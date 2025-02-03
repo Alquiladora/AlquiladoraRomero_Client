@@ -1,0 +1,68 @@
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&family=Montserrat:wght@400;700&display=swap');
+
+/**=================Header=========================*/
+/* Fondo azul y texto blanco */
+header {
+    font-family: 'Roboto', 'Montserrat', 'Arial', sans-serif;
+    /* background-color:  #000080;  azul marino */
+    /* background-color:   #27408B; /*  Azul Rey  */
+    background-color:      #fcb900; /*  AZUL cobalto
+    /* background-color:  #0F52BA;  */ /*Azul zafiro */
+    /* background-color:  #D4A017; */
+  
+    color: rgb(255, 255, 255);
+  }
+
+  /**=================Footer=========================*/
+  footer{
+    /* background-color:    #fcb900; */
+    background-color:      #fcb900;
+    font-family: 'Roboto', 'Montserrat', 'Arial', sans-serif;
+  }
+
+ /**=================Color principal=========================*/
+ .colorprimario{
+  background-color: #fcb900;
+
+ }
+  
+ /**=================Color de logo borde=========================*/
+ .border-logo{
+  border-color:  #fcb900;
+  border-style: solid;
+  border-width: 3px;
+  border-radius: 60%;
+ }
+  
+  /**=================Text primario Hover=========================*/
+  .colorTexto{
+    color: #fcb900 ;
+
+  }
+  .colorFondo{
+    background-color: #fcb900;
+
+  }
+  
+  .colorTexto1:hover{
+
+    color:  #2563EB; ;
+
+  }
+
+  .colorTexto1:focus{
+    color: #fcb900 ;
+  }
+
+
+  .custom-border {
+    border-color:  #fcb900;
+  
+  }
+  
+
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
