@@ -10,17 +10,22 @@ import {
   ShoppingCartIcon,
   BriefcaseIcon,
 } from "@heroicons/react/outline";
+import { LoginLink, IconoPerfil } from "../btnLogin/LoginClient";
 
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faHeadset } from "@fortawesome/free-solid-svg-icons";
-import SearchBar from "./Seach"; // Asegúrate de que el nombre del archivo sea correcto
+import SearchBar from "./Seach";
 import ToggleThemeButton from "../../btnTheme/ToggleThemeButton";
 import Logo from "../../../img/Logos/logo.jpg";
-import { Link } from "react-router-dom"; // Asegúrate de importar Link
+import { Link } from "react-router-dom";
+import Chatbox from "../../chabox/Chabox";
+import { useAuth } from "../../../hooks/ContextAuth";
 
 const HeaderChil1 = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isCategoriesOpen, setIsCategoriesOpen] = useState(false);
+  const [isChatboxOpen, setIsChatboxOpen] = useState(false);
+  const { user, setUser, checkAuth, isLoading, logout } = useAuth();
 
   return (
     <div className="shadow-md sticky top-0 z-50 bg-white dark:bg-gray-950 dark:text-white">
@@ -53,7 +58,9 @@ const HeaderChil1 = () => {
               <ClipboardListIcon className="w-6 h-6" />
               <span>Categorías</span>
               <svg
-                className={`w-5 h-5 ml-1 transition-transform duration-300 ease-in-out ${isCategoriesOpen ? "transform rotate-180" : ""}`}
+                className={`w-5 h-5 ml-1 transition-transform duration-300 ease-in-out ${
+                  isCategoriesOpen ? "transform rotate-180" : ""
+                }`}
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -69,54 +76,51 @@ const HeaderChil1 = () => {
             </button>
 
             {isCategoriesOpen && (
-  <div className="absolute left-0 mt-2 bg-white text-gray-700 border rounded-md shadow-lg w-56 dark:bg-gray-950 dark:text-white">
-    <div className="p-4">
-      <p className="font-bold text-gray-900 dark:text-white">
-        Categorías de productos
-      </p>
-      <div className="text-sm mt-2">
-        {/* Categoría de Sillas */}
-        <Link
-          to="/categorias/sillas"
-          className="block py-1 hover:text-blue-600 flex items-center space-x-2 transition-all duration-300 ease-in-out hover:scale-105"
-        >
-          {/* <ChairIcon className="w-4 h-4" /> */}
-          <span>Sillas</span>
-        </Link>
+              <div className="absolute left-0 mt-2 bg-white text-gray-700 border rounded-md shadow-lg w-56 dark:bg-gray-950 dark:text-white">
+                <div className="p-4">
+                  <p className="font-bold text-gray-900 dark:text-white">
+                    Categorías de productos
+                  </p>
+                  <div className="text-sm mt-2">
+                    {/* Categoría de Sillas */}
+                    <Link
+                      to="/categorias/sillas"
+                      className="block py-1 hover:text-blue-600 flex items-center space-x-2 transition-all duration-300 ease-in-out hover:scale-105"
+                    >
+                      {/* <ChairIcon className="w-4 h-4" /> */}
+                      <span>Sillas</span>
+                    </Link>
 
-        {/* Categoría de Mesas */}
-        <Link
-          to="/categoria/mesas"
-          className="block py-1 hover:text-blue-600 flex items-center space-x-2 transition-all duration-300 ease-in-out hover:scale-105"
-        >
-          {/* <TableIcon className="w-4 h-4" /> */}
-          <span>Mesas</span>
-        </Link>
+                    {/* Categoría de Mesas */}
+                    <Link
+                      to="/categoria/mesas"
+                      className="block py-1 hover:text-blue-600 flex items-center space-x-2 transition-all duration-300 ease-in-out hover:scale-105"
+                    >
+                      {/* <TableIcon className="w-4 h-4" /> */}
+                      <span>Mesas</span>
+                    </Link>
 
-        {/* Categoría de Carpas */}
-        <Link
-          to="/categoria/carpas"
-          className="block py-1 hover:text-blue-600 flex items-center space-x-2 transition-all duration-300 ease-in-out hover:scale-105"
-        >
-          {/* <TentIcon className="w-4 h-4" /> */}
-          <span>Carpas</span>
-        </Link>
+                    {/* Categoría de Carpas */}
+                    <Link
+                      to="/categoria/carpas"
+                      className="block py-1 hover:text-blue-600 flex items-center space-x-2 transition-all duration-300 ease-in-out hover:scale-105"
+                    >
+                      {/* <TentIcon className="w-4 h-4" /> */}
+                      <span>Carpas</span>
+                    </Link>
 
-        {/* Categoría de Otros productos */}
-        <Link
-          to="/categoria/otros"
-          className="block py-1 hover:text-blue-600 flex items-center space-x-2 transition-all duration-300 ease-in-out hover:scale-105"
-        >
-          {/* <BoxIcon className="w-4 h-4" /> */}
-          <span>Otros productos</span>
-        </Link>
-      </div>
-    </div>
-  </div>
-)}
-
-
-
+                    {/* Categoría de Otros productos */}
+                    <Link
+                      to="/categoria/otros"
+                      className="block py-1 hover:text-blue-600 flex items-center space-x-2 transition-all duration-300 ease-in-out hover:scale-105"
+                    >
+                      {/* <BoxIcon className="w-4 h-4" /> */}
+                      <span>Otros productos</span>
+                    </Link>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
 
           <Link
@@ -136,15 +140,22 @@ const HeaderChil1 = () => {
           </div>
 
           {/* Login Button */}
-          <Link
-            to="/login"
-            className="relative group flex items-center font-semibold hover:text-blue-600"
-          >
-            <UserIcon className="w-6 h-6" />
-            <span className="absolute top-full mt-2 left-1/2 transform -translate-x-1/2 whitespace-normal text-xs text-gray-700 bg-white px-2 py-1 rounded-lg shadow border border-blue-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300 sm:text-xs sm:px-2 sm:py-1 max-w-[90vw] sm:max-w-[70vw] hover:text-blue-600">
-              Login
-            </span>
-          </Link>
+          {user ? (
+            user?.rol && user.rol !== "Administrador" ? (
+              user?.rol === "cliente" ? (
+                <IconoPerfil />
+              ) : (
+                <></>
+                // <InconoHeaderComedor
+                //   nombreCompleto={user?.nombre || "Invitado"}
+                // />
+              )
+            ) : (
+              <LoginLink />
+            )
+          ) : (
+            <LoginLink />
+          )}
 
           {/* Shopping Cart */}
           <Link
@@ -161,15 +172,15 @@ const HeaderChil1 = () => {
           </Link>
 
           {/* Atención al Cliente */}
-          <Link
-            to="/contact"
+          <button
+            onClick={() => setIsChatboxOpen(!isChatboxOpen)}
             className="relative group hidden lg:flex items-center font-semibold hover:text-blue-600"
           >
             <FontAwesomeIcon icon={faHeadset} className="w-6 h-6" />
             <span className="hover:text-blue-600 absolute top-full mt-2 left-1/2 transform -translate-x-1/2 whitespace-normal text-xs text-gray-700 bg-white px-2 py-1 rounded-lg shadow border border-blue-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300 sm:text-xs sm:px-2 sm:py-1 max-w-[90vw] sm:max-w-[70vw]">
               Ayuda
             </span>
-          </Link>
+          </button>
 
           {/* Toggle Theme Button */}
           <div className="hidden md:flex items-center">
@@ -229,6 +240,8 @@ const HeaderChil1 = () => {
           </nav>
         </div>
       )}
+      {/* Chatbox */}
+      {isChatboxOpen && <Chatbox onClose={() => setIsChatboxOpen(false)} />}
     </div>
   );
 };

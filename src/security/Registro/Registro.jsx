@@ -23,7 +23,7 @@ const Registro = () => {
   
 
   return (
-    <div className={`min-h-full flex justify-center items-center bg-gray-100 dark:bg-gray-900 transition-all p-8 relative overflow-hidden`}>
+    <div className={`min-h-full flex justify-center items-center  transition-all p-8 relative overflow-hidden`}>
       {/* Efecto de lluvia de meteoritos */}
       <div className="meteor-shower">
         {[...Array(20)].map((_, i) => (

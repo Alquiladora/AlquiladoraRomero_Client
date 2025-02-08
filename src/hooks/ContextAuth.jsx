@@ -17,7 +17,7 @@ export const AuthProvider = ({ children }) => {
       setCsrfToken(response.data.csrfToken);
       console.log("CSRF Token:", response.data.csrfToken);
     } catch (error) {
-      setError("Error obteniendo el token CSRF.");
+      setError(" Error En EL Servidor-500.");
       console.error('Error obteniendo el token CSRF:', error);
     }
   };
@@ -44,20 +44,47 @@ export const AuthProvider = ({ children }) => {
   const logout = async () => {
     try {
       if (!csrfToken) {
+        console.log("CSRF Token no encontrado, obteniendo uno nuevo...");
         await fetchCsrfToken(); 
       }
-
-      await axios.post(`${BASE_URL}/api/usuarios/Delete/login`, {}, {
+  
+      console.log("CSRF Token obtenido:", csrfToken);
+  
+      const response = await axios.post(`${BASE_URL}/api/usuarios/Delete/login`, {}, {
         withCredentials: true,
         headers: { 'X-CSRF-Token': csrfToken },
       });
-
-      setUser(null);
+  
+      console.log("Respuesta del servidor al cerrar sesión:", response);
+  
+      if (response.status === 200) {
+        console.log("Sesión cerrada correctamente.");
+        setUser(null);
+      } else {
+        console.error("Error inesperado al cerrar sesión. Código:", response.status);
+        setError("Error inesperado al cerrar sesión.");
+      }
+  
     } catch (error) {
-      setError("Error al cerrar sesión.");
-      console.error('Error al cerrar sesión', error);
+      console.error("Error al cerrar sesión:", error);
+  
+      if (error.response) {
+        // El servidor respondió con un código de error
+        console.error("Respuesta del servidor:", error.response.data);
+        setError(`Error del servidor: ${error.response.data.message || "Error desconocido"}`);
+      } else if (error.request) {
+        // La petición se hizo, pero no hubo respuesta
+        console.error("No se recibió respuesta del servidor.");
+        setError("No se pudo conectar con el servidor.");
+      } else {
+        // Otro error ocurrió al configurar la solicitud
+        console.error("Error en la configuración de la solicitud:", error.message);
+        setError("Error al cerrar sesión.");
+      }
     }
   };
+  
+
 
   useEffect(() => {
     fetchCsrfToken(); 

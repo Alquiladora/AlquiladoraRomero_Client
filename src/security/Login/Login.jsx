@@ -10,7 +10,8 @@ import { IconButton } from "@mui/material";
 import { faEye, faEyeSlash } from "@fortawesome/free-solid-svg-icons";
 import Swal from "sweetalert2";
 import { useAuth } from "../../hooks/ContextAuth";
-const BASE_URL = "http://localhost:3001";
+
+
 
 
 
@@ -33,7 +34,8 @@ export const Login = () => {
 
   const [mfaRequired, setMfaRequired] = useState(false);
   const [mfaToken, setMfaToken] = useState(""); // Para el código MFA
-  const [userId, setUserId] = useState(""); //
+  const [userId, setUserId] = useState(""); 
+  const BASE_URL = "http://localhost:3001";
 
   //Variables de contexto auto
   const { setUser, csrfToken } = useAuth();
@@ -62,45 +64,10 @@ export const Login = () => {
 
     return matchedDevice ? matchedDevice.type : "Unknown";
   };
-  //=====================================================================AUDITORIA DE LOGUEO=========
-  const registrarAuditoria = async (
-    usuario,
-    correo,
-    accion,
-    dispositivo,
-    detalles
-  ) => {
-    const fecha_hora = new Date().toISOString();
-    const ip = await obtenerIPUsuario();
 
-    try {
-      await axios.post(
-        "https://alquiladora-romero-backed-1.onrender.com/api/usuarios/auditoria",
-        {
-          usuario,
-          correo,
-          accion,
-          dispositivo,
-          ip,
-          fecha_hora,
-          detalles,
-        },
-        {
-          headers: {
-            "X-CSRF-Token": csrfToken,
-          },
-          withCredentials: true,
-          timeout: 30000,
-        }
-      );
-    } catch (error) {
-      console.error("Error al enviar datos de auditoría:", error);
-    }
-  };
 
-  //======================================================================================
-  // Función para obtener la IP del usuario
-  const obtenerIPUsuario = async () => {
+   // Función para obtener la IP del usuario
+   const obtenerIPUsuario = async () => {
     const serviciosIP = [
       "https://api64.ipify.org?format=json",
       "https://api.ipify.org?format=json",
@@ -143,6 +110,44 @@ export const Login = () => {
     return "Desconocido";
   };
 
+  //=====================================================================AUDITORIA DE LOGUEO=========
+  const registrarAuditoria = async (
+    usuario,
+    correo,
+    accion,
+    dispositivo,
+    detalles
+  ) => {
+    const fecha_hora = new Date().toISOString();
+    const ip = await obtenerIPUsuario();
+
+    try {
+      await axios.post(
+       `${BASE_URL}/api/auditoria/auditoria`,
+        {
+          usuario,
+          correo,
+          accion,
+          dispositivo,
+          ip,
+          fecha_hora,
+          detalles,
+        },
+        {
+          headers: {
+            "X-CSRF-Token": csrfToken,
+          },
+          withCredentials: true,
+          timeout: 30000,
+        }
+      );
+    } catch (error) {
+      console.error("Error al enviar datos de auditoría:", error);
+    }
+  };
+
+  //======================================================================================
+ 
   //================================Enviar datos a back=================================================
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -151,6 +156,23 @@ export const Login = () => {
     const deviceType = getDeviceType();
     //Obtenemos el tiempo
     const deviceTime = new Date().toISOString();
+
+    if (!executeRecaptcha) {
+      setErrorMessage("Completa el captcha");
+      await registrarAuditoria(
+        "Desconocido",
+        correo,
+        "Intento fallido: CAPTCHA no completado",
+        deviceType,
+        "CAPTCHA no completado por el usuario"
+      );
+      return;
+    }
+
+     //oBTENEMOS EL TOKEN DE RECAPCHAT
+     const captchaToken = await executeRecaptcha("login");
+     console.log(captchaToken)
+     if (!captchaToken) throw new Error("Error al obtener el token de reCAPTCHA.");
 
     if (isBlocked) {
       setErrorMessage("Cuenta bloqueada. Espera 10 minutos.");
@@ -176,23 +198,12 @@ export const Login = () => {
       return;
     }
 
-    if (!executeRecaptcha) {
-      setErrorMessage("Completa el captcha");
-      await registrarAuditoria(
-        "Desconocido",
-        correo,
-        "Intento fallido: CAPTCHA no completado",
-        deviceType,
-        "CAPTCHA no completado por el usuario"
-      );
-      return;
-    }
-
+   
     try {
       setIsLoading(true);
-      //oBTENEMOS EL TOKEN DE RECAPCHAT
-      const captchaToken = await executeRecaptcha("login");
-      if (!captchaToken) throw new Error("Error al obtener el token de reCAPTCHA.");
+      const fecha_hora = new Date().toISOString();
+      const ip = await obtenerIPUsuario();
+     
       // Hacemos una solicitud POST
       const response = await axios.post(
         `${BASE_URL}/api/usuarios/login`,
@@ -202,7 +213,9 @@ export const Login = () => {
           tokenMFA: mfaToken,
           clientTimestamp: deviceTime,
           deviceType: deviceType,
-          captchaToken: captchaToken
+          captchaToke: captchaToken,
+          fecha_hora,
+          ip
         },
         {
           headers: {
@@ -348,6 +361,7 @@ export const Login = () => {
             );
             break;
           case 500:
+            navigate('/error500');
             setErrorMessage(
               "Error del servidor. Por favor, intenta más tarde."
             );
@@ -371,6 +385,7 @@ export const Login = () => {
             break;
         }
       } else {
+        navigate('/error500');
         setErrorMessage("Error de conexión. Inténtalo de nuevo más tarde.");
         await registrarAuditoria(
           "Desconocido",
@@ -461,6 +476,7 @@ export const Login = () => {
       } else if (error.response) {
         setErrorMessage("Código MFA incorrecto o vencido.");
       } else {
+        navigate('/error500');
         setErrorMessage("Error de conexión. Inténtalo de nuevo más tarde.");
       }
     } finally {
@@ -636,7 +652,7 @@ export const Login = () => {
     {/* Enlace para recuperar contraseña */}
     <div className="text-right">
       <Link
-        to="/recuperarPassword"
+        to="/cambiarPass"
         className="text-sm text-blue-500 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 transition-all duration-300"
       >
         ¿Olvidaste tu contraseña?

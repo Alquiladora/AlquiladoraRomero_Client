@@ -5,6 +5,7 @@ import CategoryP from "../../../components/categ/CategoryP";
 //Importamos el combop
 import ComboProdutsP from "../../../components/combosProducts/comboProductP";
 import Informacion from "./Informacion";
+import PaymentMethods from "./MetodosPago";
 
 const Home=()=>{
 
@@ -20,6 +21,7 @@ const Home=()=>{
         <CategoryP/>
         <ComboProdutsP/>
         <Informacion/>
+        <PaymentMethods/>
         </div>
       
       
