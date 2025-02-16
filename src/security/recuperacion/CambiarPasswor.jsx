@@ -37,6 +37,14 @@ const CambiarPassword = () => {
     }
   }, [csrfToken]);
 
+  const validateEmail = (email) => {
+    // Expresión regular simple para validar email
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  };
+
+
+
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -44,6 +52,8 @@ const CambiarPassword = () => {
     console.log({ email, token, newPassword, confirmPassword });
   };
 
+
+  
   const handleValidation = async (e) => {
 
   }

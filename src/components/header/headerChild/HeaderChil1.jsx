@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState,useEffect } from "react";
 import {
   HomeIcon,
   ClipboardListIcon,
@@ -26,6 +26,9 @@ const HeaderChil1 = () => {
   const [isCategoriesOpen, setIsCategoriesOpen] = useState(false);
   const [isChatboxOpen, setIsChatboxOpen] = useState(false);
   const { user, setUser, checkAuth, isLoading, logout } = useAuth();
+
+
+
 
   return (
     <div className="shadow-md sticky top-0 z-50 bg-white dark:bg-gray-950 dark:text-white">

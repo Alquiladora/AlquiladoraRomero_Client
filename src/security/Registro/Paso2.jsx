@@ -23,31 +23,25 @@ const Paso2 = ({ onValidationSuccess, guardarCorreo }) => {
   //======================================================================================
   // Obtenemos el token del correo registrado
   useEffect(() => {
-    console.log("Valor de guradr correo", guardarCorreo);
+    if (!guardarCorreo) return; 
+
+    console.log("Valor de guardarCorreo:", guardarCorreo);
 
     axios
-      .get(`${BASE_URL}/api/token/correo/${guardarCorreo}`)
-      .then((response) => {
-        const data = response.data;
-        setCorreo(data);
-        console.log("Este son el token obtenido", data)
-       
+        .get(`${BASE_URL}/api/token/correo/${guardarCorreo}`)
+        .then((response) => {
+            if (response.data && response.data.token) {
+                setTokenRecuperado(response.data.token);
+                console.log("Token recuperado:", response.data.token);
+            } else {
+                console.error("El token ha expirado o no existe.");
+            }
+        })
+        .catch((error) => {
+            console.error("Error al cargar los datos:", error);
+        });
+}, [guardarCorreo]);
 
-        //Aqui hacemos la consulta de token de ese correo
-        const recoveredToken = data.token;
-     
-
-        if (recoveredToken) {
-          setTokenRecuperado(recoveredToken);
-          console.log(recoveredToken);
-        } else {
-          console.error("El token ha expirado o no existe.");
-        }
-      })
-      .catch((error) => {
-        console.error("Error al cargar los datos: ", error);
-      });
-  }, [guardarCorreo]);
 
   //======================================================================================
 

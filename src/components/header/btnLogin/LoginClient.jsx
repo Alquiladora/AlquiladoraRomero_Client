@@ -14,6 +14,7 @@ import {
   Box,
 } from "@mui/material";
 import Swal from "sweetalert2";
+import axios from "axios";
 
 import { useNavigate } from "react-router-dom";
 
@@ -37,11 +38,35 @@ const LoginLink = () => {
   );
 };
 
+
+
+
 const IconoPerfil = () => {
   const { user, isLoading, logout } = useAuth();
   const [anchorEl, setAnchorEl] = useState(null);
   const navigate = useNavigate();
+  const [foto, setFoto]=useState("");
+    const BASE_URL = "http://localhost:3001";
 
+  const fetchProfileData = async () => {
+    try {
+      const response = await axios.get(`${BASE_URL}/api/usuarios/perfil`, {
+        withCredentials: true,
+      });
+      setFoto(response.data.user.fotoPerfil);
+
+
+    } catch (error) {
+      
+      console.error("Error al obtener los datos del perfil:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchProfileData();
+  }, []);
+ 
+ 
   const handleLogout = async () => {
     try {
       await logout();
@@ -73,7 +98,7 @@ const IconoPerfil = () => {
   };
 
   const username = user?.nombre?.charAt(0).toUpperCase() || "U";
-  const fotoPerfil = user?.fotoPerfil;
+  const fotoPerfil =foto ;
 
   const handleMenuOpen = (event) => {
     setAnchorEl(event.currentTarget);

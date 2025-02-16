@@ -12,6 +12,8 @@ import {
   Alert,
 } from '@mui/material';
 import axios from 'axios';
+import { useAuth } from "../../../../hooks/ContextAuth";
+
 
 const MFAComponent = ({ userId, setActivo }) => {
   const [isMfaEnabled, setIsMfaEnabled] = useState(false);
@@ -20,8 +22,10 @@ const MFAComponent = ({ userId, setActivo }) => {
   const [verificationCode, setVerificationCode] = useState('');
   const [loading, setLoading] = useState(false);
   const [verificationError, setVerificationError] = useState('');
-  const [csrfToken, setCsrfToken] = useState('');
+  const { csrfToken } = useAuth();
   const [loadingMfaStatus, setLoadingMfaStatus] = useState(true);
+  const BASE_URL = "http://localhost:3001";
+ 
 
   // Estados para Snackbar
   const [snackbarOpen, setSnackbarOpen] = useState(false);
@@ -30,32 +34,20 @@ const MFAComponent = ({ userId, setActivo }) => {
 
   // Obtener el token CSRF y el estado MFA al montar el componente
   useEffect(() => {
-    const fetchCsrfToken = async () => {
+    
+    const checkMfaStatus = async () => {
       try {
-        const response = await axios.get("https://alquiladora-romero-backed-1.onrender.com/api/get-csrf-token", {
+        const response = await axios.get(`${BASE_URL}/api/mfa/mfa-status/${userId}`, {
+          headers: { 'X-CSRF-Token': csrfToken },
           withCredentials: true,
         });
-        setCsrfToken(response.data.csrfToken);
-        checkMfaStatus(response.data.csrfToken); // Mover checkMfaStatus aquí
-      } catch (error) {
-        console.error("Error al obtener el token CSRF", error);
-        setLoadingMfaStatus(false);
-      }
-    };
-
-    const checkMfaStatus = async (token) => {
-      try {
-        const response = await axios.get(`https://alquiladora-romero-backed-1.onrender.com/api/mfa/mfa-status/${userId}`, {
-          headers: { 'X-CSRF-Token': token },
-          withCredentials: true,
-        });
+        console.log("Este " ,response)
         setIsMfaEnabled(response.data.mfaEnabled);
       } catch (error) {
         console.error("Error al obtener el estado MFA:", error);
       }
     };
-
-    fetchCsrfToken();
+    checkMfaStatus();
   }, [userId]);
 
   const showSnackbar = (message, severity = 'info') => {
@@ -76,7 +68,7 @@ const MFAComponent = ({ userId, setActivo }) => {
     setLoading(true);
     try {
       const response = await axios.post(
-        'https://alquiladora-romero-backed-1.onrender.com/api/mfa/enable-mfa',
+        `${BASE_URL}/api/mfa/enable-mfa `,
         { userId: userId },
         {
           headers: {
@@ -86,6 +78,7 @@ const MFAComponent = ({ userId, setActivo }) => {
         }
       );
       setQrCodeUrl(response.data.qrCode);
+      console.log("Token generado",response.data.qrCode )
       setOpenModal(true); 
       setActivo(true);
      
@@ -102,7 +95,7 @@ const MFAComponent = ({ userId, setActivo }) => {
   const handleVerifyMFA = async () => {
     try {
       const response = await axios.post(
-        'https://alquiladora-romero-backed-1.onrender.com/api/mfa/verify-mfa',
+        `${BASE_URL}/api/mfa/verify-mfa `,
         {
           userId: userId,        
           token: verificationCode 
@@ -138,7 +131,7 @@ const MFAComponent = ({ userId, setActivo }) => {
 
     try {
       const response = await axios.post(
-        'https://alquiladora-romero-backed-1.onrender.com/api/mfa/verify-mfa',
+         `${BASE_URL}/api/mfa/verify-mfa `,
         {
           userId: userId,
           token: verificationCode,
@@ -151,7 +144,7 @@ const MFAComponent = ({ userId, setActivo }) => {
 
       if (response.data.message === 'Código MFA verificado correctamente.') {
         await axios.post(
-          'https://alquiladora-romero-backed-1.onrender.com/api/mfa/disable-mfa',
+           `${BASE_URL}/api/mfa/disable-mfa `,
           { userId: userId },
           {
             headers: { 'X-CSRF-Token': csrfToken },

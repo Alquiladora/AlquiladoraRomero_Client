@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useMemo } from "react";
 import { useLocation } from "react-router-dom";
 import Header from "../header/Header";
 import Footer from "../footer/Footer";
@@ -7,34 +7,31 @@ import Breadcrumbs from "../../utils/Breadcrumbs";
 const LayoutHeader = ({ children }) => {
   const location = useLocation();
   const path = location.pathname.toLowerCase();
-  let encabezado;
-  let piePagina;
 
-
-  if (path.startsWith("/admin")) {
-    encabezado = <Header admin={true} />;
-    piePagina = <Footer admin={true} />;
-  } else if (path.startsWith("/cliente")) {
-    encabezado = <Header cliente={true} />;
-    piePagina = <Footer cliente={true} />;
-  } else {
-    encabezado = <Header />;
-    piePagina = <Footer />;
-  }
-
-
-  const ocultarBreadcrumbs = [
-    "/", "/home", 
-    "/cliente", "/cliente/home", 
+  // Rutas donde NO se mostrarán Breadcrumbs
+  const ocultarBreadcrumbsPaths = new Set([
+    "/", "/home",
+    "/cliente", "/cliente/home",
     "/admin", "/admin/home",
     "/repartidor", "/repartidor/home"
-  ].includes(path);
+  ]);
+
+  // Determinar Header y Footer con useMemo para mejorar rendimiento
+  const { encabezado, piePagina } = useMemo(() => {
+    if (path.startsWith("/admin")) {
+      return { encabezado: <Header admin />, piePagina: <Footer admin /> };
+    }
+    if (path.startsWith("/cliente")) {
+      return { encabezado: <Header cliente />, piePagina: <Footer cliente /> };
+    }
+    return { encabezado: <Header />, piePagina: <Footer /> };
+  }, [path]);
 
   return (
     <>
       {encabezado}
       <div className="p-4">
-        {!ocultarBreadcrumbs && <Breadcrumbs />} 
+        {!ocultarBreadcrumbsPaths.has(path) && <Breadcrumbs />}
         {children}
       </div>
       {piePagina}

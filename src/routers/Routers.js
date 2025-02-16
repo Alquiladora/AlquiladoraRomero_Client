@@ -3,6 +3,8 @@ import { useState, useEffect } from "react";
 //----------------------LAYOUTS--------------------------------------------
 import LayoutHeader from "../components/layout/LayHeader";
 import RoutePrivate from './RoutePrivate';
+import RoutePublic from './RoutePublic';
+
 
 
 
@@ -28,21 +30,19 @@ import PerfilUsuarioPrime from '../pages/client/perfil/PerfilClient';
 const Routerss = () => {
 
 
-
-
-
   return (
     <>
 
       <div className="dark:bg-gray-950 dark:text-white">
+
         <Routes>
-          <Route path="/" element={<LayoutHeader><Home /></LayoutHeader>} />
+          
+          <Route path="/" element={<RoutePublic><LayoutHeader><Home /></LayoutHeader> </RoutePublic>} />
 
-          <Route path="/login" element={<LayoutHeader><Login /></LayoutHeader>} />
-          <Route path="/registro" element={<LayoutHeader><Registro /></LayoutHeader>} />
-          <Route path="/cambiarPass" element={<LayoutHeader><CambiarPassword /></LayoutHeader>} />
-          <Route path="/categorias/sillas" element={<LayoutHeader><Catalogo /></LayoutHeader>} />
-
+          <Route path="/login" element={<RoutePublic><LayoutHeader><Login /></LayoutHeader></RoutePublic>} />
+        <Route path="/registro" element={<RoutePublic><LayoutHeader><Registro /></LayoutHeader></RoutePublic>} />
+        <Route path="/cambiarPass" element={<RoutePublic><LayoutHeader><CambiarPassword /></LayoutHeader></RoutePublic>} />
+        <Route path="/categorias/sillas" element={<LayoutHeader><Catalogo /></LayoutHeader>} />
 
 
 

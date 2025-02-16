@@ -1,24 +1,17 @@
 import React, { useState, useRef, useContext, useEffect } from "react";
+import logoUrl from "../../img/Logos/logo.jpg";
 import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import ReCAPTCHA from "react-google-recaptcha";
 import axios from "axios";
 import { useGoogleReCaptcha } from "react-google-recaptcha-v3";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { Alert, Box, CircularProgress, TextField, Button } from "@mui/material";
-import { IconButton } from "@mui/material";
 import { faEye, faEyeSlash } from "@fortawesome/free-solid-svg-icons";
 import Swal from "sweetalert2";
 import { useAuth } from "../../hooks/ContextAuth";
 
-
-
-
-
 export const Login = () => {
-  const [recaptchaValue, setRecaptchaValue] = useState(null);
   const [captchaValid, setCaptchaValid] = useState(false);
-  const [captchaToken, setCaptchaToken] = useState("");
+
   const [correo, setCorreo] = useState("");
   const [contrasena, setContrasena] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
@@ -31,10 +24,9 @@ export const Login = () => {
   const recaptchaRef = useRef(null);
   const { executeRecaptcha } = useGoogleReCaptcha();
 
-
   const [mfaRequired, setMfaRequired] = useState(false);
-  const [mfaToken, setMfaToken] = useState(""); // Para el código MFA
-  const [userId, setUserId] = useState(""); 
+  const [mfaToken, setMfaToken] = useState(""); 
+  const [userId, setUserId] = useState("");
   const BASE_URL = "http://localhost:3001";
 
   //Variables de contexto auto
@@ -65,9 +57,8 @@ export const Login = () => {
     return matchedDevice ? matchedDevice.type : "Unknown";
   };
 
-
-   // Función para obtener la IP del usuario
-   const obtenerIPUsuario = async () => {
+  // Función para obtener la IP del usuario
+  const obtenerIPUsuario = async () => {
     const serviciosIP = [
       "https://api64.ipify.org?format=json",
       "https://api.ipify.org?format=json",
@@ -123,7 +114,7 @@ export const Login = () => {
 
     try {
       await axios.post(
-       `${BASE_URL}/api/auditoria/auditoria`,
+        `${BASE_URL}/api/auditoria/auditoria`,
         {
           usuario,
           correo,
@@ -147,15 +138,13 @@ export const Login = () => {
   };
 
   //======================================================================================
- 
+
   //================================Enviar datos a back=================================================
   const handleSubmit = async (e) => {
     e.preventDefault();
     setErrorMessage("");
-    //Obtenemos el tipo de dispositivo
+
     const deviceType = getDeviceType();
-    //Obtenemos el tiempo
-    const deviceTime = new Date().toISOString();
 
     if (!executeRecaptcha) {
       setErrorMessage("Completa el captcha");
@@ -169,10 +158,12 @@ export const Login = () => {
       return;
     }
 
-     //oBTENEMOS EL TOKEN DE RECAPCHAT
-     const captchaToken = await executeRecaptcha("login");
-     console.log(captchaToken)
-     if (!captchaToken) throw new Error("Error al obtener el token de reCAPTCHA.");
+    //oBTENEMOS EL TOKEN DE RECAPCHAT
+    const captchaToken = await executeRecaptcha("login");
+  
+
+    if (!captchaToken)
+      throw new Error("Error al obtener el token de reCAPTCHA.");
 
     if (isBlocked) {
       setErrorMessage("Cuenta bloqueada. Espera 10 minutos.");
@@ -198,12 +189,11 @@ export const Login = () => {
       return;
     }
 
-   
     try {
       setIsLoading(true);
-      const fecha_hora = new Date().toISOString();
+
       const ip = await obtenerIPUsuario();
-     
+
       // Hacemos una solicitud POST
       const response = await axios.post(
         `${BASE_URL}/api/usuarios/login`,
@@ -211,11 +201,9 @@ export const Login = () => {
           email: correo,
           contrasena: contrasena,
           tokenMFA: mfaToken,
-          clientTimestamp: deviceTime,
           deviceType: deviceType,
-          captchaToke: captchaToken,
-          fecha_hora,
-          ip
+          captchaToken,
+          ip,
         },
         {
           headers: {
@@ -283,7 +271,7 @@ export const Login = () => {
               navigate("/cliente");
             },
           });
-        } else if (user.rol === "repartidor"){
+        } else if (user.rol === "repartidor") {
           Swal.fire({
             title: "¡Inicio de sesión correcto!",
             text: "Bienvenido.",
@@ -298,10 +286,7 @@ export const Login = () => {
               navigate("/repartidor");
             },
           });
-
-
-          }
-          else {
+        } else {
           setErrorMessage("Rol no reconocido.");
         }
       } else {
@@ -361,7 +346,7 @@ export const Login = () => {
             );
             break;
           case 500:
-            navigate('/error500');
+            navigate("/error500");
             setErrorMessage(
               "Error del servidor. Por favor, intenta más tarde."
             );
@@ -385,7 +370,7 @@ export const Login = () => {
             break;
         }
       } else {
-        navigate('/error500');
+        navigate("/error500");
         setErrorMessage("Error de conexión. Inténtalo de nuevo más tarde.");
         await registrarAuditoria(
           "Desconocido",
@@ -411,22 +396,28 @@ export const Login = () => {
     e.preventDefault();
     setErrorMessage("");
     const deviceType = getDeviceType();
-    const deviceTime = new Date().toISOString();
+    
+ 
+
 
     try {
       setIsLoading(true);
+      const captchaToken = await executeRecaptcha("login");
+  
 
-      // Realizamos la solicitud al backend para verificar el código MFA
+      if (!captchaToken)
+        throw new Error("Error al obtener el token de reCAPTCHA.");
+
       const response = await axios.post(
-       `${BASE_URL}/api/usuarios/login`,
+        `${BASE_URL}/api/usuarios/login`,
         {
           email: correo,
           contrasena: contrasena,
           tokenMFA: mfaToken,
-          clientTimestamp: deviceTime,
           deviceType: deviceType,
-          captchaToken: captchaToken
+          captchaToken: captchaToken,
         },
+
         {
           headers: {
             "X-CSRF-Token": csrfToken,
@@ -435,8 +426,6 @@ export const Login = () => {
           timeout: 30000,
         }
       );
-
-      // Si la verificación del MFA fue exitosa, recibimos el usuario en la respuesta
       const user = response.data?.user;
 
       if (user) {
@@ -476,7 +465,7 @@ export const Login = () => {
       } else if (error.response) {
         setErrorMessage("Código MFA incorrecto o vencido.");
       } else {
-        navigate('/error500');
+        navigate("/error500");
         setErrorMessage("Error de conexión. Inténtalo de nuevo más tarde.");
       }
     } finally {
@@ -502,47 +491,65 @@ export const Login = () => {
       {mfaRequired ? (
         <>
           {mfaRequired && (
-            <div className="login-box flex items-center justify-center min-h-screen bg-gray-100">
-              <div className="w-full max-w-md p-8 bg-white rounded-lg shadow-lg">
-                <h2 className="text-2xl font-bold text-center text-gray-800 mb-6">
+            <div className="flex justify-center   px-4 sm:px-6 lg:px-8  to-gray-100 dark:from-gray-900 dark:to-gray-800">
+              <div className="w-full max-w-md p-6 sm:p-8 bg-white dark:bg-gray-800 rounded-xl shadow-2xl border border-gray-200 dark:border-gray-700">
+                {/* Título */}
+                <h2 className="text-2xl sm:text-3xl font-bold text-center text-gray-800 dark:text-white mb-6">
                   Autenticación MFA
                 </h2>
 
+                {/* Mensaje de error */}
                 {errorMessage && (
-                  <div className="mb-4 text-center">
-                    <div className="inline-flex items-center px-4 py-2 bg-red-100 border border-red-400 text-red-700 rounded">
+                  <div className="mb-4">
+                    <div className="flex items-center justify-center px-4 py-3 bg-red-50 dark:bg-red-900 border border-red-200 dark:border-red-700 text-red-700 dark:text-red-200 rounded-lg">
                       <span className="mr-2">⚠️</span>
                       {errorMessage}
                     </div>
                   </div>
                 )}
 
-                <form onSubmit={handleMfaSubmit} className="space-y-6">
+                {/* Formulario */}
+                <form onSubmit={handleMfaSubmit} className="space-y-5">
+                  {/* Campo de entrada para el código MFA */}
                   <div>
                     <label
                       htmlFor="mfaToken"
-                      className="block text-sm font-medium text-gray-700"
+                      className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
                     >
                       Código MFA
                     </label>
                     <input
                       id="mfaToken"
                       type="text"
+                      inputMode="numeric"
+                      pattern="[0-9]{6}"
+                      maxLength={6}
                       value={mfaToken}
                       onChange={(e) => setMfaToken(e.target.value)}
-                      className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                      className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:focus:ring-blue-600 dark:focus:border-blue-600 bg-white dark:bg-gray-700 text-gray-800 dark:text-white placeholder-gray-400"
+                      placeholder="Ingresa tu código de 6 dígitos"
                       required
                     />
                   </div>
 
+                  {/* Botón de verificación */}
                   <button
                     type="submit"
-                    disabled={isLoading}
-                    className="w-full flex justify-center items-center px-4 py-2 bg-blue-600 text-white font-semibold rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                    disabled={isLoading || isBlocked}
+                    whileHover={
+                      !(isLoading || isBlocked) ? { scale: 1.05 } : {}
+                    }
+                    whileTap={!(isLoading || isBlocked) ? { scale: 0.95 } : {}}
+                    className={`w-full px-4 py-3 rounded-lg font-semibold transition-all duration-300 flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-offset-2 dark:focus:ring-offset-gray-800 
+        ${
+          isLoading || isBlocked
+            ? "bg-gray-400 dark:bg-gray-500 text-gray-200 cursor-not-allowed"
+            : "bg-blue-600 hover:bg-blue-700 text-white focus:ring-blue-500"
+        }`}
                   >
                     {isLoading ? (
                       <>
-                        Verificando...
+                        <span>Verificando...</span>
                         <svg
                           className="animate-spin ml-2 h-5 w-5 text-white"
                           xmlns="http://www.w3.org/2000/svg"
@@ -569,152 +576,160 @@ export const Login = () => {
                     )}
                   </button>
                 </form>
+
+                {/* Nota adicional */}
+                <p className="mt-6 text-center text-sm text-gray-600 dark:text-gray-400">
+                  Usa tu aplicación de autenticación (como Google Authenticator)
+                  para obtener el código.
+                </p>
               </div>
             </div>
           )}
         </>
       ) : (
         <>
-        <motion.div
-  initial={{ opacity: 0, y: -50 }} // Animación inicial: invisible y desplazado hacia arriba
-  animate={{ opacity: 1, y: 0 }}   // Animación final: visible y en su posición original
-  transition={{ duration: 0.5 }}   // Duración de la animación
-  className={`w-full max-w-md p-8 bg-white dark:bg-gray-900 shadow-2xl rounded-2xl mx-4 ${
-    isBlocked || isLoading ? "opacity-50 pointer-events-none" : ""
-  }`}
->
-  {/* Título */}
-  <h2 className="text-3xl font-bold text-center text-gray-800 dark:text-white mb-6">
-    Bienvenido
-  </h2>
-
-  {/* Mensaje de error */}
-  {errorMessage && (
-    <div className="mb-6 text-center">
-      <div className="inline-flex items-center px-4 py-2 bg-red-100 dark:bg-red-900 border border-red-400 dark:border-red-700 text-red-700 dark:text-red-200 rounded-md">
-        <span className="mr-2">⚠️</span>
-        {errorMessage}
-      </div>
-    </div>
-  )}
-
-  {/* Formulario de inicio de sesión */}
-  <form onSubmit={handleSubmit} className="space-y-6">
-    {/* Campo de correo electrónico */}
-    <div>
-      <label
-        htmlFor="email"
-        className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
-      >
-        Correo electrónico
-      </label>
-      <input
-        type="email"
-        id="email"
-        placeholder="Ingresa tu correo"
-        value={correo}
-        disabled={isBlocked || isLoading}
-        onChange={(e) => setCorreo(e.target.value)}
-        className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 bg-white dark:bg-gray-800 dark:text-white transition-all duration-300"
-        required
-      />
-    </div>
-
-    {/* Campo de contraseña */}
-    <div>
-      <label
-        htmlFor="password"
-        className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
-      >
-        Contraseña
-      </label>
-      <div className="relative">
-        <input
-          type={showPassword ? "text" : "password"}
-          id="password"
-          placeholder="Ingresa tu contraseña"
-          value={contrasena}
-          disabled={isBlocked || isLoading}
-          onChange={(e) => setContrasena(e.target.value)}
-          className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 bg-white dark:bg-gray-800 dark:text-white transition-all duration-300"
-          required
-        />
-        <button
-          type="button"
-          onClick={togglePasswordVisibility}
-          className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-500 dark:text-gray-400"
-        >
-          <FontAwesomeIcon icon={showPassword ? faEye: faEyeSlash } />
-        </button>
-      </div>
-    </div>
-
-    {/* Enlace para recuperar contraseña */}
-    <div className="text-right">
-      <Link
-        to="/cambiarPass"
-        className="text-sm text-blue-500 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 transition-all duration-300"
-      >
-        ¿Olvidaste tu contraseña?
-      </Link>
-    </div>
-
-    {/* Botón de inicio de sesión */}
-    <motion.button
-      disabled={isLoading || isBlocked}
-      whileHover={{ scale: 1.05 }}
-      whileTap={{ scale: 0.95 }}
-      type="submit"
-      className="w-full py-3 bg-blue-500 dark:bg-blue-600 text-white rounded-md font-semibold shadow-md hover:bg-blue-600 dark:hover:bg-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 transition-all duration-300 flex items-center justify-center"
-    >
-      {isLoading ? (
-        <>
-          Cargando...
-          <svg
-            className="animate-spin ml-2 h-5 w-5 text-white"
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            viewBox="0 0 24 24"
+          <motion.div
+            initial={{ opacity: 0, y: -50 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+            className={`w-full max-w-md p-8 bg-white dark:bg-gray-900 shadow-2xl rounded-2xl mx-4 
+            }`}
           >
-            <circle
-              className="opacity-25"
-              cx="12"
-              cy="12"
-              r="10"
-              stroke="currentColor"
-              strokeWidth="4"
-            ></circle>
-            <path
-              className="opacity-75"
-              fill="currentColor"
-              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-            ></path>
-          </svg>
-        </>
-      ) : (
-        "Iniciar Sesión"
-      )}
-    </motion.button>
-  </form>
+            {/* Título */}
+            <h2 className="text-3xl font-bold text-center text-[#fcb900]  mb-6">
+              Bienvenido
+            </h2>
 
-  {/* Enlace para registro */}
-  <div className="mt-6 text-center">
-    <p className="text-sm text-gray-700 dark:text-gray-300">
-      ¿No tienes una cuenta?{" "}
-      <Link
-        to="/registro"
-        className="text-blue-500 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 transition-all duration-300"
-      >
-        Regístrate aquí
-      </Link>
-    </p>
-  </div>
-</motion.div>
-          
+            {/* Mensaje de error */}
+            {errorMessage && (
+              <div className="mb-6 text-center">
+                <div className="inline-flex items-center px-4 py-2 bg-red-100 dark:bg-red-900 border border-red-400 dark:border-red-700 text-red-700 dark:text-red-200 rounded-md">
+                  <span className="mr-2">⚠️</span>
+                  {errorMessage}
+                </div>
+              </div>
+            )}
+
+            {/* Formulario de inicio de sesión */}
+            <form onSubmit={handleSubmit} className="space-y-6">
+              {/* Campo de correo electrónico */}
+              <div>
+                <label
+                  htmlFor="email"
+                  className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+                >
+                  Correo electrónico
+                </label>
+                <input
+                  type="email"
+                  id="email"
+                  placeholder="Ingresa tu correo"
+                  value={correo}
+                  disabled={isBlocked || isLoading}
+                  onChange={(e) => setCorreo(e.target.value)}
+                  className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 bg-white dark:bg-gray-800 dark:text-white transition-all duration-300"
+                  required
+                />
+              </div>
+
+              {/* Campo de contraseña */}
+              <div>
+                <label
+                  htmlFor="password"
+                  className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+                >
+                  Contraseña
+                </label>
+                <div className="relative">
+                  <input
+                    type={showPassword ? "text" : "password"}
+                    id="password"
+                    placeholder="Ingresa tu contraseña"
+                    value={contrasena}
+                    disabled={isBlocked || isLoading}
+                    onChange={(e) => setContrasena(e.target.value)}
+                    className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 bg-white dark:bg-gray-800 dark:text-white transition-all duration-300"
+                    required
+                  />
+                  <button
+                    type="button"
+                    onClick={togglePasswordVisibility}
+                    className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-500 dark:text-gray-400"
+                  >
+                    <FontAwesomeIcon icon={showPassword ? faEye : faEyeSlash} />
+                  </button>
+                </div>
+              </div>
+
+              {/* Enlace para recuperar contraseña */}
+              <div className="text-right">
+                <Link
+                  to="/cambiarPass"
+                  className="text-sm text-blue-500 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 transition-all duration-300"
+                >
+                  ¿Olvidaste tu contraseña?
+                </Link>
+              </div>
+
+              {/* Botón de inicio de sesión */}
+              <motion.button
+                disabled={isLoading || isBlocked}
+                whileHover={!(isLoading || isBlocked) ? { scale: 1.05 } : {}}
+                whileTap={!(isLoading || isBlocked) ? { scale: 0.95 } : {}}
+                type="submit"
+                className={`w-full py-3 rounded-md font-semibold shadow-md transition-all duration-300 flex items-center justify-center focus:outline-none focus:ring-2 
+        ${
+          isLoading || isBlocked
+            ? "bg-gray-400 dark:bg-gray-500 text-gray-200 cursor-not-allowed"
+            : "bg-blue-500 dark:bg-blue-600 text-white hover:bg-blue-600 dark:hover:bg-blue-500 focus:ring-blue-500 dark:focus:ring-blue-400"
+        }`}
+              >
+                {isLoading ? (
+                  <>
+                    Cargando...
+                    <svg
+                      className="animate-spin ml-2 h-5 w-5 text-white"
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                    >
+                      <circle
+                        className="opacity-25"
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        stroke="currentColor"
+                        strokeWidth="4"
+                      ></circle>
+                      <path
+                        className="opacity-75"
+                        fill="currentColor"
+                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                      ></path>
+                    </svg>
+                  </>
+                ) : (
+                  "Iniciar Sesión"
+                )}
+              </motion.button>
+            </form>
+
+            {/* Enlace para registro */}
+            <div className="mt-6 text-center">
+              <p className="text-sm text-gray-700 dark:text-gray-300">
+                ¿No tienes una cuenta?{" "}
+                <Link
+                  to="/registro"
+                  className="text-blue-500 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 transition-all duration-300"
+                >
+                  Regístrate aquí
+                </Link>
+              </p>
+            </div>
+          </motion.div>
         </>
       )}
 
-      {/* Estilos para la lluvia de meteoritos */}
       <style jsx>{`
         .meteor-shower {
           position: absolute;

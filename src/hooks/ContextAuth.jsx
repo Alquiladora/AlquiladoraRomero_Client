@@ -1,5 +1,7 @@
-import React, { createContext, useState, useEffect, useContext } from 'react';
-import axios from 'axios';
+import React, { createContext, useState, useEffect, useContext } from "react";
+import axios from "axios";
+import SpinerCarga from "../utils/SpinerCarga";
+import { useNavigate } from "react-router-dom";
 
 const AuthContext = createContext();
 
@@ -7,99 +9,99 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [csrfToken, setCsrfToken] = useState("");
-  const [error, setError] = useState(null);  
+  const [error, setError] = useState(null);
   const BASE_URL = "http://localhost:3001";
+  const CHECK_COOKIE_INTERVAL = 2 * 1000; 
+  const navigate = useNavigate();
 
-  // Obtener el token CSRF al montar el componente
-  const fetchCsrfToken = async () => {
+ const fetchCsrfToken = async () => {
+    if (csrfToken) return;
     try {
       const response = await axios.get(`${BASE_URL}/api/get-csrf-token`, { withCredentials: true });
       setCsrfToken(response.data.csrfToken);
-      console.log("CSRF Token:", response.data.csrfToken);
     } catch (error) {
-      setError(" Error En EL Servidor-500.");
-      console.error('Error obteniendo el token CSRF:', error);
+      console.error("⚠️ Error obteniendo el token CSRF:", error);
+      setError("Error en el servidor - 500.");
     }
   };
 
-  // Verificar la autenticación
+  // 🔹 Verificar autenticación
   const checkAuth = async () => {
     try {
       const response = await axios.get(`${BASE_URL}/api/usuarios/perfil`, { withCredentials: true });
-      console.log("Perfil de usuario:", response);
-      if (response.data && response.data.user) {
+      if (response.data?.user) {
         setUser(response.data.user);
       } else {
         setUser(null);
       }
     } catch (error) {
-      console.error('Error verificando la autenticación:', error);
+      console.error("⚠️ Error verificando la autenticación:", error);
       setUser(null);
     } finally {
       setIsLoading(false);
     }
   };
 
-  // Cerrar sesión
   const logout = async () => {
     try {
-      if (!csrfToken) {
-        console.log("CSRF Token no encontrado, obteniendo uno nuevo...");
-        await fetchCsrfToken(); 
-      }
-  
-      console.log("CSRF Token obtenido:", csrfToken);
-  
-      const response = await axios.post(`${BASE_URL}/api/usuarios/Delete/login`, {}, {
-        withCredentials: true,
-        headers: { 'X-CSRF-Token': csrfToken },
-      });
-  
-      console.log("Respuesta del servidor al cerrar sesión:", response);
-  
-      if (response.status === 200) {
-        console.log("Sesión cerrada correctamente.");
+      if (!csrfToken) await fetchCsrfToken();
+
+      const response = await axios.post(
+        `${BASE_URL}/api/usuarios/Delete/login`,
+        { userId: user?.idUsuarios },
+        {
+          withCredentials: true,
+          headers: { "X-CSRF-Token": csrfToken, "Content-Type": "application/json" },
+        }
+      );
         setUser(null);
-      } else {
-        console.error("Error inesperado al cerrar sesión. Código:", response.status);
-        setError("Error inesperado al cerrar sesión.");
-      }
-  
+        navigate("/login");
     } catch (error) {
-      console.error("Error al cerrar sesión:", error);
-  
-      if (error.response) {
-        // El servidor respondió con un código de error
-        console.error("Respuesta del servidor:", error.response.data);
-        setError(`Error del servidor: ${error.response.data.message || "Error desconocido"}`);
-      } else if (error.request) {
-        // La petición se hizo, pero no hubo respuesta
-        console.error("No se recibió respuesta del servidor.");
-        setError("No se pudo conectar con el servidor.");
-      } else {
-        // Otro error ocurrió al configurar la solicitud
-        console.error("Error en la configuración de la solicitud:", error.message);
-        setError("Error al cerrar sesión.");
+      console.error("⚠️ Error al cerrar sesión:", error);
+      setError(error.response?.data?.message || "Error al cerrar sesión.");
+    }
+  };
+
+
+  const checkSessionCookie = async () => {
+    if (!user) {
+      console.log("Error usaurio no existe")
+      return;
+    }
+     
+    try {
+      await axios.get(`${BASE_URL}/api/usuarios/perfil`, { withCredentials: true });
+    } catch (error) {
+   
+      if (error.response?.status === 401 || error.response?.status === 403 || error.response?.status===404) {
+        console.log("⚠️ Sesión inválida. La cookie fue eliminada manualmente o expiró.");
+       navigate("/login");
       }
     }
   };
   
-
-
   useEffect(() => {
-    fetchCsrfToken(); 
+    fetchCsrfToken();
     checkAuth();
-  }, []);
 
- 
-  if (isLoading) {
-    return <div>Loading...</div>;
-  }
+    if (user && !isLoading) {
+     
+      const interval = setInterval(checkSessionCookie, CHECK_COOKIE_INTERVAL);
+
+      return () => clearInterval(interval);
+    }
+  }, [user, isLoading]); 
+
+  if (isLoading) return <SpinerCarga />;
 
   return (
     <AuthContext.Provider value={{ user, setUser, isLoading, checkAuth, logout, csrfToken, error }}>
-      {error && <div className="error">{error}</div>} 
-      {!isLoading && children}
+      {error && (
+        <div className="border border-red-400 text-red-700 px-4 py-3 rounded dark:bg-gray-900 relative mb-4">
+          <span className="block sm:inline">{error}</span>
+        </div>    
+      )}
+      {children}
     </AuthContext.Provider>
   );
 };

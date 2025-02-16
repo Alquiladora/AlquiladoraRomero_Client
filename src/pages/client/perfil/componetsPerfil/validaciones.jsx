@@ -36,4 +36,62 @@ export const validateName = (value, fieldName) => {
   
     return error;
   };
+
+
+  export const validateAddress = (value) => {
+    let error = "";
   
+    // Validar si el campo está vacío
+    if (!value.trim()) {
+      error = "La dirección es requerida";
+    }
+    // Validar longitud mínima de 10 caracteres
+    else if (value.length < 10) {
+      error = "La dirección debe tener al menos 10 caracteres";
+    }
+    // Validar longitud máxima de 100 caracteres
+    else if (value.length > 100) {
+      error = "La dirección no puede tener más de 100 caracteres";
+    }
+  
+    return error;
+  };
+  
+
+  export const validateFechaNacimiento = (value) => {
+    let error = "";
+  
+    
+    if (!value.trim()) {
+      error = "La fecha de nacimiento es requerida";
+    }
+    
+    else if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) {
+      error = "El formato de la fecha debe ser YYYY-MM-DD";
+    }
+       else {
+      const fechaNacimiento = new Date(value);
+      const hoy = new Date();
+  
+    
+      if (fechaNacimiento > hoy) {
+        error = "La fecha de nacimiento no puede ser futura";
+      }
+    
+      else {
+        const añoMinimo = hoy.getFullYear() - 200; // Límite de 200 años en el pasado
+        if (fechaNacimiento.getFullYear() < añoMinimo) {
+          error = "La fecha de nacimiento no puede ser menor a hace 200 años";
+        }
+    
+        else {
+          const edad = hoy.getFullYear() - fechaNacimiento.getFullYear();
+          if (edad < 10) {
+            error = "Debes tener al menos 10 años";
+          }
+        }
+      }
+    }
+  
+    return error;
+  };

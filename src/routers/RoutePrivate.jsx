@@ -1,39 +1,40 @@
-import React, { useContext } from 'react';
-import { Navigate, useLocation } from 'react-router-dom';
-import { useAuth } from '../hooks/ContextAuth';
-import Spinner from './Spiner';
+import React, { useMemo } from "react";
+import { Navigate, useLocation } from "react-router-dom";
+import { useAuth } from "../hooks/ContextAuth";
+import SpinerCarga from "../utils/SpinerCarga";
 
-const RoutePrivate = ({ children, rolesPermitidos }) => {
+const RoutePrivate = ({ children, rolesPermitidos = [] }) => {
   const { user, isLoading } = useAuth();
   const location = useLocation();
 
-  if (!Array.isArray(rolesPermitidos)) {
-    console.error("rolesPermitidos debe ser un arreglo.");
-    return <Navigate to="/*" replace />;
-  }
+  // Asegurar que rolesPermitidos siempre sea un array
+  const rolesValidos = Array.isArray(rolesPermitidos) ? rolesPermitidos : [];
 
-  // Mientras se verifica la autenticación
+  // Verificar si el usuario tiene permiso (useMemo siempre debe ejecutarse)
+  const tienePermiso = useMemo(() => user?.rol && rolesValidos.includes(user.rol), [user?.rol, rolesValidos]);
+
+  // Mostrar spinner mientras se carga la autenticación
   if (isLoading) {
-    console.log("Verificando autenticación...");
-    return <div> <Spinner/> </div>; 
+    return (
+      <div className="flex justify-center items-center h-screen bg-gray-50 dark:bg-gray-900">
+        <SpinerCarga />
+      </div>
+    );
   }
 
   // Si no hay usuario autenticado, redirigir al login
   if (!user) {
-    console.warn("Acceso no autorizado: Usuario no autenticado.");
+    console.warn("Acceso denegado: Usuario no autenticado.");
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
-  // Verificar si el usuario tiene uno de los roles permitidos
-  const tienePermiso = rolesPermitidos.includes(user?.rol);
-
-  // Si tiene permiso, renderizar el contenido; si no, redirigir a la página principal o error
-  if (tienePermiso) {
-    return children;
-  } else {
-    console.warn(`Acceso denegado: El rol del usuario (${user?.rol}) no tiene permisos para acceder.`);
+  // Si el usuario no tiene el rol permitido, redirigir a inicio
+  if (!tienePermiso) {
+    console.warn(`Acceso denegado: El rol (${user?.rol}) no tiene permisos para acceder.`);
     return <Navigate to="/" state={{ from: location }} replace />;
   }
+
+  return children;
 };
 
 export default RoutePrivate;
