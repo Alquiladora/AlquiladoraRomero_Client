@@ -39,7 +39,7 @@ const style = {
   useEffect(() => {
     const fetchCsrfToken = async () => {
       try {
-        const response = await axios.get("https://alquiladora-romero-backed-1.onrender.com/api/get-csrf-token", { withCredentials: true });
+        const response = await axios.get("https://alquiladora-romero-server.onrender.com/api/get-csrf-token", { withCredentials: true });
         setCsrfToken(response.data.csrfToken);
       } catch (error) {
         console.error("Error al obtener el token CSRF:", error);
@@ -59,7 +59,7 @@ const style = {
       setTokenValido(shortUUID); 
 
      
-      const response = await axios.post("https://alquiladora-romero-backed-1.onrender.com/api/email/cambiarpass", 
+      const response = await axios.post("https://alquiladora-romero-server.onrender.com/api/email/cambiarpass", 
       { 
         correo: usuario.correo, 
         shortUUID,  

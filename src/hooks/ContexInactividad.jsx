@@ -22,7 +22,7 @@ export const InactivityProvider = ({ children }) => {
    
     const renewTokenIfNeeded = async () => {
       try {
-        const response = await fetch("http://localhost:3001/api/usuarios/refresh-session", {
+        const response = await fetch("https://alquiladora-romero-server.onrender.com/api/usuarios/refresh-session", {
           method: "POST",
           credentials: "include",
           headers: { "X-CSRF-Token": csrfToken },

@@ -13,7 +13,7 @@ const Paso1 = ({ onValidationSuccess, setGuardarCorreo }) => {
   const { csrfToken } = useAuth();
   const { executeRecaptcha } = useGoogleReCaptcha();
 
-  const BASE_URL = "http://localhost:3001";
+  const BASE_URL = "https://alquiladora-romero-server.onrender.com";
 
   useEffect(() => {
     if (csrfToken) {

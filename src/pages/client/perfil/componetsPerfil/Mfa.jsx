@@ -24,7 +24,7 @@ const MFAComponent = ({ userId, setActivo }) => {
   const [verificationError, setVerificationError] = useState('');
   const { csrfToken } = useAuth();
   const [loadingMfaStatus, setLoadingMfaStatus] = useState(true);
-  const BASE_URL = "http://localhost:3001";
+  const BASE_URL = "https://alquiladora-romero-server.onrender.com";
  
 
   // Estados para Snackbar

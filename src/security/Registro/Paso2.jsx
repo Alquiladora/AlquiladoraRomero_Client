@@ -16,7 +16,7 @@ const Paso2 = ({ onValidationSuccess, guardarCorreo }) => {
   const [isButtonDisabled, setIsButtonDisabled] = useState(true);
   const [timeLeft, setTimeLeft] = useState(600);
   const [tokenRecuperado, setTokenRecuperado] = useState(null);
-  const BASE_URL = "http://localhost:3001";
+  const BASE_URL = "https://alquiladora-romero-server.onrender.com";
   const [correo, setCorreo] = useState("");
   const inputRefs = useRef([]); 
 

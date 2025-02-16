@@ -10,14 +10,14 @@ const Error404 = () => {
   return (
     <div className="flex justify-center min-h-screen bg-white dark:bg-gray-950 dark:text-white">
       <div className="text-center px-6 py-10 max-w-screen-md w-full">
-        {/* Ícono personalizado (error 404) */}
+       
         <motion.div
           className="flex justify-center mb-6"
           initial={{ opacity: 0, scale: 0.8 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.8 }}
         >
-          {/* Usando una imagen de error 404 */}
+        
           <img
             src="https://image.freepik.com/free-vector/404-error-page-found_24908-50943.jpg"
             alt="Error 404"
@@ -25,7 +25,6 @@ const Error404 = () => {
           />
         </motion.div>
 
-        {/* Título 404 con animación y color actualizado */}
         <motion.h1
           className="text-6xl md:text-8xl font-extrabold text-[#fcb900] drop-shadow-lg"
           initial={{ opacity: 0, y: -50 }}
@@ -35,7 +34,7 @@ const Error404 = () => {
           404
         </motion.h1>
 
-        {/* Subtítulo descriptivo con color negro */}
+       
         <motion.p
           className="mt-2 text-xl md:text-2xl text-black dark:text-gray-300 font-medium"
           initial={{ opacity: 0 }}

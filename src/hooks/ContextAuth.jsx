@@ -10,7 +10,7 @@ export const AuthProvider = ({ children }) => {
   const [isLoading, setIsLoading] = useState(true);
   const [csrfToken, setCsrfToken] = useState("");
   const [error, setError] = useState(null);
-  const BASE_URL = "http://localhost:3001";
+  const BASE_URL = "https://alquiladora-romero-server.onrender.com";
   const CHECK_COOKIE_INTERVAL = 2 * 1000; 
   const navigate = useNavigate();
 

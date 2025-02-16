@@ -46,7 +46,7 @@ const IconoPerfil = () => {
   const [anchorEl, setAnchorEl] = useState(null);
   const navigate = useNavigate();
   const [foto, setFoto]=useState("");
-    const BASE_URL = "http://localhost:3001";
+    const BASE_URL = "https://alquiladora-romero-server.onrender.com";
 
   const fetchProfileData = async () => {
     try {

@@ -75,7 +75,7 @@ const PerfilUsuarioPrime = () => {
   const [activo, setActivo] = useState(false);
   const [sessions, setSessions] = useState([]);
   const [openModal, setOpenModal] = useState(false);
-  const BASE_URL = "http://localhost:3001";
+  const BASE_URL = "https://alquiladora-romero-server.onrender.com";
   const [activeTab, setActiveTab] = useState("personal");
 
   const fetchProfileData = async () => {

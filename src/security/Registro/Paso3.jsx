@@ -40,7 +40,7 @@ const Paso3 = ({ guardarCorreo }) => {
   const {csrfToken} = useAuth() ;
   const [isCompromised, setIsCompromised] = useState(null);
 
-  const BASE_URL = "http://localhost:3001";
+  const BASE_URL = "https://alquiladora-romero-server.onrender.com";
 
   useEffect(() => {
     const fetchUsuariosYCsrf = async () => {

@@ -18,7 +18,7 @@ const CambiarPassword = () => {
   const recaptchaRef = useRef(null);
   const [usuarios, setUsuarios] = useState([]);
   const { executeRecaptcha } = useGoogleReCaptcha();
-  const BASE_URL = "http://localhost:3001";
+  const BASE_URL = "https://alquiladora-romero-server.onrender.com";
 
   useEffect(() => {
     if (csrfToken) {

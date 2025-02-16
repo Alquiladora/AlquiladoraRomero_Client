@@ -27,7 +27,7 @@ export const Login = () => {
   const [mfaRequired, setMfaRequired] = useState(false);
   const [mfaToken, setMfaToken] = useState(""); 
   const [userId, setUserId] = useState("");
-  const BASE_URL = "http://localhost:3001";
+  const BASE_URL = "https://alquiladora-romero-server.onrender.com";
 
   //Variables de contexto auto
   const { setUser, csrfToken } = useAuth();
