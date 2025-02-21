@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { motion } from "framer-motion";
+import { motion, useAnimation } from "framer-motion";
 import { useSpring, animated } from "react-spring";
 import Typewriter from "typewriter-effect";
 
@@ -38,6 +38,15 @@ const Carousel = ({
     hidden: { opacity: 0, y: -20 },
     visible: { opacity: 1, y: 0, transition: { duration: 0.8 } },
   };
+
+  const imageControls = useAnimation();
+  useEffect(() => {
+    imageControls.start({
+      opacity: 1,
+      transition: { duration: 1 },
+    });
+  }, [currentIndex, imageControls]);
+
 
   // Cambiar automáticamente la imagen después de un intervalo
   useEffect(() => {
@@ -87,7 +96,7 @@ const Carousel = ({
           alt={`Slide ${currentIndex + 1}`}
           className="w-full h-full object-cover"
           initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
+          animate={imageControls}
           transition={{ duration: 1 }}
         />
       </animated.div>

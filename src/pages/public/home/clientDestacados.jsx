@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { motion } from 'framer-motion';
+import React, { useState, useEffect } from 'react';
+import { motion, useAnimation } from 'framer-motion';
 
 const ClientDestacados = () => {
     const clients = Array.from({ length: 15 }, (_, i) => ({
@@ -26,6 +26,17 @@ const ClientDestacados = () => {
             setCurrentPage(currentPage - 1);
         }
     };
+
+    const containerControls = useAnimation();
+
+    useEffect(() => {
+        containerControls.start({
+          opacity: 1,
+          x: 0,
+          transition: { duration: 0.5 }
+        });
+      }, [containerControls]);
+
 
     return (
         <div className="flex flex-col justify-center items-center w-full px-4 sm:px-8 lg:px-16  mt-2">

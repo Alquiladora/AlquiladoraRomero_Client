@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCheckCircle, faSpinner } from "@fortawesome/free-solid-svg-icons";
 import { useGoogleReCaptcha } from "react-google-recaptcha-v3";
-import axios from "axios";
+import api from "../../utils/AxiosConfig";
 import { useAuth } from "../../hooks/ContextAuth";
 import { showAlert } from "../../components/alerts/Alert"; // Importa la función de alertas
 
@@ -13,13 +13,13 @@ const Paso1 = ({ onValidationSuccess, setGuardarCorreo }) => {
   const { csrfToken } = useAuth();
   const { executeRecaptcha } = useGoogleReCaptcha();
 
-  const BASE_URL = "https://alquiladora-romero-server.onrender.com";
+  const BASE_URL = "http://localhost:3001";
 
   useEffect(() => {
     if (csrfToken) {
       const ConsultarUsuarios = async () => {
         try {
-          const response = await axios.get(`${BASE_URL}/api/usuarios`);
+          const response = await api.get(`/api/usuarios`);
           setUsuarios(response.data);
         } catch (error) {
           console.error("Error al cargar los usuarios:", error);
@@ -31,8 +31,8 @@ const Paso1 = ({ onValidationSuccess, setGuardarCorreo }) => {
 
   const isValidEmail = async (email) => {
     try {
-      const response = await axios.post(
-        `${BASE_URL}/api/email/validate-email`,
+      const response = await api.post(
+        `/api/email/validate-email`,
         { email },
         {
           headers: {
@@ -80,8 +80,8 @@ const Paso1 = ({ onValidationSuccess, setGuardarCorreo }) => {
         return;
       }
 
-      await axios.post(
-        `${BASE_URL}/api/email/send`,
+      await api.post(
+        `/api/email/send`,
         { correo: email, captchaToken, mensaje: "Bienvenido", nombreR: "cliente" },
         { headers: { "X-CSRF-Token": csrfToken }, withCredentials: true }
       );

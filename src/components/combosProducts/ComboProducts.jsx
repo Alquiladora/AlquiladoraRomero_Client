@@ -6,6 +6,7 @@ const ComboProducts = ({ products = [] }) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [subtitle, setSubtitle] = useState("¡Porque somos los mejores en lo que hacemos!");
   const itemsPerPage = 8;
+  const [mounted, setMounted] = useState(false);
 
   const validProducts = Array.isArray(products) ? products : [];
 
@@ -36,10 +37,12 @@ const ComboProducts = ({ products = [] }) => {
   }, [controls, inView]);
 
   useEffect(() => {
-    controls.start({ opacity: 0, y: 50 }).then(() => {
-      controls.start({ opacity: 1, y: 0 });
-    });
-  }, [currentPage, controls]);
+    if (mounted) {
+      controls.start({ opacity: 0, y: 50 }).then(() => {
+        controls.start({ opacity: 1, y: 0 });
+      });
+    }
+  }, [currentPage, controls, mounted]);
 
   return (
     <div className="w-full py-6  dark:bg-gray-950 dark:text-white">

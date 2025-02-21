@@ -1,13 +1,15 @@
 import React, { useState, useRef, useContext, useEffect } from "react";
 import logoUrl from "../../img/Logos/logo.jpg";
 import { Link, useNavigate } from "react-router-dom";
-import { motion } from "framer-motion";
-import axios from "axios";
+import { motion, useAnimation } from "framer-motion";
+
 import { useGoogleReCaptcha } from "react-google-recaptcha-v3";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faEye, faEyeSlash } from "@fortawesome/free-solid-svg-icons";
 import Swal from "sweetalert2";
 import { useAuth } from "../../hooks/ContextAuth";
+import api from "../../utils/AxiosConfig";
+import axios from "axios";
 
 export const Login = () => {
   const [captchaValid, setCaptchaValid] = useState(false);
@@ -23,22 +25,25 @@ export const Login = () => {
   const [usuraioC, setUsuarioC] = useState([]);
   const recaptchaRef = useRef(null);
   const { executeRecaptcha } = useGoogleReCaptcha();
-
+  const controls = useAnimation();
   const [mfaRequired, setMfaRequired] = useState(false);
   const [mfaToken, setMfaToken] = useState(""); 
   const [userId, setUserId] = useState("");
-  const BASE_URL = "https://alquiladora-romero-server.onrender.com";
+  const BASE_URL = "http://localhost:3001";
 
-  //Variables de contexto auto
+
   const { setUser, csrfToken } = useAuth();
+  useEffect(() => {
+    controls.start({ opacity: 1, y: 0 });
+  }, [controls]);
 
-  //funcion para show password or cult
+
   const togglePasswordVisibility = () => {
     setShowPassword((prevShowPassword) => !prevShowPassword);
   };
 
   //=======================================================================
-  //Obtenemos el tipo de dispositivo
+
   const getDeviceType = () => {
     const { userAgent } = navigator;
 
@@ -57,7 +62,7 @@ export const Login = () => {
     return matchedDevice ? matchedDevice.type : "Unknown";
   };
 
-  // Función para obtener la IP del usuario
+ 
   const obtenerIPUsuario = async () => {
     const serviciosIP = [
       "https://api64.ipify.org?format=json",
@@ -90,7 +95,7 @@ export const Login = () => {
           response.data.ip || response.data.ipAddress || response.data.ipv4;
 
         if (ip && esIPValida(ip)) {
-          return ip; // Retornar la IP si es válida
+          return ip; 
         }
       } catch (error) {
         console.warn(`Error al obtener IP desde ${servicio}:`, error.message);
@@ -113,8 +118,8 @@ export const Login = () => {
     const ip = await obtenerIPUsuario();
 
     try {
-      await axios.post(
-        `${BASE_URL}/api/auditoria/auditoria`,
+      await api.post(
+        `/api/auditoria/auditoria`,
         {
           usuario,
           correo,
@@ -195,8 +200,8 @@ export const Login = () => {
       const ip = await obtenerIPUsuario();
 
       // Hacemos una solicitud POST
-      const response = await axios.post(
-        `${BASE_URL}/api/usuarios/login`,
+      const response = await api.post(
+        `/api/usuarios/login`,
         {
           email: correo,
           contrasena: contrasena,
@@ -408,8 +413,8 @@ export const Login = () => {
       if (!captchaToken)
         throw new Error("Error al obtener el token de reCAPTCHA.");
 
-      const response = await axios.post(
-        `${BASE_URL}/api/usuarios/login`,
+      const response = await api.post(
+        `/api/usuarios/login`,
         {
           email: correo,
           contrasena: contrasena,
@@ -590,7 +595,7 @@ export const Login = () => {
         <>
           <motion.div
             initial={{ opacity: 0, y: -50 }}
-            animate={{ opacity: 1, y: 0 }}
+            animate={controls}
             transition={{ duration: 0.5 }}
             className={`w-full max-w-md p-8 bg-white dark:bg-gray-900 shadow-2xl rounded-2xl mx-4 
             }`}

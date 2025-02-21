@@ -8,6 +8,7 @@ import {
 import CryptoJS from "crypto-js";
 import axios from "axios";
 import { motion } from "framer-motion";
+import api from "../../utils/AxiosConfig";
 
 
 const Paso2 = ({ onValidationSuccess, guardarCorreo }) => {
@@ -16,8 +17,7 @@ const Paso2 = ({ onValidationSuccess, guardarCorreo }) => {
   const [isButtonDisabled, setIsButtonDisabled] = useState(true);
   const [timeLeft, setTimeLeft] = useState(600);
   const [tokenRecuperado, setTokenRecuperado] = useState(null);
-  const BASE_URL = "https://alquiladora-romero-server.onrender.com";
-  const [correo, setCorreo] = useState("");
+  const BASE_URL = "http://localhost:3001";
   const inputRefs = useRef([]); 
 
   //======================================================================================
@@ -27,8 +27,8 @@ const Paso2 = ({ onValidationSuccess, guardarCorreo }) => {
 
     console.log("Valor de guardarCorreo:", guardarCorreo);
 
-    axios
-        .get(`${BASE_URL}/api/token/correo/${guardarCorreo}`)
+    api
+        .get(`/api/token/correo/${guardarCorreo}`)
         .then((response) => {
             if (response.data && response.data.token) {
                 setTokenRecuperado(response.data.token);

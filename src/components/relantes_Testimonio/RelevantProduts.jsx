@@ -6,9 +6,14 @@ import img3 from './../../img/Logos/logo6.jpg';
 import img4 from './../../img/Logos/logo7.jpg';
 
 const RelevantesProducts = () => {
+  const [mounted, setMounted] = useState(false);
   const [imagenes, setImagenes] = useState([img1, img2, img3, img4, img1, img2, img3, img4]);
   const [indiceImagen, setIndiceImagen] = useState(0);
 
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
   
   const siguienteImagen = () => {
     setIndiceImagen((prev) => (prev + 1) % imagenes.length);
@@ -30,6 +35,11 @@ const RelevantesProducts = () => {
       clearInterval(intervaloImagenes);
     };
   }, []);
+
+  if (!mounted) {
+    return null;
+  }
+
 
   return (
     <>

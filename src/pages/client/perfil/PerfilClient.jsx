@@ -10,7 +10,7 @@ import {
 } from "@mui/material";
 import ComputerIcon from "@mui/icons-material/Computer";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import axios from "axios";
+
 import { Toaster } from "react-hot-toast";
 
 import "primereact/resources/themes/saga-blue/theme.css";
@@ -24,7 +24,7 @@ import EditableInput from "./componetsPerfil/EditableInput";
 import CambiarContrasenaModal from "./componetsPerfil/CambiarPass";
 import MFAComponent from "./componetsPerfil/Mfa";
 import "primereact/resources/themes/saga-blue/theme.css";
-import "primereact/resources/primereact.min.css";
+import "primereact/resources/primereact.min.css"
 import {
   Camera,
   User,
@@ -51,11 +51,12 @@ import {
   faLinux,
   faApple,
 } from "@fortawesome/free-brands-svg-icons";
-import { motion } from "framer-motion";
+import { motion, useAnimation } from "framer-motion";
 import PhoneIphoneIcon from "@mui/icons-material/PhoneIphone";
 import TabletMacIcon from "@mui/icons-material/TabletMac";
 import { useAuth } from "../../../hooks/ContextAuth";
-import Alerts from "../../../components/alerts/Alertss";
+import api from "../../../utils/AxiosConfig";
+import axios from "axios";
 
 const PerfilUsuarioPrime = () => {
   // const [activeTab, setActiveTab] = useState(0);
@@ -70,46 +71,85 @@ const PerfilUsuarioPrime = () => {
   const [uploadProgress, setUploadProgress] = useState(0);
   const [isBlocked, setIsBlocked] = useState(false);
   const [loading, setLoading] = useState(true);
-  const { csrfToken } = useAuth();
+  const { csrfToken, user } = useAuth();
   const [openMfaModal, setOpenMfaModal] = useState(false);
   const [activo, setActivo] = useState(false);
   const [sessions, setSessions] = useState([]);
   const [openModal, setOpenModal] = useState(false);
-  const BASE_URL = "https://alquiladora-romero-server.onrender.com";
+  const BASE_URL = "http://localhost:3001";
   const [activeTab, setActiveTab] = useState("personal");
+  const isMounted = useRef(true);
+  const controls = useAnimation();
+  const [cambiosContrasena, setCambiosContrasena] = useState(0);
+  const [bloqueado, setBloqueado] = useState(false);
+
+  useEffect(() => {
+    isMounted.current = true;
+    if (user) {
+      fetchProfileData();
+      verificarCambiosContrasena(user.idUsuarios);
+    }
+    return () => {
+      isMounted.current = false;
+    };
+  }, [controls]);
 
   const fetchProfileData = async () => {
+    if (!isMounted.current) return;
+
     try {
-      const response = await axios.get(`${BASE_URL}/api/usuarios/perfil`, {
+      setLoading(true);
+      const response = await api.get(`api/usuarios/perfil`, {
         withCredentials: true,
+        headers: { "X-CSRF-Token": csrfToken },
       });
-      setUsuariosC(response.data.user);
-      setActivo(!!response.data.user.multifaltor);
-      console.log(
-        "response.data.user.multifaltor",
-        response.data.user.multifaltor
-      );
-      setLastUpdated(new Date(response.data.user.fechaActualizacionF));
-      setLoading(false);
-      console.log("Esto e sloque obtengo de usuarioC", response.data.user);
+
+      if (isMounted.current) {
+        setUsuariosC(response.data.user);
+        setActivo(!!response.data.user.multifaltor);
+        setLastUpdated(new Date(response.data.user.fechaActualizacionF));
+        setLoading(false);
+        controls.start({ opacity: 1, y: 0 });
+        console.log("✅ Datos de usuario obtenidos:", response.data.user);
+      }
     } catch (error) {
-      setLoading(false);
-      console.error("Error al obtener los datos del perfil:", error);
+      if (isMounted.current) {
+        setLoading(false);
+      }
+      console.error("❌ Error al obtener los datos del perfil:", error);
     }
   };
-  //LLAMAMOS LA FUNCION
-  useEffect(() => {
-    fetchProfileData();
-  }, []);
 
-  // Función para mostrar alertas con PrimeReact
+  const verificarCambiosContrasena = async (idUsuario) => {
+    if (!idUsuario) {
+      console.warn(
+        "⚠️ ID de usuario no disponible, no se verificará cambios de contraseña."
+      );
+      return;
+    }
+    try {
+      const response = await api.get(`/api/usuarios/vecesCambioPass`, {
+        params: { idUsuario },
+        headers: { "X-CSRF-Token": csrfToken },
+        withCredentials: true,
+      });
+      console.log("Respuesta de vecesCambioPass:", response.data);
+      setCambiosContrasena(response.data.cambiosRealizados);
+      setBloqueado(response.data.cambiosRealizados >= 20);
+    } catch (error) {
+      console.error("Error al verificar los cambios de contraseña:", error);
+    }
+  };
+
   const showAlert = (type, message) => {
     setAlert({ type, message });
     setTimeout(() => setAlert(null), 5000);
   };
 
   const handleOpenModal = () => {
-    setOpenModal(true);
+    if (!bloqueado) {
+      setOpenModal(true);
+    }
   };
 
   // Función para cerrar el modal
@@ -184,30 +224,26 @@ const PerfilUsuarioPrime = () => {
     );
 
     try {
-      const response = await axios.post(
-        `${BASE_URL}/api/imagenes/upload`,
-        formData,
-        {
-          headers: {
-            "Content-Type": "multipart/form-data",
-            "X-CSRF-Token": csrfToken,
-          },
-          withCredentials: true,
-          onUploadProgress: (progressEvent) => {
-            const percentCompleted = Math.round(
-              (progressEvent.loaded * 100) / progressEvent.total
-            );
-            setUploadProgress(percentCompleted);
-          },
-        }
-      );
+      const response = await api.post(`/api/imagenes/upload`, formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+          "X-CSRF-Token": csrfToken,
+        },
+        withCredentials: true,
+        onUploadProgress: (progressEvent) => {
+          const percentCompleted = Math.round(
+            (progressEvent.loaded * 100) / progressEvent.total
+          );
+          setUploadProgress(percentCompleted);
+        },
+      });
 
       const imageUrl = response.data.url;
       console.log("URL de la imagen subida:", imageUrl);
 
       // Actualizar el perfil con la nueva URL de la imagen en MySQL
-      await axios.patch(
-        `${BASE_URL}/api/usuarios/perfil/${usuariosC.idUsuarios}/foto`,
+      await api.patch(
+        `/api/usuarios/perfil/${usuariosC.idUsuarios}/foto`,
         {
           fotoPerfil: imageUrl,
           fechaActualizacionF: now.toISOString(),
@@ -245,8 +281,8 @@ const PerfilUsuarioPrime = () => {
 
     try {
       // Asegúrate de que el valor se envíe correctamente en el cuerpo de la solicitud
-      const response = await axios.patch(
-        `${BASE_URL}/api/usuarios/perfil/${usuariosC.idUsuarios}/${field}`,
+      const response = await api.patch(
+        `/api/usuarios/perfil/${usuariosC.idUsuarios}/${field}`,
         { value },
         {
           headers: { "X-CSRF-Token": csrfToken },
@@ -287,8 +323,8 @@ const PerfilUsuarioPrime = () => {
   //===================SESIONES=======================================================================
   const fetchSessions = async () => {
     try {
-      const response = await axios.post(
-        `${BASE_URL}/api/usuarios/sesiones`,
+      const response = await api.post(
+        `/api/usuarios/sesiones`,
         { userId: usuariosC.idUsuarios },
         {
           headers: { "X-CSRF-Token": csrfToken },
@@ -305,21 +341,25 @@ const PerfilUsuarioPrime = () => {
 
   const closeAllSessions = async () => {
     try {
-      const response = await axios.post(
-        `${BASE_URL}/api/usuarios/Delete/login/all-except-current`,
-        {}, 
+      const response = await api.post(
+        `/api/usuarios/Delete/login/all-except-current`,
+        {},
         {
           headers: { "X-CSRF-Token": csrfToken },
           withCredentials: true,
           timeout: 10000,
         }
       );
-      setSessions((prevSessions) => prevSessions.filter((session) => session.isCurrent));
+      setSessions((prevSessions) =>
+        prevSessions.filter((session) => session.isCurrent)
+      );
 
       showAlert({
         severity: "success",
         summary: "Sesiones cerradas",
-        detail: response.data.message || "Todas las sesiones excepto la actual han sido cerradas.",
+        detail:
+          response.data.message ||
+          "Todas las sesiones excepto la actual han sido cerradas.",
         life: 3000,
       });
     } catch (error) {
@@ -441,7 +481,6 @@ const PerfilUsuarioPrime = () => {
   }
   //==========================================================================================
 
-
   if (loading) {
     return (
       <Grid
@@ -452,6 +491,17 @@ const PerfilUsuarioPrime = () => {
         <CircularProgress size={50} />
         <Typography variant="h6" sx={{ mt: 2 }}>
           Cargando datos del perfil...
+        </Typography>
+      </Grid>
+    );
+  }
+
+  if (!usuariosC) {
+    return (
+      <Grid container justifyContent="center" sx={{ mt: 4, mb: 4 }}>
+        <CircularProgress size={50} />
+        <Typography variant="h6" sx={{ mt: 2 }}>
+          No hay datos de usuario.
         </Typography>
       </Grid>
     );
@@ -470,9 +520,8 @@ const PerfilUsuarioPrime = () => {
         </div>
       )}
 
-      <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white p-4 dark:bg-gray-950 dark:text-white">
+      <div className="min-h-screen from-blue-50 to-white p-4 dark:bg-gray-950 dark:text-white">
         <div className="max-w-6xl mx-auto space-y-6">
-       
           <div className="bg-white rounded-2xl shadow-lg overflow-hidden dark:bg-gray-800">
             {/* Fondo amarillo sólido */}
             <div className="h-32 bg-[#fcb900] relative dark:bg-gray-900">
@@ -498,12 +547,13 @@ const PerfilUsuarioPrime = () => {
                       src={
                         usuariosC.fotoPerfil ||
                         `https://ui-avatars.com/api/?name=${encodeURIComponent(
-                          usuariosC.nombre.charAt(0)
+                          usuariosC.nombre ? usuariosC.nombre.charAt(0) : "U"
                         )}&background=0D6EFD&color=fff`
                       }
                       alt="Foto de Perfil"
                       className="w-full h-full object-cover"
                     />
+
                     <button
                       className="absolute bottom-1 right-1 p-2 bg-white rounded-full shadow-md hover:bg-gray-50 transition-all dark:bg-gray-600 dark:hover:bg-gray-500"
                       onClick={() => fileInputRef.current.click()}
@@ -625,7 +675,6 @@ const PerfilUsuarioPrime = () => {
               </>
             )}
 
-   
             {openMfaModal && (
               <motion.div
                 className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50"
@@ -667,14 +716,18 @@ const PerfilUsuarioPrime = () => {
                 <motion.h2
                   className="text-2xl font-bold text-gray-800 dark:text-white text-center sm:text-left"
                   initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
+                  animate={controls}
                   transition={{ duration: 0.5 }}
                 >
                   🔐 Seguridad
                 </motion.h2>
 
-         
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                  <CambiarContrasenaModal
+                    open={openModal}
+                    onClose={handleCloseModal}
+                    usuario={usuariosC}
+                  />
                   {/* 🔹 Cambiar Contraseña */}
                   <motion.div
                     className=" dark:bg-gray-800 p-5 sm:p-6 rounded-xl  hover:shadow-lg transition-all"
@@ -682,30 +735,36 @@ const PerfilUsuarioPrime = () => {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.4 }}
                   >
-                    {/* 🔹 Título */}
-                    <h3 className="text-lg font-semibold text-gray-800 dark:text-white mb-4 flex items-center space-x-2">
-                      <Lock className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+                    {bloqueado && (
+                    <div className="bg-red-100 border border-red-300 text-red-800 p-4 rounded-md mb-6 text-center">
+                    <strong>🚨 Atención:</strong> Límite de cambios alcanzado. Espera hasta el próximo mes.
+                  </div>
+                  
+                    )}
+
+                    <h3 className="text-xl font-bold text-gray-800 dark:text-gray-100 mb-3 flex items-center space-x-2">
+                      <Lock className="w-6 h-6 text-blue-600 dark:text-blue-400" />
                       <span>Cambiar Contraseña</span>
                     </h3>
 
-                    {/* 🔹 Input con botón dentro */}
                     <div className="relative">
                       <input
                         type="password"
                         value="************"
                         readOnly
-                        className="w-full p-3 pr-10 border border-gray-300 rounded-lg dark:bg-gray-700 dark:text-white dark:border-gray-600 truncate"
+                        disabled={bloqueado}
+                        className="w-full p-4 pr-12 border border-gray-300 rounded-lg dark:bg-gray-700 dark:text-white dark:border-gray-600"
                       />
                       <button
                         onClick={handleOpenModal}
-                        className="absolute inset-y-0 right-0 flex items-center justify-center px-3 bg-blue-600 text-white rounded-r-lg hover:bg-blue-700 transition-all"
+                        disabled={bloqueado}
+                        className="absolute inset-y-0 right-0 flex items-center justify-center px-4 bg-blue-600 text-white rounded-r-lg hover:bg-blue-700 transition-all disabled:opacity-50"
                       >
                         <Edit3 className="w-5 h-5" />
                       </button>
                     </div>
                   </motion.div>
 
-           
                   <motion.div
                     className="bg-white dark:bg-gray-800 p-5 sm:p-6 rounded-xl  hover:shadow-lg transition-all"
                     initial={{ opacity: 0, y: 10 }}
@@ -732,7 +791,6 @@ const PerfilUsuarioPrime = () => {
                   </motion.div>
                 </div>
 
-                
                 <motion.div
                   className="bg-white dark:bg-gray-800 p-5 sm:p-6 rounded-xl shadow-md hover:shadow-xl transition-all mt-8"
                   initial={{ opacity: 0, y: 10 }}
@@ -797,7 +855,6 @@ const PerfilUsuarioPrime = () => {
                     </>
                   )}
 
-               
                   {sessions.filter((session) => !session.isCurrent).length >
                     0 && (
                     <>
@@ -833,7 +890,6 @@ const PerfilUsuarioPrime = () => {
                                   <p className="text-sm text-gray-600 dark:text-gray-300 flex items-center space-x-2">
                                     <span className="text-blue-500 dark:text-blue-300">
                                       <i className="fas fa-calendar-alt"></i>{" "}
-                                    
                                     </span>
                                     <span>
                                       Fecha de inicio:{" "}

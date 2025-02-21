@@ -1,92 +1,99 @@
-import React, { createContext, useEffect, useContext, useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
+import { IdleTimerProvider } from "react-idle-timer";
 import { useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
-import { useAuth } from "./ContextAuth"; 
+import { useAuth } from "./ContextAuth";
 
-export const InactivityContext = createContext();
-
-const INACTIVITY_LIMIT = 10 * 60 * 1000;
-const TOKEN_RENEW_THRESHOLD = 2 * 60 * 1000; 
-
-export const InactivityProvider = ({ children }) => {
-  const { user, logout, csrfToken } = useAuth(); 
+const InactivityHandler = ({ children }) => {
   const navigate = useNavigate();
-  const [lastActivity, setLastActivity] = useState(Date.now());
+  const TIMEOUT_INACTIVIDAD = 10 *60* 1000; 
+  const AVISO_ANTES_MS = 50 * 1000; 
+  const { user, isLoading, logout } = useAuth();
+  const [showWarning, setShowWarning] = useState(false);
+  const idleTimerRef = useRef(null);
 
-  useEffect(() => {
-    if (!csrfToken || !user) return; 
+  const handleOnIdle = async () => {
+    if (!user || isLoading) return;
 
-    let inactivityTimer;
-    let tokenRenewTimer;
-
-   
-    const renewTokenIfNeeded = async () => {
-      try {
-        const response = await fetch("https://alquiladora-romero-server.onrender.com/api/usuarios/refresh-session", {
-          method: "POST",
-          credentials: "include",
-          headers: { "X-CSRF-Token": csrfToken },
-        });
-
-        if (response.status === 401) {
-          handleSessionExpired();
-        } else {
-          console.log("🔄 Token renovado exitosamente.");
-        }
-      } catch (error) {
-        console.error("⚠️ Error renovando token:", error);
-      }
-    };
-
-    const handleSessionExpired = async () => {
+    console.log("⏳ Inactividad detectada: Cerrando sesión...");
+    try {
       await logout();
-      Swal.fire({
-        icon: "warning",
-        title: "Sesión cerrada por inactividad",
-        text: "Tu sesión ha expirado por inactividad. Por favor, inicia sesión nuevamente.",
-        confirmButtonText: "Ir al Login",
-        allowOutsideClick: false,
-      }).then(() => {
-        navigate("/login");
-      });
+      console.log("✅ Sesión cerrada por inactividad.");
+    } catch (error) {
+      console.error("❌ Error al cerrar sesión:", error);
+    }
+
+    navigate("/login");
+  };
+
+ 
+  const handleOnPrompt = () => {
+    if (!user || isLoading) return;
+
+    console.log("⚠️ Aviso de inactividad: La sesión está por caducar.");
+    setShowWarning(true);
+    Swal.fire({
+      icon: "warning",
+      title: "⚠️ Aviso de Inactividad",
+      text: "Tu sesión se cerrará en menos de 10 segundos por inactividad.",
+      timer: AVISO_ANTES_MS,
+      showConfirmButton: false,
+      toast: true,
+      position: "top-end",
+    });
+  };
+
+
+  const resetTimer = () => {
+    if (!user || isLoading || !idleTimerRef.current) return;
+
+    console.log("🔄 Usuario activo: Reiniciando temporizador.");
+    idleTimerRef.current.reset(); 
+    setShowWarning(false);
+  };
+
+ 
+  useEffect(() => {
+    if (!user || isLoading) return;
+
+    const resetActivity = () => {
+      resetTimer();
     };
 
-  
-    const resetInactivityTimer = () => {
-      clearTimeout(inactivityTimer);
-      setLastActivity(Date.now()); 
-
-      inactivityTimer = setTimeout(() => {
-        handleSessionExpired();
-      }, INACTIVITY_LIMIT);
-    };
-
-   
-    tokenRenewTimer = setInterval(async () => {
-      const timeElapsed = Date.now() - lastActivity;
-      
-      if (timeElapsed < INACTIVITY_LIMIT - TOKEN_RENEW_THRESHOLD) {
-        console.log("🔍 Usuario activo, verificando expiración del token...",  timeElapsed);
-        await renewTokenIfNeeded();
-      }
-    }, 60 * 1000); // Revisar cada 1 minuto
-
-    // 🔹 Agregar eventos de actividad
-    document.addEventListener("mousemove", resetInactivityTimer);
-    document.addEventListener("keydown", resetInactivityTimer);
-    document.addEventListener("click", resetInactivityTimer);
-
-    // Iniciar temporizador de inactividad
-    resetInactivityTimer();
+    window.addEventListener("mousemove", resetActivity);
+    window.addEventListener("keydown", resetActivity);
+    window.addEventListener("click", resetActivity);
 
     return () => {
-      clearTimeout(inactivityTimer);
-      clearInterval(tokenRenewTimer);
-      document.removeEventListener("mousemove", resetInactivityTimer);
-      document.removeEventListener("keydown", resetInactivityTimer);
-      document.removeEventListener("click", resetInactivityTimer);
+      window.removeEventListener("mousemove", resetActivity);
+      window.removeEventListener("keydown", resetActivity);
+      window.removeEventListener("click", resetActivity);
     };
-  }, [csrfToken, user, logout, navigate, lastActivity]);
+  }, [user]);
 
-  return <InactivityContext.Provider value={{ user }}>{children}</InactivityContext.Provider>;
+  
+  useEffect(() => {
+    if (!user || isLoading) return;
+    console.log("🟢 Detección de inactividad activada para el usuario:");
+  }, [user, isLoading]);
+
+ 
+  if (!user || isLoading) {
+    return <>{children}</>;
+  }
+
+  return (
+    <IdleTimerProvider
+      ref={idleTimerRef}
+      timeout={TIMEOUT_INACTIVIDAD}
+      onIdle={handleOnIdle}
+      onPrompt={handleOnPrompt}
+      promptBeforeIdle={AVISO_ANTES_MS} 
+      debounce={2000} 
+    >
+      {children}
+    </IdleTimerProvider>
+  );
 };
+
+export default InactivityHandler;

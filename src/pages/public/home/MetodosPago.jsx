@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { FaCcVisa, FaCcMastercard, FaCcAmex, FaCcPaypal } from "react-icons/fa";
 import { SiMercadopago } from "react-icons/si";
@@ -12,6 +12,16 @@ const paymentOptions = [
 ];
 
 const PaymentMethods = () => {
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!mounted) {
+    return null;
+  }
+
   return (
     <div className="flex flex-col items-center justify-center py-12 dark:bg-gray-950 text-center px-4">
       <motion.h2 

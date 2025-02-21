@@ -5,7 +5,8 @@ import App from './App';
 import { BrowserRouter } from 'react-router-dom';
 import ThemeProvider from './hooks/ContextThem';
 import { AuthProvider } from "./hooks/ContextAuth";
-import { InactivityProvider } from './hooks/ContexInactividad';
+import InactivityHandler from './hooks/ContexInactividad';
+
 
 
 
@@ -15,11 +16,11 @@ root.render(
   <React.StrictMode>
      <BrowserRouter>
      <AuthProvider>
-     <InactivityProvider>
+     <InactivityHandler>
     <ThemeProvider>
     <App />  
     </ThemeProvider>
-    </InactivityProvider>
+    </InactivityHandler>
     </AuthProvider>
     </BrowserRouter>
   </React.StrictMode>

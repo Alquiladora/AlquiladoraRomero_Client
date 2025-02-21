@@ -27,14 +27,11 @@ export const validateName = (value, fieldName) => {
   };
 
   export const validatePhone = (value) => {
-    const phonePattern = /^\d{10}$/;
-    let error = "";
-  
-    if (!phonePattern.test(value)) {
-      error = "El número de teléfono debe tener 10 dígitos y solo contener números";
+    const regex = /^\d{10}$/;
+    if (!regex.test(value)) {
+      return "El número debe contener 10 dígitos numéricos.";
     }
-  
-    return error;
+    return "";
   };
 
 

@@ -11,12 +11,12 @@ import {
 import zxcvbn from "zxcvbn";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faEye, faEyeSlash } from "@fortawesome/free-solid-svg-icons";
-import axios from "axios";
 import Swal from "sweetalert2";
 import { useNavigate } from "react-router-dom";
 import CryptoJS from "crypto-js";
 import anime from "animejs";
 import { useAuth } from "../../hooks/ContextAuth";
+import api from "../../utils/AxiosConfig";
 
 const Paso3 = ({ guardarCorreo }) => {
   const [formData, setFormData] = useState({
@@ -40,12 +40,12 @@ const Paso3 = ({ guardarCorreo }) => {
   const {csrfToken} = useAuth() ;
   const [isCompromised, setIsCompromised] = useState(null);
 
-  const BASE_URL = "https://alquiladora-romero-server.onrender.com";
+  const BASE_URL = "http://localhost:3001";
 
   useEffect(() => {
     const fetchUsuariosYCsrf = async () => {
       try {
-        const response = await axios.get(`${BASE_URL}/api/usuarios`);
+        const response = await api.get(`/api/usuarios`);
         setUsuarios(response.data);
       
       } catch (error) {
@@ -125,7 +125,7 @@ const Paso3 = ({ guardarCorreo }) => {
       const prefix = hash.slice(0, 5);
       const suffix = hash.slice(5);
 
-      const response = await axios.get(
+      const response = await api.get(
         `https://api.pwnedpasswords.com/range/${prefix}`
       );
 
@@ -219,8 +219,8 @@ const Paso3 = ({ guardarCorreo }) => {
         setErrors("Correo ya existe");
       } else {
         try {
-          const response = await axios.post(
-            `${BASE_URL}/api/usuarios/registro`,
+          const response = await api.post(
+            `/api/usuarios/registro`,
             {
               nombre: formData.nombre,
               apellidoP: formData.apellidoPaterno,

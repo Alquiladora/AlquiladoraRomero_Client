@@ -33,7 +33,13 @@ const EditableInput = ({
   }, [isEditable]);
 
   const handleInputChange = (e) => {
-    const newValue = e.target.value;
+    let newValue = e.target.value;
+
+    if (label === "Teléfono") {
+      newValue = newValue.replace(/\D/g, "");
+      newValue = newValue.slice(0, 10);
+    }
+    
     setTempValue(newValue);
     setHasInteracted(true);
 
@@ -63,7 +69,7 @@ const EditableInput = ({
         console.error("Error al guardar:", error);
         setError("Error al guardar en la base de datos.");
 
-        // Revertir el cambio en caso de error
+    
         setInputValue(previousValue);
         setTempValue(previousValue);
       } finally {

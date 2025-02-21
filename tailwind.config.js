@@ -9,6 +9,9 @@ module.exports = {
     extend: {
       animation: {
         'fade-in-up': 'fadeInUp 1s ease-in-out',
+        "spin-smooth": "spin 2s linear infinite",
+        "spin-fast": "spin 1s linear infinite",
+        "floating": "floating 2.5s ease-in-out infinite",
       },
       keyframes: {
         fadeInUp: {
