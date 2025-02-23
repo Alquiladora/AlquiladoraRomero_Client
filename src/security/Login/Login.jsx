@@ -246,7 +246,7 @@ export const Login = () => {
         );
 
         // Redirigir según el rol del usuario
-        if (user.rol === "admin") {
+        if (user.rol === "administrador") {
           Swal.fire({
             title: "¡Inicio de sesión correcto!",
             text: "Bienvenido.",
@@ -258,7 +258,7 @@ export const Login = () => {
             },
             willClose: () => {
               console.log("Dirigiendo a administrador");
-              navigate("/admin");
+              navigate("/administrador");
             },
           });
         } else if (user.rol === "cliente") {
@@ -439,14 +439,14 @@ export const Login = () => {
         setIsLoggedIn(true);
 
         // Redirigimos según el rol del usuario
-        if (user.rol === "admin") {
+        if (user.rol === "administrador") {
           Swal.fire({
             title: "¡Código MFA correcto!",
             text: "Bienvenido.",
             icon: "success",
             timer: 2000,
             showConfirmButton: false,
-            willClose: () => navigate("/admin"),
+            willClose: () => navigate("/administrador"),
           });
         } else if (user.rol === "cliente") {
           // Mostramos un mensaje de éxito y redirigimos al área del cliente

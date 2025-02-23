@@ -1,262 +1,162 @@
-import React, { useState, useEffect ,useContext} from "react";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { 
-    faUser, 
-    faBuilding, 
-    faShieldAlt, 
-    faBalanceScale,  
-    faFileSignature, 
-    faExclamationTriangle,
-    faSignOutAlt, 
-    faShoppingCart,
-    faMoon,
-    faSun,
-    faUserSecret 
-  } from '@fortawesome/free-solid-svg-icons';
-  import { useMediaQuery } from '@mui/material';
+import React, { useState } from "react";
+import HomeAdmin from "./HomeAdmin";
+import Usuarios from "../usuarios/usuarios";
+import ToggleThemeButton from "../../../components/btnTheme/ToggleThemeButton";
+import ProductTable from "../productos/Productos";
 
-import { useNavigate } from "react-router-dom";
-import Swal from "sweetalert2";
-import Terminos from '../admin/terminos/terminos'
-import DatosEmpresa from "../admin/datosEmpresa/datosEmpresa";
-import Politicas from "./politicas/politicasP";
-// import { useAuth } from "../shared/layaouts/AuthContext";
+const MenuHomeAdmin = () => {
+  const [isOpen, setIsOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState("Usuarios");
 
+  const toggleMenu = () => setIsOpen(!isOpen);
 
-import { Box, Typography, Button, List, ListItem, Divider ,IconButton} from "@mui/material";
-// import { ThemeContext } from "../shared/layaouts/ThemeContext";
-import DeslindeLegal from "../../../components/admin/deslin/deslin";
-import Usuarios from "../../../components/admin/usuarios/usuarios";
-import Auditoria from "../../../components/admin/auditoria/auditoriaLogin"
-import UsuariosSospechosos from "../../../components/admin/auditoria/usuarioSospechoso";
-import { faBars, faTimes } from '@fortawesome/free-solid-svg-icons';
-
-
-const MenuHome = () => {
-  const [selectedSection, setSelectedSection] = useState("");
-  const navigate = useNavigate();
-  const [selectedSubSection, setSelectedSubSection] = useState(null);
-  const [selectedRestaurant, setSelectedRestaurant] = useState(null);
-  const [showRestaurantDetails, setShowRestaurantDetails] = useState(false);
-  const { user, isLoading, logout } = useAuth();
- 
-
-
-
-
-
-  const renderContent = () => {
-    switch (selectedSection) {
-      case "perfil":
-        // return <CrudPerfil />;
-      case "Terminos y Condiciones":
-        return <Terminos />;
-        case "usuarioS":
-          return <UsuariosSospechosos />;
-      case "usuarios":
-        return <Usuarios />;
-        case "auditoriaLogin":
-        return <Auditoria />;
-      case "datosEmpresa":
-        return <DatosEmpresa />;
-      case "politicasPrivacidad":
-        return <Politicas />;
-        case "Errores de sistema":
-        return <ErrorLogs />;
-      case "Deslinde legal":
-        return <DeslindeLegal />;
-        case "cerrarSesion":
-            logout(); // Llama a la función para cerrar sesión
-            Swal.fire({
-              title: "Sesión cerrada",
-              text: "Has cerrado sesión correctamente.",
-              icon: "success",
-              confirmButtonText: "OK",
-              width: "300px",
-              customClass: {
-                popup: "small-swal",     
-                title: "small-title",
-                content: "small-text",
-                confirmButton: "small-confirm",
-              },
-              buttonsStyling: false,     
-            }).then(() => {
-              navigate("/login");         
-            });
-        
-      
-            return null;
-
-      default:
-        return (
-          <div
-    style={{
-      textAlign: "center",
-      padding: "60px 20px",
-     
-      borderRadius: "12px",
-      boxShadow: "0 8px 16px rgba(0, 0, 0, 0.2)",
-      position: "relative",
-      overflow: "hidden",
-    }}
-  >
-    {/* Imagen de fondo */}
-    <img
-      src="../../img/carousel10.jpg" 
-      alt="Fondo de bienvenida"
-      style={{
-        position: "absolute",
-        top: 0,
-        left: 0,
-        width: "100%",
-        height: "100%",
-        objectFit: "cover",
-        opacity: 0.2,
-        zIndex: -1,
-      }}
-    />
-    <h1 style={{ fontSize: "30px", color: theme === "light" ? "#333" : "#fff", marginBottom: "20px" }}>
-      Bienvenido a <span style={{ color: "#1976d2" }}>Alquiladora Romero</span>
-    </h1>
-    <p
-      style={{
-        fontSize: "18px",
-        color: theme === "light" ? "#555" : "#ccc",
-        maxWidth: "600px",
-        margin: "0 auto",
-        lineHeight: "1.6",
-      }}
-    >
-      Gracias por formar parte de nuestro equipo. Disfruta de la mejor experiencia en administración de servicios de alquiler.
-    </p>
   
-  </div>
-        );
+  const navItems = [
+    { icon: "🏠", label: "Inicio" },
+    { icon: "👥", label: "Usuarios", count: 23 },
+    { icon: "⚠️", label: "Usuarios Sospechosos", count: 5 },
+    { icon: "🏢", label: "Datos de la Empresa" },
+    { icon: "🛒", label: "Productos" },
+    { icon: "📦", label: "Inventario" },
+    { icon: "💲", label: "Actualizacion Precios" },
+    { icon: "📂", label: "Subcategorias" },
+    { icon: "🏬", label: "Bodegas" },
+    { icon: "🚨", label: "Errores de Sistema", count: 3 },
+    { icon: "🚪", label: "Cerrar Sesión" },
+  ];
+  
+  const renderContent = () => {
+    switch (activeTab) {
+      case "Inicio":
+        return <HomeAdmin />;
+
+      case "Usuarios":
+        return <Usuarios />;
+      case "Productos":
+      return < ProductTable />;
+      case "Inventario":
+      // return <Inventario />;
+      case "Actualizacion Precios":
+      // return <ActualizacionPrecios />;
+      default:
+      // return <Dashboard />;
     }
   };
 
-
-  const handleSelectSection = (section) => {
-    setSelectedSection(section);
-    setShowRestaurantDetails(false);
-
-  }
-  
-
-
   return (
-    <div className="perfil-restaurante">
-      <Sidebar onSelect={handleSelectSection}  setShowRestaurantDetails={setShowRestaurantDetails} user={user}/>
-      <div className="content">{renderContent()}</div>
-    </div>
-  );
-}
+    <div className="">
+      {isOpen && (
+        <div
+          className="fixed inset-0 bg-black bg-opacity-40 z-40 lg:hidden"
+          onClick={() => setIsOpen(false)}
+        />
+      )}
 
-
-
-const Sidebar = ({ onSelect, user, setShowRestaurantDetails }) => {
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const { theme, toggleTheme } = useContext(ThemeContext);
-  const isSmallScreen = useMediaQuery('(max-width:768px)');
-  
-
-  
-  const sidebarStyles = {
-    width: "250px",
-    backgroundColor: theme === "light" ? "#304d6a" : "#222",
-    color: theme === "light" ? "#fff" : "#ccc",
-    padding: "20px",
-    transition: "all 0.3s ease",
-    minHeight: "100vh",
-    position: isSmallScreen ? 'fixed' : 'relative',
-    top: 0,
-    left: isSmallScreen ? (isMenuOpen ? 0 : '-250px') : 0,
-    zIndex: 1000,
-  };
-
-  const hamburgerStyles = {
-    display: isSmallScreen ? 'block' : 'none',
-    position: 'fixed',
-    top: '20px',
-    left: '20px',
-    zIndex: 2000,
-    cursor: 'pointer',
-    color: theme === "light" ? "#000" : "#fff",
-  };
-
-  
-
-  return (
-    <Box sx={sidebarStyles}>
-    <div style={hamburgerStyles}>
-      <FontAwesomeIcon
-        icon={isMenuOpen ? faTimes : faBars}
-        size="2x"
-        onClick={() => setIsMenuOpen(!isMenuOpen)}
-      />
-    </div>
-    <div className={`sidebar-content ${isMenuOpen ? 'open' : ''}`}>
-
-      <div className="profile-info">
-        <div className="profile-pic">
-          {user?.foto_perfil ? (
-            <img src={user.foto_perfil} alt="Profile" />
-          ) : (
-            <FontAwesomeIcon icon={faUser} size="4x" />
-          )}
-           <IconButton onClick={toggleTheme}>
-                    <FontAwesomeIcon
-                    
-                     
-                    />
-                  </IconButton>
-
-        </div>
-        <div className="country-flag">
-          <div>
-            <p>
-               {user?.nombre}
-            </p>
-            <p>Administrador</p>
+      <div className="flex">
+        {/* Sidebar */}
+        <aside
+          className={`bg-white shadow-lg w-64 fixed top-0 left-0 bottom-0 transform transition-transform duration-300 z-40 ${
+            isOpen ? "translate-x-0" : "-translate-x-full"
+          } lg:translate-x-0 lg:static`}
+        >
+          <div className="bg-gradient-to-r from-yellow-400 to-yellow-500 p-5">
+            <div className="flex justify-center mb-2">
+              <img
+                src="https://via.placeholder.com/64"
+                alt="Foto de Perfil"
+                className="h-16 w-16 rounded-full object-cover border-2 border-white"
+              />
+            </div>
+            <h2 className="text-white font-semibold text-lg text-center">
+              Panel de Administración
+            </h2>
           </div>
+
+          {/* Menú de navegación */}
+          <nav className="flex-1 overflow-y-auto">
+            {navItems.map((item, index) => (
+              <button
+                key={index}
+                onClick={() => setActiveTab(item.label)}
+                className={`w-full flex items-center p-3 mb-1 rounded-md transition-colors duration-200 ${
+                  activeTab === item.label
+                    ? "bg-yellow-100 text-yellow-800 shadow-sm"
+                    : "text-gray-600 hover:bg-gray-100"
+                }`}
+              >
+                <span className="text-xl">{item.icon}</span>
+                <span className="ml-3 font-medium">{item.label}</span>
+              </button>
+            ))}
+          </nav>
+        </aside>
+
+        <div className="flex-1 flex flex-col">
+
+          {/* Barra superior */}
+          <div className="bg-gradient-to-r from-yellow-400 to-yellow-500 text-white 
+             px-2 py-1 sm:px-4 sm:py-2 
+             flex items-center justify-between">
+
+  {/* IZQUIERDA: LOGO */}
+  <div className="flex items-center">
+    <img 
+      src="/path/to/logo.png" 
+      alt="Logo" 
+      className="h-6 w-6 sm:h-8 sm:w-8 object-contain"
+    />
+  </div>
+
+  {/* CENTRO: NOMBRE DE LA EMPRESA */}
+  <h1 className="text-sm sm:text-2xl font-bold flex-1 text-center mx-2 sm:mx-4">
+    Alquiladora Romero
+  </h1>
+
+  {/* DERECHA: BOTÓN DE TEMA Y NOTIFICACIONES */}
+  <div className="flex items-center space-x-2 sm:space-x-4">
+    {/* Botón de tema */}
+    <div className="flex items-center space-x-1 sm:space-x-2 
+                    hover:text-blue-600 transition-transform duration-300 
+                    hover:scale-105">
+      <ToggleThemeButton />
+      <span className="text-xs sm:text-sm">Tema</span>
+    </div>
+
+    {/* Botón de notificaciones */}
+    <button className="p-1 sm:p-2 rounded-full hover:bg-yellow-500 transition duration-200">
+      <svg
+        className="w-4 h-4 sm:w-6 sm:h-6"
+        fill="none"
+        stroke="currentColor"
+        viewBox="0 0 24 24"
+      >
+        <path
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          strokeWidth={2}
+          d="M15 17h5l-1.405-1.405A2.032 
+          2.032 0 0118 14.158V11a6.002 
+          6.002 0 00-4-5.659V5a2 
+          2 0 10-4 0v.341C7.67 6.165 
+          6 8.388 6 11v3.159c0 .538-.214 
+          1.055-.595 1.436L4 17h5m6 
+          0v1a3 3 0 11-6 0v-1m6 
+          0H9"
+        />
+      </svg>
+    </button>
+  </div>
+</div>
+
+
+          {/* 🌟 Aquí cambiamos dinámicamente el contenido */}
+          <main className="p-6 max-w-7xl w-full mx-auto flex-1">
+            {renderContent()}
+          </main>
         </div>
       </div>
-      <div className="menu">
-    <ul>
-      <li onClick={() => { onSelect("usuarios"); setShowRestaurantDetails(false);setIsMenuOpen(false); }}>
-        <FontAwesomeIcon icon={faUser} className="icon" /> Usuarios
-      </li>
-      <li onClick={() => { onSelect("usuarioS"); setShowRestaurantDetails(false); }}>
-      <FontAwesomeIcon icon={faUserSecret} className="icon" /> Usuario Sospechoso
-      </li> 
-      <li onClick={() => { onSelect("datosEmpresa"); setShowRestaurantDetails(false); setIsMenuOpen(false);}}>
-        <FontAwesomeIcon icon={faBuilding} className="icon" /> Datos de la Empresa
-      </li>
-      <li onClick={() => { onSelect("auditoriaLogin"); setShowRestaurantDetails(false); setIsMenuOpen(false);}}>
-        <FontAwesomeIcon icon={faBuilding} className="icon" /> Auditoria Login
-      </li>
-      <li onClick={() => { onSelect("politicasPrivacidad"); setShowRestaurantDetails(false); setIsMenuOpen(false);}}>
-        <FontAwesomeIcon icon={faShieldAlt} className="icon" /> Políticas y Privacidad
-      </li>
-      <li onClick={() => { onSelect("Deslinde legal"); setShowRestaurantDetails(false);setIsMenuOpen(false); }}>
-        <FontAwesomeIcon icon={faBalanceScale} className="icon" /> Deslinde legal
-      </li>
-      <li onClick={() => { onSelect("Terminos y Condiciones"); setShowRestaurantDetails(false); setIsMenuOpen(false);}}>
-        <FontAwesomeIcon icon={faFileSignature} className="icon" />Términos y Condiciones
-      </li>
-      <li onClick={() => { onSelect("Errores de sistema"); setShowRestaurantDetails(false); setIsMenuOpen(false);}}>
-        <FontAwesomeIcon icon={faExclamationTriangle} className="icon" /> Errores de sistema
-      </li>
-      
-      <li onClick={() => { onSelect("cerrarSesion"); setShowRestaurantDetails(false); setIsMenuOpen(false);}}>
-        <FontAwesomeIcon icon={faSignOutAlt} className="icon" /> Cerrar sesión
-      </li>
-      
-    </ul>
-  </div>
-  </div>
-  </Box>
+    </div>
   );
 };
 
-export default MenuHome;
+export default MenuHomeAdmin;

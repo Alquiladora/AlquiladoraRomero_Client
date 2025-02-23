@@ -25,7 +25,7 @@ const HeaderChil1 = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isCategoriesOpen, setIsCategoriesOpen] = useState(false);
   const [isChatboxOpen, setIsChatboxOpen] = useState(false);
-  const { user, setUser, checkAuth, isLoading, logout } = useAuth();
+  const { user } = useAuth();
 
 
 
@@ -149,9 +149,7 @@ const HeaderChil1 = () => {
                 <IconoPerfil />
               ) : (
                 <></>
-                // <InconoHeaderComedor
-                //   nombreCompleto={user?.nombre || "Invitado"}
-                // />
+               
               )
             ) : (
               <LoginLink />

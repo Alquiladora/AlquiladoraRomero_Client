@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useContext } from "react";
-import axios from "axios";
+
 import {
   Container,
   Typography,
@@ -20,8 +20,9 @@ import {
   DialogActions,
   Button,
 } from "@mui/material";
-import { ThemeContext } from "../../shared/layaouts/ThemeContext";
+// import { ThemeContext } from "../../shared/layaouts/ThemeContext";
 import InfoIcon from "@mui/icons-material/Info";
+import api from "../../../utils/AxiosConfig";
 
 const Usuarios = () => {
   // Estados para almacenar usuarios, estados de carga y errores
@@ -34,7 +35,7 @@ const Usuarios = () => {
   const [selectedUserSessions, setSelectedUserSessions] = useState([]);
   const [selectedUserName, setSelectedUserName] = useState("");
 
-  const { theme } = useContext(ThemeContext);
+  // const { theme } = useContext(ThemeContext);
 
   // Obtener lista de usuarios al cargar el componente
   useEffect(() => {
@@ -44,8 +45,8 @@ const Usuarios = () => {
   // Función para obtener los usuarios desde la API
   const fetchUsuarios = async () => {
     try {
-      const response = await axios.get(
-        "https://alquiladora-romero-backed-1.onrender.com/api/usuarios/lista",
+      const response = await api.get(
+        "/api/usuarios/lista",
         {
           withCredentials: true,
         }
@@ -65,8 +66,8 @@ const Usuarios = () => {
     );
 
     try {
-      const response = await axios.get(
-        `https://alquiladora-romero-backed-1.onrender.com/api/usuarios/${usuario.idUsuarios}/sesiones`,
+      const response = await api.get(
+        `/api/usuarios/${usuario.idUsuarios}/sesiones`,
         {
           withCredentials: true,
           timeout: 10000,
@@ -91,9 +92,9 @@ const Usuarios = () => {
 
   // Filtra usuarios por su rol
   const administradores = usuarios.filter(
-    (usuario) => usuario.Rol === "Administrador"
+    (usuario) => usuario.rol === "administrador"
   );
-  const clientes = usuarios.filter((usuario) => usuario.Rol === "Cliente");
+  const clientes = usuarios.filter((usuario) => usuario.rol === "cliente");
 
   // Muestra un indicador de carga mientras se obtienen los datos
   if (loading) {
@@ -116,7 +117,7 @@ const Usuarios = () => {
       maxWidth="lg"
       sx={{
         mt: 4,
-        bgcolor: theme === "dark" ? "#121212" : "#f9f9f9",
+       
         p: 3,
         borderRadius: "8px",
         boxShadow: 3,
@@ -126,7 +127,7 @@ const Usuarios = () => {
         variant="h4"
         align="center"
         gutterBottom
-        sx={{ fontWeight: "bold", color: theme === "dark" ? "#fff" : "#333" }}
+       
       >
         Gestión de Usuarios
       </Typography>
@@ -135,30 +136,30 @@ const Usuarios = () => {
       <Typography
         variant="h5"
         gutterBottom
-        sx={{ mt: 5, color: theme === "dark" ? "#ddd" : "#333" }}
+       
       >
         Administradores
       </Typography>
       <Paper
         sx={{
-          bgcolor: theme === "dark" ? "#1e1e1e" : "#fff",
+         
           boxShadow: 1,
           overflowX: "auto",
         }}
       >
         <Table>
           <TableHead>
-            <TableRow sx={{ bgcolor: theme === "dark" ? "#333" : "#0277bd" }}>
-              <TableCell sx={{ color: theme === "dark" ? "#ddd" : "#fff" }}>
+            <TableRow sx={{ }}>
+              <TableCell sx={{ }}>
                 Nombre
               </TableCell>
-              <TableCell sx={{ color: theme === "dark" ? "#ddd" : "#fff" }}>
+              <TableCell sx={{ }}>
                 Veces Bloqueado
               </TableCell>
-              <TableCell sx={{ color: theme === "dark" ? "#ddd" : "#fff" }}>
+              <TableCell sx={{ }}>
                 Cambios de Contraseña
               </TableCell>
-              <TableCell sx={{ color: theme === "dark" ? "#ddd" : "#fff" }}>
+              <TableCell sx={{ }}>
                 Inicios de Sesión
               </TableCell>
             </TableRow>
@@ -168,8 +169,8 @@ const Usuarios = () => {
               <TableRow key={usuario.idUsuarios}>
                 <TableCell>
                   <div style={{ display: "flex", flexDirection: "column" }}>
-                    <span style={{ fontWeight: "bold" }}>{usuario.Correo}</span>
-                    <span>{`${usuario.Nombre} ${usuario.ApellidoP} ${usuario.ApellidoM}`}</span>
+                    <span style={{ fontWeight: "bold" }}>{usuario.correo}</span>
+                    <span>{`${usuario.nombre} ${usuario.apellidoP} ${usuario.apellidoM}`}</span>
                   </div>
                 </TableCell>
 
@@ -193,30 +194,30 @@ const Usuarios = () => {
       <Typography
         variant="h5"
         gutterBottom
-        sx={{ mt: 5, color: theme === "dark" ? "#ddd" : "#333" }}
+       
       >
         Clientes
       </Typography>
       <Paper
         sx={{
-          bgcolor: theme === "dark" ? "#1e1e1e" : "#fff",
+         
           boxShadow: 1,
           overflowX: "auto",
         }}
       >
         <Table>
           <TableHead>
-            <TableRow sx={{ bgcolor: theme === "dark" ? "#333" : "#0277bd" }}>
-              <TableCell sx={{ color: theme === "dark" ? "#ddd" : "#fff" }}>
+            <TableRow sx={{ }}>
+              <TableCell sx={{ }}>
                 Nombre
               </TableCell>
-              <TableCell sx={{ color: theme === "dark" ? "#ddd" : "#fff" }}>
+              <TableCell sx={{ }}>
                 Veces Bloqueado
               </TableCell>
-              <TableCell sx={{ color: theme === "dark" ? "#ddd" : "#fff" }}>
+              <TableCell sx={{ }}>
                 Cambios de Contraseña
               </TableCell>
-              <TableCell sx={{ color: theme === "dark" ? "#ddd" : "#fff" }}>
+              <TableCell sx={{ }}>
                 Inicios de Sesión
               </TableCell>
             </TableRow>
@@ -227,7 +228,7 @@ const Usuarios = () => {
                <TableCell>
                   <div style={{ display: "flex", flexDirection: "column" }}>
                     <span style={{ fontWeight: "bold" }}>{usuario.Correo}</span>
-                    <span>{`${usuario.Nombre} ${usuario.ApellidoP} ${usuario.ApellidoM}`}</span>
+                    <span>{`${usuario.nombre} ${usuario.apellidoP} ${usuario.apellidoM}`}</span>
                   </div>
                 </TableCell>
                 <TableCell>{usuario.veces_bloqueado}</TableCell>

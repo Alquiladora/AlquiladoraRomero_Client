@@ -23,8 +23,8 @@ const CambiarPassword = () => {
   const [usuarioE, setUsuarioE] = useState(null);
   const navigate = useNavigate();
   const { executeRecaptcha } = useGoogleReCaptcha();
-    const [cambiosContrasena, setCambiosContrasena] = useState(0);
-    const [bloqueado, setBloqueado] = useState(false);
+  const [cambiosContrasena, setCambiosContrasena] = useState(0);
+  const [bloqueado, setBloqueado] = useState(false);
 
  
   useEffect(() => {

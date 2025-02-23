@@ -5,21 +5,35 @@ import { faMoon, faSun } from "@fortawesome/free-solid-svg-icons";
 
 const ToggleThemeButton = () => {
   const { theme, toggleTheme } = useContext(ThemeContext);
+  const isLight = theme === "light"; 
 
   return (
     <button
       onClick={toggleTheme}
-      className="p-2 rounded-full focus:outline-none transition-all duration-300
-        dark:bg-gray-800 dark:text-yellow-300 dark:hover:bg-gray-700 dark:hover:shadow-lg
-        bg-gray-100 text-gray-800 hover:bg-gray-200 hover:shadow-md
-        "
+      className={`
+        relative flex items-center justify-center
+        w-10 h-10
+        rounded-full
+        focus:outline-none
+        focus:ring-4 focus:ring-yellow-300
+        transition-all duration-300
+        hover:scale-105 hover:shadow-md active:scale-95
+        ${
+          isLight
+            ? "bg-gray-200 text-gray-800"
+            : "bg-gray-700 text-yellow-300"
+        }
+      `}
     >
-      {/* Ícono dinámico con animación */}
       <FontAwesomeIcon
-        icon={theme === "light" ? faMoon : faSun}
-        className={`w-6 h-6 transform transition-transform duration-300 ${
-          theme === "light" ? "rotate-0" : "rotate-180"
-        } hover:scale-110`}
+        icon={isLight ? faMoon : faSun}
+        className={`
+          w-5 h-5
+          transform
+          transition-transform
+          duration-300
+          ${isLight ? "rotate-0" : "rotate-180"}
+        `}
       />
     </button>
   );

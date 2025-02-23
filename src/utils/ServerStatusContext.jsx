@@ -9,9 +9,7 @@ export const ServerStatusProvider = ({ children }) => {
 
   const checkServerStatus = async () => {
     try {
-      await api.get("/api/status", 
-       { withCredentials: true}
-      ); 
+      await api.get("/api/status", { withCredentials: true });
       setIsServerOnline(true);
       setServerError(null);
     } catch (error) {
@@ -21,9 +19,23 @@ export const ServerStatusProvider = ({ children }) => {
   };
 
   useEffect(() => {
+  
     checkServerStatus();
-    const interval = setInterval(checkServerStatus, 10000); 
-    return () => clearInterval(interval);
+
+    
+    const interval = setInterval(checkServerStatus, 10000);
+
+   
+    const handleOnline = () => {
+      checkServerStatus();
+    };
+    window.addEventListener("online", handleOnline);
+
+   
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener("online", handleOnline);
+    };
   }, []);
 
   return (

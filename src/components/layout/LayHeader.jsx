@@ -12,14 +12,14 @@ const LayoutHeader = ({ children }) => {
   const ocultarBreadcrumbsPaths = new Set([
     "/", "/home",
     "/cliente", "/cliente/home",
-    "/admin", "/admin/home",
+    "/administrador", "/administrador/home",
     "/repartidor", "/repartidor/home"
   ]);
 
   // Determinar Header y Footer con useMemo para mejorar rendimiento
   const { encabezado, piePagina } = useMemo(() => {
-    if (path.startsWith("/admin")) {
-      return { encabezado: <Header admin />, piePagina: <Footer admin /> };
+    if (path.startsWith("/administrador")) {
+      return { encabezado: <Header administrador />, piePagina: <Footer administrador /> };
     }
     if (path.startsWith("/cliente")) {
       return { encabezado: <Header cliente />, piePagina: <Footer cliente /> };

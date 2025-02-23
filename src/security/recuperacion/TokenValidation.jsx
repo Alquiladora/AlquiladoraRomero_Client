@@ -16,6 +16,8 @@ export const TokenValidation = ({ correo, setStep }) => {
   const { idUsuario, tokenValido } = location.state || {};
   const navigate = useNavigate();
   const { csrfToken } = useAuth();
+  const [cambiosContrasena, setCambiosContrasena] = useState(0);
+  const [bloqueado, setBloqueado] = useState(false);
 
   
   const handleTokenChange = (index, value) => {
@@ -51,6 +53,27 @@ export const TokenValidation = ({ correo, setStep }) => {
     navigate("/login");
   };
 
+  const verificarCambiosContrasena = async (idUsuario) => {
+    if (!idUsuario) {
+      console.warn(
+        "⚠️ ID de usuario no disponible, no se verificará cambios de contraseña."
+      );
+      return;
+    }
+    try {
+      const response = await api.get(`/api/usuarios/vecesCambioPass`, {
+        params: { idUsuario },
+        headers: { "X-CSRF-Token": csrfToken },
+        withCredentials: true,
+      });
+      console.log("Respuesta de vecesCambioPass:", response.data);
+      setCambiosContrasena(response.data.cambiosRealizados);
+      setBloqueado(response.data.cambiosRealizados >= 20);
+    } catch (error) {
+      console.error("Error al verificar los cambios de contraseña:", error);
+    }
+  };
+
  
   const handleSubmit = async () => {
     const tokenIngresado = tokens.join("");
@@ -67,6 +90,9 @@ export const TokenValidation = ({ correo, setStep }) => {
           withCredentials: true,
         }
       );
+
+      
+      console.log("Este es lo que me contiene de response de validar correo", response)
 
       if (
         response.data.message ===
@@ -118,7 +144,7 @@ export const TokenValidation = ({ correo, setStep }) => {
       
       <div className="relative bg-white rounded-lg shadow-lg p-6 text-center  dark:bg-gray-900 dark:text-white ">
         
-        {/* Botón de cerrar (esquina superior derecha) */}
+       
         <button
           onClick={handleClose}
           className="absolute top-3 right-3 text-gray-400 hover:text-gray-600 text-xl font-bold"

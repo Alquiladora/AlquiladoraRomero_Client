@@ -5,7 +5,6 @@ import React, {
   useContext,
   useRef,
 } from "react";
-import axios from "axios";
 import SpinerCarga from "../utils/SpinerCarga";
 import { useNavigate } from "react-router-dom";
 import api from "../utils/AxiosConfig";
@@ -17,14 +16,12 @@ export const AuthProvider = ({ children }) => {
   const [isLoading, setIsLoading] = useState(true);
   const [csrfToken, setCsrfToken] = useState("");
   const [error, setError] = useState(null);
-  const BASE_URL = "http://localhost:3001";
   const navigate = useNavigate();
   const isMounted = useRef(true);
 
   const fetchCsrfToken = async () => {
     console.log("csrftoke no existe", csrfToken);
     if (csrfToken) return;
-
     try {
       const response = await api.get(`/api/get-csrf-token`, {
         withCredentials: true,
@@ -37,17 +34,8 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  // 🔹 Verificar autenticación
+ 
   const checkAuth = async () => {
-    if (!navigator.onLine) {
-      console.warn("No hay conexión a Internet. Revisa tu conexión.");
-      if (isMounted.current) {
-        setError("No se pudo conectar con el servidor. Revisa tu conexión.");
-        setIsLoading(false);
-      }
-      return;
-    }
-
     try {
       const response = await api.get(`/api/usuarios/perfil`, {
         withCredentials: true,
@@ -139,7 +127,7 @@ export const AuthProvider = ({ children }) => {
   }, [csrfToken]);
 
    useEffect(() => {
-    if (user && navigator.onLine) {
+    if (user ) {
       const intervalId = setInterval(() => {
         checkAuth();
       }, 30000);

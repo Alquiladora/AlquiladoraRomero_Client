@@ -9,7 +9,7 @@ const RoutePublic = ({ children }) => {
 
   if (user) {
     const rutasPrivadas = {
-      admin: "/administrador",
+      administrador: "/administrador",
       cliente: "/cliente",
       repartidor: "/repartidor",
     };

@@ -7,7 +7,7 @@ import RoutePublic from './RoutePublic';
 import { ServerStatusContext } from '../utils/ServerStatusContext';
 import ErrorBoundary from './Errors/ErrorBoundary';
 import ServerErrorModal from './Errors/ErrorTime';
-
+import AuthRedirector from '../components/layout/UrlDirrecion';
 
 
 
@@ -32,6 +32,12 @@ import TokenModal from '../pages/client/perfil/componetsPerfil/TokenModal';
 import ChangePassword from '../pages/client/perfil/componetsPerfil/ChangePassword';
 
 
+//-------------------ADMIN------------------------
+import MenuHomeAdmin from '../pages/admin/home/MenuAdmin';
+
+
+
+
 const Routerss = () => {
   const { isServerOnline } = useContext(ServerStatusContext);
   const navigate = useNavigate();
@@ -49,6 +55,8 @@ const Routerss = () => {
 
       <div className="dark:bg-gray-950 dark:text-white">
       <ServerErrorModal />
+      
+       
 
         <Routes>
      
@@ -72,6 +80,7 @@ const Routerss = () => {
 
 
           {/**=====================ADMINISTRADOR============================= */}
+          <Route path="/administrador" element={<RoutePrivate rolesPermitidos={['administrador']}> <LayoutHeader><MenuHomeAdmin  /></LayoutHeader></RoutePrivate>} />
 
 
 
@@ -84,6 +93,7 @@ const Routerss = () => {
         
 
         </Routes>
+       
 
       </div>
 
