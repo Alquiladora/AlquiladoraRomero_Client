@@ -50,6 +50,7 @@
     "slick-carousel": "^1.8.1",
     "tsparticles": "^3.8.0",
     "typewriter-effect": "^2.21.0",
+    "vanilla-tilt": "^1.8.1",
     "web-vitals": "^4.2.4",
     "zxcvbn": "^4.4.2"
   },
