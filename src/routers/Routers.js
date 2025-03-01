@@ -8,6 +8,7 @@ import { ServerStatusContext } from '../utils/ServerStatusContext';
 import ErrorBoundary from './Errors/ErrorBoundary';
 import ServerErrorModal from './Errors/ErrorTime';
 import AuthRedirector from '../components/layout/UrlDirrecion';
+import CarritoCompras from '../components/carrito/CarritoCompras';
 
 
 
@@ -24,16 +25,19 @@ import { Login } from '../security/Login/Login';
 import Registro from '../security/Registro/Registro';
 import Catalogo from '../pages/public/catalog/Catalogo';
 import CambiarPassword from '../security/recuperacion/CambiarPasswor';
+import ProductosCategoria from '../components/productosCategoria/ProductosCatgeoria';
 
 
 //-------------------CLIENT------------------------
 import PerfilUsuarioPrime from '../pages/client/perfil/PerfilClient';
 import TokenModal from '../pages/client/perfil/componetsPerfil/TokenModal';
 import ChangePassword from '../pages/client/perfil/componetsPerfil/ChangePassword';
+import DetalleProducto from '../components/productosCategoria/productosDetalles';
 
 
 //-------------------ADMIN------------------------
 import MenuHomeAdmin from '../pages/admin/home/MenuAdmin';
+import TokenModalAdmin from '../pages/admin/perfil/cambiarPass/ModalCambiarPass';
 
 
 
@@ -43,11 +47,7 @@ const Routerss = () => {
   const navigate = useNavigate();
 
 
-  useEffect(() => {
-    if (!isServerOnline) {
-      navigate("/error500");
-    }
-  }, [isServerOnline, navigate]);
+
 
   return (
     <>
@@ -66,22 +66,28 @@ const Routerss = () => {
         <Route path="/registro" element={<RoutePublic><LayoutHeader><Registro /></LayoutHeader></RoutePublic>} />
         <Route path="/cambiarPass" element={<RoutePublic><LayoutHeader><CambiarPassword /></LayoutHeader></RoutePublic>} />
         <Route path="/categorias/sillas" element={<LayoutHeader><Catalogo /></LayoutHeader>} />
+        <Route path="/categoria/:categori" element={<RoutePublic> <LayoutHeader>< ProductosCategoria /></LayoutHeader></RoutePublic>} />
+        <Route path="/:categori/:idProducto" element={<RoutePublic> <LayoutHeader>< DetalleProducto /></LayoutHeader></RoutePublic>} />
+
 
 
 
           {/**=====================CLIENTE============================= */}
           <Route path="/cliente" element={<RoutePrivate rolesPermitidos={['cliente']}> <LayoutHeader>< Home /></LayoutHeader></RoutePrivate>} />
+          <Route path="/cliente/carrito" element={<RoutePrivate rolesPermitidos={['cliente']}> <LayoutHeader>< CarritoCompras /></LayoutHeader></RoutePrivate>} />
           <Route path="/cliente/perfil" element={<RoutePrivate rolesPermitidos={['cliente']}> <LayoutHeader><PerfilUsuarioPrime  /></LayoutHeader></RoutePrivate>} />
           <Route path="/cliente/cambiarPassword" element={<RoutePrivate rolesPermitidos={['cliente']}> <LayoutHeader><TokenModal  /></LayoutHeader></RoutePrivate>} />
           <Route path="/cliente/updatePass" element={<RoutePrivate rolesPermitidos={['cliente']}> <LayoutHeader><ChangePassword  /></LayoutHeader></RoutePrivate>} />
-
-
+          <Route path="/cliente/categoria/:categori" element={<RoutePrivate rolesPermitidos={['cliente']}> <LayoutHeader>< ProductosCategoria /></LayoutHeader></RoutePrivate>} />
+          <Route path="/cliente/:categori/:idProducto" element={<RoutePrivate rolesPermitidos={['cliente']}> <LayoutHeader>< DetalleProducto /></LayoutHeader></RoutePrivate>} />
+        
 
 
 
           {/**=====================ADMINISTRADOR============================= */}
           <Route path="/administrador" element={<RoutePrivate rolesPermitidos={['administrador']}> <LayoutHeader><MenuHomeAdmin  /></LayoutHeader></RoutePrivate>} />
-
+          <Route path="/administrador/cambiarPassword" element={<RoutePrivate rolesPermitidos={['administrador']}><LayoutHeader><TokenModalAdmin /></LayoutHeader></RoutePrivate>} />
+          <Route path="/administrador/updatePass" element={<RoutePrivate rolesPermitidos={['administrador']}><LayoutHeader><TokenModalAdmin /></LayoutHeader></RoutePrivate>} />
 
 
 
@@ -89,6 +95,7 @@ const Routerss = () => {
 
           {/**===================== ERROR 404 (Cualquier ruta no encontrada) ============================= */}
           <Route path="*" element={<LayoutHeader><Error404 /></LayoutHeader>} />
+
           <Route path="/error500" element={<LayoutHeader><Error500 /></LayoutHeader>} />
         
 

@@ -1,16 +1,21 @@
 import React, { useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faUserCheck, faArrowRight, faCheckCircle } from "@fortawesome/free-solid-svg-icons";
+import { 
+  faUserCheck, 
+  faArrowRight, 
+  faCheckCircle, 
+  faEnvelope, 
+  faKey, 
+  faUserEdit 
+} from "@fortawesome/free-solid-svg-icons";
 import Paso1 from './Paso1';
-import Paso2 from './Paso2'
-import Paso3 from './Paso3'
-
+import Paso2 from './Paso2';
+import Paso3 from './Paso3';
 
 const Registro = () => {
-  const [step, setStep] = useState(1);
+  const [step, setStep] = useState(0); // Starting at 0 for instructions
   const [animate, setAnimate] = useState(false);
   const [guardarCorreo, setGuardarCorreo] = useState("");
-
 
   const handleNextStep = () => {
     console.log("Este es el valor de guardar correo", guardarCorreo);
@@ -18,107 +23,132 @@ const Registro = () => {
     setTimeout(() => {
       setStep(step + 1);
       setAnimate(false);
-    }, 100);
+    }, 300);
   };
-  
 
+  // Steps configuration for better visual representation
+  // Now starting at actual step 1 (email verification)
+  const steps = [
+    { label: "Verificar Correo", icon: faEnvelope },
+    { label: "Validar Código", icon: faKey },
+    { label: "Datos Personales", icon: faUserEdit }
+  ];
+  
   return (
-    <div className={`min-h-full flex justify-center items-center  transition-all p-8 relative overflow-hidden`}>
+    <div className="min-h-full flex justify-center items-center transition-all p-4 md:p-8 relative overflow-hidden">
       {/* Efecto de lluvia de meteoritos */}
       <div className="meteor-shower">
         {[...Array(20)].map((_, i) => (
-          <div key={i} className="meteor" style={{ left: `${Math.random() * 100}%`, animationDelay: `${Math.random() * 5}s` }}></div>
+          <div key={i} className="meteor" style={{ 
+            left: `${Math.random() * 100}%`, 
+            animationDelay: `${Math.random() * 5}s`,
+            animationDuration: `${3 + Math.random() * 4}s`
+          }}></div>
         ))}
       </div>
 
       <div
-        className={`login-box ${animate ? "fade-out" : "slide-in"} w-full max-w-2xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white border rounded-lg shadow-lg p-6 transition-all duration-300 flex flex-col md:flex-row md:items-center md:justify-between relative z-10`}
+        className={`login-box ${animate ? "fade-out" : "slide-in"} w-full max-w-2xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white border rounded-lg shadow-xl p-6 transition-all duration-300 flex flex-col relative z-10`}
       >
-        {/* Barra de progreso */}
-        {step >= 2 && (
-          <div className="progress-bar flex justify-between items-center mb-4 md:mb-0 md:flex-col md:space-y-4">
-            {/* Paso 1 */}
-            <div
-              className={`circle ${step > 2 ? "bg-green-500 text-white" : "bg-gray-300 text-gray-800"} rounded-full w-8 h-8 flex justify-center items-center`}
-            >
-              {step >= 2 ? (
-                <FontAwesomeIcon icon={faCheckCircle} className="text-white" />
-              ) : (
-                "1"
-              )}
-            </div>
-            <div
-              className={`line ${step >= 2 ? "bg-green-500" : "bg-gray-300"} w-16 h-1 md:w-1 md:h-16`}
-            ></div>
-
-            {/* Paso 2 */}
-            <div
-              className={`circle ${step > 2 ? "bg-green-500 text-white" : "bg-gray-300 text-gray-800"} rounded-full w-8 h-8 flex justify-center items-center`}
-            >
-              {step >= 3 ? (
-                <FontAwesomeIcon icon={faCheckCircle} className="text-white" />
-              ) : (
-                "2"
-              )}
-            </div>
-            <div
-              className={`line ${step >= 3 ? "bg-green-500" : "bg-gray-300"} w-16 h-1 md:w-1 md:h-16`}
-            ></div>
-
-            {/* Paso 3 */}
-            <div
-              className={`circle ${step > 3 ? "bg-green-500 text-white" : "bg-gray-300 text-gray-800"} rounded-full w-8 h-8 flex justify-center items-center`}
-            >
-              {step >= 4 ? (
-                <FontAwesomeIcon icon={faCheckCircle} className="text-white" />
-              ) : (
-                "3"
-              )}
+        {/* Progress Steps - Only visible after instructions */}
+        {step > 0 && (
+          <div className="progress-steps mb-8">
+            <div className="flex items-center justify-between w-full">
+              {steps.map((stepItem, index) => (
+                <React.Fragment key={index}>
+                  {/* Step Circle */}
+                  <div className="flex flex-col items-center">
+                    <div 
+                      className={`
+                        step-circle w-12 h-12 rounded-full flex items-center justify-center transition-all duration-500
+                        ${step > index + 1 ? "bg-green-500" : step === index + 1 ? "bg-[#fcb900]" : "bg-gray-300"}
+                        text-white font-semibold transform hover:scale-105
+                      `}
+                    >
+                      {step > index + 1 ? (
+                        <FontAwesomeIcon icon={faCheckCircle} className="text-lg" />
+                      ) : (
+                        <FontAwesomeIcon icon={stepItem.icon} className="text-lg" />
+                      )}
+                    </div>
+                    <span className={`text-sm mt-2 font-medium ${step === index + 1 ? "text-[#fcb900]" : ""}`}>
+                      {stepItem.label}
+                    </span>
+                  </div>
+                  
+                  {/* Connection Line */}
+                  {index < steps.length - 1 && (
+                    <div className="flex-1 mx-4">
+                      <div className={`h-1.5 ${step > index + 1 ? "bg-green-500" : "bg-gray-300"} rounded-full transition-all duration-500 progress-line`}></div>
+                    </div>
+                  )}
+                </React.Fragment>
+              ))}
             </div>
           </div>
         )}
 
-        {/* Paso 1 - Introducción y comenzar */}
-        {step === 1 && (
-          <div className="flex-1 md:ml-8">
-            <h2 className="text-2xl font-bold mb-4 flex items-center justify-center text-[#fcb900]">
-              <FontAwesomeIcon icon={faUserCheck} className="mr-2 text-[#fcb900]" />
+        {/* Paso 0 - Introducción y comenzar (not counted in progress) */}
+        {step === 0 && (
+          <div className="flex-1 intro-container">
+            <div className="flex justify-center mb-6">
+              <div className="logo-container p-3 rounded-full bg-[#fcb900]/10 animate-pulse">
+                <FontAwesomeIcon icon={faUserCheck} className="text-4xl text-[#fcb900]" />
+              </div>
+            </div>
+            
+            <h2 className="text-2xl md:text-3xl font-bold mb-6 text-center text-[#fcb900]">
               Proceso de Registro
             </h2>
-            <p className="text-lg mb-4 text-gray-700 dark:text-gray-300">
-              Regístrate en la plataforma y obtén los beneficios de ser parte de la familia Alquiladora Romero. Sigue estos sencillos pasos para completar tu registro:
+            
+            <p className="text-lg mb-6 text-gray-700 dark:text-gray-300 text-center px-4">
+              Regístrate en la plataforma y obtén los beneficios de ser parte de la familia Alquiladora Romero.
             </p>
-            <ul className="list-decimal pl-6 mb-6 text-gray-700 dark:text-gray-300">
-              <li><strong></strong> Ingresa tu correo.</li>
-              <li><strong></strong> Recibe un código en tu correo e ingrésalo para continuar.</li>
-              <li><strong></strong> Completa tus datos personales y finaliza el registro.</li>
-            </ul>
-            {/* Botón "Siguiente" */}
+            
+            <div className="steps-overview bg-gray-100 dark:bg-gray-700 rounded-lg p-6 mb-8">
+              <h3 className="text-lg font-semibold mb-4 text-center">Pasos a seguir</h3>
+              <ul className="space-y-4">
+                <li className="flex items-center">
+                  <div className="w-8 h-8 rounded-full bg-[#fcb900] flex items-center justify-center text-white mr-3">1</div>
+                  <span className="text-gray-800 dark:text-gray-200">Ingresa y verifica tu correo electrónico</span>
+                </li>
+                <li className="flex items-center">
+                  <div className="w-8 h-8 rounded-full bg-[#fcb900] flex items-center justify-center text-white mr-3">2</div>
+                  <span className="text-gray-800 dark:text-gray-200">Recibe e ingresa el código de validación</span>
+                </li>
+                <li className="flex items-center">
+                  <div className="w-8 h-8 rounded-full bg-[#fcb900] flex items-center justify-center text-white mr-3">3</div>
+                  <span className="text-gray-800 dark:text-gray-200">Completa tus datos personales y finaliza</span>
+                </li>
+              </ul>
+            </div>
+            
+            {/* Botón "Comenzar" */}
             <button
               onClick={handleNextStep}
-              className="w-auto py-2 px-4 bg-blue-500 hover:bg-blue-600 text-white rounded-md font-semibold transition-all duration-300 mx-auto block"
+              className="start-button py-3 px-6 bg-[#fcb900] hover:bg-[#e0a500] text-white rounded-lg font-semibold transition-all duration-300 mx-auto block shadow-lg hover:shadow-xl transform hover:-translate-y-1"
             >
-              Comenzar <FontAwesomeIcon icon={faArrowRight} />
+              Comenzar ahora <FontAwesomeIcon icon={faArrowRight} className="ml-2" />
             </button>
           </div>
         )}
 
-        {/* Paso 2 - Validación del correo */}
-         {step === 2 && (
+        {/* Paso 1 - Validación del correo (First actual step) */}
+        {step === 1 && (
           <Paso1
             onValidationSuccess={handleNextStep}
             setGuardarCorreo={setGuardarCorreo}
           />
-        )} 
+        )}
 
-        {/* Paso 3 - Validación del token */}
-        {step === 3 && <Paso2 onValidationSuccess={handleNextStep}  guardarCorreo={guardarCorreo} />}
+        {/* Paso 2 - Validación del token */}
+        {step === 2 && <Paso2 onValidationSuccess={handleNextStep} guardarCorreo={guardarCorreo} />}
 
-        {/* Paso 4 - Registro final */}
-        {step === 4 && <Paso3 guardarCorreo={guardarCorreo} />}
+        {/* Paso 3 - Registro final */}
+        {step === 3 && <Paso3 guardarCorreo={guardarCorreo} />}
       </div>
 
-      {/* Estilos para la lluvia de meteoritos */}
+      {/* Estilos mejorados */}
       <style jsx>{`
         .meteor-shower {
           position: absolute;
@@ -127,16 +157,18 @@ const Registro = () => {
           width: 100%;
           height: 100%;
           overflow: hidden;
-          z-index: 10;
+          z-index: 0;
+          pointer-events: none;
         }
 
         .meteor {
           position: absolute;
-          top: -50px;
+          top: -100px;
           width: 2px;
-          height: 50px;
+          height: 60px;
           background: linear-gradient(to bottom, rgba(252, 185, 0, 0), rgba(252, 185, 0, 0.8));
           animation: meteor-fall 5s linear infinite;
+          opacity: 0.7;
         }
 
         @keyframes meteor-fall {
@@ -145,8 +177,146 @@ const Registro = () => {
             opacity: 1;
           }
           100% {
-            transform: translateY(100vh) rotate(45deg);
+            transform: translateY(120vh) rotate(45deg);
             opacity: 0;
+          }
+        }
+        
+        .step-circle {
+          box-shadow: 0 0 0 5px rgba(252, 185, 0, 0.15);
+          transition: all 0.4s ease;
+        }
+        
+        .fade-out {
+          opacity: 0;
+          transform: translateY(-20px);
+        }
+        
+        .slide-in {
+          opacity: 1;
+          transform: translateY(0);
+          animation: appear 0.5s ease-out;
+        }
+
+        @keyframes appear {
+          from {
+            opacity: 0;
+            transform: translateY(20px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+
+        .progress-line {
+          position: relative;
+          overflow: hidden;
+        }
+
+        .progress-line::after {
+          content: '';
+          position: absolute;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          background: linear-gradient(90deg, rgba(252,185,0,0) 0%, rgba(252,185,0,0.3) 50%, rgba(252,185,0,0) 100%);
+          animation: shimmer 2s infinite;
+          transform: translateX(-100%);
+        }
+
+        @keyframes shimmer {
+          100% {
+            transform: translateX(100%);
+          }
+        }
+
+        .intro-container {
+          animation: fadeIn 0.8s ease-out;
+        }
+
+        @keyframes fadeIn {
+          from {
+            opacity: 0;
+            transform: scale(0.98);
+          }
+          to {
+            opacity: 1;
+            transform: scale(1);
+          }
+        }
+
+        .logo-container {
+          animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+          0% {
+            box-shadow: 0 0 0 0 rgba(252, 185, 0, 0.4);
+          }
+          70% {
+            box-shadow: 0 0 0 20px rgba(252, 185, 0, 0);
+          }
+          100% {
+            box-shadow: 0 0 0 0 rgba(252, 185, 0, 0);
+          }
+        }
+
+        .start-button {
+          position: relative;
+          overflow: hidden;
+        }
+
+        .start-button::after {
+          content: '';
+          position: absolute;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          background: linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.2) 50%, rgba(255,255,255,0) 100%);
+          animation: shine 3s infinite;
+          transform: translateX(-100%);
+        }
+
+        @keyframes shine {
+          100% {
+            transform: translateX(100%);
+          }
+        }
+
+        /* Ajustes responsivos adicionales */
+        @media (max-width: 640px) {
+          .step-circle {
+            width: 10px;
+            height: 10px;
+          }
+          
+          .steps-overview {
+            padding: 1rem;
+          }
+          
+          .login-box {
+            padding: 1rem;
+          }
+          
+          h2 {
+            font-size: 1.5rem;
+          }
+          
+          p, li, span {
+            font-size: 0.875rem;
+          }
+        }
+        
+        @media (max-width: 480px) {
+          .login-box {
+            margin: 0 1rem;
+          }
+          
+          .start-button {
+            padding: 0.75rem 1.25rem;
           }
         }
       `}</style>

@@ -17,6 +17,7 @@ import CryptoJS from "crypto-js";
 import anime from "animejs";
 import { useAuth } from "../../hooks/ContextAuth";
 import api from "../../utils/AxiosConfig";
+import axios from "axios";
 
 const Paso3 = ({ guardarCorreo }) => {
   const [formData, setFormData] = useState({
@@ -38,7 +39,7 @@ const Paso3 = ({ guardarCorreo }) => {
   const passwordStrengthBarRef = useRef(null);
 
   const {csrfToken} = useAuth() ;
-  const [isCompromised, setIsCompromised] = useState(null);
+  const [isCompromised, setIsCompromised] = useState(false);
 
   const BASE_URL = "http://localhost:3001";
 
@@ -56,7 +57,7 @@ const Paso3 = ({ guardarCorreo }) => {
     fetchUsuariosYCsrf();
   }, [csrfToken]);
 
-  // Animación del medidor de seguridad de la contraseña
+
   useEffect(() => {
     if (passwordStrengthBarRef.current) {
       anime({
@@ -103,11 +104,28 @@ const Paso3 = ({ guardarCorreo }) => {
       if (!/^\d{10}$/.test(value)) {
         error = "El teléfono debe tener 10 dígitos.";
       }
-    } else if (name === "contrasena") {
+    } 
+    else if (name === "contrasena") {
       if (!value) {
         error = "La contraseña es requerida.";
       } else if (value.length < 8) {
         error = "La contraseña debe tener al menos 8 caracteres.";
+      }
+      const missing = [];
+      if (!/(?=.*[a-z])/.test(value)) {
+        missing.push("una letra minúscula");
+      }
+      if (!/(?=.*[A-Z])/.test(value)) {
+        missing.push("una letra mayúscula");
+      }
+      if (!/(?=.*\d)/.test(value)) {
+        missing.push("un número");
+      }
+      if (!/(?=.*[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?])/.test(value)) {
+        missing.push("un carácter especial");
+      }
+      if (missing.length > 0) {
+        error = "La contraseña debe contener al menos " + missing.join(", ") + ".";
       }
       const passwordScore = zxcvbn(value).score;
       setPasswordStrengthScore(passwordScore);
@@ -121,31 +139,31 @@ const Paso3 = ({ guardarCorreo }) => {
 
   const checkPassword = async (password) => {
     try {
-      const hash = CryptoJS.SHA1(password).toString();
-      const prefix = hash.slice(0, 5);
-      const suffix = hash.slice(5);
-
-      const response = await api.get(
-        `https://api.pwnedpasswords.com/range/${prefix}`
-      );
-
-      const hashes = response.data.split("\n");
-      const isFound = hashes.some((line) => {
-        const [returnedHash] = line.split(":");
-        return returnedHash.toLowerCase() === suffix;
-      });
-
-      setIsCompromised(isFound);
-      return isFound;
+      
+      const sha1Hash = CryptoJS.SHA1(password).toString().toUpperCase();
+      
+      const prefix = sha1Hash.slice(0, 5);
+      const suffix = sha1Hash.slice(5);
+  
+      
+      const { data } = await axios.get(`https://api.pwnedpasswords.com/range/${prefix}`);
+  
+      const compromisedList = data.split("\r\n");
+  
+      
+      for (const line of compromisedList) {
+        const [returnedSuffix, count] = line.split(":");
+        if (returnedSuffix === suffix) {
+          return true;
+        }
+      }
+      return false;
     } catch (error) {
-      console.error(
-        "Error verificando la contraseña en Have I Been Pwned:",
-        error
-      );
-      setIsCompromised(false);
+      console.error("Error al verificar la contraseña en Have I Been Pwned:", error);
       return false;
     }
   };
+  
 
   const validateForm = () => {
     const newErrors = {};
@@ -165,7 +183,9 @@ const Paso3 = ({ guardarCorreo }) => {
     });
 
     if (name === "contrasena" && value) {
-      await checkPassword(value);
+      const compromised = await checkPassword(value);
+      setIsCompromised(compromised);
+    
     }
 
     if (touchedFields[name]) {
@@ -192,7 +212,10 @@ const Paso3 = ({ guardarCorreo }) => {
   };
 
   useEffect(() => {
-    setIsFormValid(validateForm());
+    (async () => {
+      const isValid = await validateForm();
+      setIsFormValid(isValid);
+    })();
   }, [formData, passwordStrengthScore]);
 
   //Registro en la base de datos
@@ -201,9 +224,9 @@ const Paso3 = ({ guardarCorreo }) => {
     e.preventDefault();
 
     if (validateForm()) {
-      const isPasswordCompromised = await checkPassword(formData.contrasena);
-      if (isPasswordCompromised) {
+      if (isCompromised) {
         setErrors({
+          ...errors,
           contrasena: "Esta contraseña ha sido comprometida. Elige otra.",
         });
         return;
@@ -463,7 +486,7 @@ const Paso3 = ({ guardarCorreo }) => {
               fontStyle: "italic",
             }}
           >
-            Error: utiliza otra contraseña
+            Error: Contraseña comprometida
           </Typography>
         )}
 
@@ -479,7 +502,7 @@ const Paso3 = ({ guardarCorreo }) => {
                   marginBottom: "8px",
                 }}
               >
-                La contraseña debe ser "fuerte" para poder registrarte.
+                La contraseña debe ser "Muy fuerte" para poder registrarte.
               </Typography>
             )}
             <Typography
@@ -531,7 +554,7 @@ const Paso3 = ({ guardarCorreo }) => {
           variant="contained"
           color="primary"
           fullWidth
-          disabled={!isFormValid}
+          disabled={!isFormValid && isCompromised}
            className=" dark:text-white [&_input]:dark:text-white [&_label]:dark:text-[#fcb900]"
           
         >

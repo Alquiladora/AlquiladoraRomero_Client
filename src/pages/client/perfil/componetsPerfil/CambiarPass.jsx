@@ -48,8 +48,8 @@ const ModalPassword = ({open, onClose, usuario}) => {
           case "cliente":
             ruta = "/cliente/cambiarPassword";
             break;
-          case "admin":
-            ruta = "/admin/cambiarPassword";
+          case "administrador":
+            ruta = "/administrador/cambiarPassword";
             break;
           case "repartidor":
             ruta = "/repartidor/cambiarPassword";

@@ -30,6 +30,7 @@
     "react-breadcrumbs-dynamic": "^1.2.1",
     "react-datepicker": "^8.0.0",
     "react-dom": "^18.0.0",
+    "react-feather": "^2.0.10",
     "react-google-recaptcha": "^3.1.0",
     "react-google-recaptcha-v3": "^1.10.1",
     "react-hot-toast": "^2.5.1",

@@ -1,4 +1,4 @@
-import React, { useState,useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import {
   HomeIcon,
   ClipboardListIcon,
@@ -20,15 +20,34 @@ import Logo from "../../../img/Logos/logo.jpg";
 import { Link } from "react-router-dom";
 import Chatbox from "../../chabox/Chabox";
 import { useAuth } from "../../../hooks/ContextAuth";
+import { toast } from "react-toastify";
+import api from "../../../utils/AxiosConfig";
+import Categoria from "../../categ/Categoria";
 
 const HeaderChil1 = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isCategoriesOpen, setIsCategoriesOpen] = useState(false);
   const [isChatboxOpen, setIsChatboxOpen] = useState(false);
-  const { user } = useAuth();
+  const { user, csrfToken } = useAuth();
+  const [categorias, setCategorias] = useState([]);
 
+  useEffect(() => {
+    fetchCategorias();
+  }, []);
 
-
+  const fetchCategorias = async () => {
+    try {
+      const response = await api.get("/api/productos/subcategorias", {
+        withCredentials: true,
+        headers: { "X-CSRF-Token": csrfToken },
+      });
+      setCategorias(response.data.subcategories);
+      console.log("categorias ", response.data.subcategories);
+    } catch (error) {
+      console.error("Error al obtener categorías:", error);
+      toast.error("Error al cargar categorías");
+    }
+  };
 
   return (
     <div className="shadow-md sticky top-0 z-50 bg-white dark:bg-gray-950 dark:text-white">
@@ -79,47 +98,34 @@ const HeaderChil1 = () => {
             </button>
 
             {isCategoriesOpen && (
-              <div className="absolute left-0 mt-2 bg-white text-gray-700 border rounded-md shadow-lg w-56 dark:bg-gray-950 dark:text-white">
+              <div className="absolute left-0 mt-2 bg-white border border-gray-200 rounded-lg shadow-lg w-56 dark:bg-gray-950 dark:border-gray-800 z-10 transition-all duration-300 ease-in-out transform opacity-100 scale-100">
                 <div className="p-4">
-                  <p className="font-bold text-gray-900 dark:text-white">
+                  <p className="font-bold text-gray-900 dark:text-white mb-3">
                     Categorías de productos
                   </p>
-                  <div className="text-sm mt-2">
-                    {/* Categoría de Sillas */}
-                    <Link
-                      to="/categorias/sillas"
-                      className="block py-1 hover:text-blue-600 flex items-center space-x-2 transition-all duration-300 ease-in-out hover:scale-105"
-                    >
-                      {/* <ChairIcon className="w-4 h-4" /> */}
-                      <span>Sillas</span>
-                    </Link>
-
-                    {/* Categoría de Mesas */}
-                    <Link
-                      to="/categoria/mesas"
-                      className="block py-1 hover:text-blue-600 flex items-center space-x-2 transition-all duration-300 ease-in-out hover:scale-105"
-                    >
-                      {/* <TableIcon className="w-4 h-4" /> */}
-                      <span>Mesas</span>
-                    </Link>
-
-                    {/* Categoría de Carpas */}
-                    <Link
-                      to="/categoria/carpas"
-                      className="block py-1 hover:text-blue-600 flex items-center space-x-2 transition-all duration-300 ease-in-out hover:scale-105"
-                    >
-                      {/* <TentIcon className="w-4 h-4" /> */}
-                      <span>Carpas</span>
-                    </Link>
-
-                    {/* Categoría de Otros productos */}
-                    <Link
-                      to="/categoria/otros"
-                      className="block py-1 hover:text-blue-600 flex items-center space-x-2 transition-all duration-300 ease-in-out hover:scale-105"
-                    >
-                      {/* <BoxIcon className="w-4 h-4" /> */}
-                      <span>Otros productos</span>
-                    </Link>
+                  <div className="text-sm space-y-2">
+                    {categorias && categorias.length > 0 ? (
+                      categorias.map((cat) => (
+                        <div key={cat.categoryName} className="mb-2">
+                          <Link
+                            to={
+                              user && user.rol === "cliente"
+                                ? `/cliente/categoria/${cat.categoryName}`
+                                : `/categoria/${cat.categoryName}`
+                            }
+                            className="block py-2 px-3 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-md transition-all duration-200 ease-in-out flex items-center space-x-2"
+                          >
+                            <span className="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400">
+                              {cat.categoryName}
+                            </span>
+                          </Link>
+                        </div>
+                      ))
+                    ) : (
+                      <p className="text-gray-500 dark:text-gray-400">
+                        Cargando categorías...
+                      </p>
+                    )}
                   </div>
                 </div>
               </div>
@@ -149,7 +155,6 @@ const HeaderChil1 = () => {
                 <IconoPerfil />
               ) : (
                 <></>
-               
               )
             ) : (
               <LoginLink />
@@ -160,7 +165,9 @@ const HeaderChil1 = () => {
 
           {/* Shopping Cart */}
           <Link
-            to="/cart"
+            to={
+              user && user.rol === "cliente" ? "/cliente/carrito" : "/carrito"
+            }
             className="relative group flex items-center font-semibold hover:text-blue-600"
           >
             <ShoppingCartIcon className="w-7 h-7" />

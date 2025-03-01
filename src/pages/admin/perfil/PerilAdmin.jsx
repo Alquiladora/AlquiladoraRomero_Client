@@ -12,7 +12,7 @@ import ComputerIcon from "@mui/icons-material/Computer";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 import { Toaster } from "react-hot-toast";
-import AddressBook from "./componetsPerfil/ListaDirecciones";
+import AddressBook from "../../client/perfil/componetsPerfil/ListaDirecciones";
 
 import "primereact/resources/themes/saga-blue/theme.css";
 import "primereact/resources/primereact.min.css";
@@ -20,10 +20,10 @@ import {
   validateName,
   validatePhone,
   validateFechaNacimiento,
-} from "./componetsPerfil/validaciones";
-import EditableInput from "./componetsPerfil/EditableInput";
-import CambiarContrasenaModal from "./componetsPerfil/CambiarPass";
-import MFAComponent from "./componetsPerfil/Mfa";
+} from "../../client/perfil/componetsPerfil/validaciones";
+import EditableInput from "../../client/perfil/componetsPerfil/EditableInput";
+import CambiarContrasenaModal from "../perfil/cambiarPass/ModalCambiarPass";
+import MFAComponent from "../../client/perfil/componetsPerfil/Mfa";
 import "primereact/resources/themes/saga-blue/theme.css";
 import "primereact/resources/primereact.min.css"
 import {
@@ -59,13 +59,13 @@ import { useAuth } from "../../../hooks/ContextAuth";
 import api from "../../../utils/AxiosConfig";
 import axios from "axios";
 
-const PerfilUsuarioPrime = () => {
-  // const [activeTab, setActiveTab] = useState(0);
+const PerfilAdmin = () => {
+
   const fileInputRef = useRef(null);
   const [uploading, setUploading] = useState(false);
   const [isMfaEnabled, setIsMfaEnabled] = useState(false);
   const [profileData, setProfileData] = useState([]);
-  //Constatnte s para actualizar el foto de perfil
+
   const [usuariosC, setUsuariosC] = useState([]);
   const [alert, setAlert] = useState(null);
   const [lastUpdated, setLastUpdated] = useState(null);
@@ -528,7 +528,7 @@ const PerfilUsuarioPrime = () => {
             <div className="h-32 bg-[#fcb900] relative dark:bg-gray-900">
               <div className="absolute top-4 right-4 bg-white/90 rounded-lg px-4 py-2 shadow-sm dark:bg-gray-700 dark:text-white">
                 <span className="text-blue-600 font-medium dark:text-blue-300">
-                  Cliente desde:{" "}
+                  Administrador desde:{" "}
                   {new Date(usuariosC.fechaCreacion).toLocaleString("es-ES", {
                     day: "2-digit",
                     month: "long",
@@ -581,8 +581,24 @@ const PerfilUsuarioPrime = () => {
 
                 {/* Resumen de Alquileres */}
                 <div className="w-full max-w-md mx-auto">
-                  <div className="grid grid-cols-2 gap-2 md:gap-4">
-                    <div className="bg-blue-50 p-3 md:p-4 rounded-xl shadow-sm text-center dark:bg-gray-700">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {/* Alquileres Activos */}
+                    <div className="bg-blue-50 p-4 rounded-xl shadow-sm text-center dark:bg-gray-700 transition transform hover:scale-105">
+                      <div className="flex justify-center mb-2">
+                        <svg
+                          className="w-6 h-6 text-blue-600 dark:text-blue-300"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M9 17v-5a2 2 0 012-2h2a2 2 0 012 2v5m-4 0h4m-4 0H7"
+                          />
+                        </svg>
+                      </div>
                       <div className="text-xs md:text-sm text-gray-600 dark:text-gray-300">
                         Alquileres Activos
                       </div>
@@ -590,12 +606,54 @@ const PerfilUsuarioPrime = () => {
                         2
                       </div>
                     </div>
-                    <div className="bg-green-50 p-3 md:p-4 rounded-xl shadow-sm text-center dark:bg-gray-700">
+
+                    {/* Completados */}
+                    <div className="bg-green-50 p-4 rounded-xl shadow-sm text-center dark:bg-gray-700 transition transform hover:scale-105">
+                      <div className="flex justify-center mb-2">
+                        <svg
+                          className="w-6 h-6 text-green-600 dark:text-green-300"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M5 13l4 4L19 7"
+                          />
+                        </svg>
+                      </div>
                       <div className="text-xs md:text-sm text-gray-600 dark:text-gray-300">
                         Completados
                       </div>
                       <div className="text-xl md:text-2xl font-bold text-green-600 dark:text-green-300">
                         15
+                      </div>
+                    </div>
+
+                    {/* Usuarios Registrados */}
+                    <div className="bg-purple-50 p-4 rounded-xl shadow-sm text-center dark:bg-gray-700 transition transform hover:scale-105">
+                      <div className="flex justify-center mb-2">
+                        <svg
+                          className="w-6 h-6 text-purple-600 dark:text-purple-300"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M17 20h5v-2a4 4 0 00-3-3.87M9 20H4v-2a4 4 0 013-3.87m8-4.13a4 4 0 11-8 0 4 4 0 018 0z"
+                          />
+                        </svg>
+                      </div>
+                      <div className="text-xs md:text-sm text-gray-600 dark:text-gray-300">
+                        Usuarios Registrados
+                      </div>
+                      <div className="text-xl md:text-2xl font-bold text-purple-600 dark:text-purple-300">
+                        120
                       </div>
                     </div>
                   </div>
@@ -609,15 +667,16 @@ const PerfilUsuarioPrime = () => {
               {[
                 { id: "personal", icon: User, label: "Datos Personales" },
                 { id: "Seguridad", icon: Shield, label: "Seguridad" },
-                { id: "direccion", icon: MapPin, label: "Dirección" },
+               
               ].map((tab) => (
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}
-                  className={`flex items-center space-x-2 px-3 py-2 rounded-lg transition-all whitespace-nowrap ${activeTab === tab.id
+                  className={`flex items-center space-x-2 px-3 py-2 rounded-lg transition-all whitespace-nowrap ${
+                    activeTab === tab.id
                       ? "bg-blue-600 text-white dark:bg-blue-700 dark:text-white"
                       : "text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700"
-                    }`}
+                  }`}
                 >
                   <tab.icon className="w-4 h-4 md:w-5 md:h-5" />
                   <span className="text-sm md:text-base">{tab.label}</span>
@@ -725,6 +784,8 @@ const PerfilUsuarioPrime = () => {
                     open={openModal}
                     onClose={handleCloseModal}
                     usuario={usuariosC}
+                     aria-labelledby="modal-modal-title"
+                     aria-describedby="modal-modal-description"
                   />
                   {/* 🔹 Cambiar Contraseña */}
                   <motion.div
@@ -735,9 +796,9 @@ const PerfilUsuarioPrime = () => {
                   >
                     {bloqueado && (
                       <div className="bg-red-100 border border-red-300 text-red-800 p-4 rounded-md mb-6 text-center">
-                        <strong>🚨 Atención:</strong> Límite de cambios alcanzado. Espera hasta el próximo mes.
+                        <strong>🚨 Atención:</strong> Límite de cambios
+                        alcanzado. Espera hasta el próximo mes.
                       </div>
-
                     )}
 
                     <h3 className="text-xl font-bold text-gray-800 dark:text-gray-100 mb-3 flex items-center space-x-2">
@@ -778,10 +839,11 @@ const PerfilUsuarioPrime = () => {
                     </p>
                     <button
                       onClick={handleOpenMfaModal}
-                      className={`px-4 py-2 w-full sm:w-auto rounded-lg transition-all ${activo
+                      className={`px-4 py-2 w-full sm:w-auto rounded-lg transition-all ${
+                        activo
                           ? "bg-red-600 hover:bg-red-700"
                           : "bg-blue-600 hover:bg-blue-700"
-                        } text-white`}
+                      } text-white`}
                     >
                       {activo ? "Desactivar MFA" : "Activar MFA"}
                     </button>
@@ -854,127 +916,71 @@ const PerfilUsuarioPrime = () => {
 
                   {sessions.filter((session) => !session.isCurrent).length >
                     0 && (
-                      <>
-                        <motion.h4
-                          className="text-xl font-semibold text-gray-800 dark:text-white mt-8 mb-4 text-center sm:text-left"
-                          initial={{ opacity: 0 }}
-                          animate={{ opacity: 1 }}
-                          transition={{ duration: 0.5 }}
-                        >
-                          🔄 Otras Sesiones Activas
-                        </motion.h4>
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                          {sessions
-                            .filter((session) => !session.isCurrent)
-                            .map((session, index) => (
-                              <motion.div
-                                key={`other-${index}`}
-                                className="flex items-center justify-between p-4 bg-gray-100 dark:bg-gray-800 
+                    <>
+                      <motion.h4
+                        className="text-xl font-semibold text-gray-800 dark:text-white mt-8 mb-4 text-center sm:text-left"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        transition={{ duration: 0.5 }}
+                      >
+                        🔄 Otras Sesiones Activas
+                      </motion.h4>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                        {sessions
+                          .filter((session) => !session.isCurrent)
+                          .map((session, index) => (
+                            <motion.div
+                              key={`other-${index}`}
+                              className="flex items-center justify-between p-4 bg-gray-100 dark:bg-gray-800 
                  rounded-lg shadow-md hover:shadow-lg transition-all overflow-hidden 
                  border border-gray-300 dark:border-gray-700"
-                                initial={{ opacity: 0, scale: 0.95 }}
-                                animate={{ opacity: 1, scale: 1 }}
-                                transition={{ duration: 0.3 }}
-                              >
-                                <div className="flex items-center space-x-3">
-                                  <div className="text-blue-600 dark:text-blue-300 text-3xl">
-                                    {getDeviceIcon(session.tipoDispositivo)}
-                                  </div>
-                                  <div>
-                                    <p className="text-lg font-semibold text-gray-900 dark:text-gray-100">
-                                      {session.tipoDispositivo}
-                                    </p>
-                                    <p className="text-sm text-gray-600 dark:text-gray-300 flex items-center space-x-2">
-                                      <span className="text-blue-500 dark:text-blue-300">
-                                        <i className="fas fa-calendar-alt"></i>{" "}
-                                      </span>
-                                      <span>
-                                        Fecha de inicio:{" "}
-                                        {formatDate(session.horaInicio)}
-                                      </span>
-                                    </p>
-                                  </div>
+                              initial={{ opacity: 0, scale: 0.95 }}
+                              animate={{ opacity: 1, scale: 1 }}
+                              transition={{ duration: 0.3 }}
+                            >
+                              <div className="flex items-center space-x-3">
+                                <div className="text-blue-600 dark:text-blue-300 text-3xl">
+                                  {getDeviceIcon(session.tipoDispositivo)}
                                 </div>
-                              </motion.div>
-                            ))}
-                        </div>
-                      </>
-                    )}
+                                <div>
+                                  <p className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+                                    {session.tipoDispositivo}
+                                  </p>
+                                  <p className="text-sm text-gray-600 dark:text-gray-300 flex items-center space-x-2">
+                                    <span className="text-blue-500 dark:text-blue-300">
+                                      <i className="fas fa-calendar-alt"></i>{" "}
+                                    </span>
+                                    <span>
+                                      Fecha de inicio:{" "}
+                                      {formatDate(session.horaInicio)}
+                                    </span>
+                                  </p>
+                                </div>
+                              </div>
+                            </motion.div>
+                          ))}
+                      </div>
+                    </>
+                  )}
 
                   {/* Botón para cerrar otras sesiones */}
                   {sessions.filter((session) => !session.isCurrent).length >
                     0 && (
-                      <motion.button
-                        onClick={closeAllSessions}
-                        className="mt-6 px-6 py-3 w-full sm:w-auto bg-red-600 text-white rounded-lg hover:bg-red-700 transition-all transform hover:scale-105 flex items-center justify-center space-x-2"
-                        whileHover={{ scale: 1.05 }}
-                        whileTap={{ scale: 0.95 }}
-                      >
-                        <LogOut className="w-5 h-5" />
-                        <span>Cerrar otras sesiones</span>
-                      </motion.button>
-                    )}
+                    <motion.button
+                      onClick={closeAllSessions}
+                      className="mt-6 px-6 py-3 w-full sm:w-auto bg-red-600 text-white rounded-lg hover:bg-red-700 transition-all transform hover:scale-105 flex items-center justify-center space-x-2"
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                    >
+                      <LogOut className="w-5 h-5" />
+                      <span>Cerrar otras sesiones</span>
+                    </motion.button>
+                  )}
                 </motion.div>
               </div>
             )}
 
-
-
-            {activeTab === "historial" && (
-              <div className="space-y-6">
-                <h3 className="text-lg md:text-xl font-semibold text-gray-800 mb-4 dark:text-white">
-                  Historial de Pedidos
-                </h3>
-                <div className="space-y-4">
-                  {[
-                    {
-                      producto: "Carpa 6x6m",
-                      cantidad: 1,
-                      fecha: "15/01/2024",
-                      total: "$1,200",
-                    },
-                    {
-                      producto: "Mesas Redondas",
-                      cantidad: 8,
-                      fecha: "10/01/2024",
-                      total: "$960",
-                    },
-                  ].map((historial, index) => (
-                    <div
-                      key={index}
-                      className="bg-gray-50 rounded-xl p-3 sm:p-4 shadow-sm dark:bg-gray-700"
-                    >
-                      <div className="flex flex-col sm:flex-row justify-between items-start gap-2 sm:gap-4">
-                        <div>
-                          <h4 className="text-sm md:text-base font-medium text-gray-800 dark:text-white">
-                            {historial.producto}
-                          </h4>
-                          <p className="text-xs md:text-sm text-gray-600 dark:text-gray-300">
-                            Cantidad: {historial.cantidad}
-                          </p>
-                        </div>
-                        <div className="text-right">
-                          <div className="text-xs md:text-sm text-gray-600 dark:text-gray-300">
-                            {historial.fecha}
-                          </div>
-                          <div className="text-sm md:text-base font-medium text-gray-800 dark:text-white">
-                            {historial.total}
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {activeTab === "direccion" && (
-              <div className="space-y-6">
-
-                <AddressBook />
-
-              </div>
-            )}
+          
           </div>
         </div>
       </div>
@@ -982,4 +988,4 @@ const PerfilUsuarioPrime = () => {
   );
 };
 
-export default PerfilUsuarioPrime;
+export default PerfilAdmin;
