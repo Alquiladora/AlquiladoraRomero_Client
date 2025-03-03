@@ -22,7 +22,7 @@ import {
   validateFechaNacimiento,
 } from "../../client/perfil/componetsPerfil/validaciones";
 import EditableInput from "../../client/perfil/componetsPerfil/EditableInput";
-import CambiarContrasenaModal from "../perfil/cambiarPass/ModalCambiarPass";
+import CambiarContrasenaModal from "../perfil/cambiarPass/Modal";
 import MFAComponent from "../../client/perfil/componetsPerfil/Mfa";
 import "primereact/resources/themes/saga-blue/theme.css";
 import "primereact/resources/primereact.min.css"
@@ -784,8 +784,7 @@ const PerfilAdmin = () => {
                     open={openModal}
                     onClose={handleCloseModal}
                     usuario={usuariosC}
-                     aria-labelledby="modal-modal-title"
-                     aria-describedby="modal-modal-description"
+                   
                   />
                   {/* 🔹 Cambiar Contraseña */}
                   <motion.div

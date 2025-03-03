@@ -142,7 +142,7 @@ export const TokenValidation = ({ correo, setStep }) => {
   return (
     <div className=" flex  items-center justify-center  dark:bg-gray-900 dark:text-white ">
       
-      <div className="relative bg-white rounded-lg shadow-lg p-6 text-center  dark:bg-gray-900 dark:text-white ">
+      <div className="relative   p-6 text-center  dark:bg-gray-900 dark:text-white ">
         
        
         <button

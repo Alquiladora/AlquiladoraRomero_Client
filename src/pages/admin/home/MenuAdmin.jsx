@@ -10,8 +10,18 @@ import api from "../../../utils/AxiosConfig";
 import SpinerCarga from "../../../utils/SpinerCarga"; 
 import PerfilAdmin from "../perfil/PerilAdmin";
 import Logo from '../../../img/Logos/logo.jpg'
-import CambiarPassword from '../../admin/perfil/cambiarPass/CambiarPassAdmin'
-
+import { useLocation, useNavigate } from "react-router-dom";
+import DasboardUsuarios from "../usuarios/usuariosSospechosos/DasboardUsuariso";
+import UsuariosSospechosos from "../usuarios/usuariosSospechosos/UsuariosSospechosos";
+import Auditoria from "../usuarios/usuariosSospechosos/AuditoriaLogin";
+import CrudEmpresa from "../datosEmpresa/gestiomEmpresa/GestiomEmpresa";
+import Politicas from "../datosEmpresa/politicas/Politicas";
+import HistorialPoliticas from "../datosEmpresa/politicas/HistorialPoliticas";
+import Terminos from "../datosEmpresa/terminos/Terminos";
+import HistorialTerminos from "../datosEmpresa/terminos/HistorialTerminos";
+import DeslindeLegal from "../datosEmpresa/dezlin/Deslin";
+import HistorialDeslindeLegal from "../datosEmpresa/dezlin/historialDeslin";
+import SobreNosotros from "../datosEmpresa/sobreNosotros/SobreNosotros";
 
 
 const MenuHomeAdmin = () => {
@@ -21,62 +31,71 @@ const MenuHomeAdmin = () => {
   const [loading, setLoading] = useState(true);
    const [usuariosC, setUsuariosC] = useState([]);
    const [isPageLoading, setIsPageLoading] = useState(true);
-  
+   const location = useLocation();
+   const navigate = useNavigate();
+   const [totalUsuarios, setTotalUsuarios]=useState([]);
+   const [fotoEmpresa, setFotoEmpresa]=useState('');
 
+
+   useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const tab = params.get("tab");
+    if (tab) {
+      setActiveTab(tab);
+    }
+  }, [location.search]);
+
+  
   useEffect(() => {
     if (activeTab === "Cerrar Sesión") {
       logout();
     }
   }, [activeTab, logout]);
 
-    useEffect(() => {
-     
-      if (user) {
-        fetchProfileData();
+
+    const fetchDataEnParalelo = async () => {
+      try {
+        setLoading(true);
+        const [perfilResponse, totalUsuariosResponse] = await Promise.all([
+          api.get("api/usuarios/perfil", {
+            withCredentials: true,
+            headers: { "X-CSRF-Token": csrfToken },
+          }),
+          api.get("api/usuarios/totalUsuarios", {
+            withCredentials: true,
+            headers: { "X-CSRF-Token": csrfToken },
+          }),
+        ]);
+        setUsuariosC(perfilResponse.data.user);
+        setTotalUsuarios(totalUsuariosResponse.data[0]?.totalUsuarios ?? 0);
+
+        setLoading(false);
+      } catch (error) {
+        setLoading(false);
+        console.error("❌ Error al obtener datos:", error);
       }
-      return () => {
-        
-      };
-    }, [user]);
+    };
 
 
-
-const fetchProfileData = async () => {
-    try {
-      setLoading(true);
-      const response = await api.get("api/usuarios/perfil", {
-        withCredentials: true,
-        headers: { "X-CSRF-Token": csrfToken },
-      });
-      setUsuariosC(response.data.user);
-      setLoading(false);
-      console.log("✅ Datos de usuario obtenidos:", response.data.user);
-    } catch (error) {
-      setLoading(false);
-      console.error("❌ Error al obtener los datos del perfil:", error);
-    }
-  };
-
-
-  const handlePasswordChangeComplete = () => {
-    setActiveTab("Perfil");
+  const handleNavigate = (tabName) => {
+    setActiveTab(tabName);
   };
 
   useEffect(() => {  
     if (user) {
-      fetchProfileData().finally(() => setIsPageLoading(false));
+      fetchDataEnParalelo().finally(() => setIsPageLoading(false));
     } else {
       setIsPageLoading(false);
     }
   }, [user]);
-  
+
 
 
 
   const navItems = [
     { icon: "🏠", label: "Inicio" },
-    { icon: "👥", label: "Usuarios", count: 23 },
-    { icon: "⚠️", label: "Usuarios Sospechosos", count: 5 },
+    { icon: "👥", label: "Usuarios",  count: totalUsuarios },
+    { icon: "⚙️", label: "Dasboard Usuarios" },
     { icon: "🏢", label: "Datos de la Empresa" },
     { icon: "🛒", label: "Productos" },
     { icon: "📦", label: "Inventario" },
@@ -85,37 +104,57 @@ const fetchProfileData = async () => {
     { icon: "🏬", label: "Bodegas" },
     { icon: "🚨", label: "Errores de Sistema", count: 3 },
     { icon: "🚪", label: "Cerrar Sesión" },
+   
   ];
+  
 
   const renderContent = () => {
     switch (activeTab) {
       case "Inicio":
-        return <HomeAdmin />;
+        return <HomeAdmin totalUsuarios={totalUsuarios} onNavigate={handleNavigate} />;
       case "Perfil":
-          return <PerfilAdmin/>;
+        return <PerfilAdmin />;
       case "Usuarios":
         return <Usuarios />;
       case "Productos":
         return <ProductTable />;
       case "Inventario":
-        case "Cambiar Contraseña":
-         
-          return (
-            <CambiarPassword onComplete={handlePasswordChangeComplete} />
-          );
         return <Inventory />;
+      case "Usuarios Sospechosos":
+        return < UsuariosSospechosos />;
       case "Datos de la Empresa":
-        return <DashboardModulosEmpresa />;
-        case "Datos de la Empresa":
-        return <DashboardModulosEmpresa />;
+        return <DashboardModulosEmpresa onNavigate={handleNavigate} />;
+      case "Dasboard Usuarios":
+        return <DasboardUsuarios onNavigate={handleNavigate} />;
+      case "Auditoría de Sesiones":
+        return <Auditoria></Auditoria>
+        case "Perfilempresa":
+
+
+        return <CrudEmpresa  setFotoEmpresa={ setFotoEmpresa}/>
+        case "Sobre Nosotros":
+          return <SobreNosotros  />
+
+        case "Politicas":
+          return <Politicas  onNavigate={handleNavigate} />
+          case "Terminos":
+            return <Terminos  onNavigate={handleNavigate} />
+            case "Deslin":
+          return <DeslindeLegal  onNavigate={handleNavigate} />
+          case "historialPoliticas":
+          return <HistorialPoliticas  onNavigate={handleNavigate}/>
+          case "historialTerminos":
+            return <HistorialTerminos onNavigate={handleNavigate}/>
+            case "historialDeslinde":
+              return <HistorialDeslindeLegal onNavigate={handleNavigate}/>
       case "Cerrar Sesión":
         return <div>Cerrando sesión...</div>;
       default:
         return null;
     }
   };
-
-
+ 
+  
 
   if (isPageLoading) {
     return (
@@ -226,7 +265,7 @@ const fetchProfileData = async () => {
               </svg>
             </button>
             <img
-              src={Logo}
+              src={fotoEmpresa || Logo}
               alt="Logo"
               className="h-8 w-8 sm:h-10 sm:w-10 object-contain ml-4 rounded-full hover:scale-105 transition-transform duration-200"
             />

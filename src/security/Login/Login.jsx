@@ -114,7 +114,6 @@ export const Login = () => {
     dispositivo,
     detalles
   ) => {
-    const fecha_hora = new Date().toISOString();
     const ip = await obtenerIPUsuario();
 
     try {
@@ -126,7 +125,6 @@ export const Login = () => {
           accion,
           dispositivo,
           ip,
-          fecha_hora,
           detalles,
         },
         {

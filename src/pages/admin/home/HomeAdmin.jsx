@@ -1,8 +1,32 @@
- 
- const HomeAdmin=()=>{
+import React, { useEffect, useRef, useState } from "react";
 
+
+
+const HomeAdmin = ({ totalUsuarios, onNavigate }) => {
+
+  const prevTotalRef = useRef(totalUsuarios);
+  const [percentageChange, setPercentageChange] = useState("0%");
+
+  useEffect(() => {
+    const prevTotal = prevTotalRef.current;
+    if (prevTotal > 0) {
+      const difference = totalUsuarios - prevTotal; 
+      const percent = (difference / prevTotal) * 100;
+      setPercentageChange(`${percent.toFixed(2)}%`);
+    }
+    prevTotalRef.current = totalUsuarios;
+  }, [totalUsuarios]);
+
+
+  
     const stats = [
-        { title: "Total Usuarios", value: "2,543", increase: "+12%", icon: "👥" },
+      {
+        title: "Total Usuarios",
+        value: totalUsuarios, 
+        increase: percentageChange,
+        icon: "👥",
+        tabToNavigate: "Usuarios",
+      },
         { title: "Rentas Activas", value: "1,123", increase: "+8%", icon: "📦" },
         {
           title: "Ingresos Mensuales",
@@ -36,6 +60,11 @@
                 <div
                   key={index}
                   className="bg-white rounded-xl shadow-sm p-6 hover:shadow-md transition-shadow duration-200"
+                  onClick={() => {
+                    if (stat.tabToNavigate) {
+                      onNavigate(stat.tabToNavigate);
+                    }
+                  }}
                 >
                   <div className="flex items-center justify-between mb-4">
                     <span className="text-2xl">{stat.icon}</span>

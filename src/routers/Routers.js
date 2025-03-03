@@ -37,7 +37,9 @@ import DetalleProducto from '../components/productosCategoria/productosDetalles'
 
 //-------------------ADMIN------------------------
 import MenuHomeAdmin from '../pages/admin/home/MenuAdmin';
-import TokenModalAdmin from '../pages/admin/perfil/cambiarPass/ModalCambiarPass';
+
+
+
 
 
 
@@ -86,8 +88,9 @@ const Routerss = () => {
 
           {/**=====================ADMINISTRADOR============================= */}
           <Route path="/administrador" element={<RoutePrivate rolesPermitidos={['administrador']}> <LayoutHeader><MenuHomeAdmin  /></LayoutHeader></RoutePrivate>} />
-          <Route path="/administrador/cambiarPassword" element={<RoutePrivate rolesPermitidos={['administrador']}><LayoutHeader><TokenModalAdmin /></LayoutHeader></RoutePrivate>} />
-          <Route path="/administrador/updatePass" element={<RoutePrivate rolesPermitidos={['administrador']}><LayoutHeader><TokenModalAdmin /></LayoutHeader></RoutePrivate>} />
+          <Route path="/administrador/cambiarPassword" element={<RoutePrivate rolesPermitidos={['administrador']}> <LayoutHeader><TokenModal /></LayoutHeader></RoutePrivate>} />
+          <Route path="/administrador/updatePass" element={<RoutePrivate rolesPermitidos={['administrador']}> <LayoutHeader><ChangePassword /></LayoutHeader></RoutePrivate>} />
+       
 
 
 

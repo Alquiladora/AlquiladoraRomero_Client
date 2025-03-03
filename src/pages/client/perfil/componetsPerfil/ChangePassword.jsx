@@ -196,7 +196,7 @@ export default function ChangePassword() {
               navigate("/cliente/perfil");
               break;
             case "administrador":
-              navigate("/administrador/perfil");
+              navigate("/administrador?tab=Perfil");
               break;
             case "repartidor":
               navigate("/repartidor/perfil");
