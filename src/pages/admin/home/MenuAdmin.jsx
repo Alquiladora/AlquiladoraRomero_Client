@@ -123,14 +123,12 @@ const MenuHomeAdmin = () => {
       case "Usuarios Sospechosos":
         return < UsuariosSospechosos />;
       case "Datos de la Empresa":
-        return <DashboardModulosEmpresa onNavigate={handleNavigate} />;
+        return <DashboardModulosEmpresa onNavigate={handleNavigate} fotoEmpresa={fotoEmpresa} />;
       case "Dasboard Usuarios":
         return <DasboardUsuarios onNavigate={handleNavigate} />;
       case "Auditoría de Sesiones":
         return <Auditoria></Auditoria>
         case "Perfilempresa":
-
-
         return <CrudEmpresa  setFotoEmpresa={ setFotoEmpresa}/>
         case "Sobre Nosotros":
           return <SobreNosotros  />

@@ -25,6 +25,7 @@ function ProductTable() {
     const [imagenesEliminar, setImagenesEliminar] = useState([]);
     const [uploadError, setUploadError] = useState("");
     const [nuevasImagenes, setNuevasImagenes] = useState([]);
+    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         fetchProductos();
@@ -90,6 +91,13 @@ function ProductTable() {
             toast.error("Error al cargar bodegas");
         }
     };
+
+    useEffect(() => {
+        if (products.length || subcategorias.length || bodegas.length) {
+          setLoading(false);
+        }
+      }, [products, subcategorias, bodegas]);
+
 
     // ===================== SUBIDA DE IMAGEN =====================
     const handleFileChange = (e) => {
@@ -402,6 +410,16 @@ function ProductTable() {
             : true;
         return matchSearch && matchCategory;
     });
+
+
+    if (loading) {
+        return (
+          <div className="flex flex-col items-center justify-center h-screen bg-gray-50 dark:bg-gray-900">
+            <div className="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+            <p className="mt-4 text-xl text-gray-700 dark:text-gray-200">Cargando...</p>
+          </div>
+        );
+      }
 
     return (
         <div className="p-4">
