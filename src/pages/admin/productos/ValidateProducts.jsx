@@ -1,4 +1,4 @@
-const REGEX_NOMBRE = /^[A-Za-zÁÉÍÓÚáéíóúñÑ\s]+$/;
+const REGEX_NOMBRE = /^[A-Za-zÁÉÍÓÚáéíóúñÑ\s][A-Za-zÁÉÍÓÚáéíóúñÑ0-9\s]*$/;
 const REGEX_MATERIAL = /^[A-Za-z0-9ÁÉÍÓÚáéíóúñÑ\s\-/]+$/;
 
 export function validateProduct(product, totalImagesCount) {
@@ -35,11 +35,6 @@ export function validateProduct(product, totalImagesCount) {
   // Validar subcategoría
   if (!product.idSubcategoria) {
     errors.idSubcategoria = "Selecciona una subcategoría.";
-  }
-
-  // Validar bodega
-  if (!product.idBodega) {
-    errors.idBodega = "Selecciona una bodega.";
   }
 
   // Validar color

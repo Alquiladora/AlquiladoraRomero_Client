@@ -30,7 +30,7 @@ const LayoutHeader = ({ children }) => {
   return (
     <>
       {encabezado}
-      <div className="p-4">
+      <div className="p-1">
         {!ocultarBreadcrumbsPaths.has(path) && <Breadcrumbs />}
         {children}
       </div>

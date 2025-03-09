@@ -24,16 +24,16 @@ const Usuarios = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
 
-  // Estados para el manejo del modal de detalles de sesiones
+  
   const [openDialog, setOpenDialog] = useState(false);
   const [selectedUserSessions, setSelectedUserSessions] = useState([]);
   const [selectedUserName, setSelectedUserName] = useState("");
 
-  // Estados para filtros de búsqueda
+
   const [searchTerm, setSearchTerm] = useState("");
   const [filterMonth, setFilterMonth] = useState("all");
 
-  // Obtener usuarios al cargar el componente
+
   useEffect(() => {
     fetchUsuarios();
   }, []);
@@ -78,7 +78,7 @@ const Usuarios = () => {
     setSelectedUserName("");
   };
 
-  // Filtrar usuarios por rol
+
   const administradores = usuarios.filter(
     (usuario) => usuario.rol === "administrador"
   );

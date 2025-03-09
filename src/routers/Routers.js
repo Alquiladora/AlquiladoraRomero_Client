@@ -45,8 +45,7 @@ import MenuHomeAdmin from '../pages/admin/home/MenuAdmin';
 
 
 const Routerss = () => {
-  const { isServerOnline } = useContext(ServerStatusContext);
-  const navigate = useNavigate();
+ 
 
 
 

@@ -45,7 +45,6 @@ const HeaderChil1 = () => {
       console.log("categorias ", response.data.subcategories);
     } catch (error) {
       console.error("Error al obtener categorías:", error);
-      toast.error("Error al cargar categorías");
     }
   };
 

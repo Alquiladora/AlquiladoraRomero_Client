@@ -6,9 +6,9 @@ import { FooterDatos } from "./FooterDatos";
 
 const Footer = () => {
   return (
-    <div className="flex flex-col min-h-screen"> {/* Se asegura de que la página ocupe toda la altura */}
-      <div className="flex-grow"> {/* Esto hace que el contenido principal ocupe el espacio disponible */}
-        {/* Aquí puedes agregar más contenido si es necesario */}
+    <div className="flex flex-col min-h-screen"> 
+      <div className="flex-grow">
+       
       </div>
       
       <footer className="px-6 dark:bg-gray-950 dark:text-white py-0">

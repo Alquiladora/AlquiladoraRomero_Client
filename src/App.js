@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import Routerss from "./routers/Routers";
 import { GoogleReCaptchaProvider } from "react-google-recaptcha-v3";
 import SpinerCarga from "./utils/SpinerCarga";
-import { ServerStatusProvider } from './utils/ServerStatusContext';
+
 import { ToastContainer } from "react-toastify";
 
 
@@ -22,7 +22,7 @@ function App() {
   return (
     <div className="dark:bg-gray-800 dark:text-white">
     
-        <ServerStatusProvider>
+     
       {cargando ? (
         <SpinerCarga />
       ) : (
@@ -43,7 +43,7 @@ function App() {
 
         </GoogleReCaptchaProvider>
       )}
-    </ServerStatusProvider>
+    
     </div>
     
   );

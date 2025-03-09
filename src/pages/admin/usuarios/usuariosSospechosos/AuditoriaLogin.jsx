@@ -13,56 +13,72 @@ import { useAuth } from "../../../../hooks/ContextAuth";
 
 const Auditoria = () => {
   const [auditorias, setAuditorias] = useState([]);
-  const [filteredAuditorias, setFilteredAuditorias] = useState([]);
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+
   const [selectedMonth, setSelectedMonth] = useState("");
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
+
   const [loading, setLoading] = useState(false);
-  const { user, logout, csrfToken } = useAuth();
+
+  const { csrfToken } = useAuth();
+
+
+  const currentYear = new Date().getFullYear();
+  const years = [];
+  for (let y = 2024; y <= currentYear; y++) {
+    years.push(y);
+  }
+
+  const fetchAuditorias = async (pageNumber = 1, month = "", year = "") => {
+    setLoading(true);
+    try { 
+      const limit = 10;
+      const params = {
+        page: pageNumber,
+        limit,
+      };
+      if (year) params.year = year;
+      if (month !== "") params.month = month;
+      const response = await api.get("/api/auditoria/auditoria/lista", {
+        params,
+        withCredentials: true,
+        headers: { "X-CSRF-Token": csrfToken },
+      });
+      setAuditorias(response.data.data);
+      setTotalPages(response.data.totalPages);
+      setPage(response.data.currentPage);
+    } catch (error) {
+      console.error("Error al obtener registros de auditoría:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
 
   useEffect(() => {
-    const fetchAuditorias = async () => {
-      setLoading(true);
-      try {
-        const response = await api.get("/api/auditoria/auditoria/lista", 
-          {
-            withCredentials: true,
-            headers: { "X-CSRF-Token": csrfToken },
-          }
-        );
-        setAuditorias(response.data);
-        setFilteredAuditorias(response.data);
-      } catch (error) {
-        console.error("Error al obtener registros de auditoría:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchAuditorias();
+    fetchAuditorias(1, selectedMonth, selectedYear);
+   
   }, [csrfToken]);
 
-  const handleMonthChange = (event) => {
-    setSelectedMonth(event.target.value);
-    filterAuditorias(event.target.value, selectedYear);
+  useEffect(() => {
+    fetchAuditorias(1, selectedMonth, selectedYear);
+
+  }, [selectedMonth, selectedYear]);
+
+ 
+  const handlePreviousPage = () => {
+    if (page > 1) {
+      fetchAuditorias(page - 1, selectedMonth, selectedYear);
+    }
   };
 
-  const handleYearChange = (event) => {
-    setSelectedYear(event.target.value);
-    filterAuditorias(selectedMonth, event.target.value);
+  const handleNextPage = () => {
+    if (page < totalPages) {
+      fetchAuditorias(page + 1, selectedMonth, selectedYear);
+    }
   };
 
-  const filterAuditorias = (month, year) => {
-    const filtered = auditorias.filter((auditoria) => {
-      const auditDate = new Date(auditoria.fecha_hora);
-      const auditMonth = auditDate.getMonth();
-      const auditYear = auditDate.getFullYear();
-      return (
-        (month === "" || auditMonth === parseInt(month, 10)) &&
-        auditYear === parseInt(year, 10)
-      );
-    });
-    setFilteredAuditorias(filtered);
-  };
 
   const getChipProps = (accion) => {
     const act = accion.toLowerCase();
@@ -77,22 +93,17 @@ const Auditoria = () => {
     }
   };
 
-  const years = [];
-  for (let i = 2024; i <= new Date().getFullYear(); i++) {
-    years.push(i);
-  }
-
   return (
     <div className="p-4 max-w-3xl mx-auto dark:bg-gray-900 dark:text-gray-100">
       <h1 className="text-3xl font-bold text-center mb-6">Registro de Auditoría</h1>
 
-      {/* Filtros */}
+    
       <div className="flex flex-col sm:flex-row justify-center gap-4 mb-6">
         <div className="flex flex-col">
           <label className="mb-1 font-semibold">Filtrar por mes</label>
           <select
             value={selectedMonth}
-            onChange={handleMonthChange}
+            onChange={(e) => setSelectedMonth(e.target.value)}
             className="p-2 border rounded dark:bg-gray-800 dark:border-gray-700"
           >
             <option value="">Todos los meses</option>
@@ -109,7 +120,7 @@ const Auditoria = () => {
           <label className="mb-1 font-semibold">Filtrar por año</label>
           <select
             value={selectedYear}
-            onChange={handleYearChange}
+            onChange={(e) => setSelectedYear(e.target.value)}
             className="p-2 border rounded dark:bg-gray-800 dark:border-gray-700"
           >
             {years.map((year) => (
@@ -121,11 +132,11 @@ const Auditoria = () => {
         </div>
       </div>
 
-      {/* Spinner de carga */}
+      
       {loading ? (
         <div className="flex justify-center items-center h-64">
           <div className="flex flex-col items-center">
-            {/* Spinner con animación de fade in/out */}
+         
             <div className="w-16 h-16 border-4 border-yellow-500 border-t-transparent rounded-full animate-spin"></div>
             <p className="mt-4 text-sm text-gray-700 dark:text-gray-300">
               Cargando auditoría...
@@ -134,7 +145,7 @@ const Auditoria = () => {
         </div>
       ) : (
         <div className="max-h-[70vh] overflow-auto p-4 bg-gray-50 dark:bg-gray-800 rounded shadow">
-          {filteredAuditorias.length === 0 ? (
+          {auditorias.length === 0 ? (
             <div className="text-center p-4">
               <div className="bg-blue-100 text-blue-800 p-2 rounded">
                 No hay registros de auditoría para el filtro seleccionado.
@@ -142,7 +153,7 @@ const Auditoria = () => {
             </div>
           ) : (
             <ul className="space-y-4">
-              {filteredAuditorias.map((auditoria) => (
+              {auditorias.map((auditoria) => (
                 <li
                   key={auditoria.id}
                   className="p-4 bg-white dark:bg-gray-700 rounded shadow hover:shadow-lg transition transform hover:scale-105"
@@ -164,6 +175,7 @@ const Auditoria = () => {
                       </p>
                     </div>
                   </div>
+                 
                   <div className="flex flex-wrap gap-2 items-center">
                     {(() => {
                       const chipProps = getChipProps(auditoria.accion);
@@ -176,6 +188,7 @@ const Auditoria = () => {
                         </span>
                       );
                     })()}
+
                     <span className="inline-block px-3 py-1 text-xs font-semibold text-gray-800 bg-gray-200 rounded-full flex items-center">
                       <FaClock className="mr-1" />{" "}
                       {new Date(auditoria.fecha_hora).toLocaleString("es-MX", {
@@ -197,6 +210,24 @@ const Auditoria = () => {
           )}
         </div>
       )}
+
+      <div className="flex justify-center items-center mt-4 space-x-4">
+        <button
+          onClick={handlePreviousPage}
+          disabled={page <= 1}
+          className="px-3 py-1 bg-yellow-500 text-white rounded disabled:opacity-50"
+        >
+          Anterior
+        </button>
+        <span>Página {page} de {totalPages}</span>
+        <button
+          onClick={handleNextPage}
+          disabled={page >= totalPages}
+          className="px-3 py-1 bg-yellow-500 text-white rounded disabled:opacity-50"
+        >
+          Siguiente
+        </button>
+      </div>
     </div>
   );
 };

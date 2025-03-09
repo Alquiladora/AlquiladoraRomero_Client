@@ -171,6 +171,7 @@ import React, {
 import SpinerCarga from "../utils/SpinerCarga";
 import { useNavigate } from "react-router-dom";
 import api from "../utils/AxiosConfig";
+import { useSocket } from "../utils/Socket";
 
 const AuthContext = createContext();
 
@@ -181,6 +182,7 @@ export const AuthProvider = ({ children }) => {
   const [error, setError] = useState(null);
   const navigate = useNavigate();
   const isMounted = useRef(true);
+  const socket = useSocket();
 
   const fetchCsrfToken = async () => {
     if (csrfToken) return;
@@ -219,7 +221,7 @@ export const AuthProvider = ({ children }) => {
         } else if (error.response.status === 401 || error.response.status === 403) {
       
           console.warn("⚠️ Usuario no autenticado (401/403). Sesión expirada o inválida, pero no forzamos logout.");
-          setUser(null);  // <- Comentado para no cerrar sesión automáticamente
+          setUser(null); 
         } else {
           setError(
             error.response?.data?.message ||
@@ -277,27 +279,33 @@ export const AuthProvider = ({ children }) => {
     };
   }, [csrfToken]);
 
-  // Verificación periódica de la autenticación cada 30s
-  useEffect(() => {
-    if (user) {
-      const intervalId = setInterval(() => {
-        checkAuth();
-      }, 30000);
-      return () => clearInterval(intervalId);
-    }
-  }, [user, csrfToken]);
 
+  useEffect(() => {
+    if (!socket) return;
+    
+    socket.on("sessionExpired", (data) => {
+      console.warn("Evento 'sessionExpired' recibido:", data);
+      setUser(null);
+      navigate("/login");
+    });
+   
+    socket.on("actualizacionPerfil", () => {
+      console.log("Evento 'actualizacionPerfil' recibido. Verificando autenticación...");
+      checkAuth();
+    });
+    return () => {
+      socket.off("sessionExpired");
+      socket.off("actualizacionPerfil");
+    };
+  }, [socket, csrfToken, navigate]);
+  
   if (isLoading) return <SpinerCarga />;
 
   return (
     <AuthContext.Provider
       value={{ user, setUser, isLoading, checkAuth, logout, csrfToken, error }}
     >
-      {error && (
-        <div className="border border-red-400 text-red-700 px-4 py-3 rounded dark:bg-gray-900 relative mb-4">
-          <span className="block sm:inline">{error}</span>
-        </div>
-      )}
+      
       {children}
     </AuthContext.Provider>
   );
