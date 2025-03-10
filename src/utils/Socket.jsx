@@ -1,20 +1,24 @@
+// src/utils/useSocket.js
+import { useEffect, useState } from "react";
+import { io } from "socket.io-client";
 
-import { useEffect, useMemo } from 'react';
-import io from 'socket.io-client';
-import api from './AxiosConfig';
 
-const SOCKET_SERVER_URL =  'http://localhost:3001';
+const SOCKET_SERVER_URL = process.env.REACT_APP_SOCKET_SERVER_URL || "http://localhost:3001";
+
 export const useSocket = () => {
-    const socket = useMemo(() => io(SOCKET_SERVER_URL, {
+  const [socket, setSocket] = useState(null);
+
+  useEffect(() => {
+    const socketIo = io(SOCKET_SERVER_URL, {
       withCredentials: true,
-    
-    }), []);
-  
-    useEffect(() => {
-      return () => {
-        socket.disconnect();
-      };
-    }, [socket]);
-  
-    return socket;
-  };
+    });
+
+    setSocket(socketIo);
+
+    return () => {
+      socketIo.disconnect();
+    };
+  }, []);
+
+  return socket;
+};

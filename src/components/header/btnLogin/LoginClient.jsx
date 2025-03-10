@@ -16,7 +16,6 @@ import axios from "axios";
 import { useAuth } from "../../../hooks/ContextAuth";
 import { UserIcon } from "@heroicons/react/outline";
 
-const BASE_URL = "http://localhost:3001";
 
 
 const LoginLink = () => (
@@ -49,7 +48,6 @@ const IconoPerfil = () => {
 
         if (isMounted.current) {
           setFoto(user.fotoPerfil || "");
-          // 🔹 Llamamos a `controls.start()` dentro de useEffect
           controls.start({ opacity: 1, scale: 1 });
         }
       } catch (error) {

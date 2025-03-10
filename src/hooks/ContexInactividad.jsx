@@ -59,7 +59,7 @@ const InactivityHandler = ({ children }) => {
 
   const resetTimer = () => {
     if (!user || isLoading) return;
-    console.log("🔄 Usuario activo: Reiniciando temporizador.");
+ 
     reset();
     Swal.close()
   };

@@ -1,282 +1,644 @@
-import React, { useEffect, useState } from 'react';
+// WizardAlquiler.jsx
+import React, { useState, useEffect } from "react";
+import axios from "axios";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import {
+  faTimes,
+  faAddressCard,
+  faLocationArrow,
+  faHome,
+  faClipboardCheck,
+  faSpinner,
+  faUser,
+} from "@fortawesome/free-solid-svg-icons";
+import { toast } from "react-toastify";
 
-function PedidosManuales() {
-  // Estado para almacenar la lista de pedidos
-  const [pedidos, setPedidos] = useState([]);
-  // Estado para manejar el formulario (crear/editar)
-  const [formData, setFormData] = useState({
-    idPedido: '',
-    nombreCliente: '',
-    metodoPago: '',
-    estado: '',
-    fechaRegistro: ''
-  });
-  // Estado para indicar si estamos editando (true) o agregando (false)
-  const [isEditing, setIsEditing] = useState(false);
+// Importamos nuestros 4 pasos
+import StepOne from "./StepOne";
+import StepTwo from "./StepTwo";
+import StepThree from "./StepThree";
+import StepFour from "./StepFour";
 
-  // ==================================================
-  // 1. OBTENER LISTA DE PEDIDOS (READ)
-  // ==================================================
-  const getPedidos = () => {
-    fetch('/api/pedidosmanuales')
-      .then((res) => res.json())
-      .then((data) => {
-        setPedidos(data);
-      })
-      .catch((error) => {
-        console.error('Error al obtener los pedidos manuales:', error);
-      });
-  };
+const DATOS_CLIENTE_SIMULADO = {
+  email: "cliente@ejemplo.com",
+  nombre: "Carlos",
+  apellido: "Rodríguez",
+  telefono: "1234567890",
+  direcciones: [
+    {
+      idDir: 1,
+      alias: "Casa Principal",
+      calle: "Avenida Principal #789",
+      cp: "43000",
+      estado: "Hidalgo",
+      municipio: "Huejutla de Reyes",
+      localidad: "Huejutla Centro",
+    },
+    {
+      idDir: 2,
+      alias: "Oficina",
+      calle: "Calle Secundaria #101",
+      cp: "43010",
+      estado: "Hidalgo",
+      municipio: "Huejutla de Reyes",
+      localidad: "Colonia Industrial",
+    },
+  ],
+};
 
+function WizardAlquiler() {
+  // --------------------------------------------
+  // Manejo general del Wizard
+  // --------------------------------------------
+  const [showWizard, setShowWizard] = useState(false);
+  const [currentStep, setCurrentStep] = useState(1);
+  const totalSteps = 4;
+
+  // --------------------------------------------
+  // Estados del formulario (Paso 1)
+  // --------------------------------------------
+  const [nombre, setNombre] = useState("");
+  const [apellido, setApellido] = useState("");
+  const [telefono, setTelefono] = useState("");
+  const [correo, setCorreo] = useState("");
+
+  // Manejo submodal correo
+  const [showSubmodalCorreo, setShowSubmodalCorreo] = useState(false);
+  const [emailParaVerificar, setEmailParaVerificar] = useState("");
+  const [cargandoVerificacion, setCargandoVerificacion] = useState(false);
+  const [esClienteExistente, setEsClienteExistente] = useState(false);
+
+  // Direcciones si es cliente
+  const [direccionesCliente, setDireccionesCliente] = useState([]);
+  const [selectedDireccionId, setSelectedDireccionId] = useState(null);
+
+  // --------------------------------------------
+  // Paso 2: Ubicación (si no es cliente)
+  // --------------------------------------------
+  const [codigoPostal, setCodigoPostal] = useState("");
+  const [direccion, setDireccion] = useState("");
+
+  const [estadosData, setEstadosData] = useState([]);
+  const [municipiosData, setMunicipiosData] = useState([]);
+  const [localidadesData, setLocalidadesData] = useState([]);
+
+  const [pais, setPais] = useState("");
+  const [estado, setEstado] = useState("");
+  const [municipio, setMunicipio] = useState("");
+  const [localidad, setLocalidad] = useState("");
+
+  const [localidadesDisponibles, setLocalidadesDisponibles] = useState([]);
+  const [cargandoCP, setCargandoCP] = useState(false);
+  const [cpValido, setCpValido] = useState(false);
+  const [modoLocalidad, setModoLocalidad] = useState("seleccionar");
+
+  // --------------------------------------------
+  // Paso 3: Productos
+  // --------------------------------------------
+  const [producto, setProducto] = useState("");
+  const [fechaInicio, setFechaInicio] = useState("");
+  const [fechaEntrega, setFechaEntrega] = useState("");
+  const [horaAlquiler, setHoraAlquiler] = useState("");
+
+  const [stock, setStock] = useState("");
+  const [precio, setPrecio] = useState("");
+  const [subPrecio, setSubPrecio] = useState("");
+  const [formaPago, setFormaPago] = useState("");
+  const [detallesPago, setDetallesPago] = useState("");
+
+  // Unidades a rentar en el producto principal
+  const [unitsToRent, setUnitsToRent] = useState("");
+
+  // Productos adicionales
+  const [productosAdicionales, setProductosAdicionales] = useState([]);
+
+  // --------------------------------------------
+  // Efecto para resetear CP cuando cambia
+  // --------------------------------------------
   useEffect(() => {
-    getPedidos();
-  }, []);
+    setCpValido(false);
+    setPais("");
+    setEstado("");
+    setMunicipio("");
+    setLocalidad("");
+    setLocalidadesDisponibles([]);
+  }, [codigoPostal]);
 
-  // ==================================================
-  // 2. CONTROL DEL FORMULARIO (ACTUALIZAR CAMPOS)
-  // ==================================================
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value
-    }));
+  // --------------------------------------------
+  // Funciones para abrir/cerrar Wizard
+  // --------------------------------------------
+  const handleAbrirWizard = () => {
+    resetCampos();
+    setShowWizard(true);
+  };
+  const handleCerrarWizard = () => {
+    setShowWizard(false);
   };
 
-  // ==================================================
-  // 3. CREAR UN NUEVO PEDIDO (CREATE)
-  // ==================================================
-  const handleCreate = () => {
-    // Quitamos idPedido porque normalmente el backend lo genera
-    const { idPedido, ...pedidoBody } = formData;
-
-    fetch('/api/pedidosmanuales', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(pedidoBody)
-    })
-      .then((res) => {
-        if (!res.ok) {
-          throw new Error('Error al crear el pedido');
-        }
-        return res.json();
-      })
-      .then(() => {
-        // Refrescamos la lista de pedidos
-        getPedidos();
-        // Limpiar formulario
-        resetForm();
-      })
-      .catch((error) => {
-        console.error(error);
-      });
+  const resetCampos = () => {
+    setCurrentStep(1);
+    setNombre("");
+    setApellido("");
+    setTelefono("");
+    setCorreo("");
+    setEsClienteExistente(false);
+    setDireccionesCliente([]);
+    setSelectedDireccionId(null);
+    setCodigoPostal("");
+    setDireccion("");
+    setPais("");
+    setEstado("");
+    setMunicipio("");
+    setLocalidad("");
+    setLocalidadesDisponibles([]);
+    setProducto("");
+    setFechaInicio("");
+    setFechaEntrega("");
+    setHoraAlquiler("");
+    setCargandoCP(false);
+    setCpValido(false);
+    setModoLocalidad("seleccionar");
+    setEstadosData([]);
+    setMunicipiosData([]);
+    setLocalidadesData([]);
+    setStock("");
+    setPrecio("");
+    setSubPrecio("");
+    setFormaPago("");
+    setDetallesPago("");
+    setUnitsToRent("");
+    setProductosAdicionales([]);
   };
 
-  // ==================================================
-  // 4. PREPARAR FORMULARIO PARA EDICIÓN
-  // ==================================================
-  const handleEdit = (pedido) => {
-    setIsEditing(true);
-    setFormData({
-      idPedido: pedido.idPedido,
-      nombreCliente: pedido.nombreCliente,
-      metodoPago: pedido.metodoPago,
-      estado: pedido.estado,
-      fechaRegistro: pedido.fechaRegistro
-    });
+  // --------------------------------------------
+  // Submodal para verificar correo
+  // --------------------------------------------
+  const handleAbrirSubmodalCorreo = () => {
+    setEmailParaVerificar("");
+    setShowSubmodalCorreo(true);
+  };
+  const handleCerrarSubmodalCorreo = () => {
+    setShowSubmodalCorreo(false);
   };
 
-  // ==================================================
-  // 5. ACTUALIZAR UN PEDIDO (UPDATE)
-  // ==================================================
-  const handleUpdate = () => {
-    const id = formData.idPedido;
-
-    // En algunos casos, el backend podría requerir que no le envíes `idPedido` en el JSON.
-    // Ajusta según tu API.
-    fetch(`/api/pedidosmanuales/${id}`, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(formData)
-    })
-      .then((res) => {
-        if (!res.ok) {
-          throw new Error('Error al actualizar el pedido');
-        }
-        return res.json();
-      })
-      .then(() => {
-        getPedidos();
-        resetForm();
-      })
-      .catch((error) => {
-        console.error(error);
-      });
+  const handleVerificarCorreo = () => {
+    setCargandoVerificacion(true);
+    setTimeout(() => {
+      if (emailParaVerificar.trim().toLowerCase() === DATOS_CLIENTE_SIMULADO.email) {
+        setEsClienteExistente(true);
+        setNombre(DATOS_CLIENTE_SIMULADO.nombre);
+        setApellido(DATOS_CLIENTE_SIMULADO.apellido);
+        setTelefono(DATOS_CLIENTE_SIMULADO.telefono);
+        setCorreo(DATOS_CLIENTE_SIMULADO.email);
+        setDireccionesCliente(DATOS_CLIENTE_SIMULADO.direcciones);
+        toast.success("¡Datos de cliente cargados!");
+        setShowSubmodalCorreo(false);
+      } else {
+        toast.error("Correo no encontrado en la base simulada.");
+      }
+      setCargandoVerificacion(false);
+    }, 1000);
   };
 
-  // ==================================================
-  // 6. ELIMINAR UN PEDIDO (DELETE)
-  // ==================================================
-  const handleDelete = (id) => {
-    if (window.confirm('¿Seguro que deseas eliminar este pedido?')) {
-      fetch(`/api/pedidosmanuales/${id}`, { method: 'DELETE' })
-        .then((res) => {
-          if (!res.ok) {
-            throw new Error('Error al eliminar el pedido');
-          }
-          return res.json();
-        })
-        .then(() => {
-          // Refrescamos la lista
-          getPedidos();
-        })
-        .catch((error) => {
-          console.error(error);
-        });
+  // --------------------------------------------
+  // Validar CP (SEPOMEX)
+  // --------------------------------------------
+  const handleValidarCP = async () => {
+    try {
+      setCargandoCP(true);
+      const url = `https://sepomex.icalialabs.com/api/v1/zip_codes?zip_code=${codigoPostal}&per_page=100`;
+      const response = await axios.get(url);
+
+      if (
+        response.data &&
+        response.data.zip_codes &&
+        response.data.zip_codes.length > 0
+      ) {
+        const uniqueEstados = [
+          ...new Set(response.data.zip_codes.map((item) => item.d_estado)),
+        ];
+        const uniqueMunicipios = [
+          ...new Set(response.data.zip_codes.map((item) => item.d_mnpio)),
+        ];
+        const uniqueLocalidades = [
+          ...new Set(response.data.zip_codes.map((item) => item.d_asenta)),
+        ];
+
+        setCpValido(true);
+        setPais("México");
+        setEstado(uniqueEstados[0] || "");
+        setMunicipio(uniqueMunicipios[0] || "");
+        setLocalidad(uniqueLocalidades[0] || "");
+        setEstadosData(uniqueEstados);
+        setMunicipiosData(uniqueMunicipios);
+        setLocalidadesData(uniqueLocalidades);
+
+        setLocalidadesDisponibles(
+          uniqueLocalidades.map((asenta) => ({ d_asenta: asenta }))
+        );
+
+        toast.success("Código Postal válido. Datos autocompletados.");
+      } else {
+        setCpValido(false);
+        toast.error("No se encontró información para ese Código Postal.");
+      }
+    } catch (error) {
+      console.error(error);
+      setCpValido(false);
+      toast.error("Error consultando el servicio de SEPOMEX.");
+    } finally {
+      setCargandoCP(false);
     }
   };
 
-  // ==================================================
-  // 7. RESETEAR FORMULARIO
-  // ==================================================
-  const resetForm = () => {
-    setIsEditing(false);
-    setFormData({
-      idPedido: '',
-      nombreCliente: '',
-      metodoPago: '',
-      estado: '',
-      fechaRegistro: ''
-    });
+  // --------------------------------------------
+  // Navegación
+  // --------------------------------------------
+  const nextStep = () => {
+    if (currentStep < totalSteps) setCurrentStep((prev) => prev + 1);
+  };
+  const prevStep = () => {
+    if (currentStep > 1) setCurrentStep((prev) => prev - 1);
   };
 
-  // ==================================================
-  // 8. ACCIÓN AL ENVIAR EL FORMULARIO
-  // ==================================================
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    if (isEditing) {
-      handleUpdate();
+  // --------------------------------------------
+  // Validaciones
+  // --------------------------------------------
+  const paso1Valido = () =>
+    nombre.trim().length >= 3 &&
+    apellido.trim().length >= 3 &&
+    telefono.trim().length === 10;
+
+  const paso2Valido = () => {
+    if (esClienteExistente) {
+      return selectedDireccionId !== null;
     } else {
-      handleCreate();
+      return cpValido && direccion.trim().length >= 5;
     }
   };
 
-  // ==================================================
-  // RENDER
-  // ==================================================
+  const paso3Valido = () =>
+    producto &&
+    fechaInicio &&
+    fechaEntrega &&
+    horaAlquiler &&
+    stock.trim() !== "" &&
+    precio.trim() !== "" &&
+    formaPago.trim() !== "";
+
+  const canGoNext = () => {
+    if (currentStep === 1) return paso1Valido();
+    if (currentStep === 2) return paso2Valido();
+    if (currentStep === 3) return paso3Valido();
+    return false;
+  };
+
+  // --------------------------------------------
+  // Cotizar (Paso 3)
+  // --------------------------------------------
+  const calcularDiasAlquiler = () => {
+    if (!fechaInicio || !fechaEntrega) return 0;
+    const inicio = new Date(fechaInicio);
+    const fin = new Date(fechaEntrega);
+    if (fin <= inicio) return 0;
+    const diffMs = fin - inicio;
+    return Math.ceil(diffMs / (1000 * 60 * 60 * 24));
+  };
+
+  const handleCotizarPrincipal = () => {
+    const dias = calcularDiasAlquiler();
+    const precioNumber = parseFloat(precio) || 0;
+    const unitsNumber = parseInt(unitsToRent) || 0;
+    const total = dias * precioNumber * unitsNumber;
+    setSubPrecio(total.toString());
+    toast.success(`Cotización principal: $${total}`);
+  };
+
+  // Productos adicionales
+  const agregarProductoAdicional = () => {
+    const nuevo = {
+      id: Date.now(),
+      producto: "",
+      stock: "",
+      precio: "",
+      subPrecio: "",
+      units: "",
+    };
+    setProductosAdicionales((prev) => [...prev, nuevo]);
+  };
+
+  const actualizarProductoAdicional = (id, field, value) => {
+    setProductosAdicionales((prev) =>
+      prev.map((p) => (p.id === id ? { ...p, [field]: value } : p))
+    );
+  };
+
+  const cotizarProductoAdicional = (id) => {
+    const dias = calcularDiasAlquiler();
+    setProductosAdicionales((prev) =>
+      prev.map((p) => {
+        if (p.id === id) {
+          const precioNumber = parseFloat(p.precio) || 0;
+          const unitsNumber = parseInt(p.units) || 0;
+          const total = dias * precioNumber * unitsNumber;
+          toast.success(`Cotización adicional: $${total}`);
+          return { ...p, subPrecio: total.toString() };
+        }
+        return p;
+      })
+    );
+  };
+
+  // --------------------------------------------
+  // Al enviar (Paso 4)
+  // --------------------------------------------
+  const handleSubmitWizard = (e) => {
+    e.preventDefault();
+    toast.success("¡Pedido de alquiler creado (simulado)!");
+    handleCerrarWizard();
+  };
+
+  // --------------------------------------------
+  // Render de cada paso
+  // --------------------------------------------
+  const renderPaso1 = () => (
+    <StepOne
+      nombre={nombre}
+      setNombre={setNombre}
+      apellido={apellido}
+      setApellido={setApellido}
+      telefono={telefono}
+      setTelefono={setTelefono}
+      correo={correo}
+      setCorreo={setCorreo}
+      handleAbrirSubmodalCorreo={handleAbrirSubmodalCorreo}
+    />
+  );
+
+  const renderPaso2 = () => (
+    <StepTwo
+      esClienteExistente={esClienteExistente}
+      direccionesCliente={direccionesCliente}
+      selectedDireccionId={selectedDireccionId}
+      setSelectedDireccionId={setSelectedDireccionId}
+      codigoPostal={codigoPostal}
+      setCodigoPostal={setCodigoPostal}
+      handleValidarCP={handleValidarCP}
+      cargandoCP={cargandoCP}
+      cpValido={cpValido}
+      pais={pais}
+      setPais={setPais}
+      estado={estado}
+      setEstado={setEstado}
+      municipio={municipio}
+      setMunicipio={setMunicipio}
+      localidad={localidad}
+      setLocalidad={setLocalidad}
+      modoLocalidad={modoLocalidad}
+      setModoLocalidad={setModoLocalidad}
+      localidadesDisponibles={localidadesDisponibles}
+      direccion={direccion}
+      setDireccion={setDireccion}
+    />
+  );
+
+  const renderPaso3 = () => (
+    <StepThree
+      producto={producto}
+      setProducto={setProducto}
+      fechaInicio={fechaInicio}
+      setFechaInicio={setFechaInicio}
+      fechaEntrega={fechaEntrega}
+      setFechaEntrega={setFechaEntrega}
+      horaAlquiler={horaAlquiler}
+      setHoraAlquiler={setHoraAlquiler}
+      stock={stock}
+      setStock={setStock}
+      precio={precio}
+      setPrecio={setPrecio}
+      subPrecio={subPrecio}
+      setSubPrecio={setSubPrecio}
+      formaPago={formaPago}
+      setFormaPago={setFormaPago}
+      detallesPago={detallesPago}
+      setDetallesPago={setDetallesPago}
+      unitsToRent={unitsToRent}
+      setUnitsToRent={setUnitsToRent}
+      handleCotizarPrincipal={handleCotizarPrincipal}
+      agregarProductoAdicional={agregarProductoAdicional}
+      productosAdicionales={productosAdicionales}
+      actualizarProductoAdicional={actualizarProductoAdicional}
+      cotizarProductoAdicional={cotizarProductoAdicional}
+    />
+  );
+
+  const renderPaso4 = () => (
+    <StepFour
+      nombre={nombre}
+      apellido={apellido}
+      telefono={telefono}
+      correo={correo}
+      esClienteExistente={esClienteExistente}
+      direccionesCliente={direccionesCliente}
+      selectedDireccionId={selectedDireccionId}
+      codigoPostal={codigoPostal}
+      pais={pais}
+      estado={estado}
+      municipio={municipio}
+      localidad={localidad}
+      direccion={direccion}
+      producto={producto}
+      fechaInicio={fechaInicio}
+      fechaEntrega={fechaEntrega}
+      horaAlquiler={horaAlquiler}
+      stock={stock}
+      precio={precio}
+      subPrecio={subPrecio}
+      formaPago={formaPago}
+      detallesPago={detallesPago}
+      productosAdicionales={productosAdicionales}
+    />
+  );
+
+  // Decide qué paso renderizar
+  const renderStepContent = () => {
+    switch (currentStep) {
+      case 1:
+        return renderPaso1();
+      case 2:
+        return renderPaso2();
+      case 3:
+        return renderPaso3();
+      case 4:
+        return renderPaso4();
+      default:
+        return null;
+    }
+  };
+
+  // --------------------------------------------
+  // Render Principal
+  // --------------------------------------------
   return (
-    <div style={{ margin: '20px' }}>
-      <h2>Pedidos Manuales</h2>
-
-      {/* SECCIÓN: FORMULARIO PARA CREAR/EDITAR */}
-      <div style={{ border: '1px solid #ccc', padding: '10px', marginBottom: '20px' }}>
-        <h3>{isEditing ? 'Editar Pedido' : 'Crear Nuevo Pedido'}</h3>
-        <form onSubmit={handleSubmit}>
-          {/* Campo: Nombre Cliente */}
-          <div>
-            <label>Nombre Cliente:</label><br />
-            <input
-              type="text"
-              name="nombreCliente"
-              value={formData.nombreCliente}
-              onChange={handleChange}
-              required
-            />
-          </div>
-
-          {/* Campo: Método de Pago */}
-          <div>
-            <label>Método de Pago:</label><br />
-            <input
-              type="text"
-              name="metodoPago"
-              value={formData.metodoPago}
-              onChange={handleChange}
-              required
-            />
-          </div>
-
-          {/* Campo: Estado */}
-          <div>
-            <label>Estado:</label><br />
-            <input
-              type="text"
-              name="estado"
-              value={formData.estado}
-              onChange={handleChange}
-              required
-            />
-          </div>
-
-          {/* Campo: Fecha Registro */}
-          <div>
-            <label>Fecha Registro:</label><br />
-            <input
-              type="datetime-local"
-              name="fechaRegistro"
-              value={formData.fechaRegistro}
-              onChange={handleChange}
-              required
-            />
-          </div>
-
-          <br />
-          <button type="submit">
-            {isEditing ? 'Actualizar' : 'Crear'}
-          </button>
-          {isEditing && (
-            <button type="button" onClick={resetForm} style={{ marginLeft: '10px' }}>
-              Cancelar
-            </button>
-          )}
-        </form>
-      </div>
-
-      {/* SECCIÓN: LISTADO DE PEDIDOS */}
-      <table
-        border="1"
-        cellPadding="5"
-        style={{ borderCollapse: 'collapse', width: '100%' }}
+    <div className="p-4 sm:p-6 lg:p-8 bg-gray-50 min-h-screen">
+      <h1 className="text-2xl font-bold text-gray-800 mb-6">
+        Alquiler de Productos (Ejemplo)
+      </h1>
+      <button
+        onClick={handleAbrirWizard}
+        className="px-4 py-2 rounded bg-yellow-500 text-white hover:bg-yellow-600 transition"
       >
-        <thead>
-          <tr>
-            <th>ID</th>
-            <th>Nombre Cliente</th>
-            <th>Método de Pago</th>
-            <th>Estado</th>
-            <th>Fecha Registro</th>
-            <th>Acciones</th>
-          </tr>
-        </thead>
-        <tbody>
-          {pedidos.map((pedido) => (
-            <tr key={pedido.idPedido}>
-              <td>{pedido.idPedido}</td>
-              <td>{pedido.nombreCliente}</td>
-              <td>{pedido.metodoPago}</td>
-              <td>{pedido.estado}</td>
-              <td>{pedido.fechaRegistro}</td>
-              <td>
-                <button onClick={() => handleEdit(pedido)}>Editar</button>
-                <button onClick={() => handleDelete(pedido.idPedido)} style={{ marginLeft: '10px' }}>
-                  Eliminar
+        Realizar un Pedido
+      </button>
+
+      {/* Wizard principal */}
+      {showWizard && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4">
+          <div className="bg-white w-full max-w-2xl rounded shadow-lg relative">
+            {/* Barra superior amarilla */}
+            <div className="bg-yellow-400 h-2 w-full rounded-t" />
+            <button
+              type="button"
+              onClick={handleCerrarWizard}
+              className="absolute top-2 right-2 text-gray-600 hover:text-red-600 transition"
+            >
+              <FontAwesomeIcon icon={faTimes} size="lg" />
+            </button>
+
+            <div className="p-6">
+              {/* Encabezado de pasos */}
+              <div className="flex justify-between items-center mb-4">
+                <div className="flex space-x-4">
+                  {[1, 2, 3, 4].map((step) => (
+                    <div
+                      key={step}
+                      className={`flex flex-col items-center ${
+                        currentStep === step ? "text-yellow-600" : "text-gray-400"
+                      }`}
+                    >
+                      <div
+                        className={`h-8 w-8 flex items-center justify-center rounded-full border-2 ${
+                          currentStep >= step
+                            ? "border-yellow-500"
+                            : "border-gray-400"
+                        }`}
+                      >
+                        {step === 1 && <FontAwesomeIcon icon={faAddressCard} size="sm" />}
+                        {step === 2 && <FontAwesomeIcon icon={faLocationArrow} size="sm" />}
+                        {step === 3 && <FontAwesomeIcon icon={faHome} size="sm" />}
+                        {step === 4 && <FontAwesomeIcon icon={faClipboardCheck} size="sm" />}
+                      </div>
+                      <span className="text-xs mt-1">
+                        {step === 1
+                          ? "Datos"
+                          : step === 2
+                          ? "Ubicación"
+                          : step === 3
+                          ? "Producto"
+                          : "Confirmación"}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <form onSubmit={handleSubmitWizard} className="space-y-6">
+                {renderStepContent()}
+
+                {/* Botones de navegación */}
+                <div className="flex justify-between mt-6">
+                  {currentStep > 1 && (
+                    <button
+                      type="button"
+                      onClick={prevStep}
+                      className="px-4 py-2 rounded bg-gray-200 text-gray-700 hover:bg-gray-300 transition"
+                    >
+                      Anterior
+                    </button>
+                  )}
+                  {currentStep < totalSteps && (
+                    <button
+                      type="button"
+                      onClick={nextStep}
+                      disabled={!canGoNext()}
+                      className={`px-4 py-2 rounded ${
+                        canGoNext()
+                          ? "bg-yellow-500 text-white hover:bg-yellow-600"
+                          : "bg-gray-400 text-gray-200 cursor-not-allowed"
+                      } transition`}
+                    >
+                      Siguiente
+                    </button>
+                  )}
+                  {currentStep === totalSteps && (
+                    <button
+                      type="submit"
+                      className="px-4 py-2 rounded bg-green-600 text-white hover:bg-green-700 transition"
+                    >
+                      Finalizar
+                    </button>
+                  )}
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Submodal para verificar correo */}
+      {showSubmodalCorreo && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4">
+          <div className="bg-white w-full max-w-md rounded shadow-lg relative">
+            <div className="bg-yellow-400 h-2 w-full rounded-t" />
+            <button
+              type="button"
+              onClick={handleCerrarSubmodalCorreo}
+              className="absolute top-2 right-2 text-gray-600 hover:text-red-600 transition"
+            >
+              <FontAwesomeIcon icon={faTimes} size="lg" />
+            </button>
+            <div className="p-6">
+              <h2 className="text-xl font-semibold text-gray-800 mb-3 flex items-center">
+                <FontAwesomeIcon icon={faUser} className="mr-2 text-yellow-500" />
+                Verificar Correo de Cliente
+              </h2>
+              <p className="text-sm text-gray-600 mb-4">
+                Ingresa el correo electrónico con el que te registraste.
+              </p>
+              <div className="space-y-3">
+                <input
+                  type="email"
+                  className="w-full p-2 border border-gray-300 rounded"
+                  placeholder="email@ejemplo.com"
+                  value={emailParaVerificar}
+                  onChange={(e) => setEmailParaVerificar(e.target.value)}
+                />
+                <button
+                  type="button"
+                  onClick={handleVerificarCorreo}
+                  disabled={!emailParaVerificar.trim()}
+                  className={`px-4 py-2 rounded ${
+                    emailParaVerificar.trim()
+                      ? "bg-yellow-500 text-white hover:bg-yellow-600"
+                      : "bg-gray-400 text-gray-200 cursor-not-allowed"
+                  } transition`}
+                >
+                  {cargandoVerificacion ? (
+                    <div className="flex items-center space-x-2">
+                      <FontAwesomeIcon icon={faSpinner} spin />
+                      <span>Validando...</span>
+                    </div>
+                  ) : (
+                    "Validar"
+                  )}
                 </button>
-              </td>
-            </tr>
-          ))}
-          {/* Si no hay pedidos, podría mostrar un mensaje */}
-          {pedidos.length === 0 && (
-            <tr>
-              <td colSpan="6" style={{ textAlign: 'center' }}>
-                No hay pedidos manuales registrados
-              </td>
-            </tr>
-          )}
-        </tbody>
-      </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
 
-export default PedidosManuales;
+export default WizardAlquiler;

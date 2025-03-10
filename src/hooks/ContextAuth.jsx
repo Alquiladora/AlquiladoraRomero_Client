@@ -191,7 +191,7 @@ export const AuthProvider = ({ children }) => {
         withCredentials: true,
       });
       setCsrfToken(response.data.csrfToken);
-      console.log("CSRF token obtenido:", response.data.csrfToken);
+     
     } catch (error) {
       console.error("⚠️ Error obteniendo el token CSRF:", error);
       setError("Error en el servidor - 500.");
@@ -207,7 +207,7 @@ export const AuthProvider = ({ children }) => {
       if (isMounted.current) {
         if (response.data?.user) {
           setUser(response.data.user);
-          console.log("Usuario obtenido:", response.data.user);
+        
         } else {
        
           console.warn("⚠️ Respuesta sin usuario, no forzamos logout.");
@@ -217,11 +217,12 @@ export const AuthProvider = ({ children }) => {
       console.error("⚠️ Error verificando la autenticación:", error);
       if (error.response) {
         if (error.response.status === 500) {
-          console.error("🔥 Error 500: Problema en el servidor.");
+          navigate("/error500")
         } else if (error.response.status === 401 || error.response.status === 403) {
       
           console.warn("⚠️ Usuario no autenticado (401/403). Sesión expirada o inválida, pero no forzamos logout.");
           setUser(null); 
+          navigate("/login")
         } else {
           setError(
             error.response?.data?.message ||
@@ -257,13 +258,13 @@ export const AuthProvider = ({ children }) => {
         navigate("/login");
       } else {
         console.warn("⚠️ No se pudo cerrar sesión correctamente, recargando...");
-        window.location.reload();
+        // window.location.reload();
       }
     } catch (error) {
       console.error("⚠️ Error al cerrar sesión:", error);
       if (error.response?.status === 401 || error.response?.status === 403) {
         console.warn("⚠️ La sesión ya estaba cerrada, recargando...");
-        window.location.reload();
+        // window.location.reload();
       } else {
         setError(error.response?.data?.message || "Error al cerrar sesión.");
       }
@@ -282,20 +283,27 @@ export const AuthProvider = ({ children }) => {
 
   useEffect(() => {
     if (!socket) return;
-    
-    socket.on("sessionExpired", (data) => {
-      console.warn("Evento 'sessionExpired' recibido:", data);
+    const handleSessionExpired = (data) => {
+     
       setUser(null);
       navigate("/login");
-    });
-   
-    socket.on("actualizacionPerfil", () => {
-      console.log("Evento 'actualizacionPerfil' recibido. Verificando autenticación...");
+    };
+
+    const handleActualizacionPerfil = () => {
+      console.log(
+        "Evento 'actualizacionPerfil' recibido. Verificando autenticación..."
+      );
       checkAuth();
-    });
+    };
+
+    
+    socket.on("sessionExpired", handleSessionExpired);
+    socket.on("actualizacionPerfil", handleActualizacionPerfil);
+
+   
     return () => {
-      socket.off("sessionExpired");
-      socket.off("actualizacionPerfil");
+      socket.off("sessionExpired", handleSessionExpired);
+      socket.off("actualizacionPerfil", handleActualizacionPerfil);
     };
   }, [socket, csrfToken, navigate]);
   

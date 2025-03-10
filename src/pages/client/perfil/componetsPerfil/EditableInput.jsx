@@ -3,6 +3,10 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faEdit, faSave, faSpinner } from "@fortawesome/free-solid-svg-icons";
 import { useSpring, animated } from "@react-spring/web";
 
+// 1. Importa react-datepicker y su CSS
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
+
 const EditableInput = ({
   label,
   value,
@@ -18,6 +22,13 @@ const EditableInput = ({
   const [hasInteracted, setHasInteracted] = useState(false);
   const [isValid, setIsValid] = useState(false);
   const [saving, setSaving] = useState(false);
+
+  // Calcula la fecha máxima permitida para el DatePicker: hoy - 15 años
+  const maxSelectableDate = new Date(
+    new Date().getFullYear() - 15,
+    new Date().getMonth(),
+    new Date().getDate()
+  );
 
   const fadeStyles = useSpring({
     opacity: isEditable ? 1 : 0,
@@ -36,10 +47,9 @@ const EditableInput = ({
     let newValue = e.target.value;
 
     if (label === "Teléfono") {
-      newValue = newValue.replace(/\D/g, "");
-      newValue = newValue.slice(0, 10);
+      newValue = newValue.replace(/\D/g, "").slice(0, 10);
     }
-    
+
     setTempValue(newValue);
     setHasInteracted(true);
 
@@ -59,17 +69,13 @@ const EditableInput = ({
 
       setSaving(true);
       try {
-      
         setInputValue(tempValue);
-
-      
         await onSave(tempValue);
         setIsEditable(false);
       } catch (error) {
         console.error("Error al guardar:", error);
         setError("Error al guardar en la base de datos.");
 
-    
         setInputValue(previousValue);
         setTempValue(previousValue);
       } finally {
@@ -78,6 +84,15 @@ const EditableInput = ({
     } else {
       setIsEditable(true);
     }
+  };
+
+  // Función para cancelar la edición y restablecer el valor original
+  const handleCancel = () => {
+    setIsEditable(false);
+    setTempValue(inputValue);
+    setError("");
+    setIsValid(false);
+    setHasInteracted(false);
   };
 
   return (
@@ -95,31 +110,77 @@ const EditableInput = ({
       )}
 
       <div className="relative">
-        <input
-          type={label === "Fecha de Nacimiento" ? "date" : "text"}
-          value={isEditable ? tempValue : inputValue}
-          onChange={handleInputChange}
-          readOnly={!isEditable}
-          className={`
-            w-full p-3 rounded-lg border
-            ${
-              error
-                ? "border-red-500 focus:border-red-500 dark:border-red-400"
-                : "border-gray-300 focus:border-blue-500 dark:border-gray-600"
+        {/* Bloque para react-datepicker si es "Fecha de Nacimiento" y estamos en modo edición */}
+        {label === "Fecha de Nacimiento" && isEditable ? (
+          <DatePicker
+            selected={
+              tempValue
+                ? new Date(tempValue) // convertir string (YYYY-MM-DD) a Date
+                : null
             }
-            focus:ring-2
-            ${
-              error
-                ? "focus:ring-red-500 dark:focus:ring-red-400"
-                : "focus:ring-blue-500 dark:focus:ring-blue-400"
-            }
-            bg-white dark:bg-gray-800
-            text-gray-900 dark:text-gray-100
-            transition-colors duration-200
-          `}
-          placeholder={label}
-          max={new Date().toISOString().split("T")[0]}
-        />
+            onChange={(date) => {
+              setHasInteracted(true);
+              const isoDate = date ? date.toISOString().split("T")[0] : "";
+              setTempValue(isoDate);
+              // Validamos
+              const validationError = validate(isoDate);
+              setError(validationError);
+              setIsValid(!validationError);
+            }}
+            className={`
+              w-full p-3 rounded-lg border
+              ${
+                error
+                  ? "border-red-500 focus:border-red-500 dark:border-red-400"
+                  : "border-gray-300 focus:border-blue-500 dark:border-gray-600"
+              }
+              focus:ring-2
+              ${
+                error
+                  ? "focus:ring-red-500 dark:focus:ring-red-400"
+                  : "focus:ring-blue-500 dark:focus:ring-blue-400"
+              }
+              bg-white dark:bg-gray-800
+              text-gray-900 dark:text-gray-100
+              transition-colors duration-200
+            `}
+            placeholderText="Selecciona tu fecha de nacimiento"
+            dateFormat="dd/MM/yyyy"
+           
+            minDate={new Date("1800-01-01")}
+            maxDate={maxSelectableDate}
+            showYearDropdown
+            scrollableYearDropdown
+          />
+        ) : (
+       
+          <input
+            type={label === "Fecha de Nacimiento" ? "date" : "text"}
+            value={isEditable ? tempValue : inputValue}
+            onChange={handleInputChange}
+            readOnly={!isEditable}
+            className={`
+              w-full p-3 rounded-lg border
+              ${
+                error
+                  ? "border-red-500 focus:border-red-500 dark:border-red-400"
+                  : "border-gray-300 focus:border-blue-500 dark:border-gray-600"
+              }
+              focus:ring-2
+              ${
+                error
+                  ? "focus:ring-red-500 dark:focus:ring-red-400"
+                  : "focus:ring-blue-500 dark:focus:ring-blue-400"
+              }
+              bg-white dark:bg-gray-800
+              text-gray-900 dark:text-gray-100
+              transition-colors duration-200
+            `}
+            placeholder={label}
+            max={new Date().toISOString().split("T")[0]}
+          />
+        )}
+
         <button
           onClick={handleIconClick}
           disabled={saving || (!isValid && isEditable)}
@@ -154,6 +215,17 @@ const EditableInput = ({
           )}
         </button>
       </div>
+      
+      {/* Botón Cancelar en modo edición */}
+      {isEditable && (
+        <button
+          onClick={handleCancel}
+          disabled={saving}
+          className="mt-2 px-4 py-2 rounded bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200 transition-colors duration-200"
+        >
+          Cancelar
+        </button>
+      )}
     </div>
   );
 };

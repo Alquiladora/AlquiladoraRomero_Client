@@ -58,37 +58,34 @@ export const validateName = (value, fieldName) => {
   export const validateFechaNacimiento = (value) => {
     let error = "";
   
-    
     if (!value.trim()) {
       error = "La fecha de nacimiento es requerida";
-    }
-    
-    else if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) {
+    } else if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) {
       error = "El formato de la fecha debe ser YYYY-MM-DD";
-    }
-       else {
+    } else {
       const fechaNacimiento = new Date(value);
       const hoy = new Date();
   
-    
+      
       if (fechaNacimiento > hoy) {
         error = "La fecha de nacimiento no puede ser futura";
-      }
-    
-      else {
-        const añoMinimo = hoy.getFullYear() - 200; // Límite de 200 años en el pasado
-        if (fechaNacimiento.getFullYear() < añoMinimo) {
-          error = "La fecha de nacimiento no puede ser menor a hace 200 años";
-        }
-    
-        else {
-          const edad = hoy.getFullYear() - fechaNacimiento.getFullYear();
-          if (edad < 10) {
-            error = "Debes tener al menos 10 años";
-          }
+      } 
+      
+      else if (fechaNacimiento.getFullYear() < 1850) {
+        error = "La fecha de nacimiento no puede ser menor a 1850";
+      } else {
+        
+        const maxFechaNacimiento = new Date(
+          hoy.getFullYear() - 16,
+          hoy.getMonth(),
+          hoy.getDate()
+        );
+        if (fechaNacimiento > maxFechaNacimiento) {
+          error = "Debes tener al menos 16 años";
         }
       }
     }
   
     return error;
   };
+  

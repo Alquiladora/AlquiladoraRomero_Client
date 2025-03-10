@@ -30,8 +30,8 @@ import { useSocket } from "../../../utils/Socket";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faHome,
-  faClock, // Para "Horario"
-  faTasks, // Para "Gestión Pedidos"
+  faClock, 
+  faTasks,
   faUsers,
   faBuilding,
   faLayerGroup,

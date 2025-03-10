@@ -10,8 +10,7 @@ import {
 } from "@mui/material";
 import ComputerIcon from "@mui/icons-material/Computer";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-
-import { Toaster } from "react-hot-toast";
+import { toast } from "react-toastify";
 import AddressBook from "./componetsPerfil/ListaDirecciones";
 
 import "primereact/resources/themes/saga-blue/theme.css";
@@ -57,15 +56,14 @@ import PhoneIphoneIcon from "@mui/icons-material/PhoneIphone";
 import TabletMacIcon from "@mui/icons-material/TabletMac";
 import { useAuth } from "../../../hooks/ContextAuth";
 import api from "../../../utils/AxiosConfig";
-import axios from "axios";
+
 
 const PerfilUsuarioPrime = () => {
-  // const [activeTab, setActiveTab] = useState(0);
+ 
   const fileInputRef = useRef(null);
   const [uploading, setUploading] = useState(false);
   const [isMfaEnabled, setIsMfaEnabled] = useState(false);
   const [profileData, setProfileData] = useState([]);
-  //Constatnte s para actualizar el foto de perfil
   const [usuariosC, setUsuariosC] = useState([]);
   const [alert, setAlert] = useState(null);
   const [lastUpdated, setLastUpdated] = useState(null);
@@ -107,6 +105,8 @@ const PerfilUsuarioPrime = () => {
 
       if (isMounted.current) {
         setUsuariosC(response.data.user);
+        console.log("datos de perfil cliente", response.data.user.idUsuarios)
+
         setActivo(!!response.data.user.multifaltor);
         setLastUpdated(new Date(response.data.user.fechaActualizacionF));
         setLoading(false);
@@ -142,10 +142,7 @@ const PerfilUsuarioPrime = () => {
     }
   };
 
-  const showAlert = (type, message) => {
-    setAlert({ type, message });
-    setTimeout(() => setAlert(null), 5000);
-  };
+
 
   const handleOpenModal = () => {
     if (!bloqueado) {
@@ -153,7 +150,7 @@ const PerfilUsuarioPrime = () => {
     }
   };
 
-  // Función para cerrar el modal
+
   const handleCloseModal = () => {
     setOpenModal(false);
     fetchProfileData();
@@ -169,10 +166,8 @@ const PerfilUsuarioPrime = () => {
       const twoMonths = 60 * 60 * 24 * 1000 * 30 * 2;
       if (lastUpdated && now - lastUpdatedTime < twoMonths) {
         console.log("Solo puedes cambiar tu foto de perfil cada dos meses.");
-        showAlert(
-          "error",
-          "Acción no permitida",
-          "Solo puedes cambiar tu foto de perfil cada dos meses."
+       toast.error(
+        "Solo puedes cambiar tu foto de perfil cada dos meses."
         );
         return;
       }
@@ -187,19 +182,16 @@ const PerfilUsuarioPrime = () => {
         ].includes(file.type)
       ) {
         console.log("Error Formato de imagen inválido");
-        showAlert(
-          "error",
-          "Formato de imagen inválido",
+        toast.error(
           "Solo se aceptan imágenes en formatos PNG, JPG, JPEG, GIF, WEBP, o SVG."
         );
         return;
       }
 
-      if (file.size > 2 * 1024 * 1024) {
-        console.log("El tamaño de la imagen debe ser menor a 2MB.");
-        showAlert(
-          "error",
-          "Tamaño Excesivo",
+      if (file.size > 10 * 1024 * 1024) {
+        console.log("El tamaño de la imagen debe ser menor a 10 MB.");
+        toast.error(
+       
           "El tamaño de la imagen debe ser menor a 2MB."
         );
         return;
@@ -218,9 +210,8 @@ const PerfilUsuarioPrime = () => {
     setUploading(true);
     setIsBlocked(true);
     console.log("Subiendo imagen");
-    showAlert(
-      "info",
-      "Subiendo Imagen",
+   toast.warning(
+     
       "Espera mientras se sube la imagen..."
     );
 
@@ -240,9 +231,9 @@ const PerfilUsuarioPrime = () => {
       });
 
       const imageUrl = response.data.url;
-      console.log("URL de la imagen subida:", imageUrl);
+    
 
-      // Actualizar el perfil con la nueva URL de la imagen en MySQL
+      
       await api.patch(
         `/api/usuarios/perfil/${usuariosC.idUsuarios}/foto`,
         {
@@ -252,7 +243,7 @@ const PerfilUsuarioPrime = () => {
         { headers: { "X-CSRF-Token": csrfToken }, withCredentials: true }
       );
 
-      // Actualizar el estado del frontend con la nueva imagen
+     
       setUsuariosC((prevProfile) => ({
         ...prevProfile,
         fotoPerfil: imageUrl,
@@ -261,14 +252,13 @@ const PerfilUsuarioPrime = () => {
       setLastUpdated(now);
       fetchProfileData();
       console.log("Imagen subido correctamente");
-      showAlert(
-        "success",
-        "Imagen Subida",
+      toast.success(
+    
         "Foto de perfil actualizada correctamente."
       );
     } catch (error) {
       console.error("Error al actualizar la foto de perfil:", error);
-      showAlert("error", "Error", "Error al actualizar la foto de perfil.");
+      toast.error("Error al actualizar la foto de perfil.");
     } finally {
       setUploading(false);
       setIsBlocked(false);
@@ -278,10 +268,8 @@ const PerfilUsuarioPrime = () => {
 
   //===================GUARDAR EN LA BASE DE DATOS=======================================================================
   const saveField = async (field, value) => {
-    console.log("VALOR DE FILE, VALUE", field, value);
-
     try {
-      // Asegúrate de que el valor se envíe correctamente en el cuerpo de la solicitud
+     
       const response = await api.patch(
         `/api/usuarios/perfil/${usuariosC.idUsuarios}/${field}`,
         { value },
@@ -292,15 +280,11 @@ const PerfilUsuarioPrime = () => {
       );
       fetchProfileData();
 
-      showAlert(
-        "success",
-        `${field} actualizado`,
+      toast.success(
         `El ${field} ha sido guardado correctamente.`
       );
     } catch (error) {
-      showAlert(
-        "error",
-        "Error al guardar",
+      toast.error(
         `Hubo un error al guardar el ${field}.`
       );
       console.error(`Error al guardar el ${field}:`, error);
@@ -334,7 +318,7 @@ const PerfilUsuarioPrime = () => {
         }
       );
       setSessions(response.data);
-      console.log("Sesiones abiertas edilberto:", response.data);
+      
     } catch (error) {
       console.error("Error al obtener las sesiones activas:", error);
     }
@@ -355,7 +339,7 @@ const PerfilUsuarioPrime = () => {
         prevSessions.filter((session) => session.isCurrent)
       );
 
-      showAlert({
+     toast.success({
         severity: "success",
         summary: "Sesiones cerradas",
         detail:
@@ -365,7 +349,7 @@ const PerfilUsuarioPrime = () => {
       });
     } catch (error) {
       console.error("Error al cerrar todas las sesiones:", error);
-      showAlert({
+      toast.error({
         severity: "error",
         summary: "Error",
         detail:
@@ -422,7 +406,7 @@ const PerfilUsuarioPrime = () => {
     return `${day}-${month}-${year}`;
   };
 
-  //Configracion de la estrutura de la tabla
+ 
   const fields = [
     {
       label: "Nombre",
@@ -524,7 +508,7 @@ const PerfilUsuarioPrime = () => {
       <div className="min-h-screen from-blue-50 to-white p-4 dark:bg-gray-950 dark:text-white">
         <div className="max-w-6xl mx-auto space-y-6">
           <div className="bg-white rounded-2xl shadow-lg overflow-hidden dark:bg-gray-800">
-            {/* Fondo amarillo sólido */}
+          
             <div className="h-32 bg-[#fcb900] relative dark:bg-gray-900">
               <div className="absolute top-4 right-4 bg-white/90 rounded-lg px-4 py-2 shadow-sm dark:bg-gray-700 dark:text-white">
                 <span className="text-blue-600 font-medium dark:text-blue-300">
@@ -538,9 +522,9 @@ const PerfilUsuarioPrime = () => {
             </div>
 
             <div className="px-4 sm:px-6 pb-6">
-              {/* Contenedor principal */}
+           
               <div className="flex flex-col items-center -mt-16 space-y-6">
-                {/* Foto de Perfil */}
+              
 
                 <div className="relative">
                   <div className="w-28 h-28 md:w-32 md:h-32 rounded-full border-4 border-white bg-white overflow-hidden shadow-lg dark:border-gray-700 dark:bg-gray-700">
@@ -572,7 +556,7 @@ const PerfilUsuarioPrime = () => {
                   />
                 </div>
 
-                {/* Información Principal */}
+              
                 <div className="text-center">
                   <h2 className="text-xl md:text-2xl font-bold text-gray-800 dark:text-white">
                     {`${usuariosC.nombre} ${usuariosC.apellidoP}`}
@@ -971,7 +955,7 @@ const PerfilUsuarioPrime = () => {
             {activeTab === "direccion" && (
               <div className="space-y-6">
 
-                <AddressBook />
+                <AddressBook  idUsuarios={usuariosC.idUsuarios}/>
 
               </div>
             )}
