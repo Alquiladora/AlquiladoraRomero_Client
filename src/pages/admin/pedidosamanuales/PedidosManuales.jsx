@@ -1,4 +1,3 @@
-// WizardAlquiler.jsx
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -12,69 +11,33 @@ import {
   faUser,
 } from "@fortawesome/free-solid-svg-icons";
 import { toast } from "react-toastify";
+import api from "../../../utils/AxiosConfig";
+import { useAuth } from "../../../hooks/ContextAuth";
 
-// Importamos nuestros 4 pasos
 import StepOne from "./StepOne";
 import StepTwo from "./StepTwo";
 import StepThree from "./StepThree";
 import StepFour from "./StepFour";
 
-const DATOS_CLIENTE_SIMULADO = {
-  email: "cliente@ejemplo.com",
-  nombre: "Carlos",
-  apellido: "Rodríguez",
-  telefono: "1234567890",
-  direcciones: [
-    {
-      idDir: 1,
-      alias: "Casa Principal",
-      calle: "Avenida Principal #789",
-      cp: "43000",
-      estado: "Hidalgo",
-      municipio: "Huejutla de Reyes",
-      localidad: "Huejutla Centro",
-    },
-    {
-      idDir: 2,
-      alias: "Oficina",
-      calle: "Calle Secundaria #101",
-      cp: "43010",
-      estado: "Hidalgo",
-      municipio: "Huejutla de Reyes",
-      localidad: "Colonia Industrial",
-    },
-  ],
-};
-
 function WizardAlquiler() {
-  // --------------------------------------------
-  // Manejo general del Wizard
-  // --------------------------------------------
+  const { csrfToken, user } = useAuth();
   const [showWizard, setShowWizard] = useState(false);
   const [currentStep, setCurrentStep] = useState(1);
   const totalSteps = 4;
 
-  // --------------------------------------------
-  // Estados del formulario (Paso 1)
-  // --------------------------------------------
   const [nombre, setNombre] = useState("");
   const [apellido, setApellido] = useState("");
   const [telefono, setTelefono] = useState("");
   const [correo, setCorreo] = useState("");
 
-  // Manejo submodal correo
   const [showSubmodalCorreo, setShowSubmodalCorreo] = useState(false);
   const [emailParaVerificar, setEmailParaVerificar] = useState("");
   const [cargandoVerificacion, setCargandoVerificacion] = useState(false);
   const [esClienteExistente, setEsClienteExistente] = useState(false);
 
-  // Direcciones si es cliente
   const [direccionesCliente, setDireccionesCliente] = useState([]);
   const [selectedDireccionId, setSelectedDireccionId] = useState(null);
 
-  // --------------------------------------------
-  // Paso 2: Ubicación (si no es cliente)
-  // --------------------------------------------
   const [codigoPostal, setCodigoPostal] = useState("");
   const [direccion, setDireccion] = useState("");
 
@@ -92,9 +55,6 @@ function WizardAlquiler() {
   const [cpValido, setCpValido] = useState(false);
   const [modoLocalidad, setModoLocalidad] = useState("seleccionar");
 
-  // --------------------------------------------
-  // Paso 3: Productos
-  // --------------------------------------------
   const [producto, setProducto] = useState("");
   const [fechaInicio, setFechaInicio] = useState("");
   const [fechaEntrega, setFechaEntrega] = useState("");
@@ -105,16 +65,11 @@ function WizardAlquiler() {
   const [subPrecio, setSubPrecio] = useState("");
   const [formaPago, setFormaPago] = useState("");
   const [detallesPago, setDetallesPago] = useState("");
-
-  // Unidades a rentar en el producto principal
   const [unitsToRent, setUnitsToRent] = useState("");
 
-  // Productos adicionales
   const [productosAdicionales, setProductosAdicionales] = useState([]);
+  const [productosDisponibles, setProductosDisponibles] = useState([]);
 
-  // --------------------------------------------
-  // Efecto para resetear CP cuando cambia
-  // --------------------------------------------
   useEffect(() => {
     setCpValido(false);
     setPais("");
@@ -124,13 +79,11 @@ function WizardAlquiler() {
     setLocalidadesDisponibles([]);
   }, [codigoPostal]);
 
-  // --------------------------------------------
-  // Funciones para abrir/cerrar Wizard
-  // --------------------------------------------
   const handleAbrirWizard = () => {
     resetCampos();
     setShowWizard(true);
   };
+
   const handleCerrarWizard = () => {
     setShowWizard(false);
   };
@@ -170,39 +123,51 @@ function WizardAlquiler() {
     setProductosAdicionales([]);
   };
 
-  // --------------------------------------------
-  // Submodal para verificar correo
-  // --------------------------------------------
   const handleAbrirSubmodalCorreo = () => {
     setEmailParaVerificar("");
     setShowSubmodalCorreo(true);
   };
+
   const handleCerrarSubmodalCorreo = () => {
     setShowSubmodalCorreo(false);
   };
 
-  const handleVerificarCorreo = () => {
+  const handleVerificarCorreo = async () => {
     setCargandoVerificacion(true);
-    setTimeout(() => {
-      if (emailParaVerificar.trim().toLowerCase() === DATOS_CLIENTE_SIMULADO.email) {
+
+    try {
+      const correoParam = emailParaVerificar.trim().toLowerCase();
+      const response = await api.get(
+        `/api/pedidos/pedidosmanuales/${correoParam}`,
+        {
+          withCredentials: true,
+          headers: { "X-CSRF-Token": csrfToken },
+        }
+      );
+      console.log("Api de pedidos a bse de correo ", response);
+
+      if (response.data && response.data.length > 0) {
+        const cliente = response.data[0];
+        console.log("Vakor de cliente enocntrado", cliente);
         setEsClienteExistente(true);
-        setNombre(DATOS_CLIENTE_SIMULADO.nombre);
-        setApellido(DATOS_CLIENTE_SIMULADO.apellido);
-        setTelefono(DATOS_CLIENTE_SIMULADO.telefono);
-        setCorreo(DATOS_CLIENTE_SIMULADO.email);
-        setDireccionesCliente(DATOS_CLIENTE_SIMULADO.direcciones);
+        setNombre(cliente.nombre);
+        setApellido(`${cliente.apellidoP} ${cliente.apellidoM}`);
+        setTelefono(cliente.telefono);
+        setCorreo(cliente.correo);
+        setDireccionesCliente(response.data);
         toast.success("¡Datos de cliente cargados!");
         setShowSubmodalCorreo(false);
       } else {
-        toast.error("Correo no encontrado en la base simulada.");
+        toast.error("Cliente no encontrado.");
       }
+    } catch (error) {
+      console.error(error);
+      toast.error("Error al verificar el cliente.");
+    } finally {
       setCargandoVerificacion(false);
-    }, 1000);
+    }
   };
 
-  // --------------------------------------------
-  // Validar CP (SEPOMEX)
-  // --------------------------------------------
   const handleValidarCP = async () => {
     try {
       setCargandoCP(true);
@@ -251,9 +216,6 @@ function WizardAlquiler() {
     }
   };
 
-  // --------------------------------------------
-  // Navegación
-  // --------------------------------------------
   const nextStep = () => {
     if (currentStep < totalSteps) setCurrentStep((prev) => prev + 1);
   };
@@ -277,76 +239,26 @@ function WizardAlquiler() {
     }
   };
 
-  const paso3Valido = () =>
-    producto &&
-    fechaInicio &&
-    fechaEntrega &&
-    horaAlquiler &&
-    stock.trim() !== "" &&
-    precio.trim() !== "" &&
-    formaPago.trim() !== "";
+  const paso3Valido = () => {
+    return step3Data.isValid;
+  };
+
+  const [step3Data, setStep3Data] = useState({
+    isValid: false,
+    selectedProducts: [],
+    lineItems: [],
+    ticketTotal: 0,
+  });
+
+  const handleStep3Change = (data) => {
+    setStep3Data(data);
+  };
 
   const canGoNext = () => {
     if (currentStep === 1) return paso1Valido();
     if (currentStep === 2) return paso2Valido();
     if (currentStep === 3) return paso3Valido();
     return false;
-  };
-
-  // --------------------------------------------
-  // Cotizar (Paso 3)
-  // --------------------------------------------
-  const calcularDiasAlquiler = () => {
-    if (!fechaInicio || !fechaEntrega) return 0;
-    const inicio = new Date(fechaInicio);
-    const fin = new Date(fechaEntrega);
-    if (fin <= inicio) return 0;
-    const diffMs = fin - inicio;
-    return Math.ceil(diffMs / (1000 * 60 * 60 * 24));
-  };
-
-  const handleCotizarPrincipal = () => {
-    const dias = calcularDiasAlquiler();
-    const precioNumber = parseFloat(precio) || 0;
-    const unitsNumber = parseInt(unitsToRent) || 0;
-    const total = dias * precioNumber * unitsNumber;
-    setSubPrecio(total.toString());
-    toast.success(`Cotización principal: $${total}`);
-  };
-
-  // Productos adicionales
-  const agregarProductoAdicional = () => {
-    const nuevo = {
-      id: Date.now(),
-      producto: "",
-      stock: "",
-      precio: "",
-      subPrecio: "",
-      units: "",
-    };
-    setProductosAdicionales((prev) => [...prev, nuevo]);
-  };
-
-  const actualizarProductoAdicional = (id, field, value) => {
-    setProductosAdicionales((prev) =>
-      prev.map((p) => (p.id === id ? { ...p, [field]: value } : p))
-    );
-  };
-
-  const cotizarProductoAdicional = (id) => {
-    const dias = calcularDiasAlquiler();
-    setProductosAdicionales((prev) =>
-      prev.map((p) => {
-        if (p.id === id) {
-          const precioNumber = parseFloat(p.precio) || 0;
-          const unitsNumber = parseInt(p.units) || 0;
-          const total = dias * precioNumber * unitsNumber;
-          toast.success(`Cotización adicional: $${total}`);
-          return { ...p, subPrecio: total.toString() };
-        }
-        return p;
-      })
-    );
   };
 
   // --------------------------------------------
@@ -358,6 +270,24 @@ function WizardAlquiler() {
     handleCerrarWizard();
   };
 
+  // NUEVO: Traer la lista de productos desde tu endpoint
+  // --------------------------------------------
+  useEffect(() => {
+    const fetchProductos = async () => {
+      try {
+        const response = await api.get("/api/productos/pedidos-manual", {
+          withCredentials: true,
+          headers: { "X-CSRF-Token": csrfToken },
+        });
+        setProductosDisponibles(response.data);
+        console.log("Datos recibidos hhh", productosDisponibles);
+      } catch (error) {
+        console.error("Error al obtener productos disponibles:", error);
+      }
+    };
+
+    fetchProductos();
+  }, [csrfToken]);
   // --------------------------------------------
   // Render de cada paso
   // --------------------------------------------
@@ -404,59 +334,49 @@ function WizardAlquiler() {
 
   const renderPaso3 = () => (
     <StepThree
-      producto={producto}
-      setProducto={setProducto}
       fechaInicio={fechaInicio}
       setFechaInicio={setFechaInicio}
       fechaEntrega={fechaEntrega}
       setFechaEntrega={setFechaEntrega}
       horaAlquiler={horaAlquiler}
       setHoraAlquiler={setHoraAlquiler}
-      stock={stock}
-      setStock={setStock}
-      precio={precio}
-      setPrecio={setPrecio}
-      subPrecio={subPrecio}
-      setSubPrecio={setSubPrecio}
       formaPago={formaPago}
       setFormaPago={setFormaPago}
       detallesPago={detallesPago}
       setDetallesPago={setDetallesPago}
-      unitsToRent={unitsToRent}
-      setUnitsToRent={setUnitsToRent}
-      handleCotizarPrincipal={handleCotizarPrincipal}
-      agregarProductoAdicional={agregarProductoAdicional}
-      productosAdicionales={productosAdicionales}
-      actualizarProductoAdicional={actualizarProductoAdicional}
-      cotizarProductoAdicional={cotizarProductoAdicional}
+      productosDisponibles={productosDisponibles}
+
+      onChangeData={handleStep3Change}
     />
   );
 
   const renderPaso4 = () => (
     <StepFour
+     
       nombre={nombre}
       apellido={apellido}
       telefono={telefono}
       correo={correo}
-      esClienteExistente={esClienteExistente}
-      direccionesCliente={direccionesCliente}
-      selectedDireccionId={selectedDireccionId}
+
+
       codigoPostal={codigoPostal}
       pais={pais}
       estado={estado}
       municipio={municipio}
       localidad={localidad}
       direccion={direccion}
-      producto={producto}
+      direccionesCliente={direccionesCliente}
+      esClienteExistente={esClienteExistente}
+      selectedDireccionId={selectedDireccionId}
+      setSelectedDireccionId={setSelectedDireccionId}
+      
+      step3Data={step3Data}
+    
       fechaInicio={fechaInicio}
       fechaEntrega={fechaEntrega}
       horaAlquiler={horaAlquiler}
-      stock={stock}
-      precio={precio}
-      subPrecio={subPrecio}
       formaPago={formaPago}
       detallesPago={detallesPago}
-      productosAdicionales={productosAdicionales}
     />
   );
 
@@ -493,19 +413,50 @@ function WizardAlquiler() {
 
       {/* Wizard principal */}
       {showWizard && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4">
-          <div className="bg-white w-full max-w-2xl rounded shadow-lg relative">
+        <div
+          className="
+      fixed inset-0 z-50
+      flex items-center justify-center
+      bg-black bg-opacity-50
+      p-4
+      dark:bg-black dark:bg-opacity-70
+      transition-colors
+    "
+        >
+          <div
+            className="
+        w-full max-w-2xl
+        bg-white dark:bg-gray-800
+        rounded shadow-lg
+        relative
+        overflow-hidden
+      "
+          >
             {/* Barra superior amarilla */}
-            <div className="bg-yellow-400 h-2 w-full rounded-t" />
+            <div className="bg-yellow-400 dark:bg-yellow-500 h-2 w-full rounded-t" />
+
+            {/* Botón de Cerrar */}
             <button
               type="button"
               onClick={handleCerrarWizard}
-              className="absolute top-2 right-2 text-gray-600 hover:text-red-600 transition"
+              className="
+          absolute top-2 right-2
+          text-gray-600 dark:text-gray-200
+          hover:text-red-600
+          transition
+        "
             >
               <FontAwesomeIcon icon={faTimes} size="lg" />
             </button>
 
-            <div className="p-6">
+            {/* Contenedor interno con scroll si excede la altura */}
+            <div
+              className="
+          p-6
+          max-h-[calc(100vh-8rem)]
+          overflow-y-auto
+        "
+            >
               {/* Encabezado de pasos */}
               <div className="flex justify-between items-center mb-4">
                 <div className="flex space-x-4">
@@ -513,7 +464,9 @@ function WizardAlquiler() {
                     <div
                       key={step}
                       className={`flex flex-col items-center ${
-                        currentStep === step ? "text-yellow-600" : "text-gray-400"
+                        currentStep === step
+                          ? "text-yellow-600"
+                          : "text-gray-400"
                       }`}
                     >
                       <div
@@ -523,10 +476,18 @@ function WizardAlquiler() {
                             : "border-gray-400"
                         }`}
                       >
-                        {step === 1 && <FontAwesomeIcon icon={faAddressCard} size="sm" />}
-                        {step === 2 && <FontAwesomeIcon icon={faLocationArrow} size="sm" />}
-                        {step === 3 && <FontAwesomeIcon icon={faHome} size="sm" />}
-                        {step === 4 && <FontAwesomeIcon icon={faClipboardCheck} size="sm" />}
+                        {step === 1 && (
+                          <FontAwesomeIcon icon={faAddressCard} size="sm" />
+                        )}
+                        {step === 2 && (
+                          <FontAwesomeIcon icon={faLocationArrow} size="sm" />
+                        )}
+                        {step === 3 && (
+                          <FontAwesomeIcon icon={faHome} size="sm" />
+                        )}
+                        {step === 4 && (
+                          <FontAwesomeIcon icon={faClipboardCheck} size="sm" />
+                        )}
                       </div>
                       <span className="text-xs mt-1">
                         {step === 1
@@ -542,7 +503,11 @@ function WizardAlquiler() {
                 </div>
               </div>
 
-              <form onSubmit={handleSubmitWizard} className="space-y-6">
+              {/* Formulario del Wizard */}
+              <form
+                onSubmit={handleSubmitWizard}
+                className="space-y-6 dark:text-gray-100"
+              >
                 {renderStepContent()}
 
                 {/* Botones de navegación */}
@@ -551,7 +516,13 @@ function WizardAlquiler() {
                     <button
                       type="button"
                       onClick={prevStep}
-                      className="px-4 py-2 rounded bg-gray-200 text-gray-700 hover:bg-gray-300 transition"
+                      className="
+                  px-4 py-2
+                  rounded
+                  bg-gray-200 text-gray-700
+                  hover:bg-gray-300
+                  transition
+                "
                     >
                       Anterior
                     </button>
@@ -561,11 +532,16 @@ function WizardAlquiler() {
                       type="button"
                       onClick={nextStep}
                       disabled={!canGoNext()}
-                      className={`px-4 py-2 rounded ${
-                        canGoNext()
-                          ? "bg-yellow-500 text-white hover:bg-yellow-600"
-                          : "bg-gray-400 text-gray-200 cursor-not-allowed"
-                      } transition`}
+                      className={`
+                  px-4 py-2
+                  rounded
+                  transition
+                  ${
+                    canGoNext()
+                      ? "bg-yellow-500 text-white hover:bg-yellow-600"
+                      : "bg-gray-400 text-gray-200 cursor-not-allowed"
+                  }
+                `}
                     >
                       Siguiente
                     </button>
@@ -573,7 +549,13 @@ function WizardAlquiler() {
                   {currentStep === totalSteps && (
                     <button
                       type="submit"
-                      className="px-4 py-2 rounded bg-green-600 text-white hover:bg-green-700 transition"
+                      className="
+                  px-4 py-2
+                  rounded
+                  bg-green-600 text-white
+                  hover:bg-green-700
+                  transition
+                "
                     >
                       Finalizar
                     </button>
@@ -585,7 +567,6 @@ function WizardAlquiler() {
         </div>
       )}
 
-      {/* Submodal para verificar correo */}
       {showSubmodalCorreo && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4">
           <div className="bg-white w-full max-w-md rounded shadow-lg relative">
@@ -599,7 +580,10 @@ function WizardAlquiler() {
             </button>
             <div className="p-6">
               <h2 className="text-xl font-semibold text-gray-800 mb-3 flex items-center">
-                <FontAwesomeIcon icon={faUser} className="mr-2 text-yellow-500" />
+                <FontAwesomeIcon
+                  icon={faUser}
+                  className="mr-2 text-yellow-500"
+                />
                 Verificar Correo de Cliente
               </h2>
               <p className="text-sm text-gray-600 mb-4">

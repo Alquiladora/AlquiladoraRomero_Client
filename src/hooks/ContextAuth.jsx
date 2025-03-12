@@ -219,10 +219,9 @@ export const AuthProvider = ({ children }) => {
         if (error.response.status === 500) {
           navigate("/error500")
         } else if (error.response.status === 401 || error.response.status === 403) {
-      
+          // setUser(null);
           console.warn("⚠️ Usuario no autenticado (401/403). Sesión expirada o inválida, pero no forzamos logout.");
-          setUser(null); 
-          navigate("/login")
+         
         } else {
           setError(
             error.response?.data?.message ||
@@ -258,13 +257,13 @@ export const AuthProvider = ({ children }) => {
         navigate("/login");
       } else {
         console.warn("⚠️ No se pudo cerrar sesión correctamente, recargando...");
-        // window.location.reload();
+        window.location.reload();
       }
     } catch (error) {
       console.error("⚠️ Error al cerrar sesión:", error);
       if (error.response?.status === 401 || error.response?.status === 403) {
         console.warn("⚠️ La sesión ya estaba cerrada, recargando...");
-        // window.location.reload();
+        window.location.reload();
       } else {
         setError(error.response?.data?.message || "Error al cerrar sesión.");
       }
@@ -281,32 +280,6 @@ export const AuthProvider = ({ children }) => {
   }, [csrfToken]);
 
 
-  useEffect(() => {
-    if (!socket) return;
-    const handleSessionExpired = (data) => {
-     
-      setUser(null);
-      navigate("/login");
-    };
-
-    const handleActualizacionPerfil = () => {
-      console.log(
-        "Evento 'actualizacionPerfil' recibido. Verificando autenticación..."
-      );
-      checkAuth();
-    };
-
-    
-    socket.on("sessionExpired", handleSessionExpired);
-    socket.on("actualizacionPerfil", handleActualizacionPerfil);
-
-   
-    return () => {
-      socket.off("sessionExpired", handleSessionExpired);
-      socket.off("actualizacionPerfil", handleActualizacionPerfil);
-    };
-  }, [socket, csrfToken, navigate]);
-  
   if (isLoading) return <SpinerCarga />;
 
   return (

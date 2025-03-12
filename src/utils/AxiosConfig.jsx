@@ -8,19 +8,15 @@ const api = axios.create({
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    // Si no hay respuesta, puede ser error de red o de timeout.
     if (!error.response) {
       if (!navigator.onLine) {
-        // No hay conexión a Internet.
         console.error("❌ Offline: No hay conexión a Internet.");
         window.dispatchEvent(new Event("network-error"));
       } else {
-        // Problema de red (el endpoint no respondió o no se pudo alcanzar).
         console.error("❌ Network Error: No se pudo conectar al servidor.", error.message);
         window.dispatchEvent(new Event("network-error"));
       }
     } else {
-      // Hay respuesta, diferenciamos según el código de estado.
       const { status, data } = error.response;
 
       switch (status) {
