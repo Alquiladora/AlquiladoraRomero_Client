@@ -4,33 +4,23 @@ import ProductosRelacionados from "./ProductosRelacionados";
 import { toast } from "react-toastify";
 import { useAuth } from "../../hooks/ContextAuth";
 import api from "../../utils/AxiosConfig";
+import colorMap from "./Colors";
+
+import { FaMoneyBillWave, FaTimes } from "react-icons/fa";
+import { GiMaterialsScience } from "react-icons/gi";
 
 function DetalleProducto() {
   const { idProducto } = useParams();
-  const { csrfToken, user } = useAuth();
+  const { csrfToken } = useAuth();
   const [producto, setProducto] = useState(null);
+
   const [showModal, setShowModal] = useState(false);
-  
+
   const fallbackImage = "https://via.placeholder.com/600x600?text=Sin+Imagen";
+
   
-  // Mapa opcional de nombres de color a hex (puedes extenderlo a tu gusto)
-  const colorMap = {
-    Azul: "#0000FF",
-    Rojo: "#FF0000",
-    Verde: "#00FF00",
-    Negro: "#000000",
-    Blanco: "#FFFFFF",
-    // Agrega más según tus necesidades...
-  };
+  const [selectedVariant, setSelectedVariant] = useState(null);
 
-  // Estados para la renta
-  const [dias, setDias] = useState(1);
-  const [fechaInicio, setFechaInicio] = useState("");
-  const [fechaFin, setFechaFin] = useState("");
-
-  // Estado para el color seleccionado
-  const [colorSeleccionado, setColorSeleccionado] = useState("");
-  // Estado para la imagen principal
   const [imagenPrincipal, setImagenPrincipal] = useState(fallbackImage);
 
   const navigate = useNavigate();
@@ -38,23 +28,28 @@ function DetalleProducto() {
   useEffect(() => {
     const fetchProductoDetalle = async () => {
       try {
-        const response = await api.get(`/api/productos/producto/${idProducto}`, {
-          withCredentials: true,
-          headers: { "X-CSRF-Token": csrfToken },
-        });
-        console.log("Detalle del producto:", response.data);
+        const response = await api.get(
+          `/api/productos/producto/${idProducto}`,
+          {
+            withCredentials: true,
+            headers: { "X-CSRF-Token": csrfToken },
+          }
+        );
+
         if (response.data.success && response.data.product) {
           const prod = response.data.product;
           setProducto(prod);
 
-          // Imagen principal (primera del array de imágenes, si existe)
-          setImagenPrincipal(prod.imagenes?.split(",")[0] || fallbackImage);
+        
+          const primeraImagen = prod.imagenes?.split(",")[0] || fallbackImage;
+          setImagenPrincipal(primeraImagen);
 
-          // Si 'colores' existe, usamos el primer color; si no, usamos 'color'
-          if (prod.colores && prod.colores.length > 0) {
-            setColorSeleccionado(prod.colores[0]);
-          } else if (prod.color) {
-            setColorSeleccionado(prod.color);
+   
+          if (prod.variantes && prod.variantes.length > 0) {
+            const varianteConStock = prod.variantes.find(
+              (v) => parseInt(v.stock, 10) > 0
+            );
+            setSelectedVariant(varianteConStock || prod.variantes[0]);
           }
         }
       } catch (error) {
@@ -68,42 +63,30 @@ function DetalleProducto() {
     }
   }, [idProducto, csrfToken]);
 
-  const handleImagenClick = (url) => {
-    setImagenPrincipal(url);
+  const esNuevo = () => {
+    if (!producto?.fechaCreacion) return false;
+    const fechaCreacion = new Date(producto.fechaCreacion);
+    const hoy = new Date();
+    const diffEnMs = hoy - fechaCreacion;
+    const diffEnDias = diffEnMs / (1000 * 60 * 60 * 24);
+    return diffEnDias < 5; 
+  };
+
+
+  const handleImagenClick = () => {
     setShowModal(true);
   };
 
-  // Lógica para calcular fechaFin automáticamente según los días seleccionados
-  const handleFechaInicioChange = (e) => {
-    setFechaInicio(e.target.value);
-    if (dias > 0 && e.target.value) {
-      const fecha = new Date(e.target.value);
-      fecha.setDate(fecha.getDate() + parseInt(dias, 10));
-      setFechaFin(fecha.toISOString().split("T")[0]);
+ 
+  const handleColorSelect = (variant) => {
+    if (parseInt(variant.stock, 10) > 0) {
+      setSelectedVariant(variant);
     }
   };
 
-  const handleDiasChange = (e) => {
-    const newDias = e.target.value;
-    setDias(newDias);
-    if (fechaInicio) {
-      const fecha = new Date(fechaInicio);
-      fecha.setDate(fecha.getDate() + parseInt(newDias, 10));
-      setFechaFin(fecha.toISOString().split("T")[0]);
-    }
-  };
+  const anyVariantInStock =
+    producto?.variantes?.some((v) => parseInt(v.stock, 10) > 0) || false;
 
-  const handleRentar = () => {
-    if (!fechaInicio || !fechaFin) {
-      alert("Por favor selecciona fecha de inicio y la duración (días).");
-      return;
-    }
-    alert(
-      `¡Producto rentado por ${dias} día(s), desde ${fechaInicio} hasta ${fechaFin}!\nColor seleccionado: ${colorSeleccionado}`
-    );
-  };
-
-  // Animación para banner
   const slideUpDownKeyframes = `
     @keyframes slideUpDown {
       0% {
@@ -128,6 +111,23 @@ function DetalleProducto() {
     }
   `;
 
+
+  const fadeInKeyframes = `
+    @keyframes fadeIn {
+      0% {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+      100% {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    .fadeIn {
+      animation: fadeIn 0.8s ease-out forwards;
+    }
+  `;
+
   if (!producto) {
     return (
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-6">
@@ -138,29 +138,35 @@ function DetalleProducto() {
     );
   }
 
+
+  const selectedStock = selectedVariant
+    ? parseInt(selectedVariant.stock, 10)
+    : 0;
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-900 py-6 relative overflow-hidden">
-      {/* Definición de keyframes para animación */}
+    
       <style>{slideUpDownKeyframes}</style>
-      {/* Banner animado */}
+      <style>{fadeInKeyframes}</style>
+
+ 
       <div className="bg-yellow-400 text-black font-bold text-sm py-2 text-center uppercase tracking-wider shadow animate-slideUpDown">
         ¡Renta hoy y obtén un descuento en días extra!
       </div>
 
       <div className="max-w-6xl mx-auto px-4 mt-4">
-        {/* Encabezado */}
+        
         <h1 className="text-3xl md:text-4xl font-extrabold mb-6 text-gray-800 dark:text-white text-center">
-          Detalle del producto:{" "}
-          <span className="text-blue-600">{producto.nombreProducto}</span>
+          Detalle del producto
         </h1>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          {/* Sección de imágenes */}
+       
           <div>
-            {/* Imagen principal con modal */}
+          
             <div
-              className="border-2 border-gray-200 dark:border-gray-700 rounded-md overflow-hidden mb-4 shadow-lg cursor-pointer"
-              onClick={() => handleImagenClick(imagenPrincipal)}
+              className="relative border-2 border-gray-200 dark:border-gray-700 rounded-md overflow-hidden mb-4 shadow-lg cursor-pointer"
+              onClick={handleImagenClick}
             >
               <img
                 src={imagenPrincipal}
@@ -169,19 +175,20 @@ function DetalleProducto() {
                   e.target.onerror = null;
                   e.target.src = fallbackImage;
                 }}
-                className="w-full h-96 object-cover transform transition-transform duration-300 hover:scale-105"
+                className="w-full h-64 md:h-96 object-cover transform transition-transform duration-300 hover:scale-105"
               />
             </div>
-            {/* Miniaturas */}
+
+            
             <div className="flex space-x-3">
               {producto.imagenes &&
                 producto.imagenes.split(",").map((img, index) => (
                   <div
                     key={index}
-                    className={`w-20 h-20 border-2 rounded-md overflow-hidden cursor-pointer shadow-sm transform transition-all hover:scale-105 ${
+                    className={`w-16 h-16 md:w-20 md:h-20 border-2 rounded-md overflow-hidden cursor-pointer shadow-sm transform transition-all hover:scale-105 ${
                       img === imagenPrincipal ? "ring-2 ring-blue-500" : ""
                     }`}
-                    onClick={() => handleImagenClick(img)}
+                    onClick={() => setImagenPrincipal(img)}
                   >
                     <img
                       src={img}
@@ -197,163 +204,185 @@ function DetalleProducto() {
             </div>
           </div>
 
-          {/* Sección de detalles */}
-          <div className="bg-white dark:bg-gray-800 p-6 rounded-md shadow-lg relative">
-            <div className="absolute top-0 right-0 bg-blue-600 text-white text-xs px-2 py-1 rounded-bl-md uppercase">
-              Nuevo
-            </div>
-            <h2 className="text-2xl md:text-3xl font-bold text-gray-800 dark:text-white mb-3">
-              {producto.nombreProducto}
-            </h2>
-            <p className="text-gray-600 dark:text-gray-300 mb-2">
-              Categoría:{" "}
-              <span className="font-medium text-blue-600">
-                {producto.nombreCategoria}
-              </span>
-            </p>
-            <p className="text-gray-600 dark:text-gray-300 mb-4">
-              {producto.detalles}
-            </p>
-            <p className="text-gray-800 dark:text-white text-2xl font-bold mb-4">
-  Precio por día: {(producto.precioAlquiler === null || producto.precioAlquiler === "0.00") 
-    ? "0" 
-    : `$${producto.precioAlquiler}`}
-</p>
+         
+          <div className="bg-white dark:bg-gray-800 p-6 rounded-md shadow-lg relative max-w-md w-full border-t-4 border-yellow-400 mx-auto md:mx-0 fadeIn">
+           
+            {esNuevo() && (
+              <div className="absolute top-0 right-0 bg-blue-600 text-white text-xs px-2 py-1 rounded-bl-md uppercase">
+                Nuevo
+              </div>
+            )}
 
-            <p className="text-sm mb-6">
+          
+            <p className="text-center text-gray-800 dark:text-white mb-2 text-xl font-bold uppercase tracking-wide">
+              {producto.nombreProducto}
+            </p>
+
+  
+            <p className=" text-gray-600 dark:text-gray-300 mb-2 text-sm uppercase tracking-wide">
+              Subcategoría: {producto.nombreSubcategoria}
+            </p>
+
+          
+            <div className="fadeIn">
+              <p className="text-gray-600 dark:text-gray-300 mb-4">
+                {producto.detalles}
+              </p>
+            </div>
+
+          
+            {producto.material && (
+              <p className="flex  text-gray-600 dark:text-gray-300 mb-2">
+                <GiMaterialsScience className="mr-2 text-xl text-blue-500" />
+                <span className="font-medium">Material:</span>{" "}
+                <span className="ml-1">{producto.material}</span>
+              </p>
+            )}
+
+          
+            <p className="flex  text-gray-800 dark:text-white text-2xl font-bold mb-4">
+              <FaMoneyBillWave className="mr-2 text-green-600" />
+              <span className="mr-2">Precio por día:</span>
+              {producto.precioAlquiler === null ||
+              producto.precioAlquiler === "0.00"
+                ? "0"
+                : `$${producto.precioAlquiler}`}
+            </p>
+
+           
+            <p className="text-xl mb-6 ">
               Stock disponible:{" "}
               <span
                 className={`font-bold ${
-                  producto.stock === 0 ? "text-red-500" : "text-green-600"
+                  selectedStock === 0 ? "text-red-500" : "text-green-600"
                 }`}
               >
-                {producto.stock === 0 ? "Agotado" : producto.stock}
+                {selectedStock === 0 ? "Agotado" : selectedStock}
               </span>
             </p>
 
-            {producto.colores && producto.colores.length > 0 ? (
+      
+            {producto.variantes && producto.variantes.length > 0 && (
               <div className="mb-5">
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 text-center">
                   Selecciona color:
                 </label>
-                {producto.colores.length === 1 ? (
-                  <div className="flex items-center space-x-2">
-                    <div
-                      className="w-6 h-6 rounded-full border-2 border-white shadow"
-                      style={{
-                        backgroundColor:
-                          colorMap[producto.colores[0]] || "#CCCCCC",
-                      }}
-                      title={`Color: ${producto.colores[0]}`}
-                    ></div>
-                  </div>
-                ) : (
-                  <div className="flex space-x-2">
-                    {producto.colores.map((color) => (
+                <div className="flex justify-center space-x-3">
+                  {producto.variantes.map((variant, idx) => {
+                    const isOutOfStock = parseInt(variant.stock, 10) === 0;
+                    const isSelected =
+                      selectedVariant?.nombreColor === variant.nombreColor;
+
+                    return (
                       <div
-                        key={color}
-                        className={`w-6 h-6 rounded-full border-2 cursor-pointer shadow ${
-                          colorSeleccionado === color
-                            ? "ring-2 ring-blue-500"
-                            : ""
-                        }`}
+                        key={idx}
+                        className={`
+                          relative w-8 h-8 rounded-full border-2 shadow group
+                          ${
+                            isSelected
+                              ? "ring-2 ring-blue-500"
+                              : "hover:scale-105"
+                          }
+                          ${
+                            isOutOfStock
+                              ? "opacity-50 cursor-not-allowed pointer-events-none"
+                              : "cursor-pointer"
+                          }
+                        `}
                         style={{
-                          backgroundColor: colorMap[color] || "#CCCCCC",
+                          backgroundColor:
+                            colorMap[variant.nombreColor] || "#CCCCCC",
                         }}
-                        title={`Color: ${color}`}
-                        onClick={() => setColorSeleccionado(color)}
-                      ></div>
-                    ))}
-                  </div>
-                )}
-              </div>
-            ) : producto.color ? (
-              <div className="mb-5">
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                  Color:
-                </label>
-                <div className="flex items-center space-x-2">
-                  <div
-                    className="w-6 h-6 rounded-full border-2 border-white shadow"
-                    style={{
-                      backgroundColor: colorMap[producto.color] || "#CCCCCC",
-                    }}
-                    title={`Color: ${producto.color}`}
-                  ></div>
-                  <span className="text-sm text-gray-700 dark:text-gray-300">
-                    {producto.color}
-                  </span>
+                        onClick={() => handleColorSelect(variant)}
+                      >
+                      
+                        {isOutOfStock && (
+                          <span className="absolute top-[-2rem] left-1/2 transform -translate-x-1/2 bg-black text-white text-xs rounded px-2 py-1 opacity-0 group-hover:opacity-100 transition-opacity z-10">
+                            Color no disponible
+                          </span>
+                        )}
+
+                       
+                        {isOutOfStock && (
+                          <FaTimes className="absolute top-0 right-0 text-white bg-black rounded-full text-xs" />
+                        )}
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
-            ) : null}
+            )}
 
-            {/* Formulario de renta */}
-            <div className="space-y-5">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                  Fecha de inicio
-                </label>
-                <input
-                  type="date"
-                  value={fechaInicio}
-                  onChange={handleFechaInicioChange}
-                  className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent transition-all"
-                />
+         
+            <div className="mt-4">
+              <div className="mt-4 flex justify-center">
+                <button
+                  disabled={!anyVariantInStock}
+                  className={`
+      px-6 py-2 text-white font-semibold rounded 
+      ${
+        anyVariantInStock
+          ? "bg-[#FFCC00] hover:bg-[#FFB300]"
+          : "bg-gray-400 cursor-not-allowed"
+      }
+    `}
+                >
+                  {anyVariantInStock ? "Alquilar" : "Producto no disponible"}
+                </button>
               </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                  Días de renta
-                </label>
-                <input
-                  type="number"
-                  min="1"
-                  value={dias}
-                  onChange={handleDiasChange}
-                  className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent transition-all"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                  Fecha de devolución
-                </label>
-                <input
-                  type="date"
-                  value={fechaFin}
-                  onChange={(e) => setFechaFin(e.target.value)}
-                  className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent transition-all"
-                  readOnly
-                />
-              </div>
-
-              <button
-                onClick={handleRentar}
-                disabled={producto.stock === 0}
-                className={`w-full py-3 mt-2 font-semibold rounded-md text-white tracking-wider uppercase transition-all ${
-                  producto.stock === 0
-                    ? "bg-gray-400 cursor-not-allowed"
-                    : "bg-blue-600 hover:bg-blue-700"
-                }`}
-              >
-                {producto.stock === 0 ? "Agotado" : "Alquilar producto"}
-              </button>
             </div>
           </div>
         </div>
 
-        {/* Productos relacionados */}
-        <ProductosRelacionados idSubCategoria={producto.idSubCategoria} />
+
+        <ProductosRelacionados idSubCategoria={producto.idSubCategoria}  idProducto={producto.idProducto} nombreCategoria={producto.nombreCategoria} />
       </div>
 
-      {/* Modal para ver imagen en grande */}
       {showModal && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-75 z-50">
-          <div className="relative bg-white dark:bg-gray-800 rounded-lg p-4 max-w-3xl mx-auto">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-75">
+          {/* Estilos y keyframes para animación */}
+          <style>
+            {`
+        @keyframes fadeIn {
+          0% {
+            opacity: 0;
+            transform: scale(0.95);
+          }
+          100% {
+            opacity: 1;
+            transform: scale(1);
+          }
+        }
+        .animate-fadeIn {
+          animation: fadeIn 0.3s ease-out forwards;
+        }
+      `}
+          </style>
+
+          {/* Contenedor del modal con animación */}
+          <div className="relative bg-white dark:bg-gray-800 rounded-lg shadow-lg overflow-hidden w-11/12 max-w-3xl mx-auto animate-fadeIn">
+            {/* Botón para cerrar */}
             <button
               onClick={() => setShowModal(false)}
-              className="absolute top-2 right-2 text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
+              className="absolute top-3 right-3 text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white bg-gray-200 dark:bg-gray-700 rounded-full p-1 transition-colors"
             >
-              Cerrar
+              {/* Ícono “X” */}
+              <svg
+                className="w-5 h-5"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth={2}
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M6 18L18 6M6 6l12 12"
+                />
+              </svg>
             </button>
+
+            {/* Imagen ampliada */}
             <img
               src={imagenPrincipal}
               alt="Imagen ampliada"

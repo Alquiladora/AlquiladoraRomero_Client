@@ -1,7 +1,8 @@
 import axios from 'axios';
 
 const api = axios.create({
-  baseURL: "http://localhost:3001",
+  // baseURL:  "http://localhost:3001",    
+   baseURL:"https://alquiladora-romero-server.onrender.com",
   timeout: 16000,
 });
 
@@ -25,7 +26,7 @@ api.interceptors.response.use(
           break;
         case 401:
           console.error("❌ Error 401: No autorizado.", data);
-          window.location.href = '/login';
+        
           break;
         case 500:
           console.error("❌ Error 500: Error interno del servidor.", data);

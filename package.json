@@ -19,6 +19,7 @@
     "animejs": "^3.2.2",
     "axios": "^1.7.9",
     "cloudinary": "^2.5.1",
+    "color-namer": "^1.4.0",
     "cookie": "^1.0.2",
     "cra-template": "1.2.0",
     "formik": "^2.4.6",

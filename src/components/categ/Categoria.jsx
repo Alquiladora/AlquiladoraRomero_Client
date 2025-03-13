@@ -1,15 +1,25 @@
+import React from "react";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
+import { useAuth } from "../../hooks/ContextAuth";
 
 const Categoria = ({ categories, borderRadius = "12px" }) => {
+ const { user, csrfToken } = useAuth();
+
+  if (!categories || categories.length === 0) {
+    return (
+      <div className="w-full py-4 px-4 dark:bg-gray-950 dark:text-white flex justify-center items-center h-40">
+        <div className="w-16 h-16 border-4 border-t-4 border-gray-200 rounded-full animate-spin"></div>
+      </div>
+    );
+  }
+
   return (
     <div className="w-full py-4 px-4 dark:bg-gray-950 dark:text-white">
-      {/* Título */}
       <h2 className="text-4xl font-bold text-[#fcb900] text-center mb-6">
         Categorías
       </h2>
 
-      {/* Contenedor de categorías */}
       <div className="overflow-x-auto flex space-x-6 py-4 px-4 rounded-lg dark:bg-gray-950 justify-center">
         {categories.map((category, index) => (
           <motion.div
@@ -20,19 +30,18 @@ const Categoria = ({ categories, borderRadius = "12px" }) => {
             style={{ borderRadius: borderRadius }}
           >
             <div className="relative">
-              {/* Imagen de la categoría */}
               <img
                 src={category.image}
                 alt={category.name}
                 className="w-40 h-24 object-cover rounded-t-xl mx-auto"
               />
 
-              {/* Superposición con el nombre de la categoría */}
+         
               <motion.div
                 className="absolute inset-0 bg-black/50 flex justify-center items-center rounded-t-xl"
-                initial={{ opacity: 0 }} 
-                whileHover={{ opacity: 1 }} 
-                transition={{ duration: 0.3 }} 
+                initial={{ opacity: 0 }}
+                whileHover={{ opacity: 1 }}
+                transition={{ duration: 0.3 }}
               >
                 <h3 className="text-lg text-yellow-500 font-bold text-center px-2">
                   {category.name}
@@ -40,10 +49,12 @@ const Categoria = ({ categories, borderRadius = "12px" }) => {
               </motion.div>
             </div>
 
-            {/* Botón "Ver catálogo" */}
-            <Link
-              to={`/catalogo/${category.name}`}  // Usamos Link para redirigir
-            >
+        
+            <Link  to={
+                              user && user.rol === "cliente"
+                                ? `/cliente/categoria/${category.name}`
+                                : `/categoria/${category.name}`
+                            }>
               <button className="w-full py-2 bg-yellow-500 text-white font-semibold rounded-b-xl hover:bg-yellow-600 transition-all text-sm">
                 Ver catálogo
               </button>

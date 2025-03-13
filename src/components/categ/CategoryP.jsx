@@ -1,55 +1,46 @@
+import React, { useEffect, useState } from "react";
 import Categoria from "./Categoria";
-import imagen1 from "../../img/Logos/logo.jpg";
-import imagen3 from "../../img/Logos/logo3.jpg";
-import imagen4 from "../../img/Logos/logo4.jpg";
-import imagen5 from "../../img/Logos/logo7.jpg";
-import imagen6 from "../../img/Logos/logo6.jpg";
-import Catalogo from "../../pages/public/catalog/Catalogo";
+import api from "../../utils/AxiosConfig"; 
 
+const fallbackImage = "https://via.placeholder.com/300x300?text=Sin+Imagen";
 
-const CategoryP=()=>{
-    const categories = [
-        {
-          name: "Sillas",
-          image: imagen1,
-        },
-        {
-          name: "Mesas",
-          image: imagen3,
-        },
-        {
-            name: "Platos",
-            image: imagen3,
-          },
-          {
-            name: "Carpas",
-            image: imagen4,
-          },
-          {
-            name: "Botacas",
-            image: imagen5,
-          },
-          {
-            name: "Cucharas",
-            image: imagen6,
-          }
-      ];
+const CategoryP = () => {
+  
+  const [categories, setCategories] = useState([]);
 
-      const products = [
-        { name: "Smartphone", category: "Electrónica", image: "path_to_product_1.jpg", description: "Descripción del producto", price: 100 },
-        { name: "Camisa", category: "Ropa", image: "path_to_product_2.jpg", description: "Descripción de la camisa", price: 20 },
-        // Agrega más productos
-      ];
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+    
+        const response = await api.get("/api/productos/categrias/disponibles");
+     
+        if (response.data.success && response.data.categorias) {
+        
+          const mappedCategories = response.data.categorias.map((cat) => ({
+            name: cat.nombreCategoria,
 
+            image: cat.fotoAleatoria || fallbackImage,
+          }));
+          console.log("Mapeado de categoriras", mappedCategories)
 
-    return(
-        <>
-          <Categoria categories={categories} />;
-          
-        </>
-    )
-}
+          setCategories(mappedCategories);
+        } else {
+          console.error("No se pudo obtener la lista de categorías.");
+        }
+      } catch (error) {
+        console.error("Error al obtener categorías disponibles:", error);
+      }
+    };
+
+    fetchCategories();
+  }, []);
+
+  return (
+    <>
+     
+      <Categoria categories={categories} />
+    </>
+  );
+};
 
 export default CategoryP;
-
-  

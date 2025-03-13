@@ -79,6 +79,30 @@ const paginateGroupedInventory = (grouped, itemsPerPage) => {
   return pages;
 };
 
+
+const aggregateInventory = (items) => {
+  return Object.values(
+    items.reduce((acc, item) => {
+      const key = `${item.nombreCategoria || "Sin Categoría"}|${item.nombre}`;
+      if (!acc[key]) {
+        acc[key] = {
+          ...item,
+          stock: Number(item.stock),
+          stockReal: Number(item.stockReal),
+          stockReservado: Number(item.stockReservado),
+          variants: [item],
+        };
+      } else {
+        acc[key].stock += Number(item.stock);
+        acc[key].stockReal += Number(item.stockReal);
+        acc[key].stockReservado += Number(item.stockReservado);
+        acc[key].variants.push(item);
+      }
+      return acc;
+    }, {})
+  );
+};
+
 const Inventatio = ({ onNavigate, setDatosInventario }) => {
   const [inventory, setInventory] = useState([]);
   const [showEditModal, setShowEditModal] = useState(false);
@@ -92,7 +116,6 @@ const Inventatio = ({ onNavigate, setDatosInventario }) => {
   const [isUpdating, setIsUpdating] = useState(false);
   const [currentPageSecondary, setCurrentPageSecondary] = useState({});
   const [bodegas, setBodegas] = useState([]);
-
   const [loading, setLoading] = useState(true);
 
   const { csrfToken } = useAuth();
@@ -132,7 +155,6 @@ const Inventatio = ({ onNavigate, setDatosInventario }) => {
     }
   };
 
-  
   const isSubBodegaInactive = (idBodega) => {
     const subBodega = bodegas.find((b) => b.idBodega === idBodega);
     if (!subBodega) return false;
@@ -162,17 +184,18 @@ const Inventatio = ({ onNavigate, setDatosInventario }) => {
     });
   };
 
-  
+  // Se filtra el inventario principal y secundario
   const mainInventoryRaw = inventory.filter((item) => item.es_principal === 1);
   const secondaryInventoryRaw = inventory.filter(
     (item) => item.es_principal === 0
   );
 
- 
   const mainInventoryFiltered = applyFilters(mainInventoryRaw);
   const secondaryInventoryFiltered = applyFilters(secondaryInventoryRaw);
 
-  const mainInventoryGroupedByCategory = mainInventoryFiltered.reduce(
+ 
+  const aggregatedMainInventory = aggregateInventory(mainInventoryFiltered);
+  const mainInventoryGroupedByCategory = aggregatedMainInventory.reduce(
     (acc, item) => {
       const category = item.nombreCategoria || "Sin Categoría";
       if (!acc[category]) {
@@ -183,7 +206,6 @@ const Inventatio = ({ onNavigate, setDatosInventario }) => {
     },
     {}
   );
-
 
   const mainInventoryPages = paginateGroupedInventory(
     mainInventoryGroupedByCategory,
@@ -198,6 +220,9 @@ const Inventatio = ({ onNavigate, setDatosInventario }) => {
     }
   };
 
+  /* ===== AGREGACIÓN PARA INVENTARIO SECUNDARIO =====
+     Primero se agrupa por bodega y luego se agrega cada grupo
+  */
   const secondaryByBodega = secondaryInventoryFiltered.reduce((acc, item) => {
     const bodega = item.nombreBodega || "Sin Bodega";
     if (!acc[bodega]) {
@@ -206,7 +231,15 @@ const Inventatio = ({ onNavigate, setDatosInventario }) => {
     acc[bodega].push(item);
     return acc;
   }, {});
+  // Se agrega cada grupo de inventario secundario
+  const aggregatedSecondaryByBodega = {};
+  for (const bodega in secondaryByBodega) {
+    aggregatedSecondaryByBodega[bodega] = aggregateInventory(
+      secondaryByBodega[bodega]
+    );
+  }
 
+  // Función para agrupar por categoría (se usa en inventario secundario)
   const groupByCategory = (items) => {
     return items.reduce((acc, item) => {
       const category = item.nombreCategoria || "Sin Categoría";
@@ -227,10 +260,21 @@ const Inventatio = ({ onNavigate, setDatosInventario }) => {
     }
   };
 
-
+  /* ===== MODIFICACIÓN DEL MODAL DE EDICIÓN =====
+     Si el producto (agrupado) tiene más de una variante (por color),
+     se inicializa editStock como un objeto con cada idInventario y su stock.
+  */
   const openEditModal = (item) => {
     setSelectedItem(item);
-    setEditStock(item.stock);
+    if (item.variants && item.variants.length > 1) {
+      const stocks = {};
+      item.variants.forEach((variant) => {
+        stocks[variant.idInventario] = variant.stock;
+      });
+      setEditStock(stocks);
+    } else {
+      setEditStock(item.stock);
+    }
     setShowEditModal(true);
   };
 
@@ -239,7 +283,6 @@ const Inventatio = ({ onNavigate, setDatosInventario }) => {
     setSelectedItem(null);
   };
 
-  
   const openDetailModal = (item) => {
     setSelectedItem(item);
     setShowDetailModal(true);
@@ -250,49 +293,86 @@ const Inventatio = ({ onNavigate, setDatosInventario }) => {
     setSelectedItem(null);
   };
 
-  const updateStock = async () => {
-    if (!selectedItem) return;
-    setIsUpdating(true);
-    try {
-      const response = await api.put(
-        `/api/inventario/actualizarStock/${selectedItem.idInventario}`,
-        { stock: editStock },
-        {
-          headers: { "X-CSRF-Token": csrfToken },
-          withCredentials: true,
+
+     const updateStock = async () => {
+      if (!selectedItem) return;
+      setIsUpdating(true);
+      try {
+       
+        if (selectedItem.variants && selectedItem.variants.length > 1) {
+          const updatePromises = selectedItem.variants.map((variant) => {
+            const stockToAdd = Number(editStock[variant.idInventario]);
+            if (isNaN(stockToAdd) || stockToAdd < 0) {
+              toast.error(
+                `El valor de stock para la variante ${variant.color || "Sin color"} debe ser 0 o mayor.`
+              );
+              return Promise.reject();
+            }
+            return api.put(
+              `/api/inventario/actualizarStock/${variant.idInventario}`,
+              { stock: stockToAdd, allowZero: true },
+              {
+                headers: { "X-CSRF-Token": csrfToken },
+                withCredentials: true,
+              }
+            );
+          });
+    
+          const responses = await Promise.all(updatePromises);
+          let updatedInventory = [...inventory];
+          selectedItem.variants.forEach((variant, index) => {
+            const resData = responses[index].data;
+            if (resData.success) {
+              updatedInventory = updatedInventory.map((inv) =>
+                inv.idInventario === variant.idInventario
+                  ? { ...inv, stock: resData.data.stock, stockReal: resData.data.stockReal }
+                  : inv
+              );
+            } else {
+              toast.error(`Error al actualizar la variante ${variant.color || "Sin color"}`);
+            }
+          });
+          setInventory(updatedInventory);
+          toast.success("Stock actualizado correctamente para todas las variantes");
+        } else {
+        
+          const stockToAdd = Number(editStock);
+          if (isNaN(stockToAdd) || stockToAdd <= 0) {
+            toast.error("El valor de 'stock' debe ser un número mayor que 0.");
+            setIsUpdating(false);
+            return;
+          }
+          const response = await api.put(
+            `/api/inventario/actualizarStock/${selectedItem.idInventario}`,
+            { stock: stockToAdd, allowZero: false },
+            {
+              headers: { "X-CSRF-Token": csrfToken },
+              withCredentials: true,
+            }
+          );
+          const { success, message, data } = response.data;
+          if (success) {
+            setInventory(
+              inventory.map((inv) =>
+                inv.idInventario === selectedItem.idInventario
+                  ? { ...inv, stock: data.stock, stockReal: data.stockReal }
+                  : inv
+              )
+            );
+            toast.success(message || "Se actualizó correctamente el stock");
+          } else {
+            toast.error(message || "Error al actualizar el stock");
+          }
         }
-      );
-
-      const { success, message, data } = response.data;
-
-      if (success) {
-        setInventory(
-          inventory.map((inv) =>
-            inv.idInventario === selectedItem.idInventario
-              ? {
-                  ...inv,
-                  stock: data.stock,
-                  stockReal: data.stockReal,
-                }
-              : inv
-          )
-        );
-
-        toast.success(message || "Se actualizó correctamente el stock");
+      } catch (error) {
+        console.error("Error updating stock:", error);
+        toast.error("Error actualizando el stock");
+      } finally {
+        setIsUpdating(false);
         closeEditModal();
-      } else {
-        toast.error(message || "Error al actualizar el stock");
       }
-    } catch (error) {
-      console.error("Error updating stock:", error);
-      toast.error("Error actualizando el stock");
-    } finally {
-      setIsUpdating(false);
-      closeEditModal();
-    }
-  };
+    };
 
- 
   const confirmDesactivar = async (item) => {
     if (
       window.confirm(
@@ -314,13 +394,11 @@ const Inventatio = ({ onNavigate, setDatosInventario }) => {
     }
   };
 
-
   const formatDate = (dateStr) => {
     const date = new Date(dateStr);
     return date.toLocaleString();
   };
 
- 
   const renderStock = (stock) => {
     if (stock === 0) {
       return (
@@ -377,7 +455,6 @@ const Inventatio = ({ onNavigate, setDatosInventario }) => {
     setCurrentPageSecondary({});
   };
 
- 
   const years = [];
   const currentYearValue = new Date().getFullYear();
   for (let y = currentYearValue - 5; y <= currentYearValue + 5; y++) {
@@ -395,7 +472,6 @@ const Inventatio = ({ onNavigate, setDatosInventario }) => {
 
   return (
     <div className="container mx-auto p-4">
-
       <div className="mb-4 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-2 p-3 rounded">
         <div className="flex flex-col sm:flex-row gap-2">
           <div>
@@ -460,12 +536,11 @@ const Inventatio = ({ onNavigate, setDatosInventario }) => {
         </div>
       </div>
 
-   
       <div>
         <h2 className="text-3xl font-bold mb-6 text-yellow-600 text-center">
-          Inventario Principal
+          Inventario Principal esme
         </h2>
-        {mainInventoryFiltered.length === 0 ? (
+        {aggregatedMainInventory.length === 0 ? (
           <div className="flex flex-col justify-center items-center py-8">
             <FaBoxOpen className="text-4xl text-gray-500" />
             <p className="text-xl text-gray-600 dark:text-gray-300 mt-4">
@@ -488,7 +563,7 @@ const Inventatio = ({ onNavigate, setDatosInventario }) => {
                       Bodega
                     </th>
                     <th className="border border-gray-300 dark:border-gray-700 px-3 py-2 text-left">
-                      Catidad Productos
+                      Cantidad Productos
                     </th>
                     <th className="border border-gray-300 dark:border-gray-700 px-3 py-2 text-left">
                       Stock
@@ -621,8 +696,7 @@ const Inventatio = ({ onNavigate, setDatosInventario }) => {
         )}
       </div>
 
-  
-      {Object.keys(secondaryByBodega).length === 0 ? (
+      {Object.keys(aggregatedSecondaryByBodega).length === 0 ? (
         <div className="flex flex-col justify-center items-center py-8">
           <FaBoxOpen className="text-4xl text-gray-500" />
           <p className="text-xl text-gray-600 dark:text-gray-300 mt-4">
@@ -630,9 +704,8 @@ const Inventatio = ({ onNavigate, setDatosInventario }) => {
           </p>
         </div>
       ) : (
-        Object.keys(secondaryByBodega).map((bodega) => {
-        
-          const firstItemRow = (secondaryByBodega[bodega] || []).find(
+        Object.keys(aggregatedSecondaryByBodega).map((bodega) => {
+          const firstItemRow = (aggregatedSecondaryByBodega[bodega] || []).find(
             (prod) => prod.idBodega
           );
           let bodegaInactiva = false;
@@ -640,9 +713,8 @@ const Inventatio = ({ onNavigate, setDatosInventario }) => {
             bodegaInactiva = isSubBodegaInactive(firstItemRow.idBodega);
           }
 
-    
           const secondaryPages = paginateGroupedInventory(
-            groupByCategory(secondaryByBodega[bodega]),
+            groupByCategory(aggregatedSecondaryByBodega[bodega]),
             ITEMS_PER_PAGE
           );
           const totalPages = secondaryPages.length;
@@ -684,7 +756,7 @@ const Inventatio = ({ onNavigate, setDatosInventario }) => {
                           Producto
                         </th>
                         <th className="border border-gray-300 dark:border-gray-700 px-3 py-2 text-left">
-                          Catidad Productos
+                          Cantidad Productos
                         </th>
                         <th className="border border-gray-300 dark:border-gray-700 px-3 py-2 text-left">
                           Stock
@@ -769,7 +841,6 @@ const Inventatio = ({ onNavigate, setDatosInventario }) => {
                               </td>
                               <td className="border border-gray-300 dark:border-gray-700 px-3 py-2">
                                 <div className="flex gap-2">
-                                 
                                   <button
                                     onClick={() => openEditModal(item)}
                                     disabled={bodegaInactiva}
@@ -839,7 +910,7 @@ const Inventatio = ({ onNavigate, setDatosInventario }) => {
         })
       )}
 
- 
+      {/* ===== MODAL DE EDICIÓN ===== */}
       {showEditModal && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
           <div className="bg-white dark:bg-gray-800 rounded-lg p-6 w-96">
@@ -847,32 +918,65 @@ const Inventatio = ({ onNavigate, setDatosInventario }) => {
               Editar Stock
             </h3>
 
-            <div className="mb-4">
-              <label className="block text-gray-700 dark:text-gray-300 mb-2">
-                Nuevo Stock:
-              </label>
-              <input
-                type="number"
-                min="0"
-                value={editStock}
-                onChange={(e) => {
-                  const val = e.target.value;
-                  if (Number(val) < 0) {
-                    toast.warning("No se permiten números negativos");
-                    return;
-                  }
-                  setEditStock(val);
-                }}
-                className="w-full border border-gray-300 dark:border-gray-700 p-2 rounded 
+            {/* Si el producto tiene varias variantes (por color), mostramos una entrada por variante */}
+            {selectedItem &&
+            selectedItem.variants &&
+            selectedItem.variants.length > 1 ? (
+              selectedItem.variants.map((variant) => (
+                <div key={variant.idInventario} className="mb-4">
+                  <label className="block text-gray-700 dark:text-gray-300 mb-2">
+                    {variant.colores || "Sin color"} - Stock:
+                  </label>
+                  <input
+                    type="number"
+                    min="0"
+                    value={editStock[variant.idInventario]}
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      if (Number(val) < 0) {
+                        toast.warning("No se permiten números negativos");
+                        return;
+                      }
+                      setEditStock((prev) => ({
+                        ...prev,
+                        [variant.idInventario]: val,
+                      }));
+                    }}
+                    className="w-full border border-gray-300 dark:border-gray-700 p-2 rounded 
                      focus:outline-yellow-500 bg-white dark:bg-gray-700 
                      text-gray-700 dark:text-gray-300"
-              />
-            </div>
+                  />
+                </div>
+              ))
+            ) : (
+              // Si es un único registro, se muestra el input original
+              <div className="mb-4">
+                <label className="block text-gray-700 dark:text-gray-300 mb-2">
+                  Nuevo Stock:
+                </label>
+                <input
+                  type="number"
+                  min="0"
+                  value={editStock}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    if (Number(val) < 0) {
+                      toast.warning("No se permiten números negativos");
+                      return;
+                    }
+                    setEditStock(val);
+                  }}
+                  className="w-full border border-gray-300 dark:border-gray-700 p-2 rounded 
+                     focus:outline-yellow-500 bg-white dark:bg-gray-700 
+                     text-gray-700 dark:text-gray-300"
+                />
+              </div>
+            )}
 
             <div className="flex justify-end">
               <button
                 onClick={updateStock}
-                disabled={isUpdating || editStock < 0}
+                disabled={isUpdating || (typeof editStock === "number" && editStock < 0)}
                 className={`py-2 px-4 rounded mr-2 flex items-center gap-2 
                       ${
                         isUpdating
@@ -905,7 +1009,6 @@ const Inventatio = ({ onNavigate, setDatosInventario }) => {
         </div>
       )}
 
-    
       {showDetailModal && selectedItem && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
           <div className="bg-white dark:bg-gray-800 rounded-lg p-6 w-96 overflow-y-auto max-h-[90vh]">
@@ -940,7 +1043,7 @@ const Inventatio = ({ onNavigate, setDatosInventario }) => {
 
             <div className="mb-2 flex items-center gap-2 text-gray-700 dark:text-gray-300">
               <FaPalette className="text-gray-500" />
-              <strong>Color:</strong> {selectedItem.color || "N/A"}
+              <strong>Color:</strong> {selectedItem.colores || "N/A"}
             </div>
 
             <div className="mb-2 flex items-center gap-2 text-gray-700 dark:text-gray-300">

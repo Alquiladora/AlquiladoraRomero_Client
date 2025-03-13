@@ -10,7 +10,6 @@ import axios from "axios";
 import { motion } from "framer-motion";
 import api from "../../utils/AxiosConfig";
 
-
 const Paso2 = ({ onValidationSuccess, guardarCorreo }) => {
   const [tokens, setTokens] = useState(Array(6).fill(""));
   const [errorMessage, setErrorMessage] = useState("");
@@ -28,54 +27,45 @@ const Paso2 = ({ onValidationSuccess, guardarCorreo }) => {
     console.log("Valor de guardarCorreo:", guardarCorreo);
 
     api
-        .get(`/api/token/correo/${guardarCorreo}`)
-        .then((response) => {
-            if (response.data && response.data.token) {
-                setTokenRecuperado(response.data.token);
-                console.log("Token recuperado:", response.data.token);
-            } else {
-                console.error("El token ha expirado o no existe.");
-            }
-        })
-        .catch((error) => {
-            console.error("Error al cargar los datos:", error);
-        });
-}, [guardarCorreo]);
-
-
-  //======================================================================================
+      .get(`/api/token/correo/${guardarCorreo}`)
+      .then((response) => {
+        if (response.data && response.data.token) {
+          setTokenRecuperado(response.data.token);
+          console.log("Token recuperado:", response.data.token);
+        } else {
+          console.error("El token ha expirado o no existe.");
+        }
+      })
+      .catch((error) => {
+        console.error("Error al cargar los datos:", error);
+      });
+  }, [guardarCorreo]);
 
   //======================================================================================
   // Maneja el cambio de valor en los inputs de tokens (letras y números permitidos)
   const handleTokenChange = (index, value) => {
     const newTokens = [...tokens];
 
-
     if (/^[A-Za-z0-9]$/.test(value)) {
       newTokens[index] = value;
       setTokens(newTokens);
 
-     
       if (index < tokens.length - 1) {
         inputRefs.current[index + 1].focus();
       }
     }
 
-  
     const allTokensFilled = newTokens.every((token) => token !== "");
     setIsButtonDisabled(!allTokensFilled || timeLeft <= 0);
   };
 
-
   const handleKeyDown = (e, index) => {
     if (e.key === "Backspace") {
       const newTokens = [...tokens];
-
-      
       if (newTokens[index] === "" && index > 0) {
         inputRefs.current[index - 1].focus();
       } else {
-        newTokens[index] = ""; // Borra el valor actual
+        newTokens[index] = "";
         setTokens(newTokens);
       }
     }
@@ -84,7 +74,6 @@ const Paso2 = ({ onValidationSuccess, guardarCorreo }) => {
   const handleSubmit = () => {
     if (tokens.join("") === tokenRecuperado) {
       setErrorMessage("");
-      // Alerta de éxito usando Tailwind
       showAlert(
         "¡Token Correcto!",
         "El token ha sido validado correctamente.",
@@ -96,6 +85,9 @@ const Paso2 = ({ onValidationSuccess, guardarCorreo }) => {
     } else {
       setErrorMessage("Token inválido, vuelve a intentarlo.");
     }
+
+    // >>>> LÍNEA AÑADIDA: Habilita de nuevo el botón tras cada intento <<<<
+    setIsButtonDisabled(false);
   };
 
   const showAlert = (title, message, type) => {
@@ -123,7 +115,6 @@ const Paso2 = ({ onValidationSuccess, guardarCorreo }) => {
     return `${minutes}:${remainingSeconds < 10 ? "0" : ""}${remainingSeconds}`;
   };
 
-
   useEffect(() => {
     const timer = setInterval(() => {
       setTimeLeft((prevTime) => {
@@ -150,7 +141,7 @@ const Paso2 = ({ onValidationSuccess, guardarCorreo }) => {
         >
           Paso 2: Validar Token
         </motion.h2>
-  
+
         {errorMessage && (
           <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
@@ -168,7 +159,7 @@ const Paso2 = ({ onValidationSuccess, guardarCorreo }) => {
             </div>
           </motion.div>
         )}
-  
+
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -190,7 +181,7 @@ const Paso2 = ({ onValidationSuccess, guardarCorreo }) => {
             />
           ))}
         </motion.div>
-  
+
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -200,14 +191,14 @@ const Paso2 = ({ onValidationSuccess, guardarCorreo }) => {
           <FontAwesomeIcon icon={faClock} className="mr-2" />
           {formatTime(timeLeft)}
         </motion.div>
-  
+
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.6, duration: 0.5 }}
           className="flex items-center justify-between"
         >
-          <button
+          <motion.button
             className={`flex-grow p-2 bg-blue-500 text-white rounded-md font-bold transition-all duration-200 ease-in-out ${
               isButtonDisabled
                 ? "opacity-50 cursor-not-allowed"
@@ -219,9 +210,9 @@ const Paso2 = ({ onValidationSuccess, guardarCorreo }) => {
             whileTap={{ scale: 0.95 }}
           >
             Validar Token
-          </button>
+          </motion.button>
         </motion.div>
-  
+
         <motion.p
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}

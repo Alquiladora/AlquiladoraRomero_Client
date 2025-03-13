@@ -11,7 +11,7 @@ import {
   faIndustry,
   faDownload,
 } from "@fortawesome/free-solid-svg-icons";
-
+import { Link } from "react-router-dom";
 import {
   faFacebook,
   faInstagram,
@@ -33,7 +33,7 @@ import { useAuth } from "../../hooks/ContextAuth";
 
 export const FooterDatos = () => {
 
-  const { csrfToken } = useAuth();
+  const { csrfToken,user } = useAuth();
 
   const [empresaData, setEmpresaData] = useState({
     nombreEmpresa: "",
@@ -95,42 +95,54 @@ export const FooterDatos = () => {
       
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
         
-          <div className="flex flex-col mb-6 md:mb-0">
-            <h4 className="text-xl font-bold text-white mb-3 flex items-center">
-              <FontAwesomeIcon icon={faInfoCircle} className="mr-2" />
-              Información
-            </h4>
+        <div className="flex flex-col mb-6 md:mb-0">
+      <h4 className="text-xl font-bold text-white mb-3 flex items-center">
+        <FontAwesomeIcon icon={faInfoCircle} className="mr-2" />
+        Información
+      </h4>
 
-          
-            <a
-              href="#"
-              className="flex items-center text-sm text-white transition-colors mb-1 hover:text-gray-400"
-            >
-              <FontAwesomeIcon icon={faUserShield} className="mr-2" />
-              Política de Privacidad
-            </a>
-            <a
-              href="#"
-              className="flex items-center text-sm text-white transition-colors mb-1 hover:text-gray-400"
-            >
-              <FontAwesomeIcon icon={faGavel} className="mr-2" />
-              Políticas
-            </a>
-            <a
-              href="#"
-              className="flex items-center text-sm text-white transition-colors mb-1 hover:text-gray-400"
-            >
-              <FontAwesomeIcon icon={faFileContract} className="mr-2" />
-              Términos y Condiciones
-            </a>
-            <a
-              href="#"
-              className="flex items-center text-sm text-white transition-colors mb-1 hover:text-gray-400"
-            >
-              <FontAwesomeIcon icon={faQuestionCircle} className="mr-2" />
-              Sobre nosotros
-            </a>
-          </div>
+      <Link
+       to={
+        user && user.rol === "cliente"
+          ? `/cliente/politicas-privacidad`
+          : `/politicas-privacidad`
+      }
+        className="flex items-center text-sm text-white transition-colors mb-1 hover:text-gray-400"
+      >
+        <FontAwesomeIcon icon={faUserShield} className="mr-2" />
+        Política de Privacidad
+      </Link>
+      <Link
+        to={
+          user && user.rol === "cliente"
+            ? `/cliente/deslin-legal`
+            : `/deslin-legal`
+        }
+        className="flex items-center text-sm text-white transition-colors mb-1 hover:text-gray-400"
+      >
+        <FontAwesomeIcon icon={faGavel} className="mr-2" />
+       Deskin legal
+      </Link>
+      <Link
+        to={
+          user && user.rol === "cliente"
+            ? `/cliente/terminos-condiciones`
+            : `/terminos-condiciones`
+        }
+        className="flex items-center text-sm text-white transition-colors mb-1 hover:text-gray-400"
+      >
+        <FontAwesomeIcon icon={faFileContract} className="mr-2" />
+        Términos y Condiciones
+      </Link>
+      <Link
+        to="/sobre-nosotros"
+        className="flex items-center text-sm text-white transition-colors mb-1 hover:text-gray-400"
+      >
+        <FontAwesomeIcon icon={faQuestionCircle} className="mr-2" />
+        Sobre nosotros
+      </Link>
+    </div>
+
 
         
           <div className="flex flex-col items-center mb-6 md:mb-0">

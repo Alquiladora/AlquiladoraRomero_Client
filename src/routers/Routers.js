@@ -13,7 +13,7 @@ import CarritoCompras from '../components/carrito/CarritoCompras';
 
 
 
-// import RoutePrivate from "./RoutePrivate";
+
 
 import Error404 from './Errors/Error404';
 import Error500 from './Errors/Error500';
@@ -26,6 +26,7 @@ import Registro from '../security/Registro/Registro';
 import Catalogo from '../pages/public/catalog/Catalogo';
 import CambiarPassword from '../security/recuperacion/CambiarPasswor';
 import ProductosCategoria from '../components/productosCategoria/ProductosCatgeoria';
+import PoliticasPrivacidad from '../components/footer/foter-empresa/Politicas';
 
 
 //-------------------CLIENT------------------------
@@ -69,6 +70,10 @@ const Routerss = () => {
         <Route path="/categorias/sillas" element={<LayoutHeader><Catalogo /></LayoutHeader>} />
         <Route path="/categoria/:categori" element={<RoutePublic> <LayoutHeader>< ProductosCategoria /></LayoutHeader></RoutePublic>} />
         <Route path="/:categori/:idProducto" element={<RoutePublic> <LayoutHeader>< DetalleProducto /></LayoutHeader></RoutePublic>} />
+        <Route path="/politicas-privacidad" element={<RoutePublic> <LayoutHeader>< PoliticasPrivacidad /></LayoutHeader></RoutePublic>} />
+        <Route path="/deslin-legal" element={<RoutePublic> <LayoutHeader>< PoliticasPrivacidad /></LayoutHeader></RoutePublic>} />
+        <Route path="/terminos-condiciones" element={<RoutePublic> <LayoutHeader>< PoliticasPrivacidad /></LayoutHeader></RoutePublic>} />
+
 
 
 
@@ -81,7 +86,9 @@ const Routerss = () => {
           <Route path="/cliente/updatePass" element={<RoutePrivate rolesPermitidos={['cliente']}> <LayoutHeader><ChangePassword  /></LayoutHeader></RoutePrivate>} />
           <Route path="/cliente/categoria/:categori" element={<RoutePrivate rolesPermitidos={['cliente']}> <LayoutHeader>< ProductosCategoria /></LayoutHeader></RoutePrivate>} />
           <Route path="/cliente/:categori/:idProducto" element={<RoutePrivate rolesPermitidos={['cliente']}> <LayoutHeader>< DetalleProducto /></LayoutHeader></RoutePrivate>} />
-        
+          <Route path="/cliente/politicas-privacidad" element={<RoutePrivate rolesPermitidos={['cliente']}> <LayoutHeader>< PoliticasPrivacidad /></LayoutHeader></RoutePrivate>} />
+          <Route path="/cliente/deslin-legal" element={<RoutePrivate rolesPermitidos={['cliente']}> <LayoutHeader>< PoliticasPrivacidad /></LayoutHeader></RoutePrivate>} />
+          <Route path="/cliente/terminos-condiciones" element={<RoutePrivate rolesPermitidos={['cliente']}> <LayoutHeader>< PoliticasPrivacidad /></LayoutHeader></RoutePrivate>} />
 
 
 
