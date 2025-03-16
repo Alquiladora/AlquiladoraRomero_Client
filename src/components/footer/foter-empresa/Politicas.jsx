@@ -27,8 +27,10 @@ const PoliticasPrivacidad = () => {
       </style>
 
       <div className="max-w-4xl mx-auto animate-fadeInUp">
-        {/* Título principal */}
-        <h1 className="text-4xl sm:text-5xl font-extrabold text-center mb-6 bg-gradient-to-r from-indigo-500 via-blue-500 to-green-400 bg-clip-text text-transparent">
+        {/* Título principal (gradiente amarillo) */}
+        <h1 className="text-4xl sm:text-5xl font-extrabold text-center mb-6
+          bg-gradient-to-r from-[#fcb900] to-yellow-400 bg-clip-text text-transparent
+        ">
           Términos y Condiciones de Uso
         </h1>
 

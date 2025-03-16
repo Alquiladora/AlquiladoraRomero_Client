@@ -79,7 +79,6 @@ const paginateGroupedInventory = (grouped, itemsPerPage) => {
   return pages;
 };
 
-
 const aggregateInventory = (items) => {
   return Object.values(
     items.reduce((acc, item) => {
@@ -184,7 +183,6 @@ const Inventatio = ({ onNavigate, setDatosInventario }) => {
     });
   };
 
-  // Se filtra el inventario principal y secundario
   const mainInventoryRaw = inventory.filter((item) => item.es_principal === 1);
   const secondaryInventoryRaw = inventory.filter(
     (item) => item.es_principal === 0
@@ -193,7 +191,6 @@ const Inventatio = ({ onNavigate, setDatosInventario }) => {
   const mainInventoryFiltered = applyFilters(mainInventoryRaw);
   const secondaryInventoryFiltered = applyFilters(secondaryInventoryRaw);
 
- 
   const aggregatedMainInventory = aggregateInventory(mainInventoryFiltered);
   const mainInventoryGroupedByCategory = aggregatedMainInventory.reduce(
     (acc, item) => {
@@ -260,10 +257,7 @@ const Inventatio = ({ onNavigate, setDatosInventario }) => {
     }
   };
 
-  /* ===== MODIFICACIÓN DEL MODAL DE EDICIÓN =====
-     Si el producto (agrupado) tiene más de una variante (por color),
-     se inicializa editStock como un objeto con cada idInventario y su stock.
-  */
+
   const openEditModal = (item) => {
     setSelectedItem(item);
     if (item.variants && item.variants.length > 1) {
@@ -293,85 +287,92 @@ const Inventatio = ({ onNavigate, setDatosInventario }) => {
     setSelectedItem(null);
   };
 
-
-     const updateStock = async () => {
-      if (!selectedItem) return;
-      setIsUpdating(true);
-      try {
-       
-        if (selectedItem.variants && selectedItem.variants.length > 1) {
-          const updatePromises = selectedItem.variants.map((variant) => {
-            const stockToAdd = Number(editStock[variant.idInventario]);
-            if (isNaN(stockToAdd) || stockToAdd < 0) {
-              toast.error(
-                `El valor de stock para la variante ${variant.color || "Sin color"} debe ser 0 o mayor.`
-              );
-              return Promise.reject();
-            }
-            return api.put(
-              `/api/inventario/actualizarStock/${variant.idInventario}`,
-              { stock: stockToAdd, allowZero: true },
-              {
-                headers: { "X-CSRF-Token": csrfToken },
-                withCredentials: true,
-              }
+  const updateStock = async () => {
+    if (!selectedItem) return;
+    setIsUpdating(true);
+    try {
+      if (selectedItem.variants && selectedItem.variants.length > 1) {
+        const updatePromises = selectedItem.variants.map((variant) => {
+          const stockToAdd = Number(editStock[variant.idInventario]);
+          if (isNaN(stockToAdd) || stockToAdd < 0) {
+            toast.error(
+              `El valor de stock para la variante ${
+                variant.color || "Sin color"
+              } debe ser 0 o mayor.`
             );
-          });
-    
-          const responses = await Promise.all(updatePromises);
-          let updatedInventory = [...inventory];
-          selectedItem.variants.forEach((variant, index) => {
-            const resData = responses[index].data;
-            if (resData.success) {
-              updatedInventory = updatedInventory.map((inv) =>
-                inv.idInventario === variant.idInventario
-                  ? { ...inv, stock: resData.data.stock, stockReal: resData.data.stockReal }
-                  : inv
-              );
-            } else {
-              toast.error(`Error al actualizar la variante ${variant.color || "Sin color"}`);
-            }
-          });
-          setInventory(updatedInventory);
-          toast.success("Stock actualizado correctamente para todas las variantes");
-        } else {
-        
-          const stockToAdd = Number(editStock);
-          if (isNaN(stockToAdd) || stockToAdd <= 0) {
-            toast.error("El valor de 'stock' debe ser un número mayor que 0.");
-            setIsUpdating(false);
-            return;
+            return Promise.reject();
           }
-          const response = await api.put(
-            `/api/inventario/actualizarStock/${selectedItem.idInventario}`,
-            { stock: stockToAdd, allowZero: false },
+          return api.put(
+            `/api/inventario/actualizarStock/${variant.idInventario}`,
+            { stock: stockToAdd, allowZero: true },
             {
               headers: { "X-CSRF-Token": csrfToken },
               withCredentials: true,
             }
           );
-          const { success, message, data } = response.data;
-          if (success) {
-            setInventory(
-              inventory.map((inv) =>
-                inv.idInventario === selectedItem.idInventario
-                  ? { ...inv, stock: data.stock, stockReal: data.stockReal }
-                  : inv
-              )
+        });
+
+        const responses = await Promise.all(updatePromises);
+        let updatedInventory = [...inventory];
+        selectedItem.variants.forEach((variant, index) => {
+          const resData = responses[index].data;
+          if (resData.success) {
+            updatedInventory = updatedInventory.map((inv) =>
+              inv.idInventario === variant.idInventario
+                ? {
+                    ...inv,
+                    stock: resData.data.stock,
+                    stockReal: resData.data.stockReal,
+                  }
+                : inv
             );
-            toast.success(message || "Se actualizó correctamente el stock");
           } else {
-            toast.error(message || "Error al actualizar el stock");
+            toast.error(
+              `Error al actualizar la variante ${variant.color || "Sin color"}`
+            );
           }
+        });
+        setInventory(updatedInventory);
+        toast.success(
+          "Stock actualizado correctamente para todas las variantes"
+        );
+      } else {
+        const stockToAdd = Number(editStock);
+        if (isNaN(stockToAdd) || stockToAdd <= 0) {
+          toast.error("El valor de 'stock' debe ser un número mayor que 0.");
+          setIsUpdating(false);
+          return;
         }
-      } catch (error) {
-        console.error("Error updating stock:", error);
-        toast.error("Error actualizando el stock");
-      } finally {
-        setIsUpdating(false);
-        closeEditModal();
+        const response = await api.put(
+          `/api/inventario/actualizarStock/${selectedItem.idInventario}`,
+          { stock: stockToAdd, allowZero: false },
+          {
+            headers: { "X-CSRF-Token": csrfToken },
+            withCredentials: true,
+          }
+        );
+        const { success, message, data } = response.data;
+        if (success) {
+          setInventory(
+            inventory.map((inv) =>
+              inv.idInventario === selectedItem.idInventario
+                ? { ...inv, stock: data.stock, stockReal: data.stockReal }
+                : inv
+            )
+          );
+          toast.success(message || "Se actualizó correctamente el stock");
+        } else {
+          toast.error(message || "Error al actualizar el stock");
+        }
       }
-    };
+    } catch (error) {
+      console.error("Error updating stock:", error);
+      toast.error("Error actualizando el stock");
+    } finally {
+      setIsUpdating(false);
+      closeEditModal();
+    }
+  };
 
   const confirmDesactivar = async (item) => {
     if (
@@ -976,7 +977,9 @@ const Inventatio = ({ onNavigate, setDatosInventario }) => {
             <div className="flex justify-end">
               <button
                 onClick={updateStock}
-                disabled={isUpdating || (typeof editStock === "number" && editStock < 0)}
+                disabled={
+                  isUpdating || (typeof editStock === "number" && editStock < 0)
+                }
                 className={`py-2 px-4 rounded mr-2 flex items-center gap-2 
                       ${
                         isUpdating
@@ -1009,114 +1012,143 @@ const Inventatio = ({ onNavigate, setDatosInventario }) => {
         </div>
       )}
 
-      {showDetailModal && selectedItem && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
-          <div className="bg-white dark:bg-gray-800 rounded-lg p-6 w-96 overflow-y-auto max-h-[90vh]">
-            <h3 className="text-2xl font-bold mb-4 text-yellow-600 flex items-center gap-2">
-              <FaBox className="text-yellow-600" /> Detalle del Producto
-            </h3>
-
-            <div className="mb-2 flex items-center gap-2 text-gray-700 dark:text-gray-300">
-              <FaHashtag className="text-gray-500" />
+{showDetailModal && selectedItem && (
+  <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50 p-2">
+    <div className="bg-white dark:bg-gray-800 rounded-lg p-6 w-full max-w-md md:max-w-4xl mx-auto overflow-y-auto max-h-[90vh]">
+      <h3 className="text-2xl md:text-3xl font-bold mb-6 text-yellow-600 flex items-center gap-2 border-b pb-2">
+        <FaBox className="text-yellow-600" /> Detalle del Producto
+      </h3>
+      {/* Grid responsive: 1 columna en pantallas pequeñas, 2 columnas en medianas o superiores */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        
+        {/* Columna Izquierda */}
+        <div className="space-y-4">
+          <div className="flex items-center gap-2 text-gray-700 dark:text-gray-300">
+            <FaHashtag className="text-gray-500" />
+            <span>
               <strong>ID Inventario:</strong> {selectedItem.idInventario}
-            </div>
+            </span>
+          </div>
 
-            <div className="mb-2 flex items-center gap-2 text-gray-700 dark:text-gray-300">
-              <FaBox className="text-gray-500" />
+          <div className="flex items-center gap-2 text-gray-700 dark:text-gray-300">
+            <FaBox className="text-gray-500" />
+            <span>
               <strong>Producto:</strong> {selectedItem.nombre}
-            </div>
+            </span>
+          </div>
 
-            <div className="mb-4">
-              {selectedItem.urlFoto ? (
-                <img
-                  src={selectedItem.urlFoto}
-                  alt={selectedItem.nombre}
-                  className="mt-2 w-32 h-auto object-contain rounded border border-gray-300 dark:border-gray-700"
-                />
-              ) : (
-                <div className="flex items-center gap-2 text-gray-700 dark:text-gray-300">
-                  <FaImage className="text-gray-500" />
-                  <span>No hay imagen disponible</span>
-                </div>
-              )}
-            </div>
+          <div>
+            {selectedItem.urlFoto ? (
+              <img
+                src={selectedItem.urlFoto}
+                alt={selectedItem.nombre}
+                className="w-32 h-auto object-contain rounded border border-gray-300 dark:border-gray-700"
+              />
+            ) : (
+              <div className="flex items-center gap-2 text-gray-700 dark:text-gray-300">
+                <FaImage className="text-gray-500" />
+                <span>No hay imagen disponible</span>
+              </div>
+            )}
+          </div>
 
-            <div className="mb-2 flex items-center gap-2 text-gray-700 dark:text-gray-300">
-              <FaPalette className="text-gray-500" />
-              <strong>Color:</strong> {selectedItem.colores || "N/A"}
-            </div>
-
-            <div className="mb-2 flex items-center gap-2 text-gray-700 dark:text-gray-300">
-              <FaCubes className="text-gray-500" />
-              <strong>Material:</strong> {selectedItem.material || "N/A"}
-            </div>
-
-            <div className="mb-2 flex items-center gap-2 text-gray-700 dark:text-gray-300">
-              <FaStore className="text-gray-500" />
-              <strong>Bodega:</strong> {selectedItem.nombreBodega || "N/A"}
-            </div>
-
-            <div className="mb-2 flex items-center gap-2 text-gray-700 dark:text-gray-300">
-              <FaMapMarkerAlt className="text-gray-500" />
-              <strong>Ubicación Bodega:</strong>{" "}
-              {selectedItem.ubicacion || "N/A"}
-            </div>
-
-            <div className="mb-2 flex items-center gap-2 text-gray-700 dark:text-gray-300">
+          {/* Stock Total y Variantes */}
+          {selectedItem.variants && selectedItem.variants.length > 1 ? (
+            <>
+              <div className="flex items-center gap-2 text-gray-700 dark:text-gray-300">
+                <FaSortNumericDown className="text-gray-500" />
+                <span>
+                  <strong>Stock Total:</strong> {selectedItem.stock}
+                </span>
+              </div>
+              <div>
+                <strong>Stock por Color:</strong>
+                {selectedItem.variants.map((variant) => (
+                  <div
+                    key={variant.idInventario}
+                    className="flex items-center gap-2 text-gray-700 dark:text-gray-300 ml-4 mt-1"
+                  >
+                    <span>{variant.colores || "Sin color"}:</span>
+                    <span>{variant.stock}</span>
+                  </div>
+                ))}
+              </div>
+            </>
+          ) : (
+            <div className="flex items-center gap-2 text-gray-700 dark:text-gray-300">
               <FaSortNumericDown className="text-gray-500" />
-              <strong>Stock:</strong> {selectedItem.stock}
+              <span>
+                <strong>Stock:</strong> {selectedItem.stock}
+              </span>
             </div>
+          )}
+        </div>
 
-            <div className="mb-2 flex items-center gap-2 text-gray-700 dark:text-gray-300">
-              <FaLock className="text-gray-500" />
+        {/* Columna Derecha */}
+        <div className="space-y-4">
+          <div className="flex items-center gap-2 text-gray-700 dark:text-gray-300">
+            <FaLock className="text-gray-500" />
+            <span>
               <strong>Stock Reservado:</strong> {selectedItem.stockReservado}
-            </div>
+            </span>
+          </div>
 
-            <div className="mb-2 flex items-center gap-2 text-gray-700 dark:text-gray-300">
-              <FaMoneyBillAlt className="text-gray-500" />
+          <div className="flex items-center gap-2 text-gray-700 dark:text-gray-300">
+            <FaMoneyBillAlt className="text-gray-500" />
+            <span>
               <strong>Precio Alquiler:</strong>{" "}
               {selectedItem.precioAlquiler == null
                 ? "Sin precio definido"
                 : `$${selectedItem.precioAlquiler}`}
-            </div>
+            </span>
+          </div>
 
-            <div className="mb-2 flex items-center gap-2 text-gray-700 dark:text-gray-300">
-              <FaTags className="text-gray-500" />
+          <div className="flex items-center gap-2 text-gray-700 dark:text-gray-300">
+            <FaTags className="text-gray-500" />
+            <span>
               <strong>Subcategoría:</strong>{" "}
               {selectedItem.nombreSubcategoria || "N/A"}
-            </div>
+            </span>
+          </div>
 
-            <div className="mb-2 text-gray-700 dark:text-gray-300">
-              <strong>Estado:</strong> {renderEstado(selectedItem.estado)}
-            </div>
+          <div className="text-gray-700 dark:text-gray-300">
+            <strong>Estado:</strong> {renderEstado(selectedItem.estado)}
+          </div>
 
-            <div className="mb-2 flex items-center gap-2 text-gray-700 dark:text-gray-300">
-              <FaStickyNote className="text-gray-500" />
+          <div className="flex items-center gap-2 text-gray-700 dark:text-gray-300">
+            <FaStickyNote className="text-gray-500" />
+            <span>
               <strong>Notas:</strong> {selectedItem.notas}
-            </div>
+            </span>
+          </div>
 
-            <div className="mb-2 flex items-center gap-2 text-gray-700 dark:text-gray-300">
-              <FaUser className="text-gray-500" />
+          <div className="flex items-center gap-2 text-gray-700 dark:text-gray-300">
+            <FaUser className="text-gray-500" />
+            <span>
               <strong>Creado por:</strong> {selectedItem.correo}
-            </div>
+            </span>
+          </div>
 
-            <div className="mb-2 flex items-center gap-2 text-gray-700 dark:text-gray-300">
-              <FaCalendarAlt className="text-gray-500" />
-              <strong>Fecha Registro:</strong>{" "}
-              {formatDate(selectedItem.fechaRegistro)}
-            </div>
-
-            <div className="flex justify-end mt-4">
-              <button
-                onClick={closeDetailModal}
-                className="bg-gray-300 dark:bg-gray-700 text-black dark:text-white py-2 px-4 rounded hover:bg-gray-400 dark:hover:bg-gray-600 flex items-center gap-2"
-              >
-                <FaTimesCircle /> Cerrar
-              </button>
-            </div>
+          <div className="flex items-center gap-2 text-gray-700 dark:text-gray-300">
+            <FaCalendarAlt className="text-gray-500" />
+            <span>
+              <strong>Fecha Registro:</strong> {formatDate(selectedItem.fechaRegistro)}
+            </span>
           </div>
         </div>
-      )}
+      </div>
+      <div className="flex justify-end mt-6">
+        <button
+          onClick={closeDetailModal}
+          className="bg-gray-300 dark:bg-gray-700 text-black dark:text-white py-2 px-4 rounded hover:bg-gray-400 dark:hover:bg-gray-600 flex items-center gap-2"
+        >
+          <FaTimesCircle /> Cerrar
+        </button>
+      </div>
+    </div>
+  </div>
+)}
+
     </div>
   );
 };

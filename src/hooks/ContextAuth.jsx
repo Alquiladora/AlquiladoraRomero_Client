@@ -160,7 +160,6 @@
 
 
 
-
 import React, {
   createContext,
   useState,
@@ -171,7 +170,6 @@ import React, {
 import SpinerCarga from "../utils/SpinerCarga";
 import { useNavigate } from "react-router-dom";
 import api from "../utils/AxiosConfig";
-import { useSocket } from "../utils/Socket";
 
 const AuthContext = createContext();
 
@@ -182,16 +180,15 @@ export const AuthProvider = ({ children }) => {
   const [error, setError] = useState(null);
   const navigate = useNavigate();
   const isMounted = useRef(true);
-  const socket = useSocket();
 
   const fetchCsrfToken = async () => {
+   
     if (csrfToken) return;
     try {
-      const response = await api.get(`/api/get-csrf-token`, {
+      const response = await api.get("/api/get-csrf-token", {
         withCredentials: true,
       });
       setCsrfToken(response.data.csrfToken);
-     
     } catch (error) {
       console.error("⚠️ Error obteniendo el token CSRF:", error);
       setError("Error en el servidor - 500.");
@@ -200,28 +197,31 @@ export const AuthProvider = ({ children }) => {
 
   const checkAuth = async () => {
     try {
-      const response = await api.get(`/api/usuarios/perfil`, {
+      const response = await api.get("/api/usuarios/perfil", {
         withCredentials: true,
         headers: { "X-CSRF-Token": csrfToken },
       });
       if (isMounted.current) {
         if (response.data?.user) {
           setUser(response.data.user);
-        
         } else {
-       
-          console.warn("⚠️ Respuesta sin usuario, no forzamos logout.");
+          console.warn("⚠️ Respuesta sin usuario, redirigiendo a login.");
+          navigate("/login");
         }
       }
     } catch (error) {
       console.error("⚠️ Error verificando la autenticación:", error);
       if (error.response) {
         if (error.response.status === 500) {
-          navigate("/error500")
-        } else if (error.response.status === 401 || error.response.status === 403) {
-          // setUser(null);
-          console.warn("⚠️ Usuario no autenticado (401/403). Sesión expirada o inválida, pero no forzamos logout.");
-         
+          navigate("/error500");
+        } else if (
+          error.response.status === 401 ||
+          error.response.status === 403
+        ) {
+          console.warn(
+            "⚠️ Usuario no autenticado (401/403). Sesión expirada o inválida, redirigiendo a login."
+          );
+          navigate("/login");
         } else {
           setError(
             error.response?.data?.message ||
@@ -240,7 +240,7 @@ export const AuthProvider = ({ children }) => {
     try {
       if (!csrfToken) await fetchCsrfToken();
       const response = await api.post(
-        `/api/usuarios/Delete/login`,
+        "/api/usuarios/Delete/login",
         { userId: user?.idUsuarios },
         {
           withCredentials: true,
@@ -277,8 +277,18 @@ export const AuthProvider = ({ children }) => {
     return () => {
       isMounted.current = false;
     };
+
   }, [csrfToken]);
 
+  
+  useEffect(() => {
+   
+      checkAuth();
+   
+
+    
+
+  }, [csrfToken]);
 
   if (isLoading) return <SpinerCarga />;
 
@@ -286,7 +296,6 @@ export const AuthProvider = ({ children }) => {
     <AuthContext.Provider
       value={{ user, setUser, isLoading, checkAuth, logout, csrfToken, error }}
     >
-      
       {children}
     </AuthContext.Provider>
   );

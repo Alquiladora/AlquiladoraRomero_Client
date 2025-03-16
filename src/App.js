@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import Routerss from "./routers/Routers";
 import { GoogleReCaptchaProvider } from "react-google-recaptcha-v3";
 import SpinerCarga from "./utils/SpinerCarga";
-
+import 'react-toastify/dist/ReactToastify.css';
 import { ToastContainer } from "react-toastify";
 
 

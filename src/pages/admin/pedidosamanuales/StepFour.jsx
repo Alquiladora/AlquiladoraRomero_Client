@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-// IMPORTAMOS ÍCONOS
+import { v4 as uuidv4 } from "uuid"; 
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faUser,
@@ -11,13 +11,11 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 
 const StepFour = ({
-  // Datos de Paso 1
   nombre,
   apellido,
   telefono,
   correo,
-
-  // Datos de Paso 2
+  
   esClienteExistente,
   direccionesCliente,
   selectedDireccionId,
@@ -27,35 +25,31 @@ const StepFour = ({
   municipio,
   localidad,
   direccion,
-
-  // Datos de Paso 3 (traídos desde step3Data en Wizard)
+  referencia,
+  
   step3Data,
-
-  // Otras variables sueltas
   fechaInicio,
   fechaEntrega,
   horaAlquiler,
   formaPago,
   detallesPago,
+  setTrackingId,
+  trackingId
 }) => {
-  // ----------------------------------------------------------------
-  // 1. Generar ID de rastreo solo si el cliente NO existe
-  // ----------------------------------------------------------------
-  const [trackingId, setTrackingId] = useState("");
+ 
+
+  const generateNumericTrackingId = () => {
+    const timestamp = Date.now().toString();
+    const randomDigits = Math.floor(Math.random() * 100).toString().padStart(2, "0");
+    return "ROMERO-" + timestamp + randomDigits; 
+  };
 
   useEffect(() => {
-    if (!esClienteExistente) {
-      // Generar un ID simple. Ejemplo: "PED1687975123457"
-      const newId = "PED" + Date.now();
-      setTrackingId(newId);
-    } else {
-      setTrackingId(""); // No hay ID de rastreo para clientes existentes
-    }
-  }, [esClienteExistente]);
+    const newId = generateNumericTrackingId();
+    setTrackingId(newId);
+  }, [setTrackingId]);
 
-  // ----------------------------------------------------------------
-  // 2. Buscar la dirección seleccionada en caso de cliente existente
-  // ----------------------------------------------------------------
+  
   let direccionSeleccionada = null;
   if (esClienteExistente && selectedDireccionId) {
     direccionSeleccionada = direccionesCliente.find(
@@ -63,113 +57,116 @@ const StepFour = ({
     );
   }
 
-  // ----------------------------------------------------------------
-  // 3. Render
-  // ----------------------------------------------------------------
   return (
     <div className="space-y-4">
-      {/* Encabezado */}
-      <h2 className="text-xl font-bold">
+ 
+      <h2 className="text-xl font-bold dark:text-white">
         Paso 4: Confirmación
       </h2>
 
-      {/* ID de RASTREO (si existe) */}
-      {trackingId && (
-        <div className="flex items-center text-sm bg-gray-100 p-2 rounded border border-gray-300">
+      {!esClienteExistente && trackingId && (
+        <div className="flex items-center text-sm bg-gray-100 dark:bg-gray-700 p-2 rounded border border-gray-300 dark:border-gray-600">
           <FontAwesomeIcon icon={faHashtag} className="text-gray-500 mr-2" />
-          <span className="font-semibold text-gray-700">
+          <span className="font-semibold text-gray-700 dark:text-white">
             ID de Rastreo: {trackingId}
           </span>
         </div>
       )}
-
-      {/* Datos del Cliente */}
-      <div className="bg-white p-4 rounded shadow-sm border">
-        <h3 className="text-lg font-semibold flex items-center mb-2">
+ 
+      <div className="bg-white dark:bg-gray-800 p-4 rounded shadow-sm border dark:border-gray-600">
+        <h3 className="text-lg font-semibold flex items-center mb-2 dark:text-white">
           <FontAwesomeIcon icon={faUser} className="text-yellow-500 mr-2" />
           Datos del Cliente
         </h3>
-        <p>
+        <p className="text-gray-700 dark:text-gray-300">
           <span className="font-semibold">Nombre:</span> {nombre} {apellido}
         </p>
-        <p>
+        <p className="text-gray-700 dark:text-gray-300">
           <span className="font-semibold">Teléfono:</span> {telefono}
         </p>
-        <p>
+        <p className="text-gray-700 dark:text-gray-300">
           <span className="font-semibold">Correo:</span> {correo}
         </p>
       </div>
 
-      {/* Dirección */}
-      <div className="bg-white p-4 rounded shadow-sm border">
-        <h3 className="text-lg font-semibold flex items-center mb-2">
+
+      <div className="bg-white dark:bg-gray-800 p-4 rounded shadow-sm border dark:border-gray-600">
+        <h3 className="text-lg font-semibold flex items-center mb-2 dark:text-white">
           <FontAwesomeIcon
             icon={faMapMarkerAlt}
             className="text-yellow-500 mr-2"
           />
           Dirección
         </h3>
-
         {esClienteExistente ? (
           direccionSeleccionada ? (
-            <div className="text-sm text-gray-700">
+           
+            <div className="text-sm text-gray-700 dark:text-gray-300">
               <p>Código Postal: {direccionSeleccionada.codigoPostal}</p>
               <p>País: {direccionSeleccionada.pais}</p>
               <p>Estado: {direccionSeleccionada.estado}</p>
               <p>Municipio: {direccionSeleccionada.municipio}</p>
               <p>Localidad: {direccionSeleccionada.localidad}</p>
               <p>Dirección: {direccionSeleccionada.direccion}</p>
+              <p>Detalles: {direccionSeleccionada.referencias}</p>
             </div>
           ) : (
-            <p className="text-sm text-gray-500">
-              No se encontró la dirección seleccionada en la BD.
-            </p>
+           
+            <div className="text-sm text-gray-700 dark:text-gray-300">
+              <p>Código Postal: {codigoPostal}</p>
+              <p>País: {pais}</p>
+              <p>Estado: {estado}</p>
+              <p>Municipio: {municipio}</p>
+              <p>Localidad: {localidad}</p>
+              <p>Dirección: {direccion}</p>
+              <p>Detalles: {referencia}</p>
+            </div>
           )
         ) : (
-          <div className="text-sm text-gray-700">
+         
+          <div className="text-sm text-gray-700 dark:text-gray-300">
             <p>Código Postal: {codigoPostal}</p>
             <p>País: {pais}</p>
             <p>Estado: {estado}</p>
             <p>Municipio: {municipio}</p>
             <p>Localidad: {localidad}</p>
             <p>Dirección: {direccion}</p>
+            <p>Detalles: {referencia}</p>
           </div>
         )}
       </div>
 
-      {/* Detalles de Alquiler */}
-      <div className="bg-white p-4 rounded shadow-sm border">
-        <h3 className="text-lg font-semibold flex items-center mb-2">
+     
+      <div className="bg-white dark:bg-gray-800 p-4 rounded shadow-sm border dark:border-gray-600">
+        <h3 className="text-lg font-semibold flex items-center mb-2 dark:text-white">
           <FontAwesomeIcon
             icon={faCalendarCheck}
             className="text-yellow-500 mr-2"
           />
           Detalles de Alquiler
         </h3>
-        <p className="text-sm">
+        <p className="text-sm text-gray-700 dark:text-gray-300">
           <span className="font-semibold">Fecha Inicio:</span> {fechaInicio}
         </p>
-        <p className="text-sm">
+        <p className="text-sm text-gray-700 dark:text-gray-300">
           <span className="font-semibold">Fecha Entrega:</span> {fechaEntrega}
         </p>
-        <p className="text-sm">
+        <p className="text-sm text-gray-700 dark:text-gray-300">
           <span className="font-semibold">Hora Alquiler:</span> {horaAlquiler}
         </p>
       </div>
 
-      {/* Productos Seleccionados */}
-      <div className="bg-white p-4 rounded shadow-sm border">
-        <h3 className="text-lg font-semibold flex items-center mb-2">
+      <div className="bg-white dark:bg-gray-800 p-4 rounded shadow-sm border dark:border-gray-600">
+        <h3 className="text-lg font-semibold flex items-center mb-2 dark:text-white">
           <FontAwesomeIcon
             icon={faCartArrowDown}
             className="text-yellow-500 mr-2"
           />
           Productos Seleccionados
         </h3>
-
         {step3Data.lineItems && step3Data.lineItems.length > 0 ? (
-          <table className="w-full text-sm mb-4 border border-gray-200">
-            <thead className="bg-gray-100">
+          <table className="w-full text-sm mb-4 border border-gray-200 dark:border-gray-600">
+            <thead className="bg-gray-100 dark:bg-gray-700">
               <tr>
                 <th className="border px-2 py-1">Producto</th>
                 <th className="border px-2 py-1">Cant.</th>
@@ -180,14 +177,16 @@ const StepFour = ({
             <tbody>
               {step3Data.lineItems.map((item, i) => (
                 <tr key={i}>
-                  <td className="border px-2 py-1">{item.productName}</td>
-                  <td className="border px-2 py-1 text-center">
+                  <td className="border px-2 py-1 text-gray-700 dark:text-gray-300">
+                    {item.productName}
+                  </td>
+                  <td className="border px-2 py-1 text-center text-gray-700 dark:text-gray-300">
                     {item.quantity}
                   </td>
-                  <td className="border px-2 py-1 text-right">
+                  <td className="border px-2 py-1 text-right text-gray-700 dark:text-gray-300">
                     ${item.unitPrice.toFixed(2)}
                   </td>
-                  <td className="border px-2 py-1 text-right">
+                  <td className="border px-2 py-1 text-right text-gray-700 dark:text-gray-300">
                     ${item.subtotal.toFixed(2)}
                   </td>
                 </tr>
@@ -195,25 +194,26 @@ const StepFour = ({
             </tbody>
           </table>
         ) : (
-          <p className="text-sm text-gray-500">No hay productos seleccionados.</p>
+          <p className="text-sm text-gray-500 dark:text-gray-400">
+            No hay productos seleccionados.
+          </p>
         )}
-
-        <p className="text-right font-bold text-gray-800 mt-2">
+        <p className="text-right font-bold text-gray-800 dark:text-gray-200 mt-2">
           Total: ${step3Data.ticketTotal.toFixed(2)}
         </p>
       </div>
 
-      {/* Forma de Pago */}
-      <div className="bg-white p-4 rounded shadow-sm border">
-        <h3 className="text-lg font-semibold flex items-center mb-2">
+    
+      <div className="bg-white dark:bg-gray-800 p-4 rounded shadow-sm border dark:border-gray-600">
+        <h3 className="text-lg font-semibold flex items-center mb-2 dark:text-white">
           <FontAwesomeIcon icon={faMoneyBillWave} className="text-yellow-500 mr-2" />
           Forma de Pago
         </h3>
-        <p className="text-sm">
+        <p className="text-sm text-gray-700 dark:text-gray-300">
           <span className="font-semibold">Tipo:</span>{" "}
           {formaPago || "No especificada"}
         </p>
-        <p className="text-sm">
+        <p className="text-sm text-gray-700 dark:text-gray-300">
           <span className="font-semibold">Detalles:</span>{" "}
           {detallesPago || "N/A"}
         </p>

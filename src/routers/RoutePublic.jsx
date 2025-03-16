@@ -5,7 +5,6 @@ import { useAuth } from "../hooks/ContextAuth";
 const RoutePublic = ({ children }) => {
   const { user } = useAuth(); 
   
-  console.log("Usuario autenticado en RoutePublic:", user);
 
   if (user) {
     const rutasPrivadas = {
