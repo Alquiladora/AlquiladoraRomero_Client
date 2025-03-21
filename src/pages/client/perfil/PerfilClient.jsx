@@ -93,6 +93,7 @@ const PerfilUsuarioPrime = () => {
     };
   }, [controls]);
 
+  
   const fetchProfileData = async () => {
     if (!isMounted.current) return;
 

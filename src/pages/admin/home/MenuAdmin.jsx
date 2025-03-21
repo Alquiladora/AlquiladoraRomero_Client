@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import HomeAdmin from "./HomeAdmin";
 import Usuarios from "../usuarios/usuarios";
 import ProductTable from "../productos/Productos";
@@ -30,7 +30,7 @@ import { useSocket } from "../../../utils/Socket";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faHome,
-  faClock, 
+  faClock,
   faTasks,
   faUsers,
   faBuilding,
@@ -43,8 +43,95 @@ import {
   faChartLine,
   faExclamationTriangle,
   faSignOutAlt,
+  faChevronRight,
 } from "@fortawesome/free-solid-svg-icons";
 import AgregarProductosSubbodegas from "../inventario/AgregarProductosSubbodegas";
+import DashboardPedidos from "../dashboard/DashboardPedidos";
+import GestionPedidos from "../gestion-pedidos/GestionPedidos";
+
+const Breadcrumbs = ({ activeTab, onNavigate }) => {
+  const pageHierarchy = {
+    "Inicio": [],
+    "Perfil": ["Inicio"],
+    "Usuarios": ["Inicio"],
+    "Actualizacion Precios": ["Inicio"],
+    "Bodegas": ["Inicio"],
+    "Productos": ["Inicio"],
+    "Pedidos Manuales": ["Inicio"],
+    "Inventario": ["Inicio"],
+    "Agregar Productos a subodegas": ["Inicio", "Inventario"],
+    "Usuarios Sospechosos": ["Inicio"],
+    "Subcategorias-Categorias": ["Inicio"],
+    "Datos de la Empresa": ["Inicio"],
+    "Dashboard-pedidos": ["Inicio", "Pedidos Manuales"],
+    "Gestion Pedidos": ["Inicio"],
+    "Dasboard Usuarios": ["Inicio"],
+    "Auditoría de Sesiones": ["Inicio", "Dasboard Usuarios"],
+    "Perfilempresa": ["Inicio", "Datos de la Empresa"],
+    "Sobre Nosotros": ["Inicio", "Datos de la Empresa"],
+    "Politicas": ["Inicio", "Datos de la Empresa"],
+    "Terminos": ["Inicio", "Datos de la Empresa"],
+    "Deslin": ["Inicio", "Datos de la Empresa"],
+    "historialPoliticas": ["Inicio", "Datos de la Empresa", "Politicas"],
+    "historialTerminos": ["Inicio", "Datos de la Empresa", "Terminos"],
+    "historialDeslinde": ["Inicio", "Datos de la Empresa", "Deslin"],
+    "Cerrar Sesion": ["Inicio"],
+  };
+
+  const displayNames = {
+    "Subcategorias-Categorias": "Subcategorías y Categorías",
+    "Actualizacion Precios": "Actualización de Precios",
+    "Pedidos Manuales": "Pedidos Manuales",
+    "Gestion Pedidos": "Gestión de Pedidos",
+    "Dasboard Usuarios": "Dashboard de Usuarios",
+    "Auditoría de Sesiones": "Auditoría de Sesiones",
+    Perfilempresa: "Perfil de Empresa",
+    "Sobre Nosotros": "Sobre Nosotros",
+    Politicas: "Políticas",
+    Terminos: "Términos",
+    Deslin: "Deslinde Legal",
+    historialPoliticas: "Historial de Políticas",
+    historialTerminos: "Historial de Términos",
+    historialDeslinde: "Historial de Deslinde Legal",
+    "Agregar Productos a subodegas": "Agregar Productos a Subbodegas",
+    "Usuarios Sospechosos": "Usuarios Sospechosos",
+    "Dashboard-pedidos": "Dashboard de Pedidos",
+    "Cerrar Sesion": "Cerrar Sesión",
+  };
+
+  const breadcrumbItems = pageHierarchy[activeTab] || [];
+  const items = [
+    ...breadcrumbItems.map((label) => ({ label, path: label })),
+    { label: activeTab, path: activeTab },
+  ];
+
+  return (
+    <nav className="flex items-center space-x-2 text-sm font-medium mb-6">
+      {items.map((item, index) => (
+        <div key={index} className="flex items-center">
+          {index > 0 && (
+            <FontAwesomeIcon
+              icon={faChevronRight}
+              className="text-gray-500 dark:text-gray-400 mx-2"
+            />
+          )}
+          {index === items.length - 1 ? (
+            <span className="text-amber-600 dark:text-amber-400">
+              {displayNames[item.label] || item.label}
+            </span>
+          ) : (
+            <button
+              onClick={() => onNavigate(item.path)}
+              className="text-gray-700 dark:text-gray-300 hover:text-amber-600 dark:hover:text-amber-400 transition-colors"
+            >
+              {displayNames[item.label] || item.label}
+            </button>
+          )}
+        </div>
+      ))}
+    </nav>
+  );
+};
 
 const MenuHomeAdmin = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -54,26 +141,25 @@ const MenuHomeAdmin = () => {
   const [usuariosC, setUsuariosC] = useState([]);
   const [isPageLoading, setIsPageLoading] = useState(true);
   const location = useLocation();
+  const navigate = useNavigate();
   const [totalUsuarios, setTotalUsuarios] = useState(0);
   const [fotoEmpresa, setFotoEmpresa] = useState("");
-  const [datosInventario, setDatosInventario]= useState([])
-
+  const [datosInventario, setDatosInventario] = useState([]);
+  const [pedidos, setPedidos] = useState([]);
 
   const socket = useSocket();
 
   useEffect(() => {
-    if (!socket) return;
-    socket.on("mensaje", (msg) => {
-      console.log("Mensaje de bienvenida:", msg);
-    });
+    if (socket) {
+      socket.on("totalUsuarios", (data) => {
+        console.log("Total de usuarios actualizado:", data.totalUsuarios);
+        setTotalUsuarios(data.totalUsuarios);
+      });
 
-    socket.on("eventoServidor", (data) => {
-      console.log("Evento del servidor:", data);
-    });
-    return () => {
-      socket.off("mensaje");
-      socket.off("eventoServidor");
-    };
+      return () => {
+        socket.off("totalUsuarios");
+      };
+    }
   }, [socket]);
 
   useEffect(() => {
@@ -84,11 +170,28 @@ const MenuHomeAdmin = () => {
     }
   }, [location.search]);
 
-  useEffect(() => {
-    if (activeTab === "Cerrar Sesión") {
-      logout();
+
+  const handleLogout = async () => {
+    try {
+      await logout();
+   
+      setUsuariosC([]);
+      setTotalUsuarios(0);
+      setFotoEmpresa("");
+      setDatosInventario([]);
+      setPedidos([]);
+     
+      navigate("/login");
+    } catch (error) {
+      console.error("Error during logout:", error);
     }
-  }, [activeTab, logout]);
+  };
+
+  useEffect(() => {
+    if (activeTab === "Cerrar Sesion") {
+      handleLogout();
+    }
+  }, [activeTab]);
 
   const fetchDataEnParalelo = async () => {
     try {
@@ -114,6 +217,7 @@ const MenuHomeAdmin = () => {
 
   const handleNavigate = (tabName) => {
     setActiveTab(tabName);
+    navigate(`?tab=${tabName}`);
   };
 
   useEffect(() => {
@@ -148,7 +252,9 @@ const MenuHomeAdmin = () => {
     },
     {
       title: "Análisis",
-      items: [],
+      items: [
+        // { icon: faChartLine, label: "Dashboard-pedidos" },
+      ],
     },
     {
       title: "Seguridad",
@@ -158,8 +264,8 @@ const MenuHomeAdmin = () => {
       ],
     },
     {
-      title: "",
-      items: [{ icon: faSignOutAlt, label: "Cerrar Sesión" }],
+      title: "Salida",
+      items: [{ icon: faSignOutAlt, label: "Cerrar Sesion" }],
     },
   ];
 
@@ -179,15 +285,20 @@ const MenuHomeAdmin = () => {
       case "Actualizacion Precios":
         return <ActualizacionPrecios />;
       case "Bodegas":
-        return <Bodegas  />;
+        return <Bodegas />;
       case "Productos":
         return <ProductTable />;
       case "Pedidos Manuales":
-        return <PedidosManuales />;
+        return <PedidosManuales onNavigate={handleNavigate} setPedidos={setPedidos} />;
       case "Inventario":
-        return <Inventory onNavigate={handleNavigate} setDatosInventario={setDatosInventario} />;
-        case "Agregar Productos a subodegas":
-          return < AgregarProductosSubbodegas  datosInventario={datosInventario}  />;
+        return (
+          <Inventory
+            onNavigate={handleNavigate}
+            setDatosInventario={setDatosInventario}
+          />
+        );
+      case "Agregar Productos a subodegas":
+        return <AgregarProductosSubbodegas datosInventario={datosInventario} />;
       case "Usuarios Sospechosos":
         return <UsuariosSospechosos />;
       case "Subcategorias-Categorias":
@@ -199,6 +310,10 @@ const MenuHomeAdmin = () => {
             fotoEmpresa={fotoEmpresa}
           />
         );
+      case "Dashboard-pedidos":
+        return <DashboardPedidos orders={pedidos} />;
+      case "Gestion Pedidos":
+        return <GestionPedidos />;
       case "Dasboard Usuarios":
         return <DasboardUsuarios onNavigate={handleNavigate} />;
       case "Auditoría de Sesiones":
@@ -219,7 +334,7 @@ const MenuHomeAdmin = () => {
         return <HistorialTerminos onNavigate={handleNavigate} />;
       case "historialDeslinde":
         return <HistorialDeslindeLegal onNavigate={handleNavigate} />;
-      case "Cerrar Sesión":
+      case "Cerrar Sesion":
         return <div>Cerrando sesión...</div>;
       default:
         return null;
@@ -231,23 +346,21 @@ const MenuHomeAdmin = () => {
   }
 
   return (
-    <div className="min-h-screen flex  dark:bg-gray-900 text-gray-800 dark:text-white relative">
+    <div className="min-h-screen flex dark:bg-gray-900 text-gray-800 dark:text-white relative">
+      {/* Sidebar Mobile Overlay */}
       {isOpen && (
         <div
-          className="fixed inset-0 bg-black bg-opacity-40 z-40 lg:hidden"
+          className="fixed inset-0 bg-black/50 lg:hidden z-40"
           onClick={() => setIsOpen(false)}
         />
       )}
 
-
       <aside
-        className={`fixed top-0 left-0 bottom-0 w-64 z-50 bg-white dark:bg-gray-800 shadow-lg transform transition-transform duration-300 ease-in-out 
+        className={`fixed top-0 left-0 bottom-0 w-64 z-50 bg-white dark:bg-gray-800 shadow-xl transform transition-transform duration-300 ease-in-out 
         ${isOpen ? "translate-x-0" : "-translate-x-full"} 
-        lg:translate-x-0 lg:static`}
+        lg:translate-x-0 lg:static lg:shadow-none`}
       >
-       
         <div className="bg-gradient-to-r from-[#fcb900] to-[#fcb900cc] p-5 shadow-sm flex flex-col items-center">
-       
           <div
             className="flex justify-center mb-3 cursor-pointer"
             onClick={() => setActiveTab("Perfil")}
@@ -268,90 +381,74 @@ const MenuHomeAdmin = () => {
           </h2>
         </div>
 
-  
-        <nav className="flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-rounded-full scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-700 p-3">
+        <nav className="flex-1 h-[calc(100vh-12rem)] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-600 scrollbar-track-gray-100 dark:scrollbar-track-gray-800 lg:h-auto lg:max-h-[calc(100vh-12rem)] lg:overflow-y-visible p-4">
           {navSections.map((section, sectionIndex) => (
-            <div key={sectionIndex} className="mb-4">
+            <div key={sectionIndex} className="mb-6 last:mb-0">
               {section.title && (
-                <div className="px-3 py-1 text-xs font-bold text-gray-500 uppercase">
+                <h3 className="px-3 py-1.5 text-xs font-semibold text-gray-800 dark:text-gray-200 uppercase tracking-wider bg-amber-100/80 dark:bg-amber-900/30 rounded-md shadow-sm">
                   {section.title}
-                </div>
+                </h3>
               )}
-              {section.items.map((item, index) => (
-                <button
-                  key={index}
-                  onClick={() => {
-                    setActiveTab(item.label);
-                    setIsOpen(false);
-                  }}
-                  className={`w-full flex items-center p-3 mb-1 rounded-md transition-all duration-200 text-left
-            ${
-              activeTab === item.label
-                ? "bg-[#fcb90033] dark:bg-[#fcb90044] text-[#fcb900] dark:text-[#fcb900] font-semibold shadow-sm"
-                : "text-gray-600 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-700"
-            }`}
-                >
-                  <span className="text-xl mr-3">
-                    <FontAwesomeIcon icon={item.icon} />
-                  </span>
-                  <span className="font-medium flex-1">{item.label}</span>
-                  {item.count && (
+              <div className="space-y-1 mt-2">
+                {section.items.map((item, index) => (
+                  <button
+                    key={index}
+                    onClick={() => {
+                      setActiveTab(item.label);
+                      setIsOpen(false);
+                      if (item.label === "Cerrar Sesion") {
+                        handleLogout();
+                      }
+                    }}
+                    className={`w-full flex items-center p-3 rounded-lg transition-all duration-200 text-sm ${
+                      activeTab === item.label
+                        ? "bg-amber-50/80 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 font-medium shadow-inner"
+                        : "text-gray-600 dark:text-gray-300 hover:bg-gray-100/50 dark:hover:bg-gray-700/50"
+                    }`}
+                  >
                     <span
-                      className={`ml-auto text-sm font-semibold rounded-full px-2 py-0.5
-                ${
-                  activeTab === item.label
-                    ? "bg-[#fcb900] text-white"
-                    : "bg-gray-200 dark:bg-gray-600 dark:text-gray-100"
-                }`}
+                      className={`text-lg w-8 ${
+                        activeTab === item.label
+                          ? "text-amber-600 dark:text-amber-400"
+                          : "text-gray-500 dark:text-gray-400"
+                      }`}
                     >
-                      {item.count}
+                      <FontAwesomeIcon
+                        icon={item.icon}
+                        className="inline-block align-middle"
+                      />
                     </span>
-                  )}
-                </button>
-              ))}
+                    <span className="flex-1 text-left truncate">
+                      {item.label}
+                    </span>
+                    {item.count && (
+                      <span
+                        className={`ml-2 px-2 py-0.5 text-xs rounded-full ${
+                          activeTab === item.label
+                            ? "bg-amber-600 text-white"
+                            : "bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-200"
+                        }`}
+                      >
+                        {item.count}
+                      </span>
+                    )}
+                  </button>
+                ))}
+              </div>
             </div>
           ))}
         </nav>
       </aside>
 
-  
-      <div className="flex-1 flex flex-col">
-        <header className="bg-gradient-to-r from-[#fcb900] to-[#fcb900cc] text-white px-4 py-3 flex items-center justify-between shadow-md">
-      
-          <div className="flex items-center space-x-3">
-            <button
-              className="lg:hidden relative group p-3 rounded-md hover:bg-[#fcb90033] transition duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500 transform hover:scale-105"
-              onClick={() => setIsOpen(!isOpen)}
-              aria-label="Abrir menú"
-            >
-             
-              <div className="flex flex-col justify-between w-6 h-5 transform transition-all duration-300 origin-center group-hover:scale-105">
-                <span className="block h-[2px] w-full bg-white rounded-sm"></span>
-                <span className="block h-[2px] w-full bg-white rounded-sm"></span>
-                <span className="block h-[2px] w-full bg-white rounded-sm"></span>
-              </div>
-            </button>
-
-       
-            <img
-              src={fotoEmpresa || Logo}
-              alt="Logo"
-              className="h-12 w-12 object-contain rounded-full transition-transform duration-200 hover:scale-110"
-            />
-          </div>
-
-          
-          <h1 className="text-xl sm:text-2xl font-bold text-center flex-1">
-            Alquiladora Romero
-          </h1>
-
-   
+      <div className="flex-1 flex flex-col min-w-0">
+        <header className="sticky top-0 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-4 sm:px-6 py-3 flex items-center justify-between z-30 shadow-sm">
           <div className="flex items-center space-x-2 sm:space-x-4">
-            <ToggleThemeButton />
-            <button className="p-3 rounded-full hover:bg-[#fcb90033] transition duration-200 transform hover:scale-105">
-          
+            <button
+              onClick={() => setIsOpen(!isOpen)}
+              className="lg:hidden p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+            >
               <svg
-                className="w-6 h-6 sm:w-7 sm:h-7"
+                className="w-6 h-6 text-gray-600 dark:text-gray-300"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -360,19 +457,48 @@ const MenuHomeAdmin = () => {
                   strokeLinecap="round"
                   strokeLinejoin="round"
                   strokeWidth={2}
-                  d="M15 17h5l-1.405-1.405A2.032 
-             2.032 0 0118 14.158V11a6.002 
-             6.002 0 00-4-5.659V5a2 
-             2 0 10-4 0v.341C7.67 6.165 
-             6 8.388 6 11v3.159c0 .538-.214 
-             1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"
+                  d="M4 6h16M4 12h16M4 18h16"
                 />
               </svg>
+            </button>
+
+            <div className="flex items-center space-x-3">
+              <img
+                src={fotoEmpresa || Logo}
+                alt="Logo"
+                className="h-10 w-10 sm:h-12 sm:w-12 object-contain rounded-lg bg-white p-1 shadow-sm"
+              />
+              <h1 className="text-xl sm:text-2xl font-bold text-gray-800 dark:text-white truncate">
+                Alquiladora Romero
+              </h1>
+            </div>
+          </div>
+
+          <div className="flex items-center space-x-3 sm:space-x-4">
+            <ToggleThemeButton />
+            <button className="relative p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+              <svg
+                className="w-6 h-6 text-gray-600 dark:text-gray-300"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"
+                />
+              </svg>
+              <span className="absolute top-0 right-0 w-5 h-5 bg-red-500 text-white text-xs font-semibold rounded-full flex items-center justify-center">
+                3
+              </span>
             </button>
           </div>
         </header>
 
-        <main className="p-2 max-w-7xl w-full mx-auto flex-1 ">
+        <main className="p-4 sm:p-6 max-w-7xl w-full mx-auto flex-1">
+          <Breadcrumbs activeTab={activeTab} onNavigate={handleNavigate} />
           {renderContent()}
         </main>
       </div>

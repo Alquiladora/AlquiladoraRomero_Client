@@ -170,8 +170,10 @@ import React, {
 import SpinerCarga from "../utils/SpinerCarga";
 import { useNavigate } from "react-router-dom";
 import api from "../utils/AxiosConfig";
+import { useSocket } from "../utils/Socket";
 
 const AuthContext = createContext();
+
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
@@ -180,6 +182,10 @@ export const AuthProvider = ({ children }) => {
   const [error, setError] = useState(null);
   const navigate = useNavigate();
   const isMounted = useRef(true);
+  const socket = useSocket();
+
+
+
 
   const fetchCsrfToken = async () => {
    
@@ -206,6 +212,7 @@ export const AuthProvider = ({ children }) => {
           setUser(response.data.user);
         } else {
           console.warn("⚠️ Respuesta sin usuario, redirigiendo a login.");
+          setUser(null);
           navigate("/login");
         }
       }
@@ -221,6 +228,7 @@ export const AuthProvider = ({ children }) => {
           console.warn(
             "⚠️ Usuario no autenticado (401/403). Sesión expirada o inválida, redirigiendo a login."
           );
+          setUser(null);
           navigate("/login");
         } else {
           setError(
@@ -270,6 +278,10 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+
+
+
+ 
   useEffect(() => {
     isMounted.current = true;
     fetchCsrfToken();
@@ -282,13 +294,25 @@ export const AuthProvider = ({ children }) => {
 
   
   useEffect(() => {
-   
-      checkAuth();
-   
+    if (user) {
+      const intervalId = setInterval(() => {
+        checkAuth();
+      }, 1020000); 
+      return () => clearInterval(intervalId);
+    }
+  }, [user, csrfToken]);
 
-    
 
-  }, [csrfToken]);
+  useEffect(() => {
+    const handleSessionExpired = () => {
+      console.warn("⚠️ Sesión expirada, redirigiendo a login.");
+      setUser(null);
+      navigate("/login");
+    };
+
+    window.addEventListener("session-expired", handleSessionExpired);
+    return () => window.removeEventListener("session-expired", handleSessionExpired);
+  }, [navigate]);
 
   if (isLoading) return <SpinerCarga />;
 

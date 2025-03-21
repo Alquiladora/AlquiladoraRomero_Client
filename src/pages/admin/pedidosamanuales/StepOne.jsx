@@ -203,7 +203,7 @@ function StepOne({
       {/* Correo (opcional) */}
       <div>
         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-          Correo (opcional)
+          Correo
         </label>
         <div className="relative">
           <FontAwesomeIcon

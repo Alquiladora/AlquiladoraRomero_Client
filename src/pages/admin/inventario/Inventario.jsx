@@ -539,10 +539,10 @@ const Inventatio = ({ onNavigate, setDatosInventario }) => {
 
       <div>
         <h2 className="text-3xl font-bold mb-6 text-yellow-600 text-center">
-          Inventario Principal esme
+          Inventario Principal 
         </h2>
         {aggregatedMainInventory.length === 0 ? (
-          <div className="flex flex-col justify-center items-center py-8">
+          <div className="flex flex-col justify-center items-center py-8 animate-fade-in-up">
             <FaBoxOpen className="text-4xl text-gray-500" />
             <p className="text-xl text-gray-600 dark:text-gray-300 mt-4">
               Sin producto en el inventario principal
@@ -550,7 +550,7 @@ const Inventatio = ({ onNavigate, setDatosInventario }) => {
           </div>
         ) : (
           <>
-            <div className="overflow-x-auto">
+            <div className="overflow-x-auto  animate-fade-in-up">
               <table className="table-auto w-full border border-gray-300 dark:border-gray-700">
                 <thead className="bg-yellow-500 text-white text-sm">
                   <tr>
@@ -698,7 +698,7 @@ const Inventatio = ({ onNavigate, setDatosInventario }) => {
       </div>
 
       {Object.keys(aggregatedSecondaryByBodega).length === 0 ? (
-        <div className="flex flex-col justify-center items-center py-8">
+        <div className="flex flex-col justify-center items-center py-8 animate-fade-in-up">
           <FaBoxOpen className="text-4xl text-gray-500" />
           <p className="text-xl text-gray-600 dark:text-gray-300 mt-4">
             Sin producto en el inventario secundario
@@ -728,10 +728,10 @@ const Inventatio = ({ onNavigate, setDatosInventario }) => {
                 Inventario: {bodega}
               </h2>
 
-              <div className="overflow-x-auto relative">
+              <div className="overflow-x-auto relative animate-fade-in-up">
                 {bodegaInactiva && (
                   <div
-                    className="absolute flex items-center justify-center w-full pointer-events-none z-10"
+                    className="animate-fade-in-up absolute flex items-center justify-center w-full pointer-events-none z-10"
                     style={{ top: "0.75rem" }}
                   >
                     <div className="transform ">
@@ -747,7 +747,7 @@ const Inventatio = ({ onNavigate, setDatosInventario }) => {
                     bodegaInactiva ? "bg-red-200" : ""
                   }`}
                 >
-                  <table className="table-auto w-full border border-gray-300 dark:border-gray-700">
+                  <table className="table-auto w-full border border-gray-300 dark:border-gray-700 animate-fade-in-up">
                     <thead className="bg-yellow-500 text-white text-sm">
                       <tr>
                         <th className="border border-gray-300 dark:border-gray-700 px-3 py-2 text-left">

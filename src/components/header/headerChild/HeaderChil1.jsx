@@ -2,16 +2,13 @@ import React, { useState, useEffect } from "react";
 import {
   HomeIcon,
   ClipboardListIcon,
-  ReceiptTaxIcon,
-  TicketIcon,
+  BriefcaseIcon,
   MenuIcon,
   XIcon,
-  UserIcon,
   ShoppingCartIcon,
-  BriefcaseIcon,
+  TruckIcon, 
 } from "@heroicons/react/outline";
 import { LoginLink, IconoPerfil } from "../btnLogin/LoginClient";
-
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faHeadset } from "@fortawesome/free-solid-svg-icons";
 import SearchBar from "./Seach";
@@ -20,9 +17,7 @@ import Logo from "../../../img/Logos/logo.jpg";
 import { Link } from "react-router-dom";
 import Chatbox from "../../chabox/Chabox";
 import { useAuth } from "../../../hooks/ContextAuth";
-import { toast } from "react-toastify";
 import api from "../../../utils/AxiosConfig";
-import Categoria from "../../categ/Categoria";
 
 const HeaderChil1 = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -42,46 +37,49 @@ const HeaderChil1 = () => {
         headers: { "X-CSRF-Token": csrfToken },
       });
       setCategorias(response.data.subcategories);
-      console.log("categorias ", response.data.subcategories);
     } catch (error) {
       console.error("Error al obtener categorías:", error);
     }
   };
 
+  const handleCategoryClick = () => {
+    setIsCategoriesOpen(false);
+  };
+
+  const isCliente = user && user.rol === "cliente";
+
   return (
-    <div className="shadow-md sticky top-0 z-50 bg-white dark:bg-gray-950 dark:text-white">
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between py-2">
+    <header className="sticky top-0 z-50 bg-white dark:bg-gray-900 shadow-lg transition-all duration-300">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between">
         {/* Logo */}
-        <div className="text-xl font-bold flex items-center">
-          <Link to="/" className="hover:text-blue-600">
+        <div className="flex items-center">
+          <Link to="/" className="hover:text-blue-500 transition-transform duration-300">
             <img
               src={Logo}
               alt="Logo"
-              className="max-h-20 w-auto rounded-full border-2 transition-transform duration-300 ease-in-out hover:scale-110"
+              className="h-14 w-auto rounded-full border-2 border-gray-200 dark:border-gray-700 shadow-md hover:scale-105 transition-transform duration-300"
             />
           </Link>
         </div>
 
         {/* Desktop Menu */}
-        <nav className="hidden lg:flex items-center justify-end flex-grow space-x-8">
+        <nav className="hidden lg:flex items-center space-x-12 flex-grow justify-center">
           <Link
             to="/"
-            className="flex items-center space-x-2 hover:text-blue-600 transition-all duration-300 ease-in-out hover:scale-105"
+            className="flex items-center space-x-2 text-lg font-medium text-gray-900 dark:text-gray-100 hover:text-blue-500 transition-all duration-300 hover:scale-105"
           >
-            <HomeIcon className="w-6 h-6" />
-            <span>Home</span>
+            <HomeIcon className="w-5 h-5" />
+            <span>Inicio</span>
           </Link>
           <div className="relative">
             <button
-              className="flex items-center space-x-2 hover:text-blue-600 transition-all duration-300 ease-in-out hover:scale-105"
+              className="flex items-center space-x-2 text-lg font-medium text-gray-900 dark:text-gray-100 hover:text-blue-500 transition-all duration-300 hover:scale-105 focus:outline-none"
               onClick={() => setIsCategoriesOpen(!isCategoriesOpen)}
             >
-              <ClipboardListIcon className="w-6 h-6" />
+              <ClipboardListIcon className="w-5 h-5" />
               <span>Categorías</span>
               <svg
-                className={`w-5 h-5 ml-1 transition-transform duration-300 ease-in-out ${
-                  isCategoriesOpen ? "transform rotate-180" : ""
-                }`}
+                className={`w-4 h-4 transition-transform duration-300 ${isCategoriesOpen ? "rotate-180" : ""}`}
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -92,164 +90,160 @@ const HeaderChil1 = () => {
                   strokeLinejoin="round"
                   strokeWidth="2"
                   d="M19 9l-7 7-7-7"
-                ></path>
+                />
               </svg>
             </button>
-
             {isCategoriesOpen && (
-              <div className="absolute left-0 mt-2 bg-white border border-gray-200 rounded-lg shadow-lg w-56 dark:bg-gray-950 dark:border-gray-800 z-10 transition-all duration-300 ease-in-out transform opacity-100 scale-100">
+              <div className="absolute left-0 mt-4 w-72 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-2xl z-20 animate-fade-in">
                 <div className="p-4">
-                  <p className="font-bold text-gray-900 dark:text-white mb-3">
-                    Categorías de productos
+                  <p className="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-3">
+                    Categorías de Productos
                   </p>
-                  <div className="text-sm space-y-2">
+                  <ul className="space-y-2">
                     {categorias && categorias.length > 0 ? (
                       categorias.map((cat) => (
-                        <div key={cat.categoryName} className="mb-2">
+                        <li key={cat.categoryName}>
                           <Link
                             to={
-                              user && user.rol === "cliente"
+                              isCliente
                                 ? `/cliente/categoria/${cat.categoryName}`
                                 : `/categoria/${cat.categoryName}`
                             }
-                            className="block py-2 px-3 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-md transition-all duration-200 ease-in-out flex items-center space-x-2"
+                            className="block py-2 px-4 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-all duration-200 hover:text-blue-500"
+                            onClick={handleCategoryClick}
                           >
-                            <span className="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400">
-                              {cat.categoryName}
-                            </span>
+                            {cat.categoryName}
                           </Link>
-                        </div>
+                        </li>
                       ))
                     ) : (
-                      <p className="text-gray-500 dark:text-gray-400">
+                      <p className="text-sm text-gray-500 dark:text-gray-400 px-4">
                         Cargando categorías...
                       </p>
                     )}
-                  </div>
+                  </ul>
                 </div>
               </div>
             )}
           </div>
-
           <Link
             to="/about"
-            className="flex items-center space-x-2 hover:text-blue-600 transition-all duration-300 ease-in-out hover:scale-105"
+            className="flex items-center space-x-2 text-lg font-medium text-gray-900 dark:text-gray-100 hover:text-blue-500 transition-all duration-300 hover:scale-105"
           >
-            <BriefcaseIcon className="w-6 h-6" />
+            <BriefcaseIcon className="w-5 h-5" />
             <span>Sobre Nosotros</span>
           </Link>
+     
+          {!isCliente && (
+            <Link
+              to="/rastrear-pedido"
+              className="flex items-center space-x-2 text-lg font-medium text-gray-900 dark:text-gray-100 hover:text-blue-500 transition-all duration-300 hover:scale-105"
+            >
+              <TruckIcon className="w-5 h-5" />
+              <span>Rastrear Pedido</span>
+            </Link>
+          )}
         </nav>
 
-        {/* Right Side: Search Bar, Login, and Cart */}
-        <div className="flex items-center space-x-4">
-          {/* Search Bar */}
+      
+        <div className="flex items-center space-x-5">
           <div className="hidden md:block">
             <SearchBar />
           </div>
-
-          {/* Login Button */}
           {user ? (
             user?.rol && user.rol !== "Administrador" ? (
               user?.rol === "cliente" ? (
                 <IconoPerfil />
-              ) : (
-                <></>
-              )
+              ) : null
             ) : (
               <LoginLink />
             )
           ) : (
             <LoginLink />
           )}
-
-          {/* Shopping Cart */}
           <Link
-            to={
-              user && user.rol === "cliente" ? "/cliente/carrito" : "/carrito"
-            }
-            className="relative group flex items-center font-semibold hover:text-blue-600"
+            to={isCliente ? "/cliente/carrito" : "/carrito"}
+            className="relative group flex items-center text-gray-900 dark:text-gray-100 hover:text-blue-500 transition-all duration-300"
           >
-            <ShoppingCartIcon className="w-7 h-7" />
-            <span className="absolute -top-2 -right-2 bg-blue-600 text-white text-xs font-bold px-2 py-0.5 rounded-full">
+            <ShoppingCartIcon className="w-6 h-6" />
+            <span className="absolute -top-2 -right-2 bg-blue-500 text-white text-xs font-bold px-1.5 py-0.5 rounded-full shadow-md">
               3
             </span>
-            <span className="hover:text-blue-600 absolute top-full mt-2 left-1/2 transform -translate-x-1/2 whitespace-normal text-xs text-gray-700 bg-white px-2 py-1 rounded-lg shadow border border-blue-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300 sm:text-xs sm:px-2 sm:py-1 max-w-[90vw] sm:max-w-[70vw]">
+            <span className="absolute top-full mt-2 left-1/2 transform -translate-x-1/2 text-xs bg-white dark:bg-gray-800 px-2 py-1 rounded-md shadow-md border border-gray-200 dark:border-gray-700 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
               Carrito
             </span>
           </Link>
-
-          {/* Atención al Cliente */}
           <button
             onClick={() => setIsChatboxOpen(!isChatboxOpen)}
-            className="relative group hidden lg:flex items-center font-semibold hover:text-blue-600"
+            className="hidden lg:flex items-center group text-gray-900 dark:text-gray-100 hover:text-blue-500 transition-all duration-300"
           >
             <FontAwesomeIcon icon={faHeadset} className="w-6 h-6" />
-            <span className="hover:text-blue-600 absolute top-full mt-2 left-1/2 transform -translate-x-1/2 whitespace-normal text-xs text-gray-700 bg-white px-2 py-1 rounded-lg shadow border border-blue-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300 sm:text-xs sm:px-2 sm:py-1 max-w-[90vw] sm:max-w-[70vw]">
+            <span className="absolute top-full mt-2 left-1/2 transform -translate-x-1/2 text-xs bg-white dark:bg-gray-800 px-2 py-1 rounded-md shadow-md border border-gray-200 dark:border-gray-700 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
               Ayuda
             </span>
           </button>
-
-          {/* Toggle Theme Button */}
           <div className="hidden md:flex items-center">
             <ToggleThemeButton />
           </div>
-
-          {/* Hamburger Menu Button */}
           <button
-            className="lg:hidden focus:outline-none transition-transform duration-300 ease-in-out"
+            className="lg:hidden p-2 rounded-md text-gray-900 dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-800 transition-all duration-300"
             onClick={() => setIsMenuOpen(!isMenuOpen)}
           >
-            {isMenuOpen ? (
-              <XIcon className="w-6 h-6" />
-            ) : (
-              <MenuIcon className="w-6 h-6" />
-            )}
+            {isMenuOpen ? <XIcon className="w-6 h-6" /> : <MenuIcon className="w-6 h-6" />}
           </button>
         </div>
       </div>
 
       {/* Mobile Menu */}
       {isMenuOpen && (
-        <div className="lg:hidden bg-white text-gray-700 border-t dark:bg-gray-950 dark:text-white">
-          <nav className="flex flex-col space-y-2 py-4 px-6">
+        <div className="lg:hidden bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700 animate-slide-down">
+          <nav className="flex flex-col space-y-5 p-6">
             <Link
               to="/"
-              className="flex items-center space-x-2 hover:text-blue-600 transition-all duration-300 ease-in-out hover:scale-105"
+              className="flex items-center space-x-3 text-lg font-medium text-gray-900 dark:text-gray-100 hover:text-blue-500 transition-all duration-300"
+              onClick={() => setIsMenuOpen(false)}
             >
               <HomeIcon className="w-5 h-5" />
-              <span>Home</span>
-            </Link>
-            <Link
-              to="/categories"
-              className="flex items-center space-x-2 hover:text-blue-600 transition-all duration-300 ease-in-out hover:scale-105"
-            >
-              <ClipboardListIcon className="w-5 h-5" />
-              <span>Categorías</span>
+              <span>Inicio</span>
             </Link>
             <Link
               to="/about"
-              className="flex items-center space-x-2 hover:text-blue-600 transition-all duration-300 ease-in-out hover:scale-105"
+              className="flex items-center space-x-3 text-lg font-medium text-gray-900 dark:text-gray-100 hover:text-blue-500 transition-all duration-300"
+              onClick={() => setIsMenuOpen(false)}
             >
               <BriefcaseIcon className="w-5 h-5" />
               <span>Sobre Nosotros</span>
             </Link>
+            {/* Rastrear Pedido - Only for non-clients */}
+            {!isCliente && (
+              <Link
+                to="/rastrear-pedido"
+                className="flex items-center space-x-3 text-lg font-medium text-gray-900 dark:text-gray-100 hover:text-blue-500 transition-all duration-300"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                <TruckIcon className="w-5 h-5" />
+                <span>Rastrear Pedido</span>
+              </Link>
+            )}
             <Link
               to="/contact"
-              className="flex items-center space-x-2 hover:text-blue-600 transition-all duration-300 ease-in-out hover:scale-105"
+              className="flex items-center space-x-3 text-lg font-medium text-gray-900 dark:text-gray-100 hover:text-blue-500 transition-all duration-300"
+              onClick={() => setIsMenuOpen(false)}
             >
               <FontAwesomeIcon icon={faHeadset} className="w-5 h-5" />
               <span>Ayuda</span>
             </Link>
-            <div className="flex items-center space-x-2 hover:text-blue-600 transition-all duration-300 ease-in-out hover:scale-105">
+            <div className="flex items-center space-x-3">
               <ToggleThemeButton />
-              <span>Tema</span>
+              <span className="text-lg font-medium text-gray-900 dark:text-gray-100">Tema</span>
             </div>
           </nav>
         </div>
       )}
+
       {/* Chatbox */}
       {isChatboxOpen && <Chatbox onClose={() => setIsChatboxOpen(false)} />}
-    </div>
+    </header>
   );
 };
 

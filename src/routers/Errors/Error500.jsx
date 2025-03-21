@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { RefreshCw, PlugZap } from "lucide-react";
 
@@ -36,10 +36,30 @@ const plugVariants = {
 };
 
 const Error500 = () => {
-  const handleReload = () => {
-    window.location.reload();
-  };
+  const [showError, setShowError] = useState(false);
 
+
+    useEffect(() => {
+      const handleServerError = () => {
+        console.error("⚠️ Evento 'server-error' detectado. Mostrando pantalla de error.");
+        setShowError(true);
+      };
+  
+      // Escucha el evento `server-error`
+      window.addEventListener("server-error", handleServerError);
+  
+      return () => {
+        // Limpiar el evento cuando el componente se desmonte
+        window.removeEventListener("server-error", handleServerError);
+      };
+    }, []);
+  
+    const handleReload = () => {
+      window.location.reload();
+    };
+  
+    if (!showError) return null; // Si no se detecta el error, no se renderiza nada
+  
   return (
     <motion.div
       className="flex flex-col items-center justify-center   dark:bg-black-800"

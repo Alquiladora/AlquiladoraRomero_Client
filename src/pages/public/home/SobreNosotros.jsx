@@ -90,7 +90,9 @@ const SobreNosotros = () => {
             ¿Quiénes Somos?
           </h2>
           <p className="text-lg text-gray-700 dark:text-white">
-            {sobreNosotrosData.quienesSomos || "Información no disponible."}
+            {sobreNosotrosData && sobreNosotrosData.quienesSomos
+              ? sobreNosotrosData.quienesSomos
+              : "Información no disponible."}
           </p>
         </motion.div>
         <motion.div
@@ -134,7 +136,9 @@ const SobreNosotros = () => {
             Nuestra Historia
           </h2>
           <p className="text-lg text-gray-700 dark:text-white">
-            {sobreNosotrosData.nuestraHistoria || "Información no disponible."}
+            {sobreNosotrosData && sobreNosotrosData.nuestraHistoria
+              ? sobreNosotrosData.nuestraHistoria
+              : "Información no disponible."}
           </p>
         </motion.div>
       </div>

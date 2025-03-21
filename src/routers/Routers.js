@@ -4,11 +4,12 @@ import { useContext, useEffect } from "react";
 import LayoutHeader from "../components/layout/LayHeader";
 import RoutePrivate from './RoutePrivate';
 import RoutePublic from './RoutePublic';
-import { ServerStatusContext } from '../utils/ServerStatusContext';
+
 import ErrorBoundary from './Errors/ErrorBoundary';
 import ServerErrorModal from './Errors/ErrorTime';
 import AuthRedirector from '../components/layout/UrlDirrecion';
 import CarritoCompras from '../components/carrito/CarritoCompras';
+
 
 
 
@@ -27,6 +28,7 @@ import Catalogo from '../pages/public/catalog/Catalogo';
 import CambiarPassword from '../security/recuperacion/CambiarPasswor';
 import ProductosCategoria from '../components/productosCategoria/ProductosCatgeoria';
 import PoliticasPrivacidad from '../components/footer/foter-empresa/Politicas';
+import RastrearPedido from '../components/rastreo-pedido/RastreoPedido';
 
 
 //-------------------CLIENT------------------------
@@ -67,14 +69,14 @@ const Routerss = () => {
         <Route path="/login" element={<RoutePublic><LayoutHeader><Login /></LayoutHeader></RoutePublic>} />
         <Route path="/registro" element={<RoutePublic><LayoutHeader><Registro /></LayoutHeader></RoutePublic>} />
         <Route path="/cambiarPass" element={<RoutePublic><LayoutHeader><CambiarPassword /></LayoutHeader></RoutePublic>} />
-        <Route path="/categorias/sillas" element={<LayoutHeader><Catalogo /></LayoutHeader>} />
         <Route path="/categoria/:categori" element={<RoutePublic> <LayoutHeader>< ProductosCategoria /></LayoutHeader></RoutePublic>} />
         <Route path="/:categori/:idProducto" element={<RoutePublic> <LayoutHeader>< DetalleProducto /></LayoutHeader></RoutePublic>} />
         <Route path="/politicas-privacidad" element={<RoutePublic> <LayoutHeader>< PoliticasPrivacidad /></LayoutHeader></RoutePublic>} />
         <Route path="/deslin-legal" element={<RoutePublic> <LayoutHeader>< PoliticasPrivacidad /></LayoutHeader></RoutePublic>} />
         <Route path="/terminos-condiciones" element={<RoutePublic> <LayoutHeader>< PoliticasPrivacidad /></LayoutHeader></RoutePublic>} />
 
-
+        <Route path="/rastrear-pedido" element={<RoutePublic> <LayoutHeader>< RastrearPedido /></LayoutHeader></RoutePublic>} />
+       
 
 
 

@@ -25,34 +25,37 @@ import {
 } from "@mui/icons-material";
 import { motion } from "framer-motion";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { 
-    faFacebook, 
-    faInstagram, 
-    faTwitter, 
-    faLinkedin, 
-    faYoutube, 
-    faPinterest, 
-    faSnapchatGhost, 
-    faTiktok, 
-    faDiscord, 
-    faWhatsapp, 
-    faTelegramPlane 
+import {
+  faFacebook,
+  faInstagram,
+  faTwitter,
+  faLinkedin,
+  faYoutube,
+  faPinterest,
+  faSnapchatGhost,
+  faTiktok,
+  faDiscord,
+  faWhatsapp,
+  faTelegramPlane,
 } from "@fortawesome/free-brands-svg-icons";
-  
 import { FaGlobe, FaSadTear, FaDatabase, FaTimes } from "react-icons/fa";
 import axios from "axios";
 import { toast } from "react-toastify";
 import api from "../../../../utils/AxiosConfig";
 import { useAuth } from "../../../../hooks/ContextAuth";
-import { faDatabase, faUser, faHandPointer } from "@fortawesome/free-solid-svg-icons";
+import {
+  faDatabase,
+  faUser,
+  faHandPointer,
+} from "@fortawesome/free-solid-svg-icons";
 
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const phoneRegex = /^\d{10}$/;
 const urlRegex = /^(https?:\/\/)/;
-const direccionRegex = /^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]{3,},\s*[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]{3,},\s*[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]{3,}$/;
+const direccionRegex =
+  /^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]{3,},\s*[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]{3,},\s*[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]{3,}$/;
 
-
-const CrudEmpresa = ({ setFotoEmpresa}) => {
+const CrudEmpresa = ({ setFotoEmpresa }) => {
   const [empresaData, setEmpresaData] = useState({
     nombreEmpresa: "",
     logoUrl: "",
@@ -60,7 +63,7 @@ const CrudEmpresa = ({ setFotoEmpresa}) => {
     telefono: "",
     correo: "",
     ubicacion: "",
-    redesSociales: {}, 
+    redesSociales: {},
   });
   const { user, csrfToken } = useAuth();
   const [uploading, setUploading] = useState(false);
@@ -73,26 +76,25 @@ const CrudEmpresa = ({ setFotoEmpresa}) => {
   const [currentSocialKey, setCurrentSocialKey] = useState("");
   const [fechaA, setFechaA] = useState("");
   const [saving, setSaving] = useState(false);
-
   const [dataLoading, setDataLoading] = useState(true);
   const [dataError, setDataError] = useState("");
 
   const iconOptions = [
-    { name: "Facebook",   icon: faFacebook },
-    { name: "Instagram",  icon: faInstagram },
-    { name: "Twitter",    icon: faTwitter },
-    { name: "LinkedIn",   icon: faLinkedin },
-    { name: "YouTube",    icon: faYoutube },
-    { name: "Pinterest",  icon: faPinterest },
-    { name: "Snapchat",   icon: faSnapchatGhost },
-    { name: "TikTok",     icon: faTiktok },
-    { name: "Discord",    icon: faDiscord },
-    { name: "WhatsApp",   icon: faWhatsapp },
-    { name: "Telegram",   icon: faTelegramPlane },
-    { name: "Other",      icon: FaGlobe },
+    { name: "Facebook", icon: faFacebook },
+    { name: "Instagram", icon: faInstagram },
+    { name: "Twitter", icon: faTwitter },
+    { name: "LinkedIn", icon: faLinkedin },
+    { name: "YouTube", icon: faYoutube },
+    { name: "Pinterest", icon: faPinterest },
+    { name: "Snapchat", icon: faSnapchatGhost },
+    { name: "TikTok", icon: faTiktok },
+    { name: "Discord", icon: faDiscord },
+    { name: "WhatsApp", icon: faWhatsapp },
+    { name: "Telegram", icon: faTelegramPlane },
+    { name: "Other", icon: FaGlobe },
   ];
 
-  // Obtener datos de la empresa
+  // Fetch company data
   const fetchEmpresaData = async () => {
     setDataLoading(true);
     setDataError("");
@@ -101,7 +103,6 @@ const CrudEmpresa = ({ setFotoEmpresa}) => {
         headers: { "X-CSRF-Token": csrfToken },
         withCredentials: true,
       });
-      console.log("Datos empresa", response.data);
       setEmpresaData({
         nombreEmpresa: response.data.nombreEmpresa || "",
         ubicacion: response.data.ubicacion || "",
@@ -109,11 +110,10 @@ const CrudEmpresa = ({ setFotoEmpresa}) => {
         telefono: response.data.telefono || "",
         slogan: response.data.slogan || "",
         logoUrl: response.data.logoUrl || "",
-        // Si redesSociales es null/undefined, se pasa "{}"
         redesSociales: JSON.parse(response.data.redesSociales || "{}"),
       });
       setFechaA(response.data.actualizadoEn || "{}");
-       setFotoEmpresa(response.data.logoUrl);
+      setFotoEmpresa(response.data.logoUrl);
     } catch (error) {
       console.error("Error al obtener datos de la empresa", error);
       setDataError("No se pudieron cargar los datos de la empresa.");
@@ -210,37 +210,36 @@ const CrudEmpresa = ({ setFotoEmpresa}) => {
     setOpenModal(false);
   };
 
-  // Función de validación de dirección
-const validateDireccion = (direccion) => {
+  const validateDireccion = (direccion) => {
     if (!direccionRegex.test(direccion)) {
-      setErrorMessage("La dirección debe tener el formato 'Municipio,Ciudad, Estado' (ejemplo: tahuitzal, huejutla, hidalgo) y cada parte debe tener al menos 3 caracteres.");
+      setErrorMessage(
+        "La dirección debe tener el formato 'Municipio, Ciudad, Estado' (ejemplo: tahuitzal, huejutla, hidalgo) y cada parte debe tener al menos 3 caracteres."
+      );
       return false;
     }
     return true;
   };
 
   const validateField = () => {
-    
     if (currentField === "correo") {
       if (!emailRegex.test(newValue)) {
         setErrorMessage("Por favor, ingresa un correo electrónico válido.");
         return false;
       }
-    }
-    
-    else if (currentField === "telefono") {
+    } else if (currentField === "telefono") {
       if (!phoneRegex.test(newValue)) {
-        setErrorMessage("El teléfono debe contener exactamente 10 dígitos numéricos.");
+        setErrorMessage(
+          "El teléfono debe contener exactamente 10 dígitos numéricos."
+        );
         return false;
       }
-    }
-  
-    else if (currentField === "redesSociales") {
+    } else if (currentField === "redesSociales") {
       if (!urlRegex.test(newValue)) {
-        setErrorMessage("Ingresa una URL válida que comience con http o https.");
+        setErrorMessage(
+          "Ingresa una URL válida que comience con http o https."
+        );
         return false;
       }
-      
       const redes = empresaData.redesSociales || {};
       const duplicate = Object.keys(redes).some(
         (key) => key !== currentSocialKey && redes[key] === newValue.trim()
@@ -249,22 +248,16 @@ const validateDireccion = (direccion) => {
         setErrorMessage("Esta red social ya está registrada.");
         return false;
       }
-    }
-
-    else if (currentField === "ubicacion") {
-        if (!validateDireccion(newValue)) {
-            return false;
-          }
-    }
-   
-    else if (currentField === "slogan") {
+    } else if (currentField === "ubicacion") {
+      if (!validateDireccion(newValue)) {
+        return false;
+      }
+    } else if (currentField === "slogan") {
       if (newValue.trim().length < 4 || newValue.trim().length > 30) {
         setErrorMessage("El slogan debe tener entre 4 y 30 caracteres.");
         return false;
       }
-    }
-    
-    else if (currentField === "nombreEmpresa") {
+    } else if (currentField === "nombreEmpresa") {
       if (!/^[A-Za-z]/.test(newValue)) {
         setErrorMessage("El nombre de la empresa debe comenzar con una letra.");
         return false;
@@ -277,19 +270,18 @@ const validateDireccion = (direccion) => {
     setErrorMessage("");
     return true;
   };
-  
 
   const handleSave = async () => {
     if (!validateField()) return;
     const updatedData = { ...empresaData };
 
-   
     if (currentField === "redesSociales") {
       if (newValue.trim() === "") {
-        setErrorMessage("Por favor, introduce una URL válida antes de guardar.");
+        setErrorMessage(
+          "Por favor, introduce una URL válida antes de guardar."
+        );
         return;
       }
-     
       updatedData.redesSociales = updatedData.redesSociales || {};
       updatedData.redesSociales[currentSocialKey] = newValue;
     } else {
@@ -297,7 +289,7 @@ const validateDireccion = (direccion) => {
     }
 
     try {
-        setSaving(true);
+      setSaving(true);
       await api.post("/api/empresa/actualizar", updatedData, {
         headers: {
           "Content-Type": "application/json",
@@ -312,16 +304,13 @@ const validateDireccion = (direccion) => {
     } catch (error) {
       toast.error(`El campo ${currentField} no se actualizó.`);
       console.error(`Error al actualizar el campo ${currentField}`, error);
-    }finally{
-        setSaving(false);
+    } finally {
+      setSaving(false);
     }
   };
 
   const addNewSocial = () => {
-  
     const socialObj = empresaData.redesSociales || {};
-;
-    
     const newSocialKey = `Red_Social_${Object.keys(socialObj).length + 1}`;
     handleOpenModal("redesSociales", newSocialKey);
   };
@@ -338,15 +327,16 @@ const validateDireccion = (direccion) => {
     if (url.includes("tiktok.com")) return faTiktok;
     if (url.includes("discord.com")) return faDiscord;
     if (url.includes("whatsapp.com")) return faWhatsapp;
-    if (url.includes("telegram.org") || url.includes("t.me")) return faTelegramPlane;
+    if (url.includes("telegram.org") || url.includes("t.me"))
+      return faTelegramPlane;
     return FaGlobe;
   };
 
   if (dataLoading) {
     return (
-      <Box className="flex flex-col items-center justify-center h-screen">
-        <div className="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
-        <Typography className="mt-4 text-gray-700 dark:text-gray-300">
+      <Box className="flex flex-col items-center justify-center min-h-screen bg-white dark:bg-gray-900">
+        <CircularProgress size={60} className="text-blue-500 mb-4" />
+        <Typography variant="h6" className="text-gray-900 dark:text-white">
           Cargando datos de la empresa...
         </Typography>
       </Box>
@@ -362,35 +352,37 @@ const validateDireccion = (direccion) => {
       !empresaData.slogan)
   ) {
     return (
-      <Box
-        className="flex flex-col items-center justify-center h-screen  dark:bg-gray-900 p-4"
-        sx={{ textAlign: "center" }}
-      >
+      <Box className="flex flex-col items-center justify-center min-h-screen bg-white dark:bg-gray-900 p-4 sm:p-8">
         <motion.div
           animate={{ y: [0, -10, 0] }}
           transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-          style={{ marginBottom: "1rem" }}
+          className="mb-4"
         >
-          <FontAwesomeIcon icon={faUser} size="3x" className="text-gray-500 mb-2" />
+          <FontAwesomeIcon
+            icon={faUser}
+            size="3x"
+            className="text-gray-500 dark:text-gray-300 mb-2"
+          />
           <FontAwesomeIcon
             icon={faHandPointer}
             size="2x"
-            className="text-gray-400 absolute transform -translate-x-6 translate-y-6"
+            className="text-gray-500 dark:text-gray-300 absolute transform -translate-x-6 translate-y-6"
           />
-          <FontAwesomeIcon icon={faDatabase} size="4x" className="text-gray-400" />
+          <FontAwesomeIcon
+            icon={faDatabase}
+            size="4x"
+            className="text-gray-500 dark:text-gray-300"
+          />
         </motion.div>
-
         <Typography
           variant="h5"
-          className="text-red-600 font-bold mb-2"
-          sx={{ color: "error.main" }}
+          className="text-red-500 dark:text-red-400 font-bold mb-2"
         >
           Sin datos registrados de la empresa.
         </Typography>
         <Typography
           variant="body1"
           className="text-gray-700 dark:text-gray-300"
-          sx={{ color: "text.secondary" }}
         >
           Contacta con el administrador de la base de datos.
         </Typography>
@@ -399,41 +391,22 @@ const validateDireccion = (direccion) => {
   }
 
   return (
-    <Box
-      sx={{
-        maxWidth: "1200px",
-        mx: "auto",
-        p: 2,
-        bgcolor: "background.default",
-        color: "text.primary",
-      }}
-    >
-     
+    <Box className="max-w-6xl mx-auto p-4 sm:p-6 bg-white dark:bg-gray-900 min-h-screen  animate-fade-in-up">
       <Paper
         elevation={3}
-        sx={{
-          p: 2,
-          mb: 4,
-          position: "relative",
-          bgcolor: "background.paper",
-          transition: "box-shadow 0.3s ease",
-          "&:hover": {
-            boxShadow: 6,
-          },
-        }}
+        className="p-4 sm:p-6 mb-6 relative bg-white dark:bg-gray-800 rounded-lg transition-all hover:shadow-lg hover:-translate-y-1"
       >
-       
         <Typography
           variant="body2"
           sx={{
             position: "absolute",
-            top: 8,
-            right: 16,
-            fontSize: 14,
+            top: { xs: 8, sm: 12 },
+            right: { xs: 8, sm: 16 },
+            fontSize: { xs: "0.75rem", sm: "0.875rem" },
             color: "text.secondary",
           }}
+          className="dark:text-gray-300"
         >
-        
           Actualizado el:{" "}
           {fechaA
             ? new Date(fechaA).toLocaleString("es-ES", {
@@ -443,7 +416,6 @@ const validateDireccion = (direccion) => {
             : ""}
         </Typography>
 
-      
         <Box
           sx={{
             display: "flex",
@@ -452,7 +424,6 @@ const validateDireccion = (direccion) => {
             mt: 2,
           }}
         >
-       
           <Box sx={{ position: "relative" }}>
             <Avatar
               alt="Logo de la empresa"
@@ -463,9 +434,11 @@ const validateDireccion = (direccion) => {
                 )}&background=0D6EFD&color=fff`
               }
               sx={{
-                width: 100,
-                height: 100,
+                width: { xs: 80, sm: 100 },
+                height: { xs: 80, sm: 100 },
                 boxShadow: 3,
+                transition: "transform 0.3s ease",
+                "&:hover": { transform: "scale(1.05)" },
               }}
             />
             <IconButton
@@ -476,12 +449,15 @@ const validateDireccion = (direccion) => {
                 left: "50%",
                 transform: "translateX(-50%)",
                 bgcolor: "background.paper",
+                boxShadow: 2,
                 "&:hover": {
                   transform: "translateX(-50%) scale(1.1)",
+                  bgcolor: "background.default",
                 },
               }}
+              className="dark:bg-gray-700 dark:hover:bg-gray-600"
             >
-              <CameraAltIcon />
+              <CameraAltIcon sx={{ color: "primary.main" }} />
               <input
                 type="file"
                 hidden
@@ -491,31 +467,35 @@ const validateDireccion = (direccion) => {
             </IconButton>
           </Box>
 
-       
           <Box
             sx={{
               mt: 2,
               position: "relative",
               width: "100%",
-              maxWidth: "300px",
+              maxWidth: { xs: "250px", sm: "300px" },
+              textAlign: "center",
             }}
           >
-           <Typography
+            <Typography
               variant="h5"
               fontWeight="bold"
-              sx={{ textAlign: "center" }}
+              sx={{
+                fontSize: { xs: "1.25rem", sm: "1.5rem" },
+                color: "text.primary",
+              }}
+              className="dark:text-white"
             >
               {empresaData.nombreEmpresa || "Nombre de la Empresa"}
             </Typography>
-
-          
             <IconButton
               onClick={() => handleOpenModal("nombreEmpresa")}
               sx={{
                 position: "absolute",
                 top: 0,
                 right: 0,
+                color: "primary.main",
               }}
+              className="dark:text-white"
             >
               <EditIcon />
             </IconButton>
@@ -523,28 +503,42 @@ const validateDireccion = (direccion) => {
         </Box>
       </Paper>
 
-   
-      <Grid container spacing={2} justifyContent="center">
-        {["correo", "ubicacion", "telefono"].map((field, index) => (
-          <Grid item xs={12} sm={6} md={4} key={index}>
+      <Grid container spacing={{ xs: 1, sm: 2, md: 3 }} justifyContent="center">
+        {["correo", "ubicacion", "telefono", "slogan"].map((field, index) => (
+          <Grid item xs={12} sm={6} md={3} key={index}>
             <Paper
-              elevation={1}
+              elevation={2}
               sx={{
-                p: 2,
+                p: { xs: 1, sm: 2 },
                 textAlign: "center",
                 position: "relative",
                 bgcolor: "background.paper",
-                transition: "box-shadow 0.3s ease",
-                "&:hover": {
-                  boxShadow: 4,
-                },
+                borderRadius: 2,
+                transition: "box-shadow 0.3s ease, transform 0.3s ease",
+                "&:hover": { boxShadow: 6, transform: "translateY(-2px)" },
               }}
+              className="dark:bg-gray-800"
             >
-              <Typography variant="h6" fontWeight="bold" mb={1}>
+              <Typography
+                variant="h6"
+                fontWeight="medium"
+                sx={{
+                  mb: 1,
+                  fontSize: { xs: "0.9rem", sm: "1rem" },
+                  color: "text.primary",
+                }}
+                className="dark:text-white"
+              >
                 {field.charAt(0).toUpperCase() + field.slice(1)}
               </Typography>
               <Typography
-                sx={{ color: "text.secondary", wordWrap: "break-word", px: 1 }}
+                sx={{
+                  color: "text.secondary",
+                  wordWrap: "break-word",
+                  px: 1,
+                  fontSize: { xs: "0.85rem", sm: "0.95rem" },
+                }}
+                className="dark:text-gray-300"
               >
                 {empresaData[field] || "N/A"}
               </Typography>
@@ -553,7 +547,9 @@ const validateDireccion = (direccion) => {
                   position: "absolute",
                   top: 8,
                   right: 8,
+                  color: "primary.main",
                 }}
+                className="dark:text-white"
                 onClick={() => handleOpenModal(field)}
               >
                 <EditIcon />
@@ -562,60 +558,28 @@ const validateDireccion = (direccion) => {
           </Grid>
         ))}
 
-        {/* Slogan */}
-        <Grid item xs={12} sm={6} md={4}>
-          <Paper
-            elevation={1}
-            sx={{
-              p: 2,
-              textAlign: "center",
-              position: "relative",
-              bgcolor: "background.paper",
-              transition: "box-shadow 0.3s ease",
-              "&:hover": {
-                boxShadow: 4,
-              },
-            }}
-          >
-            <Typography variant="h6" fontWeight="bold" mb={1}>
-              Slogan
-            </Typography>
-            <Typography sx={{ color: "text.secondary", px: 1 }}>
-              {empresaData.slogan || "N/A"}
-            </Typography>
-            <IconButton
-              sx={{
-                position: "absolute",
-                top: 8,
-                right: 8,
-              }}
-              onClick={() => handleOpenModal("slogan")}
-            >
-              <EditIcon />
-            </IconButton>
-          </Paper>
-        </Grid>
-
-        {/* Redes Sociales */}
         <Grid item xs={12}>
           <Paper
-            elevation={1}
+            elevation={2}
             sx={{
-              p: 2,
+              p: { xs: 1, sm: 2, md: 3 },
               textAlign: "center",
-              position: "relative",
               bgcolor: "background.paper",
-              transition: "box-shadow 0.3s ease",
-              "&:hover": {
-                boxShadow: 4,
-              },
+              borderRadius: 2,
+              transition: "box-shadow 0.3s ease, transform 0.3s ease",
+              "&:hover": { boxShadow: 6, transform: "translateY(-2px)" },
             }}
+            className="dark:bg-gray-800 dark:text-white"
           >
-            <Typography variant="h6" fontWeight="bold" mb={1}>
+            <Typography
+              variant="h6"
+              fontWeight="medium"
+              sx={{ mb: 2, fontSize: { xs: "1rem", sm: "1.25rem" } }}
+            >
               Redes Sociales
             </Typography>
             {Object.keys(empresaData.redesSociales || {}).length > 0 ? (
-              <List>
+              <List sx={{ maxHeight: "300px", overflowY: "auto" }}>
                 {Object.keys(empresaData.redesSociales || {}).map(
                   (socialKey, index) => (
                     <ListItem
@@ -624,32 +588,55 @@ const validateDireccion = (direccion) => {
                         display: "flex",
                         justifyContent: "space-between",
                         alignItems: "center",
+                        bgcolor:
+                          index % 2 === 0
+                            ? "background.paper"
+                            : "background.default",
+                        borderRadius: 1,
+                        mb: 0.5,
                       }}
+                      className="dark:bg-gray-700"
                     >
                       <Box sx={{ display: "flex", alignItems: "center" }}>
                         <FontAwesomeIcon
                           icon={getSocialIcon(
                             empresaData.redesSociales[socialKey]
                           )}
-                          style={{ marginRight: 10 }}
+                          className="dark:text-gray-300"
+                          style={{ marginRight: 10, fontSize: "1.2rem" }}
                         />
                         <ListItemText
-                          primary={empresaData.redesSociales[socialKey]}
+                          primary={
+                            <Typography
+                              sx={{
+                                fontSize: { xs: "0.85rem", sm: "0.95rem" },
+                                color: "text.primary",
+                                wordBreak: "break-word",
+                              }}
+                              className="dark:text-white"
+                            >
+                              {empresaData.redesSociales[socialKey]}
+                            </Typography>
+                          }
                         />
                       </Box>
                       <IconButton
                         onClick={() =>
                           handleOpenModal("redesSociales", socialKey)
                         }
+                        sx={{ color: "primary.main" }}
                       >
-                        <EditIcon />
+                        <EditIcon className="dark:text-white" />
                       </IconButton>
                     </ListItem>
                   )
                 )}
               </List>
             ) : (
-              <Typography sx={{ color: "text.secondary" }}>
+              <Typography
+                className="dark:text-gray-300"
+                sx={{ color: "text.secondary", mb: 2 }}
+              >
                 No se han agregado redes sociales.
               </Typography>
             )}
@@ -663,10 +650,15 @@ const validateDireccion = (direccion) => {
                 color: "white",
                 "&:hover": {
                   bgcolor: "primary.dark",
+                  transform: "scale(1.05)",
                 },
-                borderRadius: 4,
+                transition: "transform 0.3s ease",
+                borderRadius: 2,
                 fontWeight: "bold",
+                fontSize: { xs: "0.75rem", sm: "0.875rem" },
+                px: { xs: 2, sm: 3 },
               }}
+              className="dark:bg-blue-600 dark:hover:bg-blue-700"
             >
               Añadir Red Social
             </Button>
@@ -674,7 +666,6 @@ const validateDireccion = (direccion) => {
         </Grid>
       </Grid>
 
-      {/* Modal para editar campo */}
       <Modal open={openModal} onClose={handleCloseModal}>
         <Box
           sx={{
@@ -682,22 +673,39 @@ const validateDireccion = (direccion) => {
             left: "50%",
             top: "50%",
             transform: "translate(-50%, -50%)",
-            width: "90%",
-            maxWidth: 400,
+            width: { xs: "90%", sm: "400px" },
             bgcolor: "background.paper",
-            p: 3,
+            p: { xs: 2, sm: 3 },
             borderRadius: 2,
             boxShadow: 24,
+            outline: "none",
+            maxHeight: "90vh",
+            overflowY: "auto",
           }}
+          className="dark:bg-gray-800"
         >
-          {/* Botón para cerrar el modal */}
           <IconButton
             onClick={handleCloseModal}
-            sx={{ position: "absolute", top: 8, right: 8, color: "text.secondary" }}
+            sx={{
+              position: "absolute",
+              top: 8,
+              right: 8,
+              color: "text.secondary",
+              "&:hover": { color: "text.primary" },
+            }}
+            className="dark:text-white"
           >
             <FaTimes />
           </IconButton>
-          <Typography variant="h6" mb={2} sx={{ color: "text.primary" }}>
+          <Typography
+            variant="h6"
+            sx={{
+              mb: 2,
+              color: "text.primary",
+              fontSize: { xs: "1rem", sm: "1.25rem" },
+            }}
+            className="dark:text-white"
+          >
             Editar{" "}
             {typeof currentField === "string"
               ? currentField.charAt(0).toUpperCase() + currentField.slice(1)
@@ -711,13 +719,19 @@ const validateDireccion = (direccion) => {
             margin="normal"
             sx={{
               "& .MuiInputBase-root": { bgcolor: "background.default" },
+              "& .MuiInputLabel-root": { color: "text.secondary" },
+              "& .MuiInputBase-input": { color: "text.primary" },
             }}
+            className="dark:bg-gray-700 dark:text-white"
             error={!!errorMessage}
             helperText={errorMessage}
           />
           {currentField === "redesSociales" && (
             <FormControl fullWidth margin="normal">
-              <InputLabel sx={{ color: "text.secondary" }}>
+              <InputLabel
+                sx={{ color: "text.secondary" }}
+                className="dark:text-gray-300"
+              >
                 Selecciona un icono
               </InputLabel>
               <Select
@@ -727,12 +741,25 @@ const validateDireccion = (direccion) => {
                     iconOptions.find((option) => option.icon === e.target.value)
                   )
                 }
-                sx={{ bgcolor: "background.default" }}
+                sx={{
+                  bgcolor: "background.default",
+                  color: "text.primary",
+                  "& .MuiSvgIcon-root": { color: "text.secondary" },
+                }}
+                className="dark:bg-gray-700 dark:text-white"
                 label="Selecciona un icono"
               >
                 {iconOptions.map((option) => (
-                  <MenuItem key={option.name} value={option.icon}>
-                    <FontAwesomeIcon icon={option.icon} style={{ marginRight: 10 }} />
+                  <MenuItem
+                    key={option.name}
+                    value={option.icon}
+                    className="dark:bg-gray-800 dark:text-white"
+                  >
+                    <FontAwesomeIcon
+                      icon={option.icon}
+                      style={{ marginRight: 10, color: "text.secondary" }}
+                      className="dark:text-gray-300"
+                    />
                     {option.name}
                   </MenuItem>
                 ))}
@@ -741,7 +768,6 @@ const validateDireccion = (direccion) => {
           )}
           <Button
             variant="contained"
-            color="primary"
             onClick={handleSave}
             fullWidth
             disabled={saving}
@@ -749,11 +775,22 @@ const validateDireccion = (direccion) => {
               mt: 2,
               bgcolor: "primary.main",
               color: "white",
-              "&:hover": { bgcolor: "primary.dark" },
+              "&:hover": {
+                bgcolor: "primary.dark",
+                transform: "scale(1.02)",
+              },
+              transition: "transform 0.3s ease",
               fontWeight: "bold",
+              fontSize: { xs: "0.75rem", sm: "0.875rem" },
+              py: 1,
             }}
+            className="dark:bg-blue-600 dark:hover:bg-blue-700"
           >
-            {saving ? <CircularProgress size={24} sx={{ color: "white" }} /> : "Guardar"}
+            {saving ? (
+              <CircularProgress size={24} sx={{ color: "white" }} />
+            ) : (
+              "Guardar"
+            )}
           </Button>
         </Box>
       </Modal>

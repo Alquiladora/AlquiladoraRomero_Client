@@ -30,7 +30,6 @@ const RoutePrivate = ({ children, rolesPermitidos = [] }) => {
 
   
   if (!tienePermiso) {
-    console.warn(`Acceso denegado: El rol (${user?.rol}) no tiene permisos para acceder.`);
     return <Navigate to="/" state={{ from: location }} replace />;
   }
 

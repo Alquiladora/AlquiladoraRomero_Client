@@ -29,10 +29,9 @@ export const Login = () => {
   const [mfaRequired, setMfaRequired] = useState(false);
   const [mfaToken, setMfaToken] = useState(""); 
   const [userId, setUserId] = useState("");
-  const BASE_URL = "http://localhost:3001";
 
 
-  const { setUser, csrfToken } = useAuth();
+  const { setUser, csrfToken, socket } = useAuth();
   useEffect(() => {
     controls.start({ opacity: 1, y: 0 });
   }, [controls]);
@@ -182,6 +181,7 @@ export const Login = () => {
 
     if (!correo.trim() || !contrasena.trim()) {
       setErrorMessage("Completa todos los campos");
+
       await registrarAuditoria(
         "Desconocido",
         correo,
@@ -221,6 +221,7 @@ export const Login = () => {
       setUsuarioC(user);
       if (response.data.mfaRequired) {
         setMfaRequired(true);
+
         await registrarAuditoria(
           user ? user.nombre : "Desconocido",
           correo,
@@ -232,7 +233,7 @@ export const Login = () => {
       }
 
       if (user) {
-        console.log("Usuario obtenido:", user);
+      
         setUser({ id: user.idUsuarios, nombre: user.nombre, rol: user.rol });
         setIsLoggedIn(true);
         await registrarAuditoria(
@@ -242,6 +243,9 @@ export const Login = () => {
           deviceType,
           "Usuario autenticado correctamente"
         );
+
+
+    
 
         // Redirigir según el rol del usuario
         if (user.rol === "administrador") {
@@ -399,10 +403,6 @@ export const Login = () => {
     e.preventDefault();
     setErrorMessage("");
     const deviceType = getDeviceType();
-    
- 
-
-
     try {
       setIsLoading(true);
       const captchaToken = await executeRecaptcha("login");
@@ -432,11 +432,9 @@ export const Login = () => {
       const user = response.data?.user;
 
       if (user) {
-        // Guardamos el usuario en el contexto o en el estado global
+     
         setUser({ id: user.idUsuarios, nombre: user.nombre, rol: user.rol });
-        setIsLoggedIn(true);
-
-        // Redirigimos según el rol del usuario
+        setIsLoggedIn(true);   
         if (user.rol === "administrador") {
           Swal.fire({
             title: "¡Código MFA correcto!",
@@ -447,7 +445,7 @@ export const Login = () => {
             willClose: () => navigate("/administrador"),
           });
         } else if (user.rol === "cliente") {
-          // Mostramos un mensaje de éxito y redirigimos al área del cliente
+      
           Swal.fire({
             title: "¡Código MFA correcto!",
             text: "Bienvenido.",

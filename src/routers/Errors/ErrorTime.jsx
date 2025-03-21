@@ -7,19 +7,16 @@ const ServerErrorModal = () => {
   const [modalMessage, setModalMessage] = useState("");
 
   useEffect(() => {
-    // Maneja problemas de red lenta o falta de conexión.
     const handleSlowConnectionError = () => {
       setModalMessage("La red está muy lenta o no hay conexión a Internet.");
       setVisible(true);
     };
 
-    // Maneja el timeout en solicitudes al servidor.
     const handleTimeoutError = () => {
       setModalMessage("El servidor no respondió a tiempo.");
       setVisible(true);
     };
 
-    // Agregar listeners para eventos específicos.
     window.addEventListener("slow-connection-error", handleSlowConnectionError);
     window.addEventListener("timeout-error", handleTimeoutError);
 
