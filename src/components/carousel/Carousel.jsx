@@ -1,132 +1,110 @@
-import { useState, useEffect } from "react";
-import { motion, useAnimation } from "framer-motion";
-import { useSpring, animated } from "react-spring";
+import { useState, useEffect, useCallback } from "react";
+import { motion } from "framer-motion";
 import Typewriter from "typewriter-effect";
 
 const Carousel = ({
   images,
-  margin = "1",
+  margin = "1rem",
   height = "100%",
   headerText = ["Optimiza tus eventos", "Soluciones de calidad"],
-  autoPlayInterval = 5000,
+  autoPlayInterval = 7000,
 }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
 
-  // Función para ir a la imagen anterior
-  const goToPrevious = () => {
+  // Memoize navigation functions
+  const goToPrevious = useCallback(() => {
     setCurrentIndex((prevIndex) =>
       prevIndex === 0 ? images.length - 1 : prevIndex - 1
     );
-  };
+  }, [images.length]);
 
-  // Función para ir a la siguiente imagen
-  const goToNext = () => {
+  const goToNext = useCallback(() => {
     setCurrentIndex((prevIndex) =>
       prevIndex === images.length - 1 ? 0 : prevIndex + 1
     );
+  }, [images.length]);
+
+  // Simplified image animation
+  const imageVariants = {
+    enter: { opacity: 0 },
+    center: { opacity: 1 },
+    exit: { opacity: 0 },
   };
 
-  // Animación de fade para las imágenes
-  const fade = useSpring({
-    opacity: 1,
-    from: { opacity: 0 },
-    config: { tension: 250, friction: 30 },
-  });
-
-  // Animación para el texto
-  const textVariants = {
-    hidden: { opacity: 0, y: -20 },
-    visible: { opacity: 1, y: 0, transition: { duration: 0.8 } },
-  };
-
-  const imageControls = useAnimation();
+  // Optimized auto-play
   useEffect(() => {
-    imageControls.start({
-      opacity: 1,
-      transition: { duration: 1 },
-    });
-  }, [currentIndex, imageControls]);
-
-
-  // Cambiar automáticamente la imagen después de un intervalo
-  useEffect(() => {
-    const interval = setInterval(() => {
-      goToNext();
-    }, autoPlayInterval);
-
+    const interval = setInterval(goToNext, autoPlayInterval);
     return () => clearInterval(interval);
-  }, [autoPlayInterval]);
+  }, [autoPlayInterval, goToNext]);
 
   return (
     <div
-      className="relative dark:bg-gray-900"
-      style={{
-        width: "100%",
-        height: height,
-        margin: margin,
-      }}
+      className="relative w-full dark:bg-gray-900"
+      style={{ height, margin }}
     >
-      {/* Texto animado con efecto de máquina de escribir */}
-      <div className="absolute inset-0 z-20 flex justify-center items-center bg-gradient-to-b from-black/80 to-transparent dark:from-black/90 w-full h-full">
+      {/* Overlay with text */}
+      <div className="absolute inset-0 z-20 flex items-center justify-center bg-gradient-to-b from-black/70 to-transparent">
         <motion.h1
-          variants={textVariants}
-          initial="hidden"
-          animate="visible"
-          className="text-4xl md:text-6xl font-extrabold text-white drop-shadow-2xl text-center"
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          className="text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white text-center px-4 drop-shadow-lg"
         >
           <Typewriter
             options={{
               strings: headerText,
               autoStart: true,
               loop: true,
-              deleteSpeed: 30,
+              deleteSpeed: 50,
+              delay: 75,
             }}
           />
         </motion.h1>
       </div>
 
-      {/* Imágenes del Carousel */}
-      <animated.div
-        style={fade}
-        className="relative overflow-hidden rounded-xl shadow-2xl w-full h-full"
-      >
+      {/* Image container */}
+      <div className="relative w-full h-full overflow-hidden rounded-lg">
         <motion.img
           key={currentIndex}
           src={images[currentIndex]}
           alt={`Slide ${currentIndex + 1}`}
+          variants={imageVariants}
+          initial="enter"
+          animate="center"
+          exit="exit"
+          transition={{ duration: 0.5 }}
           className="w-full h-full object-cover"
-          initial={{ opacity: 0 }}
-          animate={imageControls}
-          transition={{ duration: 1 }}
+          loading="lazy" // Lazy load images
         />
-      </animated.div>
+      </div>
 
-      {/* Botones de navegación */}
+      {/* Navigation buttons */}
       <button
         onClick={goToPrevious}
-        className="absolute top-1/2 left-4 transform -translate-y-1/2 bg-black/60 text-white p-4 rounded-full shadow-xl hover:bg-black/80 focus:outline-none z-20 transition-all"
+        className="absolute top-1/2 left-2 sm:left-4 transform -translate-y-1/2 bg-black/50 text-white p-2 sm:p-3 rounded-full hover:bg-black/70 transition-colors z-20"
+        aria-label="Previous slide"
       >
-        &#9664;
+        ◀
       </button>
       <button
         onClick={goToNext}
-        className="absolute top-1/2 right-4 transform -translate-y-1/2 bg-black/60 text-white p-4 rounded-full shadow-xl hover:bg-black/80 focus:outline-none z-20 transition-all"
+        className="absolute top-1/2 right-2 sm:right-4 transform -translate-y-1/2 bg-black/50 text-white p-2 sm:p-3 rounded-full hover:bg-black/70 transition-colors z-20"
+        aria-label="Next slide"
       >
-        &#9654;
+        ▶
       </button>
 
-      {/* Indicadores dinámicos */}
-      <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 z-20 flex space-x-2">
+      {/* Indicators */}
+      <div className="absolute bottom-2 sm:bottom-4 left-1/2 transform -translate-x-1/2 z-20 flex space-x-1 sm:space-x-2">
         {images.map((_, index) => (
           <button
             key={index}
             onClick={() => setCurrentIndex(index)}
-            className={`w-4 h-4 rounded-full transition-all transform hover:scale-125 ${
-              currentIndex === index
-                ? "bg-blue-600 scale-150 shadow-xl"
-                : "bg-gray-400 hover:bg-gray-500"
+            className={`w-2 h-2 sm:w-3 sm:h-3 rounded-full transition-colors ${
+              currentIndex === index ? "bg-blue-500" : "bg-gray-400 hover:bg-gray-500"
             }`}
-          ></button>
+            aria-label={`Go to slide ${index + 1}`}
+          />
         ))}
       </div>
     </div>

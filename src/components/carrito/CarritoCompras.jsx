@@ -28,20 +28,17 @@ function CarritoRentaSheinStyle() {
   const [itemLoading, setItemLoading] = useState({});
   const allSelected = selectedItems.length === cartItems.length;
 
-  // Función para obtener la fecha actual en formato YYYY-MM-DD
   const getTodayDate = () => {
     const today = new Date();
     return today.toISOString().split("T")[0];
   };
 
-  // Función para obtener la fecha actual + 1 año en formato YYYY-MM-DD
   const getMaxDate = (startDate) => {
     const maxDate = new Date(startDate);
     maxDate.setFullYear(maxDate.getFullYear() + 1);
     return maxDate.toISOString().split("T")[0];
   };
 
-  // Función para obtener el día siguiente a una fecha dada en formato YYYY-MM-DD
   const getNextDay = (date) => {
     const nextDay = new Date(date);
     nextDay.setDate(nextDay.getDate() + 1);
@@ -63,9 +60,45 @@ function CarritoRentaSheinStyle() {
       if (data.idUsuario === idUsuario) fetchCartItems();
     };
 
+    const handleInventoryUpdate = (data) => {
+      setCartItems((prevItems) =>
+        prevItems.map((item) => {
+          if (item.idProductoColor === data.idProductoColor) {
+            const newStockDisponible = data.stockDisponible;
+            if (
+              (newStockDisponible === 0 || item.cantidad > newStockDisponible) &&
+              selectedItems.includes(item.id)
+            ) {
+              setSelectedItems((prev) => prev.filter((id) => id !== item.id));
+              if (newStockDisponible === 0) {
+                toast.warn(
+                  `El producto "${item.nombre}" se ha quedado sin stock y ha sido deseleccionado.`
+                );
+              } else {
+                toast.warn(
+                  `La cantidad del producto "${item.nombre}" (${item.cantidad}) es mayor al stock disponible (${newStockDisponible}). Por favor, disminuye la cantidad.`
+                );
+              }
+            }
+            return {
+              ...item,
+              stockDisponible: newStockDisponible,
+              disponible: newStockDisponible > 0,
+            };
+          }
+          return item;
+        })
+      );
+    };
+
     socket.on("Agregalo Carrito", handleCartUpdate);
-    return () => socket.off("Agregalo Carrito", handleCartUpdate);
-  }, [socket, idUsuario]);
+    socket.on("Inventario Actualizado", handleInventoryUpdate);
+
+    return () => {
+      socket.off("Agregalo Carrito", handleCartUpdate);
+      socket.off("Inventario Actualizado", handleInventoryUpdate);
+    };
+  }, [socket, idUsuario, selectedItems]);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -114,12 +147,16 @@ function CarritoRentaSheinStyle() {
 
       if (response.data.expiredCount > 0) {
         toast.info(
-          `${response.data.expiredCount} producto(s) fueron eliminados del carrito porque excedieron el límite de 5 días.`
+          `${response.data.expiredCount} producto(s) fueron eliminados del carrito porque excedieron el límite de 1 año.`
         );
       }
 
       setCartItems(mappedItems);
-      setSelectedItems(mappedItems.map((item) => item.id));
+      setSelectedItems(
+        mappedItems
+          .filter((item) => item.stockDisponible > 0 && item.cantidad <= item.stockDisponible)
+          .map((item) => item.id)
+      );
       console.log("Mapeamos intems de carrito ", mappedItems);
     } catch (err) {
       console.error("Error fetching cart items:", err);
@@ -169,6 +206,7 @@ function CarritoRentaSheinStyle() {
 
   const removeFromCart = async (idCarrito) => {
     setItemLoading((prev) => ({ ...prev, [idCarrito]: true }));
+    const idUser= user?.id || user?.idUsuarios
     try {
       const response = await api.delete(`/api/carrito/eliminar/${idCarrito}`, {
         withCredentials: true,
@@ -176,6 +214,7 @@ function CarritoRentaSheinStyle() {
           "X-CSRF-Token": csrfToken,
           "Content-Type": "application/json",
         },
+        data: { idUsuario: idUser }
       });
 
       if (!response.data.success) {
@@ -187,6 +226,24 @@ function CarritoRentaSheinStyle() {
       setCartItems((prev) => prev.filter((item) => item.id !== idCarrito));
       setSelectedItems((prev) => prev.filter((id) => id !== idCarrito));
       toast.success("Producto eliminado del carrito correctamente");
+
+     
+      if (totalCalculated !== null && rentalDate && returnDate) {
+        const start = new Date(rentalDate);
+        const end = new Date(returnDate);
+        const diffTime = Math.abs(end - start);
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) || 1;
+
+        const updatedCartItems = cartItems.filter((item) => item.id !== idCarrito);
+        const total = updatedCartItems.reduce((acc, item) => {
+          if (selectedItems.includes(item.id)) {
+            return acc + item.precioPorDia * item.cantidad * diffDays;
+          }
+          return acc;
+        }, 0);
+
+        setTotalCalculated(total);
+      }
     } catch (err) {
       console.error("Error removing item from cart:", err);
       toast.error(
@@ -225,18 +282,48 @@ function CarritoRentaSheinStyle() {
         );
       }
 
+     
       setCartItems((prev) =>
         prev.map((item) =>
           item.id === idCarrito
             ? {
                 ...item,
                 cantidad: newCantidad,
-                stockDisponible:
-                  item.stockDisponible - (newCantidad - item.cantidad),
               }
             : item
         )
       );
+
+     
+      const updatedItem = cartItems.find((item) => item.id === idCarrito);
+      if (updatedItem && newCantidad <= updatedItem.stockDisponible) {
+        setSelectedItems((prev) => {
+          if (!prev.includes(idCarrito)) {
+            return [...prev, idCarrito];
+          }
+          return prev;
+        });
+      }
+
+   
+      if (totalCalculated !== null && rentalDate && returnDate) {
+        const start = new Date(rentalDate);
+        const end = new Date(returnDate);
+        const diffTime = Math.abs(end - start);
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) || 1;
+
+        const updatedCartItems = cartItems.map((item) =>
+          item.id === idCarrito ? { ...item, cantidad: newCantidad } : item
+        );
+        const total = updatedCartItems.reduce((acc, item) => {
+          if (selectedItems.includes(item.id)) {
+            return acc + item.precioPorDia * item.cantidad * diffDays;
+          }
+          return acc;
+        }, 0);
+
+        setTotalCalculated(total);
+      }
     } catch (err) {
       console.error("Error updating quantity:", err);
       toast.error(
@@ -252,10 +339,58 @@ function CarritoRentaSheinStyle() {
     setSelectedItems((prev) =>
       prev.includes(id) ? prev.filter((itemId) => itemId !== id) : [...prev, id]
     );
+
+  
+    if (totalCalculated !== null && rentalDate && returnDate) {
+      const start = new Date(rentalDate);
+      const end = new Date(returnDate);
+      const diffTime = Math.abs(end - start);
+      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) || 1;
+
+      const newSelectedItems = selectedItems.includes(id)
+        ? selectedItems.filter((itemId) => itemId !== id)
+        : [...selectedItems, id];
+
+      const total = cartItems.reduce((acc, item) => {
+        if (newSelectedItems.includes(item.id)) {
+          return acc + item.precioPorDia * item.cantidad * diffDays;
+        }
+        return acc;
+      }, 0);
+
+      setTotalCalculated(total);
+    }
   };
 
   const handleToggleAll = () => {
-    setSelectedItems(allSelected ? [] : cartItems.map((item) => item.id));
+    if (allSelected) {
+      setSelectedItems([]);
+
+      if (totalCalculated !== null && rentalDate && returnDate) {
+        setTotalCalculated(0);
+      }
+    } else {
+      const newSelectedItems = cartItems
+        .filter((item) => item.stockDisponible > 0 && item.cantidad <= item.stockDisponible)
+        .map((item) => item.id);
+      setSelectedItems(newSelectedItems);
+
+      if (totalCalculated !== null && rentalDate && returnDate) {
+        const start = new Date(rentalDate);
+        const end = new Date(returnDate);
+        const diffTime = Math.abs(end - start);
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) || 1;
+
+        const total = cartItems.reduce((acc, item) => {
+          if (newSelectedItems.includes(item.id)) {
+            return acc + item.precioPorDia * item.cantidad * diffDays;
+          }
+          return acc;
+        }, 0);
+
+        setTotalCalculated(total);
+      }
+    }
   };
 
   const handleChangeQuantity = (id, newCantidad) => {
@@ -297,7 +432,8 @@ function CarritoRentaSheinStyle() {
   const getRemainingTime = (fechaAgregado) => {
     const fechaAgregadoDate = new Date(fechaAgregado);
     const expirationDate = new Date(fechaAgregadoDate);
-    expirationDate.setDate(fechaAgregadoDate.getDate() + 5);
+    expirationDate.setFullYear(fechaAgregadoDate.getFullYear() + 1);
+
     const currentDate = new Date();
     const diffTime = expirationDate - currentDate;
 
@@ -307,7 +443,8 @@ function CarritoRentaSheinStyle() {
     const hours = Math.floor((diffTime % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
     const minutes = Math.floor((diffTime % (1000 * 60 * 60)) / (1000 * 60));
     const timeString = `${days}d ${hours}h ${minutes}m`;
-    const showTimer = days <= 1;
+    const showTimer = days <= 2;
+
     return { timeString, showTimer };
   };
 
@@ -317,11 +454,17 @@ function CarritoRentaSheinStyle() {
 
     if (returnDate && new Date(newRentalDate) >= new Date(returnDate)) {
       setReturnDate("");
-      toast.warn("La fecha de devolución ha sido reseteada porque debe ser posterior a la fecha de renta.");
+      toast.warn(
+        "La fecha de devolución ha sido reseteada porque debe ser posterior a la fecha de renta."
+      );
+    }
+
+   
+    if (totalCalculated !== null) {
+      setTotalCalculated(null);
     }
   };
 
- 
   const handleReturnDateChange = (e) => {
     const newReturnDate = e.target.value;
     const rentalDateObj = new Date(rentalDate);
@@ -334,12 +477,19 @@ function CarritoRentaSheinStyle() {
     }
 
     if (returnDateObj <= rentalDateObj) {
-      toast.error("La fecha de devolución debe ser posterior a la fecha de renta.");
+      toast.error(
+        "La fecha de devolución debe ser posterior a la fecha de renta."
+      );
       setReturnDate("");
       return;
     }
 
     setReturnDate(newReturnDate);
+
+  
+    if (totalCalculated !== null) {
+      setTotalCalculated(null);
+    }
   };
 
   return (
@@ -412,6 +562,21 @@ function CarritoRentaSheinStyle() {
           background: linear-gradient(90deg, #b91c1c, #dc2626);
           color: #fee2e2;
         }
+        .out-of-stock {
+          background-color: #fee2e2;
+          color: #b91c1c;
+          padding: 4px 12px;
+          border-radius: 20px;
+          font-size: 0.875rem;
+          font-weight: 500;
+          margin-bottom: 8px;
+          display: inline-flex;
+          align-items: center;
+        }
+        .out-of-stock.dark {
+          background-color: #7f1d1d;
+          color: #fee2e2;
+        }
         @media (max-width: 640px) {
           .cart-item {
             flex-direction: column;
@@ -452,7 +617,9 @@ function CarritoRentaSheinStyle() {
           <div className="lg:col-span-2 space-y-4">
             {isLoading ? (
               <div className="bg-white rounded-lg shadow-sm p-6 text-center dark:bg-gray-800">
-                <p className="text-gray-500 dark:text-gray-400">Cargando carrito...</p>
+                <p className="text-gray-500 dark:text-gray-400">
+                  Cargando carrito...
+                </p>
               </div>
             ) : error ? (
               <div className="bg-white rounded-lg shadow-sm p-6 text-center dark:bg-gray-800">
@@ -476,7 +643,9 @@ function CarritoRentaSheinStyle() {
               </div>
             ) : cartItems.length === 0 ? (
               <div className="bg-white rounded-lg shadow-sm p-6 text-center dark:bg-gray-800">
-                <p className="text-gray-500 dark:text-gray-400">Tu carrito está vacío.</p>
+                <p className="text-gray-500 dark:text-gray-400">
+                  Tu carrito está vacío.
+                </p>
                 <a
                   href="/cliente"
                   className="mt-4 inline-block bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700 transition-all dark:bg-indigo-700 dark:hover:bg-indigo-800"
@@ -488,21 +657,23 @@ function CarritoRentaSheinStyle() {
               cartItems.map((item, index) => {
                 const isChecked = selectedItems.includes(item.id);
                 const subtotal = calcularSubtotal(item);
-                console.log(
-                  "valor de stock disponible y valor de cantidad",
-                  item.stockDisponible,
-                  item.cantidad
-                );
-                const canIncrease = item.stockDisponible > 0;
-                console.log("Increentar valor", canIncrease);
+                const isOutOfStock = item.stockDisponible === 0;
+                const isOverStock = item.cantidad > item.stockDisponible && item.stockDisponible > 0;
+                const canIncrease = !isOutOfStock && !isOverStock && item.cantidad < item.stockDisponible;
                 const canDecrease = item.cantidad > 1;
+                const canSelect = !isOutOfStock && !isOverStock;
                 const isItemLoading = itemLoading[item.id] || false;
-                const remainingTime = item.remainingTime || getRemainingTime(item.fechaAgregado);
+                const remainingTime =
+                  item.remainingTime || getRemainingTime(item.fechaAgregado);
 
                 return (
                   <div
                     key={item.id}
-                    className={`cart-item bg-white dark:bg-gray-800 rounded-xl shadow-sm p-2 sm:p-6 flex flex-col sm:flex-row items-center space-y-4 sm:space-y-0 sm:space-x-4 sm:space-x-6 transform transition-all hover:shadow-lg animate-fadeIn border border-gray-100 dark:border-gray-700 hover:border-indigo-200 dark:hover:border-indigo-500`}
+                    className={`cart-item bg-white dark:bg-gray-800 rounded-xl shadow-sm p-2 sm:p-6 flex flex-col sm:flex-row items-center space-y-4 sm:space-y-0 sm:space-x-4 sm:space-x-6 transform transition-all hover:shadow-lg animate-fadeIn border ${
+                      (isOutOfStock || isOverStock)
+                        ? "border-red-200 dark:border-red-800 opacity-75"
+                        : "border-gray-100 dark:border-gray-700 hover:border-indigo-200 dark:hover:border-indigo-500"
+                    }`}
                     style={{ animationDelay: `${index * 0.1}s` }}
                   >
                     <input
@@ -510,57 +681,94 @@ function CarritoRentaSheinStyle() {
                       checked={isChecked}
                       onChange={() => handleToggleItem(item.id)}
                       className="h-4 w-4 sm:h-5 sm:w-5 text-indigo-600 rounded border-gray-300 dark:border-gray-600 focus:ring-indigo-500 transition-all"
+                      disabled={!canSelect}
                     />
 
                     <div className="relative">
                       <img
                         src={item.imagen}
                         alt={item.nombre}
-                        className="w-16 h-16 sm:w-20 sm:h-20 md:w-28 md:h-28 object-cover rounded-lg border border-gray-200 dark:border-gray-600 transition-transform transform hover:scale-105"
-                      />
-
-                      {/* <span
-                        className={`absolute -top-1 -right-1 sm:-top-2 sm:-right-2 px-1.5 sm:px-2 py-0.5 sm:py-1 text-xs font-semibold rounded-full shadow-sm ${
-                          item.disponible
-                            ? "bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-200"
-                            : "bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-200"
+                        className={`w-16 h-16 sm:w-20 sm:h-20 md:w-28 md:h-28 object-cover rounded-lg border border-gray-200 dark:border-gray-600 transition-transform transform hover:scale-105 ${
+                          (isOutOfStock || isOverStock) ? "opacity-50" : ""
                         }`}
-                      >
-                        {item.disponible ? "Disponible" : "No disponible"}
-                      </span> */}
-
+                      />
                     </div>
 
                     <div className="flex-1 space-y-1 sm:space-y-2">
-                      {remainingTime.showTimer && (
+                      {isOutOfStock ? (
+                        <span className="out-of-stock dark:out-of-stock-dark text-xs sm:text-sm">
+                          Producto sin stock
+                        </span>
+                      ) : isOverStock ? (
+                        <span className="out-of-stock dark:out-of-stock-dark text-xs sm:text-sm">
+                          La cantidad es mayor a la disponible. Por favor, disminuye la cantidad.
+                        </span>
+                      ) : null}
+                      {remainingTime.showTimer && !isOutOfStock && !isOverStock && (
                         <span className="timer dark:timer-dark text-xs sm:text-sm">
                           <ClockIcon className="h-4 w-4 mr-2" />
                           Tiempo restante: {remainingTime.timeString}
                         </span>
                       )}
-                      <p className="font-semibold text-base sm:text-lg md:text-xl text-gray-900 dark:text-gray-100 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">
+                      <p
+                        className={`font-semibold text-base sm:text-lg md:text-xl text-gray-900 dark:text-gray-100 transition-colors ${
+                          (isOutOfStock || isOverStock)
+                            ? "text-gray-500 dark:text-gray-400"
+                            : "hover:text-indigo-600 dark:hover:text-indigo-400"
+                        }`}
+                      >
                         {item.nombre}
                       </p>
 
                       <div className="flex flex-wrap items-center gap-1 sm:gap-2">
-                        <span className="bubble bg-indigo-50 text-indigo-700 dark:bg-indigo-900 dark:text-indigo-200 hover:bg-indigo-100 dark:hover:bg-indigo-800 transition-colors text-xs sm:text-sm">
+                        <span
+                          className={`bubble text-xs sm:text-sm ${
+                            (isOutOfStock || isOverStock)
+                              ? "bg-gray-200 text-gray-500 dark:bg-gray-700 dark:text-gray-400"
+                              : "bg-indigo-50 text-indigo-700 dark:bg-indigo-900 dark:text-indigo-200 hover:bg-indigo-100 dark:hover:bg-indigo-800 transition-colors"
+                          }`}
+                        >
                           <PaintBrushIcon className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
                           Color: {item.color}
                         </span>
-                        <span className="bubble bg-indigo-50 text-indigo-700 dark:bg-indigo-900 dark:text-indigo-200 hover:bg-indigo-100 dark:hover:bg-indigo-800 transition-colors text-xs sm:text-sm">
+                        <span
+                          className={`bubble text-xs sm:text-sm ${
+                            (isOutOfStock || isOverStock)
+                              ? "bg-gray-200 text-gray-500 dark:bg-gray-700 dark:text-gray-400"
+                              : "bg-indigo-50 text-indigo-700 dark:bg-indigo-900 dark:text-indigo-200 hover:bg-indigo-100 dark:hover:bg-indigo-800 transition-colors"
+                          }`}
+                        >
                           <WrenchScrewdriverIcon className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
                           Material: {item.material}
                         </span>
                       </div>
 
-                      <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400">
+                      <p
+                        className={`text-xs sm:text-sm ${
+                          (isOutOfStock || isOverStock)
+                            ? "text-gray-500 dark:text-gray-400"
+                            : "text-gray-600 dark:text-gray-400"
+                        }`}
+                      >
                         <span className="font-medium">Detalles:</span>{" "}
                         {item.detalles}
                       </p>
 
-                      <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400">
+                      <p
+                        className={`text-xs sm:text-sm ${
+                          (isOutOfStock || isOverStock)
+                            ? "text-gray-500 dark:text-gray-400"
+                            : "text-gray-600 dark:text-gray-400"
+                        }`}
+                      >
                         <span className="font-medium">Precio por día:</span>{" "}
-                        <span className="text-indigo-600 dark:text-indigo-400 font-semibold">
+                        <span
+                          className={`font-semibold ${
+                            (isOutOfStock || isOverStock)
+                              ? "text-gray-500 dark:text-gray-400"
+                              : "text-indigo-600 dark:text-indigo-400"
+                          }`}
+                        >
                           ${item.precioPorDia.toLocaleString()}
                         </span>
                       </p>
@@ -584,7 +792,13 @@ function CarritoRentaSheinStyle() {
                             <MinusIcon className="h-4 w-4 sm:h-5 sm:w-5" />
                           )}
                         </button>
-                        <span className="px-3 sm:px-4 py-0.5 sm:py-1 bg-indigo-50 dark:bg-indigo-900 rounded-full text-indigo-800 dark:text-indigo-200 font-medium text-xs sm:text-sm">
+                        <span
+                          className={`px-3 sm:px-4 py-0.5 sm:py-1 rounded-full font-medium text-xs sm:text-sm ${
+                            (isOutOfStock || isOverStock)
+                              ? "bg-gray200 text-gray-500 dark:bg-gray-700 dark:text-gray-400"
+                              : "bg-indigo-50 text-indigo-800 dark:bg-indigo-900 dark:text-indigo-200"
+                          }`}
+                        >
                           {item.cantidad} unidades
                         </span>
                         <button
@@ -609,7 +823,13 @@ function CarritoRentaSheinStyle() {
                     </div>
 
                     <div className="text-center sm:text-right space-y-1 sm:space-y-2">
-                      <p className="text-base sm:text-lg md:text-xl font-bold text-gray-900 dark:text-gray-100">
+                      <p
+                        className={`text-base sm:text-lg md:text-xl font-bold ${
+                          (isOutOfStock || isOverStock)
+                            ? "text-gray-500 dark:text-gray-400"
+                            : "text-gray-900 dark:text-gray-100"
+                        }`}
+                      >
                         ${subtotal.toLocaleString()}
                       </p>
                       <button
@@ -637,7 +857,8 @@ function CarritoRentaSheinStyle() {
                 <p className="text-gray-600 mt-4 text-lg font-medium leading-relaxed dark:text-gray-300">
                   Aquí verás los importes de la renta de los productos
                   <span className="block text-gray-500 text-sm font-normal mt-1 dark:text-gray-400">
-                    Una vez que agregues productos, los detalles aparecerán en esta sección.
+                    Una vez que agregues productos, los detalles aparecerán en
+                    esta sección.
                   </span>
                 </p>
               </div>
@@ -656,7 +877,9 @@ function CarritoRentaSheinStyle() {
                     </span>
                   </div>
                   <div className="flex justify-between font-semibold text-lg border-t pt-3 dark:border-gray-700">
-                    <span className="text-gray-800 dark:text-gray-200">Total:</span>
+                    <span className="text-gray-800 dark:text-gray-200">
+                      Total:
+                    </span>
                     <span className="text-gray-900 dark:text-gray-100">
                       ${subtotalAproximado.toLocaleString()}
                     </span>
@@ -670,8 +893,8 @@ function CarritoRentaSheinStyle() {
                       type="date"
                       value={rentalDate}
                       onChange={handleRentalDateChange}
-                      min={getTodayDate()} 
-                      max={getMaxDate(new Date())} 
+                      min={getTodayDate()}
+                      max={getMaxDate(new Date())}
                       className="w-full p-2 border border-gray-300 dark:border-gray-700 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all dark:bg-gray-800 dark:text-gray-300"
                       aria-label="Seleccionar día de renta"
                     />
@@ -684,11 +907,15 @@ function CarritoRentaSheinStyle() {
                       type="date"
                       value={returnDate}
                       onChange={handleReturnDateChange}
-                      min={rentalDate ? getNextDay(rentalDate) : getTodayDate()} 
-                      max={rentalDate ? getMaxDate(rentalDate) : getMaxDate(new Date())} 
+                      min={rentalDate ? getNextDay(rentalDate) : getTodayDate()}
+                      max={
+                        rentalDate
+                          ? getMaxDate(rentalDate)
+                          : getMaxDate(new Date())
+                      }
                       className="w-full p-2 border border-gray-300 dark:border-gray-700 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all dark:bg-gray-800 dark:text-gray-300"
                       aria-label="Seleccionar día de devolución"
-                      disabled={!rentalDate} 
+                      disabled={!rentalDate}
                     />
                   </div>
 
@@ -721,29 +948,31 @@ function CarritoRentaSheinStyle() {
                   )}
                 </div>
 
-           <div className="mt-6">
-  <p className="text-sm text-gray-600 mb-2 dark:text-gray-300">Métodos de pago:</p>
-  <div className="flex space-x-3 justify-center sm:justify-start">
-    <img
-      src="https://upload.wikimedia.org/wikipedia/commons/4/41/Visa_Logo.png"
-      alt="Visa"
-      title="Visa"
-      className="h-6 sm:h-8 object-contain transition-transform transform hover:scale-110"
-    />
-    <img
-      src="https://upload.wikimedia.org/wikipedia/commons/2/2a/Mastercard-logo.svg"
-      alt="Mastercard"
-      title="Mastercard"
-      className="h-6 sm:h-8 object-contain transition-transform transform hover:scale-110"
-    />
-    <img
-      src="https://upload.wikimedia.org/wikipedia/commons/b/b5/PayPal.svg"
-      alt="PayPal"
-      title="PayPal"
-      className="h-6 sm:h-8 object-contain transition-transform transform hover:scale-110"
-    />
-  </div>
-</div>
+                <div className="mt-6">
+                  <p className="text-sm text-gray-600 mb-2 dark:text-gray-300">
+                    Métodos de pago:
+                  </p>
+                  <div className="flex space-x-3 justify-center sm:justify-start">
+                    <img
+                      src="https://upload.wikimedia.org/wikipedia/commons/4/41/Visa_Logo.png"
+                      alt="Visa"
+                      title="Visa"
+                      className="h-6 sm:h-8 object-contain transition-transform transform hover:scale-110"
+                    />
+                    <img
+                      src="https://upload.wikimedia.org/wikipedia/commons/2/2a/Mastercard-logo.svg"
+                      alt="Mastercard"
+                      title="Mastercard"
+                      className="h-6 sm:h-8 object-contain transition-transform transform hover:scale-110"
+                    />
+                    <img
+                      src="https://upload.wikimedia.org/wikipedia/commons/b/b5/PayPal.svg"
+                      alt="PayPal"
+                      title="PayPal"
+                      className="h-6 sm:h-8 object-contain transition-transform transform hover:scale-110"
+                    />
+                  </div>
+                </div>
               </>
             )}
           </div>

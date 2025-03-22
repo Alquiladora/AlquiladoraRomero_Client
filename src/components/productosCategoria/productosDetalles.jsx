@@ -6,7 +6,6 @@ import { useAuth } from "../../hooks/ContextAuth";
 import api from "../../utils/AxiosConfig";
 import colorMap from "./Colors";
 
-
 import { FaMoneyBillWave, FaTimes } from "react-icons/fa";
 import { GiMaterialsScience } from "react-icons/gi";
 
@@ -19,9 +18,9 @@ function DetalleProducto() {
   const [selectedVariant, setSelectedVariant] = useState(null);
   const [imagenPrincipal, setImagenPrincipal] = useState(fallbackImage);
   const [hoveredColor, setHoveredColor] = useState(null);
-  const [quantity, setQuantity] = useState(1); 
+  const [quantity, setQuantity] = useState(1);
+  const [isAddingToCart, setIsAddingToCart] = useState(false); 
   const navigate = useNavigate();
- 
 
   useEffect(() => {
     const fetchProductoDetalle = async () => {
@@ -79,48 +78,74 @@ function DetalleProducto() {
 
   const selectedStock = selectedVariant ? parseInt(selectedVariant.stock, 10) : 0;
 
- 
+  const checkIfProductInCart = async (idUsuario, idProductoColor) => {
+    try {
+      const response = await api.get(`/api/carrito/carrito/${idUsuario}`, {
+        withCredentials: true,
+        headers: { "X-CSRF-Token": csrfToken },
+      });
+
+      if (response.data.success && response.data.carrito) {
+        const cartItems = response.data.carrito;
+        return cartItems.some((item) => item.idProductoColores === idProductoColor);
+      }
+      return false;
+    } catch (error) {
+      console.error("Error al verificar el carrito:", error);
+      toast.error("Error al verificar el carrito.");
+      return false;
+    }
+  };
 
   const handleAddToCart = async () => {
     if (!selectedVariant) {
       toast.error("Por favor selecciona un color antes de añadir al carrito.");
       return;
     }
-  
+
     if (quantity <= 0) {
       toast.error("La cantidad debe ser mayor a 0.");
       return;
     }
-  
+
     if (quantity > selectedStock) {
       toast.error(`No hay suficiente stock. Stock disponible: ${selectedStock}`);
       return;
     }
-  
+
     try {
-      console.log("user carrito", user);
       const idUsuario = user?.id || user?.idUsuarios;
-  
+
       if (!idUsuario) {
         toast.error("Debes iniciar sesión para añadir al carrito.");
         return;
       }
-  
-    
+
+      // Verificar si el producto ya está en el carrito
+      const isProductInCart = await checkIfProductInCart(idUsuario, selectedVariant.idProductoColor);
+      if (isProductInCart) {
+        toast.error(
+          `El producto "${producto.nombreProducto} (${selectedVariant.nombreColor})" ya está en tu carrito.`
+        );
+        return;
+      }
+
+      setIsAddingToCart(true); // Activar el spinner y deshabilitar el botón
+
       const cartItem = {
         idUsuario,
         precioAlquiler: producto.precioAlquiler,
-        idProductoColor: selectedVariant.idProductoColor, 
+        idProductoColor: selectedVariant.idProductoColor,
         cantidad: quantity,
       };
-  
+
       console.log("Datos enviados al endpoint:", cartItem);
-  
+
       const response = await api.post("/api/carrito/agregar", cartItem, {
         withCredentials: true,
         headers: { "X-CSRF-Token": csrfToken },
       });
-  
+
       if (response.data.success) {
         toast.success(`${producto.nombreProducto} (${selectedVariant.nombreColor}) añadido al carrito!`);
         setQuantity(1);
@@ -130,10 +155,10 @@ function DetalleProducto() {
     } catch (error) {
       console.error("Error al añadir al carrito:", error);
       toast.error("Error al añadir el producto al carrito.");
+    } finally {
+      setIsAddingToCart(false); // Desactivar el spinner y habilitar el botón
     }
   };
-
-
 
   const slideUpDownKeyframes = `
     @keyframes slideUpDown {
@@ -157,6 +182,22 @@ function DetalleProducto() {
     }
   `;
 
+  const spinnerKeyframes = `
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    .spinner {
+      display: inline-block;
+      width: 1.5rem;
+      height: 1.5rem;
+      border: 3px solid rgba(255, 255, 255, 0.3);
+      border-top: 3px solid white;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+  `;
+
   if (!producto) {
     return (
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-6">
@@ -171,6 +212,7 @@ function DetalleProducto() {
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-900 py-4 relative overflow-hidden">
       <style>{slideUpDownKeyframes}</style>
       <style>{fadeInKeyframes}</style>
+      <style>{spinnerKeyframes}</style>
 
       <div className="bg-yellow-400 text-black font-bold text-xs sm:text-sm py-2 text-center uppercase tracking-wider shadow animate-slideUpDown">
         ¡Alquiladora Romero los mejores de la region!
@@ -182,9 +224,9 @@ function DetalleProducto() {
         </h1>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Sección de imágenes */}
+        
           <div className="flex flex-col lg:flex-row gap-4">
-            {/* Miniaturas a la izquierda */}
+          
             <div className="flex lg:flex-col flex-row justify-center lg:justify-start gap-2 order-2 lg:order-1">
               {producto.imagenes &&
                 producto.imagenes.split(",").map((img, index) => (
@@ -208,7 +250,7 @@ function DetalleProducto() {
                 ))}
             </div>
 
-            {/* Imagen principal */}
+          
             <div className="relative border-2 border-gray-200 dark:border-gray-700 rounded-md overflow-hidden shadow-lg cursor-pointer order-1 lg:order-2 flex-1">
               <img
                 src={imagenPrincipal}
@@ -223,7 +265,6 @@ function DetalleProducto() {
             </div>
           </div>
 
-       
           <div className="bg-white dark:bg-gray-800 p-4 sm:p-6 rounded-md shadow-lg relative max-w-md w-full border-t-4 border-yellow-400 mx-auto fadeIn">
             {esNuevo() && (
               <div className="absolute top-0 right-0 bg-blue-600 text-white text-xs px-2 py-1 rounded-bl-md uppercase">
@@ -347,9 +388,9 @@ function DetalleProducto() {
               </div>
             )}
 
-            {/* Quantity Input and Add to Cart Button */}
+          
             <div className="mt-4">
-              {/* Quantity Input */}
+            
               <div className="mb-4 flex justify-center items-center">
                 <label className="text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 mr-2">
                   Cantidad:
@@ -370,25 +411,33 @@ function DetalleProducto() {
                     }
                   }}
                   className="w-16 sm:w-20 p-1 border-2 border-gray-300 dark:border-gray-600 rounded-md text-center text-sm sm:text-base bg-white dark:bg-gray-700 text-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  disabled={!anyVariantInStock}
+                  disabled={!anyVariantInStock || isAddingToCart}
                 />
               </div>
 
-         
               <div className="flex justify-center">
                 <button
                   onClick={handleAddToCart}
-                  disabled={!anyVariantInStock}
+                  disabled={!anyVariantInStock || isAddingToCart}
                   className={`
-                    px-4 sm:px-6 py-2 text-sm sm:text-base text-white font-semibold rounded 
+                    px-4 sm:px-6 py-2 text-sm sm:text-base text-white font-semibold rounded flex items-center justify-center
                     ${
-                      anyVariantInStock
+                      anyVariantInStock && !isAddingToCart
                         ? "bg-[#FFCC00] hover:bg-[#FFB300]"
                         : "bg-gray-400 cursor-not-allowed"
                     }
                   `}
                 >
-                  {anyVariantInStock ? "Añadir al carrito" : "Producto no disponible"}
+                  {isAddingToCart ? (
+                    <>
+                      <span className="spinner mr-2" />
+                      Agregando...
+                    </>
+                  ) : anyVariantInStock ? (
+                    "Añadir al carrito"
+                  ) : (
+                    "Producto no disponible"
+                  )}
                 </button>
               </div>
             </div>

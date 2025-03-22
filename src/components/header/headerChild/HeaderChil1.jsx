@@ -6,7 +6,7 @@ import {
   MenuIcon,
   XIcon,
   ShoppingCartIcon,
-  TruckIcon, 
+  TruckIcon,
 } from "@heroicons/react/outline";
 import { LoginLink, IconoPerfil } from "../btnLogin/LoginClient";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -14,21 +14,99 @@ import { faHeadset } from "@fortawesome/free-solid-svg-icons";
 import SearchBar from "./Seach";
 import ToggleThemeButton from "../../btnTheme/ToggleThemeButton";
 import Logo from "../../../img/Logos/logo.jpg";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import Chatbox from "../../chabox/Chabox";
 import { useAuth } from "../../../hooks/ContextAuth";
 import api from "../../../utils/AxiosConfig";
+import { useSocket } from "../../../utils/Socket";
 
 const HeaderChil1 = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isCategoriesOpen, setIsCategoriesOpen] = useState(false);
   const [isChatboxOpen, setIsChatboxOpen] = useState(false);
+  const [cartCount, setCartCount] = useState(0);
   const { user, csrfToken } = useAuth();
   const [categorias, setCategorias] = useState([]);
+  const socket = useSocket();
+  const location = useLocation();
+
+  console.log("Valor de user:", user);
+
+  const isCliente = user && user.rol === "cliente";
+  const isCartPage = location.pathname === (isCliente ? "/cliente/carrito" : "/carrito");
+  const userId = user?.id || user?.idUsuarios;
 
   useEffect(() => {
     fetchCategorias();
   }, []);
+
+
+  const fetchCartCount = async () => {
+    if (!userId) {
+      console.log("No user ID available, skipping fetchCartCount");
+      setCartCount(0); 
+      return;
+    }
+    try {
+      console.log(`Fetching cart count for user ${userId} with CSRF token: ${csrfToken}`);
+      const response = await api.get(`/api/carrito/count/${userId}`, {
+        withCredentials: true,
+        headers: { "X-CSRF-Token": csrfToken },
+      });
+      console.log("API response:", response.data);
+      const count = response.data.count || 0;
+      setCartCount(count);
+      console.log("Conteo inicial del carrito:", count);
+    } catch (error) {
+      console.error("Error fetching cart count:", error.message, error.response?.data);
+      setCartCount(0); 
+    }
+  };
+
+ 
+  useEffect(() => {
+    if (user) {
+      fetchCartCount();
+    } else {
+      console.log("No user, resetting cart count to 0");
+      setCartCount(0);
+    }
+  }, [user]);
+
+
+  useEffect(() => {
+    if (!socket || !userId) {
+      console.log("Socket or user ID not available, skipping socket listeners");
+      return;
+    }
+
+    const handleProductAdded = (data) => {
+      console.log("Producto agregado al carrito:", data);
+      setCartCount((prevCount) => {
+        const newCount = prevCount + data.cantidad;
+        console.log("New cart count after adding:", newCount);
+        return newCount;
+      });
+    };
+
+    const handleProductRemoved = (data) => {
+      console.log("Producto eliminado del carrito:", data);
+      setCartCount((prevCount) => {
+        const newCount = Math.max(prevCount - data.cantidad, 0);
+        console.log("New cart count after removing:", newCount);
+        return newCount;
+      });
+    };
+
+    socket.on("productoAgregadoCarrito", handleProductAdded);
+    socket.on("productoEliminadoCarrito", handleProductRemoved);
+
+  
+    return () => {
+      socket.off("productoAgregadoCarrito", handleProductAdded);
+      socket.off("productoEliminadoCarrito", handleProductRemoved);
+    };
+  }, [socket, userId]);
 
   const fetchCategorias = async () => {
     try {
@@ -45,8 +123,6 @@ const HeaderChil1 = () => {
   const handleCategoryClick = () => {
     setIsCategoriesOpen(false);
   };
-
-  const isCliente = user && user.rol === "cliente";
 
   return (
     <header className="sticky top-0 z-50 bg-white dark:bg-gray-900 shadow-lg transition-all duration-300">
@@ -133,7 +209,6 @@ const HeaderChil1 = () => {
             <BriefcaseIcon className="w-5 h-5" />
             <span>Sobre Nosotros</span>
           </Link>
-     
           {!isCliente && (
             <Link
               to="/rastrear-pedido"
@@ -145,7 +220,7 @@ const HeaderChil1 = () => {
           )}
         </nav>
 
-      
+        {/* Right Section */}
         <div className="flex items-center space-x-5">
           <div className="hidden md:block">
             <SearchBar />
@@ -166,13 +241,16 @@ const HeaderChil1 = () => {
             className="relative group flex items-center text-gray-900 dark:text-gray-100 hover:text-blue-500 transition-all duration-300"
           >
             <ShoppingCartIcon className="w-6 h-6" />
-            <span className="absolute -top-2 -right-2 bg-blue-500 text-white text-xs font-bold px-1.5 py-0.5 rounded-full shadow-md">
-              3
-            </span>
+            {cartCount > 0 && (
+              <span className="absolute -top-2 -right-2 bg-blue-500 text-white text-xs font-bold px-1.5 py-0.5 rounded-full shadow-md">
+                {cartCount}
+              </span>
+            )}
             <span className="absolute top-full mt-2 left-1/2 transform -translate-x-1/2 text-xs bg-white dark:bg-gray-800 px-2 py-1 rounded-md shadow-md border border-gray-200 dark:border-gray-700 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
               Carrito
             </span>
           </Link>
+
           <button
             onClick={() => setIsChatboxOpen(!isChatboxOpen)}
             className="hidden lg:flex items-center group text-gray-900 dark:text-gray-100 hover:text-blue-500 transition-all duration-300"
@@ -182,6 +260,7 @@ const HeaderChil1 = () => {
               Ayuda
             </span>
           </button>
+
           <div className="hidden md:flex items-center">
             <ToggleThemeButton />
           </div>
@@ -214,7 +293,6 @@ const HeaderChil1 = () => {
               <BriefcaseIcon className="w-5 h-5" />
               <span>Sobre Nosotros</span>
             </Link>
-            {/* Rastrear Pedido - Only for non-clients */}
             {!isCliente && (
               <Link
                 to="/rastrear-pedido"
@@ -225,14 +303,13 @@ const HeaderChil1 = () => {
                 <span>Rastrear Pedido</span>
               </Link>
             )}
-            <Link
-              to="/contact"
+            <button
               className="flex items-center space-x-3 text-lg font-medium text-gray-900 dark:text-gray-100 hover:text-blue-500 transition-all duration-300"
-              onClick={() => setIsMenuOpen(false)}
+              onClick={() => setIsChatboxOpen(!isChatboxOpen)}
             >
               <FontAwesomeIcon icon={faHeadset} className="w-5 h-5" />
               <span>Ayuda</span>
-            </Link>
+            </button>
             <div className="flex items-center space-x-3">
               <ToggleThemeButton />
               <span className="text-lg font-medium text-gray-900 dark:text-gray-100">Tema</span>
@@ -241,7 +318,7 @@ const HeaderChil1 = () => {
         </div>
       )}
 
-      {/* Chatbox */}
+    
       {isChatboxOpen && <Chatbox onClose={() => setIsChatboxOpen(false)} />}
     </header>
   );
