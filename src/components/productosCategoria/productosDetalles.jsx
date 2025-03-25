@@ -5,13 +5,15 @@ import { toast } from "react-toastify";
 import { useAuth } from "../../hooks/ContextAuth";
 import api from "../../utils/AxiosConfig";
 import colorMap from "./Colors";
-
+import { useCart } from "../carrito/ContextCarrito";
 import { FaMoneyBillWave, FaTimes } from "react-icons/fa";
 import { GiMaterialsScience } from "react-icons/gi";
+
 
 function DetalleProducto() {
   const { idProducto } = useParams();
   const { csrfToken, user } = useAuth();
+  const { addToCart } = useCart()
   const [producto, setProducto] = useState(null);
   const [showModal, setShowModal] = useState(false);
   const fallbackImage = "https://via.placeholder.com/600x600?text=Sin+Imagen";
@@ -121,7 +123,7 @@ function DetalleProducto() {
         return;
       }
 
-      // Verificar si el producto ya está en el carrito
+     
       const isProductInCart = await checkIfProductInCart(idUsuario, selectedVariant.idProductoColor);
       if (isProductInCart) {
         toast.error(
@@ -130,7 +132,7 @@ function DetalleProducto() {
         return;
       }
 
-      setIsAddingToCart(true); // Activar el spinner y deshabilitar el botón
+      setIsAddingToCart(true);
 
       const cartItem = {
         idUsuario,
@@ -139,7 +141,7 @@ function DetalleProducto() {
         cantidad: quantity,
       };
 
-      console.log("Datos enviados al endpoint:", cartItem);
+      
 
       const response = await api.post("/api/carrito/agregar", cartItem, {
         withCredentials: true,
@@ -148,6 +150,7 @@ function DetalleProducto() {
 
       if (response.data.success) {
         toast.success(`${producto.nombreProducto} (${selectedVariant.nombreColor}) añadido al carrito!`);
+        await addToCart()
         setQuantity(1);
       } else {
         toast.error(response.data.mensaje || "Error al añadir el producto al carrito.");
@@ -156,7 +159,7 @@ function DetalleProducto() {
       console.error("Error al añadir al carrito:", error);
       toast.error("Error al añadir el producto al carrito.");
     } finally {
-      setIsAddingToCart(false); // Desactivar el spinner y habilitar el botón
+      setIsAddingToCart(false); 
     }
   };
 

@@ -2,19 +2,20 @@ import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-  ClockIcon, 
+  ClockIcon,
   CheckCircleIcon, // For Confirmado
   PaperAirplaneIcon, // For Enviando
   HomeIcon, // For Entregado
   TruckIcon, // For En Alquiler
   RefreshIcon, // For Devuelto
   ExclamationCircleIcon, // For Incompleto
-  ExclamationIcon, // For Incidencia (new)
+  ExclamationIcon, // For Incidencia
   FlagIcon, // For Finalizado
   BanIcon, // For Cancelado
 } from "@heroicons/react/outline";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faUserPlus, faExclamationTriangle } from "@fortawesome/free-solid-svg-icons";
+import api from "../../utils/AxiosConfig";
 
 const RastrearPedido = () => {
   const [idRastreo, setIdRastreo] = useState("");
@@ -22,44 +23,6 @@ const RastrearPedido = () => {
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [showNotification, setShowNotification] = useState(false);
-
- 
-  const mockOrders = {
-    "AR-12345": {
-      id: "AR-12345",
-      status: "Entregado",
-      history: [
-        { state: "Procesando", date: "2025-03-15 09:00 AM", description: "Estamos preparando tu pedido para el envío." },
-        { state: "Confirmado", date: "2025-03-15 10:00 AM", description: "Tu pedido ha sido confirmado y está listo para enviarse." },
-        { state: "Enviando", date: "2025-03-15 11:00 AM", description: "El pedido ha sido enviado y está en camino." },
-        { state: "Entregado", date: "2025-03-16 09:00 AM", description: "El pedido ha sido entregado exitosamente." },
-      ],
-    },
-    "AR-67890": {
-      id: "AR-67890",
-      status: "Incompleto",
-      history: [
-        { state: "Procesando", date: "2025-03-14 08:00 AM", description: "Estamos preparando tu pedido para el envío." },
-        { state: "Confirmado", date: "2025-03-14 09:00 AM", description: "Tu pedido ha sido confirmado y está listo para enviarse." },
-        { state: "Enviando", date: "2025-03-14 10:00 AM", description: "El pedido ha sido enviado y está en camino." },
-        { state: "Entregado", date: "2025-03-14 02:00 PM", description: "El pedido ha sido entregado exitosamente." },
-        { state: "En Alquiler", date: "2025-03-14 03:00 PM", description: "El producto está en uso por el cliente." },
-        { state: "Incompleto", date: "2025-03-15 02:00 PM", description: "El producto fue devuelto, pero falta un elemento." },
-      ],
-    },
-    "AR-99999": {
-      id: "AR-99999",
-      status: "Incidencia",
-      history: [
-        { state: "Procesando", date: "2025-03-13 07:00 AM", description: "Estamos preparando tu pedido para el envío." },
-        { state: "Confirmado", date: "2025-03-13 08:00 AM", description: "Tu pedido ha sido confirmado y está listo para enviarse." },
-        { state: "Enviando", date: "2025-03-13 09:00 AM", description: "El pedido ha sido enviado y está en camino." },
-        { state: "Entregado", date: "2025-03-13 01:00 PM", description: "El pedido ha sido entregado exitosamente." },
-        { state: "En Alquiler", date: "2025-03-13 02:00 PM", description: "El producto está en uso por el cliente." },
-        { state: "Incidencia", date: "2025-03-14 10:00 AM", description: "Se reportó un daño en el producto durante el alquiler." },
-      ],
-    },
-  };
 
   // Mapping of states to icons and colors
   const statusConfig = {
@@ -70,43 +33,53 @@ const RastrearPedido = () => {
     En_Alquiler: { icon: TruckIcon, color: "text-indigo-500" },
     Devuelto: { icon: RefreshIcon, color: "text-purple-500" },
     Incompleto: { icon: ExclamationCircleIcon, color: "text-yellow-500" },
-    Incidencia: { icon: ExclamationIcon, color: "text-orange-500" }, 
+    Incidencia: { icon: ExclamationIcon, color: "text-orange-500" },
     Finalizado: { icon: FlagIcon, color: "text-green-600" },
     Cancelado: { icon: BanIcon, color: "text-red-500" },
   };
 
-  const handleTrackOrder = (e) => {
+  const handleTrackOrder = async (e) => {
     e.preventDefault();
     setError("");
     setIsLoading(true);
 
- 
-    setTimeout(() => {
-      const foundOrder = mockOrders[idRastreo];
-      if (foundOrder) {
-        setOrder(foundOrder);
-      } else {
-        setError("No se encontró un pedido con ese ID. Por favor, verifica e intenta de nuevo.");
-      }
-      setIsLoading(false);
-    }, 1000);
-  };
+    try {
+      // Step 1: Check if the idRastreo exists using the new endpoint
+      const checkResponse = await api.get(`/api/pedidos/check-id-rastreo/${idRastreo}`);
 
+      if (!checkResponse.data.exists) {
+        // If idRastreo does not exist, set an error and stop
+        setError("No se encontró un pedido con ese ID de rastreo. Por favor, verifica e intenta de nuevo.");
+        setIsLoading(false);
+        return;
+      }
+
+      // Step 2: If idRastreo exists, proceed to fetch the tracking details
+      const trackingResponse = await api.get(`/api/pedidos/rastrear/${idRastreo}`);
+      setOrder(trackingResponse.data);
+    } catch (err) {
+      // Handle errors from either API call
+      setError(
+        err.response?.data?.message || "Error al rastrear el pedido. Intenta de nuevo más tarde."
+      );
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   useEffect(() => {
     if (order && order.status === "Incompleto") {
       setShowNotification(true);
       const timer = setTimeout(() => {
         setShowNotification(false);
-      }, 5000); 
+      }, 5000);
       return () => clearTimeout(timer);
     }
   }, [order]);
 
   return (
-    <div className="min-h-screen   py-5 px-2 sm:px-6 lg:px-8">
+    <div className="min-h-screen py-5 px-2 sm:px-6 lg:px-8">
       <div className="max-w-3xl mx-auto">
-     
         <motion.h1
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -116,7 +89,6 @@ const RastrearPedido = () => {
           Rastrear Pedido
         </motion.h1>
 
-      
         {!order && (
           <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
@@ -176,7 +148,6 @@ const RastrearPedido = () => {
           </motion.div>
         )}
 
-    
         <AnimatePresence>
           {order && (
             <motion.div
@@ -186,7 +157,6 @@ const RastrearPedido = () => {
               transition={{ duration: 0.5 }}
               className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 sm:p-8 mb-8 relative"
             >
-           
               <AnimatePresence>
                 {showNotification && order.status === "Incompleto" && (
                   <motion.div
@@ -208,7 +178,6 @@ const RastrearPedido = () => {
                 Estado Actual: <span className={statusConfig[order.status.replace(" ", "_")].color}>{order.status}</span>
               </h2>
 
-          
               <div className="relative">
                 <div className="absolute left-3 sm:left-4 top-0 bottom-0 w-1 bg-gray-200 dark:bg-gray-700"></div>
                 {order.history.map((step, index) => {
@@ -221,11 +190,9 @@ const RastrearPedido = () => {
                       transition={{ duration: 0.5, delay: index * 0.2 }}
                       className="relative flex items-start mb-6"
                     >
-                    
                       <div className="flex-shrink-0 w-6 h-6 sm:w-8 sm:h-8 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center z-10">
                         <Icon className={`w-4 h-4 sm:w-5 sm:h-5 ${statusConfig[step.state.replace(" ", "_")].color}`} />
                       </div>
-                      {/* Content */}
                       <div className="ml-4 sm:ml-6 flex-1">
                         <h3 className="text-base sm:text-lg font-medium text-gray-900 dark:text-white">
                           {step.state}
@@ -238,7 +205,6 @@ const RastrearPedido = () => {
                 })}
               </div>
 
-              {/* Back Button */}
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
@@ -251,37 +217,31 @@ const RastrearPedido = () => {
           )}
         </AnimatePresence>
 
-  
         <motion.div
-  initial={{ opacity: 0, y: 30, scale: 0.9 }}
-  animate={{ opacity: 1, y: 0, scale: 1 }}
-  whileHover={{ scale: 1.05, boxShadow: "0px 10px 20px rgba(252, 185, 0, 0.4)" }}
-  transition={{ duration: 0.6, ease: "easeOut" }}
-  className="p-6 text-center  dark:text-white transform transition-all"
->
-  <div className="flex justify-center mb-4">
-    <FontAwesomeIcon icon={faUserPlus} className="w-8 h-8 sm:w-10 sm:h-10 dark:text-white" />
-  </div>
-  
-  <h2 className="text-xl sm:text-2xl font-bold mb-2">
-    ¡Únete a la Familia de Alquiladora Romero!
-  </h2>
-  
-  <p className="text-sm sm:text-base mb-5">
-    Regístrate para gestionar tus pedidos y recibir notificaciones en tiempo real.
-  </p>
-
-  <motion.div whileHover={{ scale: 1.1 }} transition={{ duration: 0.3 }}>
-    <Link
-      to="/registro"
-      className="inline-block bg-white text-[#fcb900] font-semibold py-2 px-6 rounded-lg shadow-md hover:bg-gray-200 transition-all duration-300"
-    >
-      Regístrate
-    </Link>
-  </motion.div>
-</motion.div>
-
-     
+          initial={{ opacity: 0, y: 30, scale: 0.9 }}
+          animate={{ opacity: 1, y: 0, scale: 1 }}
+          whileHover={{ scale: 1.05, boxShadow: "0px 10px 20px rgba(252, 185, 0, 0.4)" }}
+          transition={{ duration: 0.6, ease: "easeOut" }}
+          className="p-6 text-center dark:text-white transform transition-all"
+        >
+          <div className="flex justify-center mb-4">
+            <FontAwesomeIcon icon={faUserPlus} className="w-8 h-8 sm:w-10 sm:h-10 dark:text-white" />
+          </div>
+          <h2 className="text-xl sm:text-2xl font-bold mb-2">
+            ¡Únete a la Familia de Alquiladora Romero!
+          </h2>
+          <p className="text-sm sm:text-base mb-5">
+            Regístrate para gestionar tus pedidos y recibir notificaciones en tiempo real.
+          </p>
+          <motion.div whileHover={{ scale: 1.1 }} transition={{ duration: 0.3 }}>
+            <Link
+              to="/registro"
+              className="inline-block bg-white text-[#fcb900] font-semibold py-2 px-6 rounded-lg shadow-md hover:bg-gray-200 transition-all duration-300"
+            >
+              Regístrate
+            </Link>
+          </motion.div>
+        </motion.div>
       </div>
     </div>
   );

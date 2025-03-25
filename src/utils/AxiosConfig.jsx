@@ -2,8 +2,8 @@ import axios from 'axios';
 import { useNavigate } from "react-router-dom";
 
 const api = axios.create({
-  baseURL:  "http://localhost:3001",    
-  //  baseURL:"https://alquiladora-romero-server.onrender.com",
+  // baseURL:  "http://localhost:3001",    
+   baseURL:"https://alquiladora-romero-server.onrender.com",
   timeout: 16000,
 });
 
@@ -32,9 +32,9 @@ api.interceptors.response.use(
             break;
         case 500:
           console.error("❌ Error 500: Error interno del servidor.", data);
-          if (window.location.pathname !== '/error500') {
+        
             window.dispatchEvent(new Event("server-error"));
-          }
+          
           break;
         case 503:
           console.error("❌ Error 503: Servicio no disponible.", data);

@@ -4,6 +4,7 @@ import { useContext, useEffect } from "react";
 import LayoutHeader from "../components/layout/LayHeader";
 import RoutePrivate from './RoutePrivate';
 import RoutePublic from './RoutePublic';
+import { CartProvider } from '../components/carrito/ContextCarrito';
 
 import ErrorBoundary from './Errors/ErrorBoundary';
 import ServerErrorModal from './Errors/ErrorTime';
@@ -29,6 +30,7 @@ import CambiarPassword from '../security/recuperacion/CambiarPasswor';
 import ProductosCategoria from '../components/productosCategoria/ProductosCatgeoria';
 import PoliticasPrivacidad from '../components/footer/foter-empresa/Politicas';
 import RastrearPedido from '../components/rastreo-pedido/RastreoPedido';
+import MissionVision from '../pages/public/home/MisionVision';
 
 
 //-------------------CLIENT------------------------
@@ -36,6 +38,7 @@ import PerfilUsuarioPrime from '../pages/client/perfil/PerfilClient';
 import TokenModal from '../pages/client/perfil/componetsPerfil/TokenModal';
 import ChangePassword from '../pages/client/perfil/componetsPerfil/ChangePassword';
 import DetalleProducto from '../components/productosCategoria/productosDetalles';
+import HistorialPedidos from '../pages/client/pedidos/HistorailPedidos';
 
 
 //-------------------ADMIN------------------------
@@ -60,11 +63,11 @@ const Routerss = () => {
       <div className="dark:bg-gray-950 dark:text-white">
       <ServerErrorModal />
       
-       
+      <CartProvider>
 
         <Routes>
      
-          
+      
         <Route path="/" element={<RoutePublic><LayoutHeader> <Home /></LayoutHeader> </RoutePublic>} />
         <Route path="/login" element={<RoutePublic><LayoutHeader><Login /></LayoutHeader></RoutePublic>} />
         <Route path="/registro" element={<RoutePublic><LayoutHeader><Registro /></LayoutHeader></RoutePublic>} />
@@ -76,6 +79,10 @@ const Routerss = () => {
         <Route path="/terminos-condiciones" element={<RoutePublic> <LayoutHeader>< PoliticasPrivacidad /></LayoutHeader></RoutePublic>} />
 
         <Route path="/rastrear-pedido" element={<RoutePublic> <LayoutHeader>< RastrearPedido /></LayoutHeader></RoutePublic>} />
+       
+
+         
+        <Route path="/SobreNosotros" element={<RoutePublic> <LayoutHeader>< MissionVision /></LayoutHeader></RoutePublic>} />
        
 
 
@@ -91,6 +98,9 @@ const Routerss = () => {
           <Route path="/cliente/politicas-privacidad" element={<RoutePrivate rolesPermitidos={['cliente']}> <LayoutHeader>< PoliticasPrivacidad /></LayoutHeader></RoutePrivate>} />
           <Route path="/cliente/deslin-legal" element={<RoutePrivate rolesPermitidos={['cliente']}> <LayoutHeader>< PoliticasPrivacidad /></LayoutHeader></RoutePrivate>} />
           <Route path="/cliente/terminos-condiciones" element={<RoutePrivate rolesPermitidos={['cliente']}> <LayoutHeader>< PoliticasPrivacidad /></LayoutHeader></RoutePrivate>} />
+          <Route path="/cliente/SobreNosotros" element={<RoutePrivate rolesPermitidos={['cliente']}> <LayoutHeader><MissionVision /></LayoutHeader></RoutePrivate>} />
+          <Route path="/cliente/historial-pedidos" element={<RoutePrivate rolesPermitidos={['cliente']}> <LayoutHeader><HistorialPedidos /></LayoutHeader></RoutePrivate>} />
+
 
 
 
@@ -109,9 +119,9 @@ const Routerss = () => {
 
           <Route path="/error500" element={<LayoutHeader><Error500 /></LayoutHeader>} />
         
-
         </Routes>
        
+        </CartProvider>
 
       </div>
 

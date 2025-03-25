@@ -12,12 +12,25 @@ const calcularDiasAlquiler = (fechaInicio, fechaEntrega) => {
   return dias < 1 ? 1 : dias;
 };
 
-const obtenerFechaHoy = () => new Date().toISOString().split("T")[0];
+const obtenerFechaHoy = () => {
+  
+  const ahora = new Date();
+  const offsetMexico = ahora.getTimezoneOffset() + (ahora.getTimezoneOffset() > 0 ? 360 : 300);
+  ahora.setMinutes(ahora.getMinutes() - offsetMexico);
+  return ahora.toISOString().split('T')[0];
+};
 
 const obtenerFechaMasMeses = (fecha, meses) => {
   const date = fecha ? new Date(fecha) : new Date();
   date.setMonth(date.getMonth() + meses);
   return date.toISOString().split("T")[0];
+};
+
+const obtenerFechaSiguiente = (fecha) => {
+  if (!fecha) return obtenerFechaHoy();
+  const date = new Date(fecha);
+  date.setDate(date.getDate() + 1);
+  return date.toISOString().split('T')[0];
 };
 
 const StepThree = ({
@@ -34,7 +47,7 @@ const StepThree = ({
   productosDisponibles,
   onChangeData,
 }) => {
-  // Se agrupan los productos con buildGroupedData (ya debe incluir idProductoColores en cada colorOption)
+ 
   const groupedCategories = buildGroupedData(productosDisponibles);
   
   const [selectedProducts, setSelectedProducts] = useState([]);
@@ -46,7 +59,7 @@ const StepThree = ({
 
   const MAX_PRODUCTS = 40;
 
-  // Función que devuelve los colores que aún no han sido seleccionados para un producto dado
+ 
   const getAvailableColorsForProduct = (product) => {
     const selectedColorsForProduct = selectedProducts
       .filter((sp) => sp.productId === product.productId && sp.selectedColor)
@@ -65,22 +78,22 @@ const StepThree = ({
   };
 
   const handleSelectProduct = (catId, product) => {
-    // Filtramos los colores disponibles para este producto según lo que ya se haya seleccionado.
+  
     const availableColors = getAvailableColorsForProduct(product);
     if (availableColors.length === 0) {
       toast.error("Ya has seleccionado todos los colores disponibles para este producto.");
       return;
     }
-    // Creamos un nuevo item con las opciones filtradas
+  
     const newItem = {
       categoryId: catId,
       productId: product.productId,
-      // Tomamos el idProductoColores del primer color disponible (se actualizará cuando el usuario seleccione otro)
+      
       idProductoColores: availableColors[0].idProductoColores,
       productName: product.productName,
       details: product.details,
       price: product.price,
-      // Solo dejamos los colores que aún no se han seleccionado
+    
       colorOptions: availableColors,
       selectedColor: "",
       unitsToRent: "",
@@ -196,7 +209,7 @@ const StepThree = ({
     });
   }, [fechaInicio, fechaEntrega, horaAlquiler, formaPago, detallesPago, selectedProducts, lineItems, ticketTotal]);
 
-  // Render de productos ya seleccionados
+ 
   const renderSelectedProducts = () => {
     return selectedProducts.map((item, index) => {
       const chosenColorObj = item.colorOptions.find((c) => c.color === item.selectedColor);
@@ -258,22 +271,22 @@ const StepThree = ({
     });
   };
 
-  // Render del selector de productos filtrando aquellos que ya tengan todos sus colores seleccionados
+
   const renderProductSelector = () => {
     if (!isAddingProduct) return null;
     const term = searchTerm.toLowerCase().trim();
 
-    // Filtramos las categorías y productos
+
     const filteredCategories = groupedCategories.map((cat) => {
       const productosFiltrados = cat.productos.filter((p) => {
-        // Obtenemos los colores disponibles considerando los ya seleccionados para este producto
+      
         const availableColors = getAvailableColorsForProduct(p);
-        // Se muestra el producto solo si tiene al menos un color disponible y además coincide con el término de búsqueda
+       
         const nameMatch = p.productName.toLowerCase().includes(term);
         const detailsMatch = p.details.toLowerCase().includes(term);
         return availableColors.length > 0 && (nameMatch || detailsMatch);
       }).map((p) => {
-        // Actualizamos las opciones de color del producto a los que aun no han sido usados
+       
         return { ...p, colorOptions: getAvailableColorsForProduct(p) };
       });
       return { ...cat, productos: productosFiltrados };
@@ -357,30 +370,32 @@ const StepThree = ({
       <hr className="my-4 border-gray-300 dark:border-gray-700" />
 
       <div className="mt-4">
-        <div className="flex flex-col md:flex-row md:space-x-4">
-          <div className="flex-1 mb-3">
-            <label className="block mb-1 text-sm font-medium">Fecha de Inicio:</label>
-            <input
-              type="date"
-              value={fechaInicio}
-              onChange={(e) => setFechaInicio(e.target.value)}
-              min={obtenerFechaHoy()}
-              max={obtenerFechaMasMeses(obtenerFechaHoy(), 10)}
-              className="border p-2 w-full dark:border-gray-600 dark:bg-gray-700"
-            />
-          </div>
-          <div className="flex-1 mb-3">
-            <label className="block mb-1 text-sm font-medium">Fecha de Entrega:</label>
-            <input
-              type="date"
-              value={fechaEntrega}
-              onChange={(e) => setFechaEntrega(e.target.value)}
-              min={fechaInicio ? fechaInicio : obtenerFechaHoy()}
-              max={fechaInicio ? obtenerFechaMasMeses(fechaInicio, 10) : obtenerFechaMasMeses(obtenerFechaHoy(), 10)}
-              className="border p-2 w-full dark:border-gray-600 dark:bg-gray-700"
-            />
-          </div>
-        </div>
+      <div className="flex flex-col md:flex-row md:space-x-4">
+  <div className="flex-1 mb-3">
+    <label className="block mb-1 text-sm font-medium">Fecha de Inicio:</label>
+    <input
+      type="date"
+      value={fechaInicio}
+      onChange={(e) => setFechaInicio(e.target.value)}
+      min={obtenerFechaHoy()}
+      max={obtenerFechaMasMeses(obtenerFechaHoy(), 10)}
+      className="border p-2 w-full dark:border-gray-600 dark:bg-gray-700"
+    />
+  </div>
+  <div className="flex-1 mb-3">
+    <label className="block mb-1 text-sm font-medium">Fecha de Entrega:</label>
+    <input
+      type="date"
+      value={fechaEntrega}
+      onChange={(e) => setFechaEntrega(e.target.value)}
+      min={fechaInicio ? obtenerFechaSiguiente(fechaInicio) : obtenerFechaSiguiente(obtenerFechaHoy())}
+      max={fechaInicio ? obtenerFechaMasMeses(fechaInicio, 10) : obtenerFechaMasMeses(obtenerFechaHoy(), 10)}
+      className="border p-2 w-full dark:border-gray-600 dark:bg-gray-700"
+    />
+  </div>
+</div>
+
+
         <div className="mb-3">
           <label className="block mb-1 text-sm font-medium">Hora de Alquiler:</label>
           <input
@@ -391,6 +406,9 @@ const StepThree = ({
           />
         </div>
       </div>
+
+
+
 
       <button
         type="button"

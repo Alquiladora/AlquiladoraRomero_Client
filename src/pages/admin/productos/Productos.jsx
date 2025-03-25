@@ -31,6 +31,7 @@ function ProductTable() {
   // Para manejo de múltiples colores
   const [selectedColorsArray, setSelectedColorsArray] = useState([]);
   const [tempColor, setTempColor] = useState("");
+  const idUser= user?.id || user?.idUsuarios;
 
   useEffect(() => {
     fetchProductos();
@@ -77,7 +78,7 @@ function ProductTable() {
         headers: { "X-CSRF-Token": csrfToken },
       });
       setSubcategorias(response.data.subcategories);
-      console.log("Subcategorías ", response.data.subcategories);
+     
     } catch (error) {
       console.error("Error al obtener subcategorías:", error);
       // toast.error("Error al cargar subcategorías");
@@ -300,7 +301,7 @@ function ProductTable() {
       const updatedArray = [...selectedColorsArray, tempColor];
       setSelectedColorsArray(updatedArray);
 
-      // Actualizamos el color en selectedProduct directamente
+    
       setSelectedProduct((prev) => ({
         ...prev,
         color: updatedArray.join(", "),
@@ -313,11 +314,9 @@ function ProductTable() {
 
   // ===================== REMOVER COLOR =====================
   const handleRemoveColor = (colorToRemove) => {
-    // OJO: Se usa solo en modo Agregar
-    // (no mostramos el botón en modo Editar para no permitir eliminar colores)
     const updatedArray = selectedColorsArray.filter((c) => c !== colorToRemove);
     setSelectedColorsArray(updatedArray);
-    // Actualizamos el color en selectedProduct
+   
     setSelectedProduct((prev) => ({
       ...prev,
       color: updatedArray.join(", "),
@@ -326,11 +325,11 @@ function ProductTable() {
 
   // ===================== GUARDAR CAMBIOS =====================
   const handleSave = async () => {
-    // Recalcamos el total de imágenes (antiguas + nuevas)
+  
     const totalImagesCount =
       selectedProduct.ImagenesProducto.length + nuevasImagenes.length;
 
-    // Validación final antes de guardar
+   
     const allErrors = validateProduct(selectedProduct, totalImagesCount);
     if (Object.keys(allErrors).length > 0) {
       setFormErrors(allErrors);
@@ -340,7 +339,7 @@ function ProductTable() {
 
     const updateData = {
       ...selectedProduct,
-      idUsuarios: user?.idUsuarios || null,
+      idUsuarios: idUser || null,
       imagenes: nuevasImagenes.length > 0 ? nuevasImagenes.join(",") : "",
       imagenesEliminar,
     };
@@ -395,9 +394,9 @@ function ProductTable() {
           ...selectedProduct.ImagenesProducto,
           ...nuevasImagenes,
         ].join(","),
-        color: selectedProduct.color, // Aquí ya viene como "Azul, Verde" etc.
+        color: selectedProduct.color, 
         material: selectedProduct.material,
-        idUsuarios: user?.idUsuarios || null,
+        idUsuarios:idUser || null,
       };
 
       const response = await api.post("/api/productos/products", newProductData, {

@@ -73,50 +73,43 @@ function WizardAlquiler() {
   const [codigoPostal, setCodigoPostal] = useState("");
   const [direccion, setDireccion] = useState("");
 
-  // Arrays para almacenar sets únicos de Estado/Municipio/Localidad
+
   const [estadosData, setEstadosData] = useState([]);
   const [municipiosData, setMunicipiosData] = useState([]);
   const [localidadesData, setLocalidadesData] = useState([]);
 
-  // Datos para autocompletar con SEPOMEX
   const [pais, setPais] = useState("");
   const [estado, setEstado] = useState("");
   const [municipio, setMunicipio] = useState("");
   const [localidad, setLocalidad] = useState("");
 
-  // Lista completa de asentamientos/colonias devueltos por la API
+ 
   const [localidadesDisponibles, setLocalidadesDisponibles] = useState([]);
 
-  // Control de validación de CP
+ 
   const [cargandoCP, setCargandoCP] = useState(false);
   const [cpValido, setCpValido] = useState(false);
 
-  // Controla si la localidad se elige de un select o se introduce manual
+
   const [modoLocalidad, setModoLocalidad] = useState("seleccionar");
 
-  // --------------------------------------------
-  // Datos de producto (Paso 3) - “Principal”
-  // --------------------------------------------
+ 
   const [producto, setProducto] = useState("");
   const [fechaInicio, setFechaInicio] = useState("");
   const [fechaEntrega, setFechaEntrega] = useState("");
   const [horaAlquiler, setHoraAlquiler] = useState("");
 
-  // NUEVOS estados añadidos en Paso 3:
+ 
   const [stock, setStock] = useState("");
   const [precio, setPrecio] = useState("");
   const [subPrecio, setSubPrecio] = useState("");
   const [formaPago, setFormaPago] = useState("");
   const [detallesPago, setDetallesPago] = useState("");
 
-  // ==================================================
-  // NUEVO: Array para múltiples productos extras
-  // ==================================================
+
   const [productosAdicionales, setProductosAdicionales] = useState([]);
 
-  // --------------------------------------------
-  // useEffect: resetea valores de ubicación cuando cambia el CP
-  // --------------------------------------------
+
   useEffect(() => {
     setCpValido(false);
     setPais("");
@@ -126,9 +119,7 @@ function WizardAlquiler() {
     setLocalidadesDisponibles([]);
   }, [codigoPostal]);
 
-  // --------------------------------------------
-  // Funciones para abrir/cerrar Wizard
-  // --------------------------------------------
+  
   const handleAbrirWizard = () => {
     resetCampos();
     setShowWizard(true);
@@ -137,9 +128,7 @@ function WizardAlquiler() {
     setShowWizard(false);
   };
 
-  // --------------------------------------------
-  // Resetear campos del Wizard
-  // --------------------------------------------
+
   const resetCampos = () => {
     setCurrentStep(1);
     setNombre("");
@@ -176,13 +165,11 @@ function WizardAlquiler() {
     setFormaPago("");
     setDetallesPago("");
 
-    // Reseteamos los productos adicionales
+
     setProductosAdicionales([]);
   };
 
-  // --------------------------------------------
-  // Submodal para verificar correo
-  // --------------------------------------------
+
   const handleAbrirSubmodalCorreo = () => {
     setEmailParaVerificar("");
     setShowSubmodalCorreo(true);

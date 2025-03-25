@@ -30,8 +30,7 @@ import { useSocket } from "../../../utils/Socket";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faHome,
-  faClock,
-  faTasks,
+  faUser,
   faUsers,
   faBuilding,
   faLayerGroup,
@@ -44,38 +43,53 @@ import {
   faExclamationTriangle,
   faSignOutAlt,
   faChevronRight,
+  faClock,
+  faTasks,
+  faPalette,
+  faCalendarAlt,
 } from "@fortawesome/free-solid-svg-icons";
 import AgregarProductosSubbodegas from "../inventario/AgregarProductosSubbodegas";
 import DashboardPedidos from "../dashboard/DashboardPedidos";
 import GestionPedidos from "../gestion-pedidos/GestionPedidos";
+import PedidosCalendario from "../pedidosamanuales/PedidosCalentario";
+import CalendarioGeneralPedidos from "../gestion-pedidos/PedidosGeneralCalendario";
+import PedidosGeneralesDashboard from "../gestion-pedidos/DashboardGeneralPedidos";
+import ProductosDashboard from "../gestion-pedidos/DasboardProductos";
+import ColorManager from "../colores/Colores";
+import Horario from "../horario/Horario";
 
 const Breadcrumbs = ({ activeTab, onNavigate }) => {
   const pageHierarchy = {
-    "Inicio": [],
-    "Perfil": ["Inicio"],
-    "Usuarios": ["Inicio"],
+    Inicio: [],
+    Perfil: ["Inicio"],
+    Usuarios: ["Inicio"],
     "Actualizacion Precios": ["Inicio"],
-    "Bodegas": ["Inicio"],
-    "Productos": ["Inicio"],
+    Bodegas: ["Inicio"],
+    Productos: ["Inicio"],
     "Pedidos Manuales": ["Inicio"],
-    "Inventario": ["Inicio"],
+    Inventario: ["Inicio"],
     "Agregar Productos a subodegas": ["Inicio", "Inventario"],
     "Usuarios Sospechosos": ["Inicio"],
     "Subcategorias-Categorias": ["Inicio"],
     "Datos de la Empresa": ["Inicio"],
     "Dashboard-pedidos": ["Inicio", "Pedidos Manuales"],
+    "pedidos-calendario": ["Inicio", "Pedidos Manuales"],
     "Gestion Pedidos": ["Inicio"],
+    "Pedidos General Calendario": ["Inicio", "Gestion Pedidos"],
+    "Pedidos General Dashboard": ["Inicio", "Gestion Pedidos"],
+    "Dasboard Productos": ["Inicio", "Gestion Pedidos"],
     "Dasboard Usuarios": ["Inicio"],
     "Auditoría de Sesiones": ["Inicio", "Dasboard Usuarios"],
-    "Perfilempresa": ["Inicio", "Datos de la Empresa"],
+    Perfilempresa: ["Inicio", "Datos de la Empresa"],
     "Sobre Nosotros": ["Inicio", "Datos de la Empresa"],
-    "Politicas": ["Inicio", "Datos de la Empresa"],
-    "Terminos": ["Inicio", "Datos de la Empresa"],
-    "Deslin": ["Inicio", "Datos de la Empresa"],
-    "historialPoliticas": ["Inicio", "Datos de la Empresa", "Politicas"],
-    "historialTerminos": ["Inicio", "Datos de la Empresa", "Terminos"],
-    "historialDeslinde": ["Inicio", "Datos de la Empresa", "Deslin"],
+    Politicas: ["Inicio", "Datos de la Empresa"],
+    Terminos: ["Inicio", "Datos de the Empresa"],
+    Deslin: ["Inicio", "Datos de la Empresa"],
+    historialPoliticas: ["Inicio", "Datos de la Empresa", "Politicas"],
+    historialTerminos: ["Inicio", "Datos de la Empresa", "Terminos"],
+    historialDeslinde: ["Inicio", "Datos de la Empresa", "Deslin"],
     "Cerrar Sesion": ["Inicio"],
+    Horario: ["Inicio"],
   };
 
   const displayNames = {
@@ -97,6 +111,7 @@ const Breadcrumbs = ({ activeTab, onNavigate }) => {
     "Usuarios Sospechosos": "Usuarios Sospechosos",
     "Dashboard-pedidos": "Dashboard de Pedidos",
     "Cerrar Sesion": "Cerrar Sesión",
+    Horario: "Horario",
   };
 
   const breadcrumbItems = pageHierarchy[activeTab] || [];
@@ -170,17 +185,14 @@ const MenuHomeAdmin = () => {
     }
   }, [location.search]);
 
-
   const handleLogout = async () => {
     try {
       await logout();
-   
       setUsuariosC([]);
       setTotalUsuarios(0);
       setFotoEmpresa("");
       setDatosInventario([]);
       setPedidos([]);
-     
       navigate("/login");
     } catch (error) {
       console.error("Error during logout:", error);
@@ -233,39 +245,58 @@ const MenuHomeAdmin = () => {
       title: "General",
       items: [
         { icon: faHome, label: "Inicio" },
+        { icon: faUser, label: "Perfil" },
         { icon: faUsers, label: "Usuarios", count: totalUsuarios },
         { icon: faBuilding, label: "Datos de la Empresa" },
       ],
     },
     {
-      title: "Gestión",
+      title: "Gestión de Productos",
       items: [
         { icon: faLayerGroup, label: "Subcategorias-Categorias" },
-        { icon: faDollarSign, label: "Actualizacion Precios" },
-        { icon: faWarehouse, label: "Bodegas" },
         { icon: faBoxOpen, label: "Productos" },
-        { icon: faShoppingCart, label: "Pedidos Manuales" },
+        { icon: faPalette, label: "Colores" },
+        { icon: faWarehouse, label: "Bodegas" },
         { icon: faClipboardList, label: "Inventario" },
-        { icon: faClock, label: "Horario" },
+        { icon: faBoxOpen, label: "Agregar Productos a subodegas" },
+      ],
+    },
+    {
+      title: "Gestión de Pedidos",
+      items: [
+        { icon: faShoppingCart, label: "Pedidos Manuales" },
         { icon: faTasks, label: "Gestion Pedidos" },
+      ],
+    },
+    {
+      title: "Gestión Financiera",
+      items: [
+        { icon: faDollarSign, label: "Actualizacion Precios" },
+      ],
+    },
+    {
+      title: "Horarios",
+      items: [
+        { icon: faClock, label: "Horario" },
       ],
     },
     {
       title: "Análisis",
       items: [
-        // { icon: faChartLine, label: "Dashboard-pedidos" },
+        { icon: faChartLine, label: "Dashboard-pedidos" },
       ],
     },
     {
       title: "Seguridad",
       items: [
-        { icon: faChartLine, label: "Dasboard Usuarios" },
-        { icon: faExclamationTriangle, label: "Errores de Sistema", count: 3 },
+        { icon: faUsers, label: "Dasboard Usuarios" },
       ],
     },
     {
       title: "Salida",
-      items: [{ icon: faSignOutAlt, label: "Cerrar Sesion" }],
+      items: [
+        { icon: faSignOutAlt, label: "Cerrar Sesion" },
+      ],
     },
   ];
 
@@ -284,12 +315,18 @@ const MenuHomeAdmin = () => {
         return <Usuarios />;
       case "Actualizacion Precios":
         return <ActualizacionPrecios />;
+      case "Colores":
+        return <ColorManager />;
+      case "Horario":
+        return <Horario />;
       case "Bodegas":
         return <Bodegas />;
       case "Productos":
         return <ProductTable />;
       case "Pedidos Manuales":
-        return <PedidosManuales onNavigate={handleNavigate} setPedidos={setPedidos} />;
+        return (
+          <PedidosManuales onNavigate={handleNavigate} setPedidos={setPedidos} />
+        );
       case "Inventario":
         return (
           <Inventory
@@ -312,8 +349,16 @@ const MenuHomeAdmin = () => {
         );
       case "Dashboard-pedidos":
         return <DashboardPedidos orders={pedidos} />;
+      case "pedidos-calendario":
+        return <PedidosCalendario />;
+      case "Pedidos General Dashboard":
+        return <PedidosGeneralesDashboard />;
+      case "Dasboard Productos":
+        return <ProductosDashboard />;
       case "Gestion Pedidos":
-        return <GestionPedidos />;
+        return <GestionPedidos onNavigate={handleNavigate} />;
+      case "Pedidos General Calendario":
+        return <CalendarioGeneralPedidos />;
       case "Dasboard Usuarios":
         return <DasboardUsuarios onNavigate={handleNavigate} />;
       case "Auditoría de Sesiones":
@@ -381,7 +426,7 @@ const MenuHomeAdmin = () => {
           </h2>
         </div>
 
-        <nav className="flex-1 h-[calc(100vh-12rem)] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-600 scrollbar-track-gray-100 dark:scrollbar-track-gray-800 lg:h-auto lg:max-h-[calc(100vh-12rem)] lg:overflow-y-visible p-4">
+        <nav className="flex-1 h-[calc(100vh-12rem)] overflow-y-auto p-4 scrollbar-none">
           {navSections.map((section, sectionIndex) => (
             <div key={sectionIndex} className="mb-6 last:mb-0">
               {section.title && (
@@ -502,6 +547,17 @@ const MenuHomeAdmin = () => {
           {renderContent()}
         </main>
       </div>
+
+    
+      <style jsx>{`
+        .scrollbar-none {
+          -ms-overflow-style: none; /* Internet Explorer 10+ */
+          scrollbar-width: none; /* Firefox */
+        }
+        .scrollbar-none::-webkit-scrollbar {
+          display: none; /* Chrome, Safari, and Opera */
+        }
+      `}</style>
     </div>
   );
 };

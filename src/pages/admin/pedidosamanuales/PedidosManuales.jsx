@@ -26,24 +26,27 @@ import {
   faExclamationCircle,
   faBan,
   faQuestionCircle,
-  faChartBar, // Para dashboard
-  faTasks, // Para gestionar pedidos
-  faFilter, // Para filtros
-  faChevronLeft, // Para paginación anterior
-  faChevronRight, // Para paginación siguiente
+  faChartBar,
+  faTasks,
+  faFilter,
+  faChevronLeft,
+  faChevronRight,
+  faCalendar,
+  faHourglassStart, 
+  faShippingFast, 
 } from "@fortawesome/free-solid-svg-icons";
 import { toast } from "react-toastify";
 import api from "../../../utils/AxiosConfig";
 import { useAuth } from "../../../hooks/ContextAuth";
 import DashboardPedidos from "../dashboard/DashboardPedidos";
-
 import StepOne from "./StepOne";
 import StepTwo from "./StepTwo";
 import StepThree from "./StepThree";
 import StepFour from "./StepFour";
 
-function WizardAlquiler({ onNavigate   ,setPedidos}) {
+function WizardAlquiler({ onNavigate, setPedidos }) {
   const { csrfToken, user } = useAuth();
+  const [useNewAddress, setUseNewAddress] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showWizard, setShowWizard] = useState(false);
   const [currentStep, setCurrentStep] = useState(1);
@@ -267,13 +270,36 @@ function WizardAlquiler({ onNavigate   ,setPedidos}) {
     telefono.trim().length === 10 &&
     (!correo.trim() || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(correo.trim()));
 
-  const paso2Valido = () => {
-    if (esClienteExistente) {
-      const direccionesValidas =
-        direccionesCliente &&
-        direccionesCliente.filter((dir) => dir.codigoPostal !== null);
-      if (direccionesValidas && direccionesValidas.length > 0) {
-        return selectedDireccionId !== null;
+    const paso2Valido = () => {
+      if (esClienteExistente) {
+        const direccionesValidas =
+          direccionesCliente &&
+          direccionesCliente.filter((dir) => dir.codigoPostal !== null);
+        if (direccionesValidas && direccionesValidas.length > 0) {
+          if (useNewAddress) {
+            return (
+              codigoPostal.trim().length === 5 &&
+              cpValido &&
+              pais.trim().length > 0 &&
+              estado.trim().length > 0 &&
+              municipio.trim().length > 0 &&
+              localidad.trim().length > 0 &&
+              direccion.trim().length >= 5
+            );
+          } else {
+            return selectedDireccionId !== null;
+          }
+        } else {
+          return (
+            codigoPostal.trim().length === 5 &&
+            cpValido &&
+            pais.trim().length > 0 &&
+            estado.trim().length > 0 &&
+            municipio.trim().length > 0 &&
+            localidad.trim().length > 0 &&
+            direccion.trim().length >= 5
+          );
+        }
       } else {
         return (
           codigoPostal.trim().length === 5 &&
@@ -285,19 +311,7 @@ function WizardAlquiler({ onNavigate   ,setPedidos}) {
           direccion.trim().length >= 5
         );
       }
-    } else {
-      return (
-        codigoPostal.trim().length === 5 &&
-        codigoPostal.trim().length === 5 &&
-        cpValido &&
-        pais.trim().length > 0 &&
-        estado.trim().length > 0 &&
-        municipio.trim().length > 0 &&
-        localidad.trim().length > 0 &&
-        direccion.trim().length >= 5
-      );
-    }
-  };
+    };
 
   const paso3Valido = () => {
     return step3Data.isValid;
@@ -332,8 +346,13 @@ function WizardAlquiler({ onNavigate   ,setPedidos}) {
         headers: { "X-CSRF-Token": csrfToken },
       });
       if (response.data.success) {
-        setOrders(response.data.data);
-        setPedidos(response.data.data)
+        const sortedOrders = response.data.data.sort((a, b) => {
+          const dateA = new Date(a.fechas.entrega);
+          const dateB = new Date(b.fechas.entrega);
+          return dateA - dateB;
+        });
+        setOrders(sortedOrders);
+        setPedidos(sortedOrders);
       }
     } catch (error) {
       console.error("Error fetching orders:", error);
@@ -412,7 +431,6 @@ function WizardAlquiler({ onNavigate   ,setPedidos}) {
     }
   };
 
-
   useEffect(() => {
     const fetchProductos = async () => {
       try {
@@ -470,6 +488,8 @@ function WizardAlquiler({ onNavigate   ,setPedidos}) {
       setDireccion={setDireccion}
       referencia={referencia}
       setReferencia={setReferencia}
+      useNewAddress={useNewAddress} 
+    setUseNewAddress={setUseNewAddress} 
     />
   );
 
@@ -533,10 +553,10 @@ function WizardAlquiler({ onNavigate   ,setPedidos}) {
     }
   };
 
-  // Filtrar y paginar los pedidos
-  const filteredOrders = filterEstado === "Todos"
-    ? orders
-    : orders.filter((order) => order.estado === filterEstado);
+  const filteredOrders =
+    filterEstado === "Todos"
+      ? orders
+      : orders.filter((order) => order.estado === filterEstado);
 
   const indexOfLastOrder = currentPage * ordersPerPage;
   const indexOfFirstOrder = indexOfLastOrder - ordersPerPage;
@@ -549,20 +569,23 @@ function WizardAlquiler({ onNavigate   ,setPedidos}) {
 
   const estadosDisponibles = [
     "Todos",
+    "Procesando",
+    "Enviando",
     "Confirmado",
     "En alquiler",
     "Entregado",
     "Devuelto",
     "Incompleto",
     "Incidente",
-    "Perdido",
-    "Finalizado",
-    "Cancelado",
   ];
+
+  const handleOrganizeActiveOrders = () => {
+    console.log("Organizing active orders...");
+    toast.info("Funcionalidad de organización de pedidos activos en desarrollo.");
+  };
 
   const renderOrdersTable = () => (
     <div className="mt-10 overflow-x-auto animate-fade-in-up rounded-xl dark:bg-gray-800 p-6">
-
       <div className="flex justify-between items-center mb-4">
         <div className="flex space-x-4">
           <button
@@ -603,7 +626,7 @@ function WizardAlquiler({ onNavigate   ,setPedidos}) {
 
       <h2 className="text-2xl font-bold mb-6 dark:text-white flex items-center">
         <FontAwesomeIcon icon={faBox} className="mr-3 text-yellow-500" />
-        Pedidos Realizados Manuales
+        Pedidos Activos Realizados 
       </h2>
 
       <div className="border dark:border-gray-700 rounded-lg overflow-hidden">
@@ -653,10 +676,11 @@ function WizardAlquiler({ onNavigate   ,setPedidos}) {
             {currentOrders.map((order, index) => (
               <tr
                 key={order.idPedido}
-                className={`border-b dark:border-gray-700 transition-all duration-200 ${index % 2 === 0
+                className={`border-b dark:border-gray-700 transition-all duration-200 ${
+                  index % 2 === 0
                     ? "bg-gray-50 dark:bg-gray-900"
                     : "bg-white dark:bg-gray-800"
-                  } hover:bg-gray-100 dark:hover:bg-gray-700`}
+                } hover:bg-gray-100 dark:hover:bg-gray-700`}
               >
                 <td className="px-6 py-4 text-sm font-medium dark:text-gray-200">
                   {order.idRastreo}
@@ -668,7 +692,10 @@ function WizardAlquiler({ onNavigate   ,setPedidos}) {
                   {order.cliente.telefono}
                 </td>
                 <td className="px-6 py-4 text-sm font-medium dark:text-gray-200">
-                  {order.cliente.direccion ? order.cliente.direccion.slice(0, 30) : 'Sin direccion'}...
+                  {order.cliente.direccion
+                    ? order.cliente.direccion.slice(0, 30)
+                    : "Sin direccion"}
+                  ...
                 </td>
                 <td className="px-6 py-4 text-sm font-medium dark:text-gray-200">
                   {order.fechas.diasAlquiler}
@@ -683,48 +710,53 @@ function WizardAlquiler({ onNavigate   ,setPedidos}) {
                 </td>
                 <td className="px-6 py-4 text-sm dark:text-gray-200">
                   <span
-                    className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold shadow-sm ${order.estado === "Confirmado"
+                    className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold shadow-sm ${
+                      order.estado === "Procesando"
+                        ? "bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-300"
+                        : order.estado === "Enviando"
+                        ? "bg-indigo-100 text-indigo-800 dark:bg-indigo-900 dark:text-indigo-300"
+                        : order.estado === "Confirmado"
                         ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300"
                         : order.estado === "En alquiler"
-                          ? "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300"
-                          : order.estado === "Entregado"
-                            ? "bg-teal-100 text-teal-800 dark:bg-teal-900 dark:text-teal-300"
-                            : order.estado === "Devuelto"
-                              ? "bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-300"
-                              : order.estado === "Incompleto"
-                                ? "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300"
-                                : order.estado === "Incidente"
-                                  ? "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300"
-                                  : order.estado === "Perdido"
-                                    ? "bg-red-200 text-red-800 dark:bg-red-800 dark:text-red-300"
-                                    : order.estado === "Finalizado"
-                                      ? "bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-300"
-                                      : order.estado === "Cancelado"
-                                        ? "bg-black-100 text-black-800 dark:bg-black-900 dark:text-black-300"
-                                        : ""
-                      }`}
+                        ? "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300"
+                        : order.estado === "Entregado"
+                        ? "bg-teal-100 text-teal-800 dark:bg-teal-900 dark:text-teal-300"
+                        : order.estado === "Devuelto"
+                        ? "bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-300"
+                        : order.estado === "Incompleto"
+                        ? "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300"
+                        : order.estado === "Incidente"
+                        ? "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300"
+                        : order.estado === "Finalizado"
+                        ? "bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-300"
+                        : order.estado === "Cancelado"
+                        ? "bg-gray-200 text-gray-800 dark:bg-gray-800 dark:text-gray-300"
+                        : "bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-300"
+                    }`}
                   >
                     <FontAwesomeIcon
                       icon={
-                        order.estado === "Confirmado"
+                        order.estado === "Procesando"
+                          ? faHourglassStart
+                          : order.estado === "Enviando"
+                          ? faShippingFast
+                          : order.estado === "Confirmado"
                           ? faCheckCircle
                           : order.estado === "En alquiler"
-                            ? faTruck
-                            : order.estado === "Entregado"
-                              ? faBoxOpen
-                              : order.estado === "Devuelto"
-                                ? faUndo
-                                : order.estado === "Incompleto"
-                                  ? faExclamationTriangle
-                                  : order.estado === "Incidente"
-                                    ? faExclamationCircle
-                                    : order.estado === "Perdido"
-                                      ? faTimes
-                                      : order.estado === "Finalizado"
-                                        ? faCheckCircle
-                                        : order.estado === "Cancelado"
-                                          ? faBan
-                                          : faQuestionCircle
+                          ? faTruck
+                          : order.estado === "Entregado"
+                          ? faBoxOpen
+                          : order.estado === "Devuelto"
+                          ? faUndo
+                          : order.estado === "Incompleto"
+                          ? faExclamationTriangle
+                          : order.estado === "Incidente"
+                          ? faExclamationCircle
+                          : order.estado === "Finalizado"
+                          ? faCheckCircle
+                          : order.estado === "Cancelado"
+                          ? faBan
+                          : faQuestionCircle
                       }
                       className="mr-1"
                     />
@@ -756,10 +788,11 @@ function WizardAlquiler({ onNavigate   ,setPedidos}) {
           <button
             onClick={() => handlePageChange(currentPage - 1)}
             disabled={currentPage === 1}
-            className={`px-3 py-1 rounded ${currentPage === 1
+            className={`px-3 py-1 rounded ${
+              currentPage === 1
                 ? "bg-gray-300 text-gray-500 cursor-not-allowed dark:bg-gray-600"
                 : "bg-yellow-500 text-white hover:bg-yellow-600 dark:bg-yellow-500 dark:hover:bg-yellow-600"
-              }`}
+            }`}
           >
             <FontAwesomeIcon icon={faChevronLeft} />
           </button>
@@ -767,10 +800,11 @@ function WizardAlquiler({ onNavigate   ,setPedidos}) {
             <button
               key={page}
               onClick={() => handlePageChange(page)}
-              className={`px-3 py-1 rounded ${currentPage === page
+              className={`px-3 py-1 rounded ${
+                currentPage === page
                   ? "bg-yellow-600 text-white dark:bg-yellow-600"
                   : "bg-gray-200 text-gray-700 hover:bg-gray-300 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600"
-                }`}
+              }`}
             >
               {page}
             </button>
@@ -778,14 +812,26 @@ function WizardAlquiler({ onNavigate   ,setPedidos}) {
           <button
             onClick={() => handlePageChange(currentPage + 1)}
             disabled={currentPage === totalPages}
-            className={`px-3 py-1 rounded ${currentPage === totalPages
+            className={`px-3 py-1 rounded ${
+              currentPage === totalPages
                 ? "bg-gray-300 text-gray-500 cursor-not-allowed dark:bg-gray-600"
                 : "bg-yellow-500 text-white hover:bg-yellow-600 dark:bg-yellow-500 dark:hover:bg-yellow-600"
-              }`}
+            }`}
           >
             <FontAwesomeIcon icon={faChevronRight} />
           </button>
         </div>
+      </div>
+
+      {/* Botón de Organización de Pedidos Activos */}
+      <div className="flex justify-center mt-6">
+        <button
+          onClick={() => onNavigate("pedidos-calendario")}
+          className="flex items-center px-4 py-2 bg-teal-500 text-white rounded-lg hover:bg-teal-600 transition dark:bg-teal-600 dark:hover:bg-teal-700"
+        >
+          <FontAwesomeIcon icon={faCalendar} className="mr-2" />
+          Organización de Pedidos Activos
+        </button>
       </div>
     </div>
   );
@@ -835,12 +881,13 @@ function WizardAlquiler({ onNavigate   ,setPedidos}) {
                       Estado
                     </p>
                     <p
-                      className={`text-lg font-semibold ${selectedOrder.estado === "Confirmado"
+                      className={`text-lg font-semibold ${
+                        selectedOrder.estado === "Confirmado"
                           ? "text-green-600 dark:text-green-400"
                           : selectedOrder.estado === "Pendiente"
-                            ? "text-yellow-600 dark:text-yellow-400"
-                            : "text-red-600 dark:text-red-400"
-                        }`}
+                          ? "text-yellow-600 dark:text-yellow-400"
+                          : "text-red-600 dark:text-red-400"
+                      }`}
                     >
                       {selectedOrder.estado}
                     </p>
@@ -883,7 +930,7 @@ function WizardAlquiler({ onNavigate   ,setPedidos}) {
                     Dirección
                   </p>
                   <p className="font-semibold dark:text-white">
-                    {selectedOrder.cliente.direccion || 'Cliente sin direccion' }
+                    {selectedOrder.cliente.direccion || "Cliente sin direccion"}
                   </p>
                 </div>
               </div>
@@ -911,9 +958,7 @@ function WizardAlquiler({ onNavigate   ,setPedidos}) {
                     Fecha Entrega
                   </p>
                   <p className="font-semibold dark:text-white">
-                    {new Date(
-                      selectedOrder.fechas.entrega
-                    ).toLocaleDateString()}
+                    {new Date(selectedOrder.fechas.entrega).toLocaleDateString()}
                   </p>
                 </div>
                 <div>
@@ -1009,7 +1054,6 @@ function WizardAlquiler({ onNavigate   ,setPedidos}) {
       {showWizard && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60 p-4 dark:bg-black dark:bg-opacity-70 transition-colors">
           <div className="w-full max-w-2xl bg-white dark:bg-gray-800 rounded-xl shadow-2xl relative overflow-hidden">
-            {/* Barra superior amarilla */}
             <div className="bg-yellow-400 dark:bg-yellow-500 h-2 w-full rounded-t-xl" />
             <button
               type="button"
@@ -1025,16 +1069,18 @@ function WizardAlquiler({ onNavigate   ,setPedidos}) {
                   {[1, 2, 3, 4].map((step) => (
                     <div
                       key={step}
-                      className={`flex flex-col items-center ${currentStep === step
+                      className={`flex flex-col items-center ${
+                        currentStep === step
                           ? "text-yellow-600 dark:text-yellow-400"
                           : "text-gray-400 dark:text-gray-300"
-                        }`}
+                      }`}
                     >
                       <div
-                        className={`h-8 w-8 flex items-center justify-center rounded-full border-2 ${currentStep >= step
+                        className={`h-8 w-8 flex items-center justify-center rounded-full border-2 ${
+                          currentStep >= step
                             ? "border-yellow-500 dark:border-yellow-400"
                             : "border-gray-400 dark:border-gray-600"
-                          }`}
+                        }`}
                       >
                         {step === 1 && (
                           <FontAwesomeIcon icon={faAddressCard} size="sm" />
@@ -1053,10 +1099,10 @@ function WizardAlquiler({ onNavigate   ,setPedidos}) {
                         {step === 1
                           ? "Datos"
                           : step === 2
-                            ? "Ubicación"
-                            : step === 3
-                              ? "Producto"
-                              : "Confirmación"}
+                          ? "Ubicación"
+                          : step === 3
+                          ? "Producto"
+                          : "Confirmación"}
                       </span>
                     </div>
                   ))}
@@ -1085,10 +1131,11 @@ function WizardAlquiler({ onNavigate   ,setPedidos}) {
                       type="button"
                       onClick={nextStep}
                       disabled={!canGoNext()}
-                      className={`px-4 py-2 rounded transition ${canGoNext()
+                      className={`px-4 py-2 rounded transition ${
+                        canGoNext()
                           ? "bg-yellow-500 text-white hover:bg-yellow-600 dark:bg-yellow-500 dark:hover:bg-yellow-600"
                           : "bg-gray-400 text-gray-200 cursor-not-allowed dark:bg-gray-600"
-                        }`}
+                      }`}
                     >
                       Siguiente
                     </button>
@@ -1098,16 +1145,17 @@ function WizardAlquiler({ onNavigate   ,setPedidos}) {
                     <button
                       type="submit"
                       disabled={isSubmitting}
-                      className={`px-4 py-2 rounded transition flex items-center justify-center ${isSubmitting
+                      className={`px-4 py-2 rounded transition flex items-center justify-center ${
+                        isSubmitting
                           ? "bg-green-400 cursor-not-allowed dark:bg-green-500"
                           : "bg-green-600 text-white hover:bg-green-700 dark:bg-green-600 dark:hover:bg-green-700"
-                        }`}
+                      }`}
                     >
                       {isSubmitting ? (
                         <>
                           <svg
                             className="animate-spin h-5 w-5 mr-2 text-white"
-                            xmlns="http://www.w3.org/2000/svg"
+                            xmlns="http://www.w3/2000/svg"
                             fill="none"
                             viewBox="0 0 24 24"
                           >
@@ -1173,10 +1221,11 @@ function WizardAlquiler({ onNavigate   ,setPedidos}) {
                   type="button"
                   onClick={handleVerificarCorreo}
                   disabled={!emailParaVerificar.trim()}
-                  className={`px-4 py-2 rounded transition ${emailParaVerificar.trim()
+                  className={`px-4 py-2 rounded transition ${
+                    emailParaVerificar.trim()
                       ? "bg-yellow-500 text-white hover:bg-yellow-600 dark:bg-yellow-500 dark:hover:bg-yellow-600"
                       : "bg-gray-400 text-gray-200 cursor-not-allowed dark:bg-gray-600"
-                    }`}
+                  }`}
                 >
                   {cargandoVerificacion ? (
                     <div className="flex items-center space-x-2">

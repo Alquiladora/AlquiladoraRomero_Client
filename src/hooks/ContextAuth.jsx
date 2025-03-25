@@ -245,11 +245,12 @@ export const AuthProvider = ({ children }) => {
   };
 
   const logout = async () => {
+    const userId= user?.id || user?.idUsuarios
     try {
       if (!csrfToken) await fetchCsrfToken();
       const response = await api.post(
         "/api/usuarios/Delete/login",
-        { userId: user?.idUsuarios },
+        { userId },
         {
           withCredentials: true,
           headers: {

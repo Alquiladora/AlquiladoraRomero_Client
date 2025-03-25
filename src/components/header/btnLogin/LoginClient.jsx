@@ -173,7 +173,7 @@ const IconoPerfil = () => {
         <MenuItem
           onClick={handleMenuClose}
           component={Link}
-          to="/cliente/pedidos"
+          to="/cliente/historial-pedidos"
           className="hover:bg-gray-100 dark:hover:bg-gray-800 p-3 rounded-lg flex items-center transition-all duration-200"
         >
           <FontAwesomeIcon icon={faHistory} className="mr-3 text-green-500" />

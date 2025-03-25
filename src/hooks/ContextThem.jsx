@@ -16,7 +16,7 @@ const ThemeProvider = ({ children }) => {
       root.classList.remove("dark");
     }
 
-    // Guardar preferencia en localStorage
+   
     localStorage.setItem("theme", theme);
   }, [theme]);
 

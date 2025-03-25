@@ -19,94 +19,38 @@ import Chatbox from "../../chabox/Chabox";
 import { useAuth } from "../../../hooks/ContextAuth";
 import api from "../../../utils/AxiosConfig";
 import { useSocket } from "../../../utils/Socket";
+import { useCart } from "../../carrito/ContextCarrito";
 
 const HeaderChil1 = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isCategoriesOpen, setIsCategoriesOpen] = useState(false);
   const [isChatboxOpen, setIsChatboxOpen] = useState(false);
-  const [cartCount, setCartCount] = useState(0);
   const { user, csrfToken } = useAuth();
+  const { cartCount, isLoading } = useCart();
   const [categorias, setCategorias] = useState([]);
   const socket = useSocket();
   const location = useLocation();
+  const [showMessage, setShowMessage] = useState(false);
 
-  console.log("Valor de user:", user);
-
+ 
   const isCliente = user && user.rol === "cliente";
   const isCartPage = location.pathname === (isCliente ? "/cliente/carrito" : "/carrito");
-  const userId = user?.id || user?.idUsuarios;
 
   useEffect(() => {
     fetchCategorias();
   }, []);
 
 
-  const fetchCartCount = async () => {
-    if (!userId) {
-      console.log("No user ID available, skipping fetchCartCount");
-      setCartCount(0); 
-      return;
+  const handleCartClick = (e) => {
+    if (!isCliente) {
+      e.preventDefault(); 
+      setShowMessage(true); 
+      setTimeout(() => setShowMessage(false), 3000); 
     }
-    try {
-      console.log(`Fetching cart count for user ${userId} with CSRF token: ${csrfToken}`);
-      const response = await api.get(`/api/carrito/count/${userId}`, {
-        withCredentials: true,
-        headers: { "X-CSRF-Token": csrfToken },
-      });
-      console.log("API response:", response.data);
-      const count = response.data.count || 0;
-      setCartCount(count);
-      console.log("Conteo inicial del carrito:", count);
-    } catch (error) {
-      console.error("Error fetching cart count:", error.message, error.response?.data);
-      setCartCount(0); 
-    }
+
   };
-
- 
-  useEffect(() => {
-    if (user) {
-      fetchCartCount();
-    } else {
-      console.log("No user, resetting cart count to 0");
-      setCartCount(0);
-    }
-  }, [user]);
-
-
-  useEffect(() => {
-    if (!socket || !userId) {
-      console.log("Socket or user ID not available, skipping socket listeners");
-      return;
-    }
-
-    const handleProductAdded = (data) => {
-      console.log("Producto agregado al carrito:", data);
-      setCartCount((prevCount) => {
-        const newCount = prevCount + data.cantidad;
-        console.log("New cart count after adding:", newCount);
-        return newCount;
-      });
-    };
-
-    const handleProductRemoved = (data) => {
-      console.log("Producto eliminado del carrito:", data);
-      setCartCount((prevCount) => {
-        const newCount = Math.max(prevCount - data.cantidad, 0);
-        console.log("New cart count after removing:", newCount);
-        return newCount;
-      });
-    };
-
-    socket.on("productoAgregadoCarrito", handleProductAdded);
-    socket.on("productoEliminadoCarrito", handleProductRemoved);
-
   
-    return () => {
-      socket.off("productoAgregadoCarrito", handleProductAdded);
-      socket.off("productoEliminadoCarrito", handleProductRemoved);
-    };
-  }, [socket, userId]);
+
 
   const fetchCategorias = async () => {
     try {
@@ -203,7 +147,7 @@ const HeaderChil1 = () => {
             )}
           </div>
           <Link
-            to="/about"
+              to={isCliente ? "/cliente/SobreNosotros" : "/SobreNosotros"}
             className="flex items-center space-x-2 text-lg font-medium text-gray-900 dark:text-gray-100 hover:text-blue-500 transition-all duration-300 hover:scale-105"
           >
             <BriefcaseIcon className="w-5 h-5" />
@@ -236,21 +180,46 @@ const HeaderChil1 = () => {
           ) : (
             <LoginLink />
           )}
-          <Link
-            to={isCliente ? "/cliente/carrito" : "/carrito"}
-            className="relative group flex items-center text-gray-900 dark:text-gray-100 hover:text-blue-500 transition-all duration-300"
-          >
-            <ShoppingCartIcon className="w-6 h-6" />
-            {cartCount > 0 && (
-              <span className="absolute -top-2 -right-2 bg-blue-500 text-white text-xs font-bold px-1.5 py-0.5 rounded-full shadow-md">
-                {cartCount}
-              </span>
-            )}
-            <span className="absolute top-full mt-2 left-1/2 transform -translate-x-1/2 text-xs bg-white dark:bg-gray-800 px-2 py-1 rounded-md shadow-md border border-gray-200 dark:border-gray-700 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-              Carrito
-            </span>
-          </Link>
 
+<div className="relative">
+      <Link
+        to={isCliente ? "/cliente/carrito" : "#"} 
+        onClick={handleCartClick}
+        className="relative group flex items-center text-gray-900 dark:text-gray-100 hover:text-blue-500 transition-all duration-300"
+      >
+        <ShoppingCartIcon className="w-6 h-6" />
+        {isLoading ? (
+          <span className="absolute -top-2 -right-2 w-4 h-4 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
+        ) : cartCount > 0 ? (
+          <span className="absolute -top-2 -right-2 bg-blue-500 text-white text-xs font-bold px-1.5 py-0.5 rounded-full shadow-md">
+            {cartCount}
+          </span>
+        ) : null}
+        <span className="absolute top-full mt-2 left-1/2 transform -translate-x-1/2 text-xs bg-white dark:bg-gray-800 px-2 py-1 rounded-md shadow-md border border-gray-200 dark:border-gray-700 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+          Carrito
+        </span>
+      </Link>
+
+      {/* Mensaje condicional */}
+      {showMessage && (
+        <div className="absolute top-full mt-10 left-1/2 transform -translate-x-1/2 bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200 px-4 py-2 rounded-md shadow-lg border border-red-300 dark:border-red-700 animate-fade-in-out">
+          Debes ser cliente para acceder al carrito. <Link to="/registro" className="underline hover:text-red-600">Regístrate aquí</Link>.
+        </div>
+      )}
+
+      {/* Estilos para la animación */}
+      <style jsx>{`
+        @keyframes fadeInOut {
+          0% { opacity: 0; transform: translateY(-10px); }
+          10% { opacity: 1; transform: translateY(0); }
+          90% { opacity: 1; transform: translateY(0); }
+          100% { opacity: 0; transform: translateY(-10px); }
+        }
+        .animate-fade-in-out {
+          animation: fadeInOut 3s ease-in-out forwards;
+        }
+      `}</style>
+    </div>
           <button
             onClick={() => setIsChatboxOpen(!isChatboxOpen)}
             className="hidden lg:flex items-center group text-gray-900 dark:text-gray-100 hover:text-blue-500 transition-all duration-300"
@@ -286,7 +255,7 @@ const HeaderChil1 = () => {
               <span>Inicio</span>
             </Link>
             <Link
-              to="/about"
+              to={isCliente ? "/cliente/SobreNosotros" : "/SobreNosotros"}
               className="flex items-center space-x-3 text-lg font-medium text-gray-900 dark:text-gray-100 hover:text-blue-500 transition-all duration-300"
               onClick={() => setIsMenuOpen(false)}
             >

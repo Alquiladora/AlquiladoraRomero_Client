@@ -20,15 +20,193 @@ import api from "../../../../utils/AxiosConfig";
 import { useAuth } from "../../../../hooks/ContextAuth";
 import { toast } from "react-toastify";
 
-function ListaDirecciones({ idUsuarios }) {
+const ListaDirecciones = ({ idUsuarios, isOpen, onClose, onAddressUpdated, showList = true, editAddressId}) => {
   const { csrfToken } = useAuth();
   const [direcciones, setDirecciones] = useState([]);
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
+ console.log("Dato recibido de dirreciones", editAddressId)
+
+  const [showModal, setShowModal] = useState(false);
+  const [currentStep, setCurrentStep] = useState(1);
+  const totalSteps = 4;
+  const [isEditing, setIsEditing] = useState(false);
+  const [editId, setEditId] = useState(null);
+
+  const [ubicacion, setUbicacion] = useState("México");
+  const [nombre, setNombre] = useState("");
+  const [apellido, setApellido] = useState("");
+  const [telefono, setTelefono] = useState("");
+  const [calleNumero, setCalleNumero] = useState("");
+  const [referencias, setReferencias] = useState("");
+  const [referencesCount, setReferencesCount] = useState(0);
+  const [postalCode, setPostalCode] = useState("");
+  const [estado, setEstado] = useState("");
+  const [municipioInput, setMunicipioInput] = useState("");
+  const [ciudad, setCiudad] = useState("");
+  const [esPredeterminada, setEsPredeterminada] = useState(false);
+
+  const [isPostalCodeValidated, setIsPostalCodeValidated] = useState(false);
+  const [hasFetchedData, setHasFetchedData] = useState(false);
+  const [cpLoading, setCpLoading] = useState(false);
+  const [estadosData, setEstadosData] = useState([]);
+  const [municipios, setMunicipios] = useState([]);
+  const [localidades, setLocalidades] = useState([]);
+  const [selectedLocalidad, setSelectedLocalidad] = useState("");
+  const [manualLocalidad, setManualLocalidad] = useState(false);
+  const [manualLocalidadValue, setManualLocalidadValue] = useState("");
+
+ 
+  const [originalCP, setOriginalCP] = useState("");
+  const [userHasChangedCP, setUserHasChangedCP] = useState(false);
+
+ 
+  const [nombreError, setNombreError] = useState("");
+  const [apellidoError, setApellidoError] = useState("");
+  const [telefonoError, setTelefonoError] = useState("");
+  const [postalCodeError, setPostalCodeError] = useState("");
+  const [calleNumeroError, setCalleNumeroError] = useState("");
+  const [referenciasError, setReferenciasError] = useState("");
+  const [localidadError, setLocalidadError] = useState("");
+  const [municipioError, setMunicipioError] = useState("");
+  const [estadoError, setEstadoError] = useState("");
+
+ 
+ 
+ useEffect(() => {
+  cargarDirecciones();
+}, []);
+
+
+ 
+ useEffect(() => {
+  if (isOpen) {
+    setShowModal(true);
+    if (editAddressId) {
+     
+      handleOpenModal(editAddressId);
+    } else {
+     
+      handleOpenModal(null);
+    }
+  }
+}, [isOpen, editAddressId]);
+
 
   useEffect(() => {
-    cargarDirecciones();
-  }, []);
+    
+    if (nombre.trim().length > 0) {
+      if (nombre.trim().length < 3) {
+        setNombreError("El nombre debe tener al menos 3 caracteres.");
+      } else if (!/^[a-zA-ZÀ-ÿ\u00f1\u00d1\s]+$/.test(nombre.trim())) {
+        setNombreError("El nombre solo puede contener letras, espacios y caracteres especiales como tildes o diéresis.");
+      } else {
+        setNombreError("");
+      }
+    } else {
+      setNombreError("");
+    }
+  }, [nombre]);
+  
+  useEffect(() => {
+   
+    if (apellido.trim().length > 0) {
+      if (apellido.trim().length < 3) {
+        setApellidoError("El apellido debe tener al menos 3 caracteres.");
+      } else if (!/^[a-zA-ZÀ-ÿ\u00f1\u00d1\s]+$/.test(apellido.trim())) {
+        setApellidoError("El apellido solo puede contener letras, espacios y caracteres especiales como tildes o diéresis.");
+      } else {
+        setApellidoError("");
+      }
+    } else {
+      setApellidoError("");
+    }
+  }, [apellido]);
+  
+
+
+  useEffect(() => {
+   
+    if (telefono.trim().length > 0) {
+      if (!/^\d{10}$/.test(telefono.trim())) {
+        setTelefonoError("El teléfono debe contener exactamente 10 dígitos.");
+      } else {
+        setTelefonoError("");
+      }
+    } else {
+      setTelefonoError("");
+    }
+  }, [telefono]);
+
+  useEffect(() => {
+  
+    if (postalCode.trim().length > 0) {
+      if (!/^\d{5}$/.test(postalCode.trim())) {
+        setPostalCodeError("El código postal debe tener 5 dígitos.");
+      } else {
+        setPostalCodeError("");
+      }
+    } else {
+      setPostalCodeError("");
+    }
+  }, [postalCode]);
+
+  useEffect(() => {
+    // Validación de Calle y Número
+    if (calleNumero.trim().length > 0) {
+      if (calleNumero.trim().length < 5) {
+        setCalleNumeroError("La dirección debe tener al menos 5 caracteres.");
+      } else {
+        setCalleNumeroError("");
+      }
+    } else {
+      setCalleNumeroError("");
+    }
+  }, [calleNumero]);
+
+  useEffect(() => {
+    // Validación de Referencias
+    if (referencias.trim().length > 0) {
+      if (referencias.length > 50) {
+        setReferenciasError("Las referencias no pueden exceder 50 caracteres.");
+      } else if (/[<>{}]/g.test(referencias)) {
+        setReferenciasError("Las referencias no pueden contener caracteres como <, >, {, }.");
+      } else {
+        setReferenciasError("");
+      }
+    } else {
+      setReferenciasError("");
+    }
+  }, [referencias]);
+
+  useEffect(() => {
+    // Validación de Localidad
+    const localidadValue = manualLocalidad ? manualLocalidadValue : selectedLocalidad;
+    if (isPostalCodeValidated && (!localidadValue || localidadValue.trim().length === 0)) {
+      setLocalidadError("La localidad/colonia es obligatoria.");
+    } else {
+      setLocalidadError("");
+    }
+  }, [manualLocalidad, manualLocalidadValue, selectedLocalidad, isPostalCodeValidated]);
+
+  useEffect(() => {
+  
+    if (isPostalCodeValidated && (!municipioInput || municipioInput.trim().length === 0)) {
+      setMunicipioError("El municipio es obligatorio.");
+    } else {
+      setMunicipioError("");
+    }
+  }, [municipioInput, isPostalCodeValidated]);
+
+
+  useEffect(() => {
+   
+    if (isPostalCodeValidated && (!estado || estado.trim().length === 0)) {
+      setEstadoError("El estado es obligatorio.");
+    } else {
+      setEstadoError("");
+    }
+  }, [estado, isPostalCodeValidated]);
 
   const cargarDirecciones = async () => {
     try {
@@ -44,6 +222,7 @@ function ListaDirecciones({ idUsuarios }) {
       });
       console.log("Direcciones obtenidas:", response.data);
       setDirecciones(response.data);
+     
     } catch (error) {
       console.error("Error al cargar las direcciones:", error);
     } finally {
@@ -51,89 +230,12 @@ function ListaDirecciones({ idUsuarios }) {
     }
   };
 
-  // Estados del modal y wizard
-  const [showModal, setShowModal] = useState(false);
-  const [currentStep, setCurrentStep] = useState(1);
-  const totalSteps = 4;
-  const [isEditing, setIsEditing] = useState(false);
-  const [editId, setEditId] = useState(null);
-
-
-  const [ubicacion, setUbicacion] = useState("México");
-  const [nombre, setNombre] = useState("");
-  const [apellido, setApellido] = useState("");
-  const [telefono, setTelefono] = useState("");
-  const [calleNumero, setCalleNumero] = useState("");
-  const [referencias, setReferencias] = useState("");
-  const [referencesCount, setReferencesCount] = useState(0);
-  const [postalCode, setPostalCode] = useState("");
-  const [estado, setEstado] = useState("");
-  const [municipioInput, setMunicipioInput] = useState("");
-  const [ciudad, setCiudad] = useState("");
-  const [esPredeterminada, setEsPredeterminada] = useState(false);
-
- 
-  const [isPostalCodeValidated, setIsPostalCodeValidated] = useState(false);
-  const [hasFetchedData, setHasFetchedData] = useState(false);
-  const [cpLoading, setCpLoading] = useState(false);
-  const [estadosData, setEstadosData] = useState([]);
-  const [municipios, setMunicipios] = useState([]);
-  const [localidades, setLocalidades] = useState([]);
-  const [selectedLocalidad, setSelectedLocalidad] = useState("");
-  const [manualLocalidad, setManualLocalidad] = useState(false);
-  const [manualLocalidadValue, setManualLocalidadValue] = useState("");
-
-  // Para detectar si el usuario cambió el CP en edición
-  const [originalCP, setOriginalCP] = useState("");
-  const [userHasChangedCP, setUserHasChangedCP] = useState(false);
-
-  // Errores de validación
-  const [nombreError, setNombreError] = useState("");
-  const [apellidoError, setApellidoError] = useState("");
-  const [telefonoError, setTelefonoError] = useState("");
-  const [postalCodeError, setPostalCodeError] = useState("");
-
-  useEffect(() => {
-    if (nombre.trim().length > 0 && nombre.trim().length < 3) {
-      setNombreError("El nombre debe tener al menos 3 caracteres.");
-    } else {
-      setNombreError("");
-    }
-  }, [nombre]);
-
-  useEffect(() => {
-    if (apellido.trim().length > 0 && apellido.trim().length < 3) {
-      setApellidoError("El apellido debe tener al menos 3 caracteres.");
-    } else {
-      setApellidoError("");
-    }
-  }, [apellido]);
-
-  useEffect(() => {
-    if (telefono.trim().length > 0 && !/^\d{10}$/.test(telefono.trim())) {
-      setTelefonoError("El teléfono debe contener exactamente 10 dígitos.");
-    } else {
-      setTelefonoError("");
-    }
-  }, [telefono]);
-
-  useEffect(() => {
-    if (postalCode.trim().length > 0 && !/^\d{5}$/.test(postalCode.trim())) {
-      setPostalCodeError("El código postal debe tener 5 dígitos.");
-    } else {
-      setPostalCodeError("");
-    }
-  }, [postalCode]);
-
   const handleOpenModal = (direccionId = null) => {
     setCurrentStep(1);
     if (direccionId) {
-      
       setIsEditing(true);
       setEditId(direccionId);
-      const dirToEdit = direcciones.find(
-        (dir) => dir.idDireccion === direccionId
-      );
+      const dirToEdit = direcciones.find((dir) => dir.idDireccion === direccionId);
       console.log("Datos a editar:", dirToEdit);
       if (dirToEdit) {
         setUbicacion("México");
@@ -145,7 +247,7 @@ function ListaDirecciones({ idUsuarios }) {
         setPostalCode(dirToEdit.codigoPostal || "");
         setOriginalCP(dirToEdit.codigoPostal || "");
         setUserHasChangedCP(false);
-        
+  
         if (dirToEdit.localidad) {
           setManualLocalidad(false);
           setSelectedLocalidad(dirToEdit.localidad);
@@ -165,20 +267,18 @@ function ListaDirecciones({ idUsuarios }) {
           setMunicipioInput("");
         }
         setEsPredeterminada(dirToEdit.predeterminado);
-
-     
+  
         setEstadosData([]);
         setMunicipios([]);
         setLocalidades([]);
         setHasFetchedData(false);
-       
+  
         if (dirToEdit.codigoPostal && /^\d{5}$/.test(dirToEdit.codigoPostal)) {
           setCpLoading(true);
           fetchPostalData(dirToEdit.codigoPostal);
         }
       }
     } else {
-      
       setIsEditing(false);
       setEditId(null);
       setUbicacion("México");
@@ -208,13 +308,15 @@ function ListaDirecciones({ idUsuarios }) {
 
   const handleCloseModal = () => {
     setShowModal(false);
+    if (onClose) {
+      onClose(); 
+    }
   };
 
-  
   const handleValidatePostalCode = () => {
     const cp = postalCode.trim();
     if (!/^\d{5}$/.test(cp)) {
-      alert("El código postal debe contener 5 dígitos numéricos.");
+      toast.error("El código postal debe contener 5 dígitos numéricos.");
       setIsPostalCodeValidated(false);
       return;
     }
@@ -227,44 +329,32 @@ function ListaDirecciones({ idUsuarios }) {
     setIsPostalCodeValidated(true);
   };
 
- 
   const fetchPostalData = async (cp) => {
     setHasFetchedData(true);
     try {
       const url = `https://sepomex.icalialabs.com/api/v1/zip_codes?zip_code=${cp}&per_page=100`;
       const response = await axios.get(url);
-      if (
-        response.data &&
-        response.data.zip_codes &&
-        response.data.zip_codes.length > 0
-      ) {
-        const uniqueEstados = [
-          ...new Set(response.data.zip_codes.map((item) => item.d_estado)),
-        ];
-        const uniqueMunicipios = [
-          ...new Set(response.data.zip_codes.map((item) => item.d_mnpio)),
-        ];
-        const uniqueLocalidades = [
-          ...new Set(response.data.zip_codes.map((item) => item.d_asenta)),
-        ];
+      if (response.data && response.data.zip_codes && response.data.zip_codes.length > 0) {
+        const uniqueEstados = [...new Set(response.data.zip_codes.map((item) => item.d_estado))];
+        const uniqueMunicipios = [...new Set(response.data.zip_codes.map((item) => item.d_mnpio))];
+        const uniqueLocalidades = [...new Set(response.data.zip_codes.map((item) => item.d_asenta))];
 
         setEstadosData(uniqueEstados);
         setMunicipios(uniqueMunicipios);
         setLocalidades(uniqueLocalidades);
-        console.log("datos de localidda", uniqueLocalidades)
+        console.log("datos de localidad", uniqueLocalidades);
 
-        // Asignar valores por defecto obtenidos de la API
         setEstado(uniqueEstados[0] || "");
         setMunicipioInput(uniqueMunicipios[0] || "");
         setSelectedLocalidad(uniqueLocalidades[0] || "");
         setCiudad(uniqueLocalidades[0] || uniqueMunicipios[0] || "");
       } else {
-        alert("Código postal no encontrado.");
+        toast.error("Código postal no encontrado.");
         setIsPostalCodeValidated(false);
         setHasFetchedData(false);
       }
     } catch (error) {
-      alert("Error al consultar el código postal.");
+      toast.error("Error al consultar el código postal.");
       setIsPostalCodeValidated(false);
       setHasFetchedData(false);
     } finally {
@@ -272,7 +362,6 @@ function ListaDirecciones({ idUsuarios }) {
     }
   };
 
- 
   const groupLocalidades = (arr) => {
     const groups = {};
     arr.forEach((item) => {
@@ -299,57 +388,72 @@ function ListaDirecciones({ idUsuarios }) {
   const isFormValidStep1 = () => {
     return (
       nombre.trim().length >= 3 &&
+      /^[a-zA-Z\s]+$/.test(nombre.trim()) &&
       apellido.trim().length >= 3 &&
-      telefono.trim().length === 10
+      /^[a-zA-Z\s]+$/.test(apellido.trim()) &&
+      telefono.trim().length === 10 &&
+      /^\d{10}$/.test(telefono.trim())
     );
   };
+
   const isFormValidStep2 = () => {
-    return postalCode.trim().length === 5 && isPostalCodeValidated;
+    const localidadValue = manualLocalidad ? manualLocalidadValue : selectedLocalidad;
+    return (
+      postalCode.trim().length === 5 &&
+      isPostalCodeValidated &&
+      estado.trim().length > 0 &&
+      municipioInput.trim().length > 0 &&
+      localidadValue.trim().length > 0
+    );
   };
+
   const isFormValidStep3 = () => {
-    return calleNumero.trim().length > 0;
+    return (
+      calleNumero.trim().length >= 5 &&
+      (!referencias || (referencias.length <= 50 && !/[<>{}]/g.test(referencias)))
+    );
   };
+
   const isFormValidFinal = () => {
+    const localidadValue = manualLocalidad ? manualLocalidadValue : selectedLocalidad;
     return (
       isFormValidStep1() &&
       isFormValidStep2() &&
       isFormValidStep3() &&
-      ((manualLocalidad && manualLocalidadValue.trim().length > 0) ||
-        (!manualLocalidad && selectedLocalidad.trim().length > 0)) &&
+      localidadValue.trim().length > 0 &&
       estado.trim().length > 0 &&
       municipioInput.trim().length > 0
     );
   };
 
- 
   const handleSave = async (e) => {
     e.preventDefault();
     if (!isFormValidFinal()) {
-      toast.warning("Por favor completa todos los campos obligatorios.");
+      toast.warning("Por favor completa todos los campos obligatorios correctamente.");
       return;
     }
+
     const dataParaEnviar = {
       idUsuario: idUsuarios,
-      nombre,
-      apellido,
+      nombre: nombre.trim(),
+      apellido: apellido.trim(),
       telefono: telefono.trim(),
       codigoPostal: postalCode.trim(),
       pais: "México",
       estado: estado.trim(),
       municipio: municipioInput.trim(),
-      localidad: manualLocalidad
-        ? manualLocalidadValue.trim()
-        : selectedLocalidad.trim(),
+      localidad: manualLocalidad ? manualLocalidadValue.trim() : selectedLocalidad.trim(),
       direccion: calleNumero.trim(),
       referencias: referencias.trim() || null,
       predeterminado: esPredeterminada,
     };
+
     setSaving(true);
     try {
       let response;
       if (isEditing) {
-        
-        response = await api.put("/api/direccion/actualizar", 
+        response = await api.put(
+          "/api/direccion/actualizar",
           { idDireccion: editId, ...dataParaEnviar },
           {
             headers: { "X-CSRF-Token": csrfToken },
@@ -357,20 +461,23 @@ function ListaDirecciones({ idUsuarios }) {
           }
         );
       } else {
-       
         response = await api.post("/api/direccion/crear", dataParaEnviar, {
           headers: { "X-CSRF-Token": csrfToken },
           withCredentials: true,
         });
       }
+
       if ((isEditing && response.status === 200) || (!isEditing && response.status === 201)) {
         console.log(isEditing ? "Dirección actualizada:" : "Dirección creada:", response.data);
         toast.success(
-          isEditing
-            ? "Dirección actualizada correctamente"
-            : "Dirección creada correctamente"
+          isEditing ? "Dirección actualizada correctamente" : "Dirección creada correctamente"
         );
-        cargarDirecciones();
+        if (showList) {
+          cargarDirecciones();
+        }
+        if (onAddressUpdated) {
+          onAddressUpdated();
+        }
         handleCloseModal();
       }
     } catch (error) {
@@ -391,11 +498,14 @@ function ListaDirecciones({ idUsuarios }) {
         const response = await api.delete("/api/direccion/eliminar", {
           data: { idDireccion: id, idUsuario: idUsuarios },
           headers: { "X-CSRF-Token": csrfToken },
-          withCredentials: true
+          withCredentials: true,
         });
         if (response.status === 200) {
           toast.success("Dirección eliminada correctamente");
           cargarDirecciones();
+          if (onAddressUpdated) {
+            onAddressUpdated(); // Notificar al componente padre (DetallesPago)
+          }
         }
       } catch (error) {
         console.error("Error al eliminar la dirección:", error);
@@ -407,15 +517,7 @@ function ListaDirecciones({ idUsuarios }) {
       }
     }
   };
-  
-  const handleSetPredeterminada = (id) => {
-    setDirecciones((prev) =>
-      prev.map((dir) => ({
-        ...dir,
-        predeterminada: dir.id === id,
-      }))
-    );
-  };
+
 
   const nextStep = () => {
     if (currentStep < totalSteps) {
@@ -436,14 +538,12 @@ function ListaDirecciones({ idUsuarios }) {
     return false;
   };
 
-  
   const renderStep1 = () => (
     <div className="space-y-4">
-      <h2 className="text-lg font-semibold text-gray-800 dark:text-white mb-4 flex items-center">
-        <FontAwesomeIcon icon={faAddressCard} className="mr-2 text-blue-600" />
-        Paso 1: Datos Personales
-      </h2>
-      {/* Nombre */}
+    <h2 className="text-lg font-semibold text-gray-800 dark:text-white mb-4 flex items-center">
+      <FontAwesomeIcon icon={faAddressCard} className="mr-2 text-blue-600" />
+      Paso 1: Datos Personales
+    </h2>
       <div className="relative">
         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
           Nombre* (mínimo 3 caracteres)
@@ -463,7 +563,6 @@ function ListaDirecciones({ idUsuarios }) {
         </div>
         {nombreError && <p className="text-xs text-red-500">{nombreError}</p>}
       </div>
-     
       <div className="relative">
         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
           Apellido* (mínimo 3 caracteres)
@@ -482,7 +581,6 @@ function ListaDirecciones({ idUsuarios }) {
         </div>
         {apellidoError && <p className="text-xs text-red-500">{apellidoError}</p>}
       </div>
-      {/* Teléfono */}
       <div className="relative">
         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
           Número de Teléfono (10 dígitos)
@@ -513,7 +611,6 @@ function ListaDirecciones({ idUsuarios }) {
         <FontAwesomeIcon icon={faLocationArrow} className="mr-2 text-blue-600" />
         Paso 2: Ubicación
       </h2>
-      {/* Código Postal */}
       <div className="relative">
         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
           Código Postal (5 dígitos)
@@ -547,14 +644,11 @@ function ListaDirecciones({ idUsuarios }) {
             </button>
           )}
         </div>
-        {postalCodeError && (
-          <p className="text-xs text-red-500">{postalCodeError}</p>
-        )}
+        {postalCodeError && <p className="text-xs text-red-500">{postalCodeError}</p>}
       </div>
 
       {isPostalCodeValidated && (
         <>
-          {/* País */}
           <div className="relative">
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
               País
@@ -571,7 +665,6 @@ function ListaDirecciones({ idUsuarios }) {
               />
             </div>
           </div>
-          {/* Estado (Deshabilitado) */}
           <div className="relative">
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
               Estado
@@ -588,8 +681,8 @@ function ListaDirecciones({ idUsuarios }) {
                 className="pl-9 block w-full py-2 bg-gray-100 border-gray-300 rounded"
               />
             </div>
+            {estadoError && <p className="text-xs text-red-500">{estadoError}</p>}
           </div>
-          {/* Municipio */}
           <div className="relative">
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
               Municipio
@@ -605,10 +698,9 @@ function ListaDirecciones({ idUsuarios }) {
                 className="pl-9 block w-full py-2 border-gray-300 rounded focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
               />
             </div>
+            {municipioError && <p className="text-xs text-red-500">{municipioError}</p>}
           </div>
-          {/* Localidad/Colonia */}
           {(isEditing && isPostalCodeValidated && !userHasChangedCP) ? (
-           
             <div className="mt-4">
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                 Localidad/Colonia (Valor actual)
@@ -625,9 +717,9 @@ function ListaDirecciones({ idUsuarios }) {
                   className="pl-9 block w-full py-2 border-gray-300 rounded focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                 />
               </div>
+              {localidadError && <p className="text-xs text-red-500">{localidadError}</p>}
             </div>
           ) : (
-           
             <div className="mt-4">
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                 Localidad/Colonia
@@ -690,6 +782,7 @@ function ListaDirecciones({ idUsuarios }) {
                   </select>
                 </div>
               )}
+              {localidadError && <p className="text-xs text-red-500">{localidadError}</p>}
             </div>
           )}
         </>
@@ -703,7 +796,6 @@ function ListaDirecciones({ idUsuarios }) {
         <FontAwesomeIcon icon={faHome} className="mr-2 text-blue-600" />
         Paso 3: Detalles de Dirección
       </h2>
-      {/* Calle y Número */}
       <div className="relative">
         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
           Dirección (Calle y Número)
@@ -720,8 +812,8 @@ function ListaDirecciones({ idUsuarios }) {
             className="pl-9 block w-full py-2 border-gray-300 rounded focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
           />
         </div>
+        {calleNumeroError && <p className="text-xs text-red-500">{calleNumeroError}</p>}
       </div>
-      {/* Referencias */}
       <div className="relative">
         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
           Referencias (máx. 50 caracteres)
@@ -736,15 +828,15 @@ function ListaDirecciones({ idUsuarios }) {
         <div className="text-xs text-gray-500 mt-1">
           {referencesCount} / 50 caracteres
         </div>
+        {referenciasError && <p className="text-xs text-red-500">{referenciasError}</p>}
       </div>
-      {/* Predeterminado */}
       <div className="flex items-center space-x-2 mt-2">
         <input
           type="checkbox"
           checked={esPredeterminada}
           onChange={(e) => setEsPredeterminada(e.target.checked)}
           className="h-4 w-4"
-          disabled={isEditing && esPredeterminada} 
+          disabled={isEditing && esPredeterminada}
         />
         <label className="text-sm text-gray-700 dark:text-gray-300">
           Hacer predeterminada (opcional)
@@ -794,143 +886,197 @@ function ListaDirecciones({ idUsuarios }) {
     </div>
   );
 
-  const renderStep = () => {
-    switch (currentStep) {
-      case 1:
-        return renderStep1();
-      case 2:
-        return renderStep2();
-      case 3:
-        return renderStep3();
-      case 4:
-        return renderStep4();
-      default:
-        return null;
-    }
-  };
 
- 
 
-  const renderModal = () => {
-    if (!showModal) return null;
 
-    return (
-      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4">
-        <div className="bg-white dark:bg-gray-800 w-full max-w-lg rounded shadow-lg relative">
-          <div className="bg-yellow-400 h-2 w-full rounded-t"></div>
-          <button
-            className="absolute top-2 right-2 text-gray-600 dark:text-gray-300 hover:text-red-600 transition"
-            onClick={handleCloseModal}
-          >
-            <FontAwesomeIcon icon={faTimes} size="lg" />
-          </button>
-          <div className="p-6">
-         
-            <div className="flex justify-between items-center mb-4">
-              <div className="flex space-x-4">
-                {/* Paso 1 */}
-                <div
-                  className={`flex flex-col items-center ${
-                    currentStep === 1 ? "text-blue-600" : "text-gray-400"
-                  }`}
+
+
+  return (
+    <>
+      <div className="px-4 sm:px-6 lg:px-8 py-4">
+        {showList && (
+          <div className="max-w-6xl mx-auto">
+            <div className="flex flex-col sm:flex-row justify-between items-center mb-6">
+              <h1 className="text-2xl font-bold text-gray-800 dark:text-white mb-4 sm:mb-0">
+                MI LIBRETA DE DIRECCIONES
+              </h1>
+              {direcciones.length < 6 && (
+                <button
+                  onClick={() => handleOpenModal(null)}
+                  className="inline-flex items-center px-4 py-2 bg-yellow-600 text-white text-sm font-semibold rounded shadow hover:bg-yellow-700 transition-all"
                 >
+                  + AÑADIR DIRECCIÓN NUEVA
+                </button>
+              )}
+            </div>
+
+            {loading ? (
+              <div className="flex justify-center items-center py-6 text-yellow-600">
+                <FontAwesomeIcon icon={faSpinner} spin className="mr-2" />
+                Cargando direcciones...
+              </div>
+            ) : direcciones.length === 0 ? (
+              <p className="text-gray-600 dark:text-gray-400 text-center">
+                No tienes direcciones registradas.
+              </p>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                {direcciones.map((dir) => (
                   <div
-                    className={`h-8 w-8 flex items-center justify-center rounded-full border-2 ${
-                      currentStep >= 1 ? "border-blue-600" : "border-gray-400"
-                    }`}
+                    key={dir.idDireccion}
+                    className="border border-gray-200 dark:border-gray-600 rounded-lg p-5 bg-white dark:bg-gray-700 shadow-sm hover:shadow-md transition-all"
                   >
-                    <FontAwesomeIcon icon={faAddressCard} size="sm" />
+                    <div className="flex flex-col space-y-2">
+                      <div className="text-lg font-semibold text-gray-700 dark:text-gray-100 flex items-center justify-between">
+                        <span>{dir.nombre} {dir.apellido}</span>
+                        {dir.telefono && (
+                          <span className="text-sm text-gray-600 dark:text-gray-300">
+                            <FontAwesomeIcon icon={faPhone} className="mr-1" />
+                            {dir.telefono}
+                          </span>
+                        )}
+                      </div>
+
+                      {dir.referencias && (
+                        <div className="text-sm text-gray-600 dark:text-gray-300">
+                          {dir.referencias}
+                        </div>
+                      )}
+
+                      <div className="text-sm text-gray-600 dark:text-gray-300">
+                        {dir.localidad}, {dir.municipio}, {dir.estado}, {dir.pais}
+                      </div>
+
+                      <div className="text-sm text-gray-500">
+                        <FontAwesomeIcon icon={faMapPin} className="mr-1 text-gray-400" />
+                        <strong>CP:</strong> {dir.codigoPostal || "N/A"}
+                      </div>
+
+                      {dir.predeterminado === 1 && (
+                        <div className="flex items-center text-green-600 text-sm">
+                          <FontAwesomeIcon icon={faCheckCircle} className="mr-1" />
+                          <span>Predeterminada</span>
+                        </div>
+                      )}
+
+                      <div className="flex items-center space-x-4 text-sm pt-2">
+                        <button
+                          onClick={() => handleDelete(dir.idDireccion)}
+                          className="text-red-500 hover:text-red-600 font-medium transition-colors"
+                        >
+                          Eliminar
+                        </button>
+                        <button
+                          onClick={() => handleOpenModal(dir.idDireccion)}
+                          className="text-yellow-500 hover:text-yellow-600 font-medium transition-colors"
+                        >
+                          Editar
+                        </button>
+                      </div>
+                    </div>
                   </div>
-                  <span className="text-xs mt-1">Datos</span>
-                </div>
-                {/* Paso 2 */}
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+
+      {showModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg w-full max-w-lg p-6 relative max-h-[90vh] overflow-y-auto">
+            <button
+              onClick={handleCloseModal}
+              className="absolute top-4 right-4 text-gray-600 dark:text-gray-300 hover:text-gray-800 dark:hover:text-gray-100"
+            >
+              <FontAwesomeIcon icon={faTimes} size="lg" />
+            </button>
+
+            <div className="mb-6">
+              <div className="flex justify-between items-center">
+                {Array.from({ length: totalSteps }, (_, index) => (
+                  <div key={index} className="flex-1 text-center">
+                    <div
+                      className={`w-8 h-8 mx-auto rounded-full flex items-center justify-center ${
+                        currentStep > index + 1
+                          ? "bg-green-500 text-white"
+                          : currentStep === index + 1
+                          ? "bg-yellow-600 text-white"
+                          : "bg-gray-300 text-gray-600"
+                      }`}
+                    >
+                      {currentStep > index + 1 ? (
+                        <FontAwesomeIcon icon={faCheckCircle} />
+                      ) : (
+                        index + 1
+                      )}
+                    </div>
+                    <p className="text-xs mt-1 text-gray-600 dark:text-gray-300">
+                      {index === 0
+                        ? "Datos Personales"
+                        : index === 1
+                        ? "Ubicación"
+                        : index === 2
+                        ? "Detalles"
+                        : "Revisión"}
+                    </p>
+                  </div>
+                ))}
+              </div>
+              <div className="mt-2 h-1 bg-gray-200 dark:bg-gray-600 rounded">
                 <div
-                  className={`flex flex-col items-center ${
-                    currentStep === 2 ? "text-blue-600" : "text-gray-400"
-                  }`}
-                >
-                  <div
-                    className={`h-8 w-8 flex items-center justify-center rounded-full border-2 ${
-                      currentStep >= 2 ? "border-blue-600" : "border-gray-400"
-                    }`}
-                  >
-                    <FontAwesomeIcon icon={faLocationArrow} size="sm" />
-                  </div>
-                  <span className="text-xs mt-1">Ubicación</span>
-                </div>
-                {/* Paso 3 */}
-                <div
-                  className={`flex flex-col items-center ${
-                    currentStep === 3 ? "text-blue-600" : "text-gray-400"
-                  }`}
-                >
-                  <div
-                    className={`h-8 w-8 flex items-center justify-center rounded-full border-2 ${
-                      currentStep >= 3 ? "border-blue-600" : "border-gray-400"
-                    }`}
-                  >
-                    <FontAwesomeIcon icon={faHome} size="sm" />
-                  </div>
-                  <span className="text-xs mt-1">Dirección</span>
-                </div>
-                {/* Paso 4 */}
-                <div
-                  className={`flex flex-col items-center ${
-                    currentStep === 4 ? "text-blue-600" : "text-gray-400"
-                  }`}
-                >
-                  <div
-                    className={`h-8 w-8 flex items-center justify-center rounded-full border-2 ${
-                      currentStep >= 4 ? "border-blue-600" : "border-gray-400"
-                    }`}
-                  >
-                    <FontAwesomeIcon icon={faClipboardCheck} size="sm" />
-                  </div>
-                  <span className="text-xs mt-1">Confirmación</span>
-                </div>
+                  className="h-1 bg-yellow-600 rounded transition-all duration-300"
+                  style={{ width: `${(currentStep / totalSteps) * 100}%` }}
+                />
               </div>
             </div>
 
-            <form onSubmit={handleSave} className="space-y-6">
-              {renderStep()}
+            <form onSubmit={handleSave}>
+              {currentStep === 1 && renderStep1()}
+              {currentStep === 2 && renderStep2()}
+              {currentStep === 3 && renderStep3()}
+              {currentStep === 4 && renderStep4()}
 
-              <div className="flex justify-between mt-6">
+              <div className="mt-6 flex justify-between">
                 {currentStep > 1 && (
                   <button
                     type="button"
                     onClick={prevStep}
-                    className="px-4 py-2 rounded bg-gray-200 text-gray-700 hover:bg-gray-300 transition"
+                    className="px-4 py-2 bg-gray-300 text-gray-800 rounded hover:bg-gray-400 transition"
                   >
                     Anterior
                   </button>
                 )}
-                {currentStep < totalSteps && (
+                {currentStep < totalSteps ? (
                   <button
                     type="button"
                     onClick={nextStep}
-                    className={`px-4 py-2 rounded ${
-                      canGoNext()
-                        ? "bg-blue-600 text-white hover:bg-blue-700"
-                        : "bg-gray-400 text-gray-200 cursor-not-allowed"
-                    } transition`}
                     disabled={!canGoNext()}
+                    className={`px-4 py-2 rounded transition ${
+                      canGoNext()
+                        ? "bg-yellow-600 text-white hover:bg-yellow-700"
+                        : "bg-gray-300 text-gray-500 cursor-not-allowed"
+                    }`}
                   >
                     Siguiente
                   </button>
-                )}
-                {currentStep === totalSteps && (
+                ) : (
                   <button
                     type="submit"
-                    className="px-4 py-2 rounded bg-green-600 text-white hover:bg-green-700 transition"
-                    disabled={saving}
+                    disabled={saving || !isFormValidFinal()}
+                    className={`px-4 py-2 rounded transition flex items-center ${
+                      saving || !isFormValidFinal()
+                        ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                        : "bg-green-600 text-white hover:bg-green-700"
+                    }`}
                   >
                     {saving ? (
-                      <div className="flex items-center space-x-2">
-                        <FontAwesomeIcon icon={faSpinner} spin />
-                        <span>{isEditing ? "Actualizando..." : "Guardando..."}</span>
-                      </div>
+                      <>
+                        <FontAwesomeIcon icon={faSpinner} spin className="mr-2" />
+                        Guardando...
+                      </>
                     ) : (
-                      isEditing ? "Actualizar" : "Guardar"
+                      "Guardar Dirección"
                     )}
                   </button>
                 )}
@@ -938,94 +1084,9 @@ function ListaDirecciones({ idUsuarios }) {
             </form>
           </div>
         </div>
-      </div>
-    );
-  };
-
-  return (
-    <div className="px-4 sm:px-6 lg:px-8 py-4">
-      <div className="max-w-4xl mx-auto">
-        <h1 className="text-2xl font-bold text-gray-800 dark:text-white mb-6">
-          MI LIBRETA DE DIRECCIONES
-        </h1>
-  
-        <button
-          onClick={() => handleOpenModal(null)}
-          className="inline-flex items-center px-4 py-2 bg-blue-600 text-white text-sm font-semibold rounded shadow hover:bg-blue-700 transition-all"
-        >
-          + AÑADIR DIRECCIÓN NUEVA
-        </button>
-  
-        {loading ? (
-          <div className="flex justify-center items-center py-6 text-blue-600">
-            <FontAwesomeIcon icon={faSpinner} spin className="mr-2" />
-            Cargando direcciones...
-          </div>
-        ) : (
-          <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4">
-            {direcciones.map((dir) => (
-              <div
-                key={dir.idDireccion}
-                className="border border-gray-200 dark:border-gray-600 rounded-md p-4 bg-white dark:bg-gray-700 shadow-sm hover:shadow-md transition"
-              >
-                <div className="text-lg font-semibold text-gray-700 dark:text-gray-100 mb-2">
-                  {dir.nombre} {dir.apellido}
-                  {dir.telefono && (
-                    <span className="ml-2 text-sm text-gray-600 dark:text-gray-300">
-                      <FontAwesomeIcon icon={faPhone} className="mr-1" />
-                      {dir.telefono}
-                    </span>
-                  )}
-                </div>
-  
-                {dir.referencias && (
-                  <div className="text-sm text-gray-600 dark:text-gray-300 mb-1">
-                    {dir.referencias}
-                  </div>
-                )}
-  
-                <div className="text-sm text-gray-600 dark:text-gray-300 mb-2">
-                  {dir.localidad}, {dir.municipio}, {dir.estado}, {dir.pais}
-                </div>
-  
-                <div className="text-sm text-gray-500 mb-2">
-                  <FontAwesomeIcon icon={faMapPin} className="mr-1 text-gray-400" />
-                  <strong>CP:</strong> {dir.codigoPostal || "N/A"}
-                </div>
-  
-                {dir.predeterminado === 1 && (
-                  <div className="flex items-center text-green-600 text-sm mb-2">
-                    <FontAwesomeIcon icon={faCheckCircle} className="mr-1" />
-                    <span>Predeterminada</span>
-                  </div>
-                )}
-  
-                <div className="flex items-center space-x-2 text-sm">
-                  <button
-                    onClick={() => handleDelete(dir.idDireccion)}
-                    className="text-red-500 hover:underline"
-                  >
-                    Eliminar
-                  </button>
-                  <button
-                    onClick={() => handleOpenModal(dir.idDireccion)}
-                    className="text-blue-500 hover:underline"
-                  >
-                    Editar
-                  </button>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
-  
-      {renderModal()}
-    </div>
+      )}
+    </>
   );
-}
+};
 
 export default ListaDirecciones;
-
-
-//NOTA ----10/03/ ----FALTA VALIDACIONES A INSERAR Y ACTUALIZAR 

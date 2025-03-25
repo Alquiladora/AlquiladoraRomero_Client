@@ -12,12 +12,14 @@ import { useSocket } from "../../utils/Socket";
 import { useAuth } from "../../hooks/ContextAuth";
 import api from "../../utils/AxiosConfig";
 import { toast } from "react-toastify";
+import { useCart } from "./ContextCarrito";
+import DetallesPago from "./DetallesPago";
 
 function CarritoRentaSheinStyle() {
   const socket = useSocket();
   const { user, csrfToken } = useAuth();
   const idUsuario = user?.idUsuarios || user?.id;
-
+  const { removeFromCart: removeFromCartContext } = useCart();
   const [cartItems, setCartItems] = useState([]);
   const [selectedItems, setSelectedItems] = useState([]);
   const [rentalDate, setRentalDate] = useState("");
@@ -26,7 +28,10 @@ function CarritoRentaSheinStyle() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
   const [itemLoading, setItemLoading] = useState({});
+  const [showDetallesPago, setShowDetallesPago] = useState(false);
   const allSelected = selectedItems.length === cartItems.length;
+
+  const MINIMUM_TOTAL = 150; 
 
   const getTodayDate = () => {
     const today = new Date();
@@ -206,7 +211,7 @@ function CarritoRentaSheinStyle() {
 
   const removeFromCart = async (idCarrito) => {
     setItemLoading((prev) => ({ ...prev, [idCarrito]: true }));
-    const idUser= user?.id || user?.idUsuarios
+    const idUser = user?.id || user?.idUsuarios;
     try {
       const response = await api.delete(`/api/carrito/eliminar/${idCarrito}`, {
         withCredentials: true,
@@ -214,7 +219,7 @@ function CarritoRentaSheinStyle() {
           "X-CSRF-Token": csrfToken,
           "Content-Type": "application/json",
         },
-        data: { idUsuario: idUser }
+        data: { idUsuario: idUser },
       });
 
       if (!response.data.success) {
@@ -226,8 +231,8 @@ function CarritoRentaSheinStyle() {
       setCartItems((prev) => prev.filter((item) => item.id !== idCarrito));
       setSelectedItems((prev) => prev.filter((id) => id !== idCarrito));
       toast.success("Producto eliminado del carrito correctamente");
+      await removeFromCartContext();
 
-     
       if (totalCalculated !== null && rentalDate && returnDate) {
         const start = new Date(rentalDate);
         const end = new Date(returnDate);
@@ -282,7 +287,6 @@ function CarritoRentaSheinStyle() {
         );
       }
 
-     
       setCartItems((prev) =>
         prev.map((item) =>
           item.id === idCarrito
@@ -294,7 +298,6 @@ function CarritoRentaSheinStyle() {
         )
       );
 
-     
       const updatedItem = cartItems.find((item) => item.id === idCarrito);
       if (updatedItem && newCantidad <= updatedItem.stockDisponible) {
         setSelectedItems((prev) => {
@@ -305,7 +308,6 @@ function CarritoRentaSheinStyle() {
         });
       }
 
-   
       if (totalCalculated !== null && rentalDate && returnDate) {
         const start = new Date(rentalDate);
         const end = new Date(returnDate);
@@ -340,7 +342,6 @@ function CarritoRentaSheinStyle() {
       prev.includes(id) ? prev.filter((itemId) => itemId !== id) : [...prev, id]
     );
 
-  
     if (totalCalculated !== null && rentalDate && returnDate) {
       const start = new Date(rentalDate);
       const end = new Date(returnDate);
@@ -459,7 +460,6 @@ function CarritoRentaSheinStyle() {
       );
     }
 
-   
     if (totalCalculated !== null) {
       setTotalCalculated(null);
     }
@@ -486,11 +486,33 @@ function CarritoRentaSheinStyle() {
 
     setReturnDate(newReturnDate);
 
-  
     if (totalCalculated !== null) {
       setTotalCalculated(null);
     }
   };
+
+  const handleProceedToPayment = () => {
+    if (selectedItems.length === 0) {
+      toast.error("Por favor, selecciona al menos un producto para proceder al pago.");
+      return;
+    }
+    if (!rentalDate || !returnDate) {
+      toast.error("Por favor, selecciona las fechas de renta y devolución.");
+      return;
+    }
+    if (totalCalculated === null) {
+      toast.error("Por favor, realiza la cotización antes de proceder al pago.");
+      return;
+    }
+    setShowDetallesPago(true);
+  };
+
+  const handleBackToCart = () => {
+    setShowDetallesPago(false);
+  };
+
+ 
+  const adjustedTotal = totalCalculated !== null ? Math.max(totalCalculated, MINIMUM_TOTAL) : null;
 
   return (
     <div className="min-h-screen bg-gray-100 text-gray-900 dark:bg-gray-900 dark:text-gray-100">
@@ -594,390 +616,424 @@ function CarritoRentaSheinStyle() {
         }
       `}</style>
 
-      <div className="max-w-7xl mx-auto py-8 px-4 sm:px-6">
-        <div className="flex flex-col sm:flex-row justify-between items-center mb-6">
-          <h2 className="text-2xl sm:text-3xl font-bold text-gray-800 animate-fadeIn dark:text-gray-200">
-            Carrito de Renta ({cartItems.length})
-          </h2>
-          <div className="flex items-center space-x-2 mt-2 sm:mt-0">
-            <input
-              type="checkbox"
-              checked={allSelected}
-              onChange={handleToggleAll}
-              className="h-5 w-5 text-indigo-600 rounded border-gray-300 focus:ring-indigo-500"
-              disabled={cartItems.length === 0}
-            />
-            <span className="text-sm font-medium text-gray-600 dark:text-gray-400">
-              Seleccionar todo
-            </span>
+      {showDetallesPago ? (
+        <DetallesPago
+          cartItems={cartItems.filter((item) => selectedItems.includes(item.id))}
+          total={adjustedTotal} 
+          rentalDate={rentalDate}
+          returnDate={returnDate}
+          onBack={handleBackToCart}
+        />
+      ) : (
+        <div className="max-w-7xl mx-auto py-8 px-4 sm:px-6">
+          <div className="flex flex-col sm:flex-row justify-between items-center mb-6">
+            <h2 className="text-2xl sm:text-3xl font-bold text-gray-800 animate-fadeIn dark:text-gray-200">
+              Carrito de Renta ({cartItems.length})
+            </h2>
+            <div className="flex items-center space-x-2 mt-2 sm:mt-0">
+              <input
+                type="checkbox"
+                checked={allSelected}
+                onChange={handleToggleAll}
+                className="h-5 w-5 text-indigo-600 rounded border-gray-300 focus:ring-indigo-500"
+                disabled={cartItems.length === 0}
+              />
+              <span className="text-sm font-medium text-gray-600 dark:text-gray-400">
+                Seleccionar todo
+              </span>
+            </div>
           </div>
-        </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-2 space-y-4">
-            {isLoading ? (
-              <div className="bg-white rounded-lg shadow-sm p-6 text-center dark:bg-gray-800">
-                <p className="text-gray-500 dark:text-gray-400">
-                  Cargando carrito...
-                </p>
-              </div>
-            ) : error ? (
-              <div className="bg-white rounded-lg shadow-sm p-6 text-center dark:bg-gray-800">
-                <p className="text-red-500 dark:text-red-400">{error}</p>
-                {idUsuario && (
-                  <button
-                    onClick={fetchCartItems}
-                    className="mt-4 inline-block bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700 transition-all dark:bg-indigo-700 dark:hover:bg-indigo-800"
-                  >
-                    Reintentar
-                  </button>
-                )}
-                {!idUsuario && (
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="lg:col-span-2 space-y-4">
+              {isLoading ? (
+                <div className="bg-white rounded-lg shadow-sm p-6 text-center dark:bg-gray-800">
+                  <p className="text-gray-500 dark:text-gray-400">
+                    Cargando carrito...
+                  </p>
+                </div>
+              ) : error ? (
+                <div className="bg-white rounded-lg shadow-sm p-6 text-center dark:bg-gray-800">
+                  <p className="text-red-500 dark:text-red-400">{error}</p>
+                  {idUsuario && (
+                    <button
+                      onClick={fetchCartItems}
+                      className="mt-4 inline-block bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700 transition-all dark:bg-indigo-700 dark:hover:bg-indigo-800"
+                    >
+                      Reintentar
+                    </button>
+                  )}
+                  {!idUsuario && (
+                    <a
+                      href="/login"
+                      className="mt-4 inline-block bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700 transition-all dark:bg-indigo-700 dark:hover:bg-indigo-800"
+                    >
+                      Iniciar sesión
+                    </a>
+                  )}
+                </div>
+              ) : cartItems.length === 0 ? (
+                <div className="bg-white rounded-lg shadow-sm p-6 text-center dark:bg-gray-800">
+                  <p className="text-gray-500 dark:text-gray-400">
+                    Tu carrito está vacío.
+                  </p>
                   <a
-                    href="/login"
+                    href="/cliente"
                     className="mt-4 inline-block bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700 transition-all dark:bg-indigo-700 dark:hover:bg-indigo-800"
                   >
-                    Iniciar sesión
+                    Explorar productos
                   </a>
-                )}
-              </div>
-            ) : cartItems.length === 0 ? (
-              <div className="bg-white rounded-lg shadow-sm p-6 text-center dark:bg-gray-800">
-                <p className="text-gray-500 dark:text-gray-400">
-                  Tu carrito está vacío.
-                </p>
-                <a
-                  href="/cliente"
-                  className="mt-4 inline-block bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700 transition-all dark:bg-indigo-700 dark:hover:bg-indigo-800"
-                >
-                  Explorar productos
-                </a>
-              </div>
-            ) : (
-              cartItems.map((item, index) => {
-                const isChecked = selectedItems.includes(item.id);
-                const subtotal = calcularSubtotal(item);
-                const isOutOfStock = item.stockDisponible === 0;
-                const isOverStock = item.cantidad > item.stockDisponible && item.stockDisponible > 0;
-                const canIncrease = !isOutOfStock && !isOverStock && item.cantidad < item.stockDisponible;
-                const canDecrease = item.cantidad > 1;
-                const canSelect = !isOutOfStock && !isOverStock;
-                const isItemLoading = itemLoading[item.id] || false;
-                const remainingTime =
-                  item.remainingTime || getRemainingTime(item.fechaAgregado);
+                </div>
+              ) : (
+                cartItems.map((item, index) => {
+                  const isChecked = selectedItems.includes(item.id);
+                  const subtotal = calcularSubtotal(item);
+                  const isOutOfStock = item.stockDisponible === 0;
+                  const isOverStock = item.cantidad > item.stockDisponible && item.stockDisponible > 0;
+                  const canIncrease = !isOutOfStock && !isOverStock && item.cantidad < item.stockDisponible;
+                  const canDecrease = item.cantidad > 1;
+                  const canSelect = !isOutOfStock && !isOverStock;
+                  const isItemLoading = itemLoading[item.id] || false;
+                  const remainingTime =
+                    item.remainingTime || getRemainingTime(item.fechaAgregado);
 
-                return (
-                  <div
-                    key={item.id}
-                    className={`cart-item bg-white dark:bg-gray-800 rounded-xl shadow-sm p-2 sm:p-6 flex flex-col sm:flex-row items-center space-y-4 sm:space-y-0 sm:space-x-4 sm:space-x-6 transform transition-all hover:shadow-lg animate-fadeIn border ${
-                      (isOutOfStock || isOverStock)
-                        ? "border-red-200 dark:border-red-800 opacity-75"
-                        : "border-gray-100 dark:border-gray-700 hover:border-indigo-200 dark:hover:border-indigo-500"
-                    }`}
-                    style={{ animationDelay: `${index * 0.1}s` }}
-                  >
-                    <input
-                      type="checkbox"
-                      checked={isChecked}
-                      onChange={() => handleToggleItem(item.id)}
-                      className="h-4 w-4 sm:h-5 sm:w-5 text-indigo-600 rounded border-gray-300 dark:border-gray-600 focus:ring-indigo-500 transition-all"
-                      disabled={!canSelect}
-                    />
+                  return (
+                    <div
+                      key={item.id}
+                      className={`cart-item bg-white dark:bg-gray-800 rounded-xl shadow-sm p-2 sm:p-6 flex flex-col sm:flex-row items-center space-y-4 sm:space-y-0 sm:space-x-4 sm:space-x-6 transform transition-all hover:shadow-lg animate-fadeIn border ${
+                        (isOutOfStock || isOverStock)
+                          ? "border-red-200 dark:border-red-800 opacity-75"
+                          : "border-gray-100 dark:border-gray-700 hover:border-indigo-200 dark:hover:border-indigo-500"
+                      }`}
+                      style={{ animationDelay: `${index * 0.1}s` }}
+                    >
+                      <input
+                        type="checkbox"
+                        checked={isChecked}
+                        onChange={() => handleToggleItem(item.id)}
+                        className="h-4 w-4 sm:h-5 sm:w-5 text-indigo-600 rounded border-gray-300 dark:border-gray-600 focus:ring-indigo-500 transition-all"
+                        disabled={!canSelect}
+                      />
 
-                    <div className="relative">
-                      <img
-                        src={item.imagen}
-                        alt={item.nombre}
-                        className={`w-16 h-16 sm:w-20 sm:h-20 md:w-28 md:h-28 object-cover rounded-lg border border-gray-200 dark:border-gray-600 transition-transform transform hover:scale-105 ${
-                          (isOutOfStock || isOverStock) ? "opacity-50" : ""
-                        }`}
+                      <div className="relative">
+                        <img
+                          src={item.imagen}
+                          alt={item.nombre}
+                          className={`w-16 h-16 sm:w-20 sm:h-20 md:w-28 md:h-28 object-cover rounded-lg border border-gray-200 dark:border-gray-600 transition-transform transform hover:scale-105 ${
+                            (isOutOfStock || isOverStock) ? "opacity-50" : ""
+                          }`}
+                        />
+                      </div>
+
+                      <div className="flex-1 space-y-1 sm:space-y-2">
+                        {isOutOfStock ? (
+                          <span className="out-of-stock dark:out-of-stock-dark text-xs sm:text-sm">
+                            Producto sin stock
+                          </span>
+                        ) : isOverStock ? (
+                          <span className="out-of-stock dark:out-of-stock-dark text-xs sm:text-sm">
+                            La cantidad es mayor a la disponible. Por favor, disminuye la cantidad.
+                          </span>
+                        ) : null}
+                        {remainingTime.showTimer && !isOutOfStock && !isOverStock && (
+                          <span className="timer dark:timer-dark text-xs sm:text-sm">
+                            <ClockIcon className="h-4 w-4 mr-2" />
+                            Tiempo restante: {remainingTime.timeString}
+                          </span>
+                        )}
+                        <p
+                          className={`font-semibold text-base sm:text-lg md:text-xl text-gray-900 dark:text-gray-100 transition-colors ${
+                            (isOutOfStock || isOverStock)
+                              ? "text-gray-500 dark:text-gray-400"
+                              : "hover:text-indigo-600 dark:hover:text-indigo-400"
+                          }`}
+                        >
+                          {item.nombre}
+                        </p>
+
+                        <div className="flex flex-wrap items-center gap-1 sm:gap-2">
+                          <span
+                            className={`bubble text-xs sm:text-sm ${
+                              (isOutOfStock || isOverStock)
+                                ? "bg-gray-200 text-gray-500 dark:bg-gray-700 dark:text-gray-400"
+                                : "bg-indigo-50 text-indigo-700 dark:bg-indigo-900 dark:text-indigo-200 hover:bg-indigo-100 dark:hover:bg-indigo-800 transition-colors"
+                            }`}
+                          >
+                            <PaintBrushIcon className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
+                            Color: {item.color}
+                          </span>
+                          <span
+                            className={`bubble text-xs sm:text-sm ${
+                              (isOutOfStock || isOverStock)
+                                ? "bg-gray-200 text-gray-500 dark:bg-gray-700 dark:text-gray-400"
+                                : "bg-indigo-50 text-indigo-700 dark:bg-indigo-900 dark:text-indigo-200 hover:bg-indigo-100 dark:hover:bg-indigo-800 transition-colors"
+                            }`}
+                          >
+                            <WrenchScrewdriverIcon className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
+                            Material: {item.material}
+                          </span>
+                        </div>
+
+                        <p
+                          className={`text-xs sm:text-sm ${
+                            (isOutOfStock || isOverStock)
+                              ? "text-gray-500 dark:text-gray-400"
+                              : "text-gray-600 dark:text-gray-400"
+                          }`}
+                        >
+                          <span className="font-medium">Detalles:</span>{" "}
+                          {item.detalles}
+                        </p>
+
+                        <p
+                          className={`text-xs sm:text-sm ${
+                            (isOutOfStock || isOverStock)
+                              ? "text-gray-500 dark:text-gray-400"
+                              : "text-gray-600 dark:text-gray-400"
+                          }`}
+                        >
+                          <span className="font-medium">Precio por día:</span>{" "}
+                          <span
+                            className={`font-semibold ${
+                              (isOutOfStock || isOverStock)
+                                ? "text-gray-500 dark:text-gray-400"
+                                : "text-indigo-600 dark:text-indigo-400"
+                            }`}
+                          >
+                            ${item.precioPorDia.toLocaleString()}
+                          </span>
+                        </p>
+
+                        <div className="quantity-controls flex items-center space-x-2 sm:space-x-3 mt-2 sm:mt-3 justify-center sm:justify-start">
+                          <button
+                            onClick={() =>
+                              handleChangeQuantity(item.id, item.cantidad - 1)
+                            }
+                            className={`p-1 sm:p-2 rounded-full transition-all ${
+                              canDecrease && !isItemLoading
+                                ? "bg-indigo-100 text-indigo-600 hover:bg-indigo-200 dark:bg-indigo-700 dark:text-indigo-200 dark:hover:bg-indigo-600"
+                                : "bg-gray-200 text-gray-400 dark:bg-gray-600 dark:text-gray-500 cursor-not-allowed"
+                            }`}
+                            aria-label="Reducir cantidad"
+                            disabled={!canDecrease || isItemLoading}
+                          >
+                            {isItemLoading ? (
+                              <span className="spinner" />
+                            ) : (
+                              <MinusIcon className="h-4 w-4 sm:h-5 sm:w-5" />
+                            )}
+                          </button>
+                          <span
+                            className={`px-3 sm:px-4 py-0.5 sm:py-1 rounded-full font-medium text-xs sm:text-sm ${
+                              (isOutOfStock || isOverStock)
+                                ? "bg-gray200 text-gray-500 dark:bg-gray-700 dark:text-gray-400"
+                                : "bg-indigo-50 text-indigo-800 dark:bg-indigo-900 dark:text-indigo-200"
+                            }`}
+                          >
+                            {item.cantidad} unidades
+                          </span>
+                          <button
+                            onClick={() =>
+                              handleChangeQuantity(item.id, item.cantidad + 1)
+                            }
+                            className={`p-1 sm:p-2 rounded-full transition-all ${
+                              canIncrease && !isItemLoading
+                                ? "bg-indigo-100 text-indigo-600 hover:bg-indigo-200 dark:bg-indigo-700 dark:text-indigo-200 dark:hover:bg-indigo-600"
+                                : "bg-gray-200 text-gray-400 dark:bg-gray-600 dark:text-gray-500 cursor-not-allowed"
+                            }`}
+                            aria-label="Aumentar cantidad"
+                            disabled={!canIncrease || isItemLoading}
+                          >
+                            {isItemLoading ? (
+                              <span className="spinner" />
+                            ) : (
+                              <PlusIcon className="h-4 w-4 sm:h-5 sm:w-5" />
+                            )}
+                          </button>
+                        </div>
+                      </div>
+
+                      <div className="text-center sm:text-right space-y-1 sm:space-y-2">
+                        <p
+                          className={`text-base sm:text-lg md:text-xl font-bold ${
+                            (isOutOfStock || isOverStock)
+                              ? "text-gray-500 dark:text-gray-400"
+                              : "text-gray-900 dark:text-gray-100"
+                          }`}
+                        >
+                          ${subtotal.toLocaleString()}
+                        </p>
+                        <button
+                          onClick={() => handleRemoveItem(item.id)}
+                          className="text-gray-500 dark:text-gray-400 hover:text-red-500 dark:hover:text-red-400 transition-all p-1 sm:p-2 rounded-full hover:bg-red-50 dark:hover:bg-red-900/50"
+                          aria-label="Eliminar producto del carrito"
+                          disabled={isItemLoading}
+                        >
+                          {isItemLoading ? (
+                            <span className="spinner" />
+                          ) : (
+                            <TrashIcon className="h-4 w-4 sm:h-5 sm:w-5" />
+                          )}
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })
+              )}
+            </div>
+
+            <div className="summary bg-white dark:bg-gray-900 rounded-lg p-6 shadow-md self-start sticky top-4 animate-slideIn border border-gray-100 dark:border-gray-700">
+              {cartItems.length === 0 ? (
+                <div className="text-center">
+                  <p className="text-gray-600 mt-4 text-lg font-medium leading-relaxed dark:text-gray-300">
+                    Aquí verás los importes de la renta de los productos
+                    <span className="block text-gray-500 text-sm font-normal mt-1 dark:text-gray-400">
+                      Una vez que agregues productos, los detalles aparecerán en
+                      esta sección.
+                    </span>
+                  </p>
+                </div>
+              ) : (
+                <>
+                  <h3 className="text-xl font-semibold mb-4 text-gray-800 dark:text-gray-200">
+                    Resumen de Renta
+                  </h3>
+                  <div className="space-y-4 text-sm">
+                    <div className="flex justify-between">
+                      <span className="text-gray-600 dark:text-gray-300">
+                        Subtotal ({selectedItems.length} productos):
+                      </span>
+                      <span className="font-medium text-gray-800 dark:text-gray-200">
+                        ${subtotalAproximado.toLocaleString()}
+                      </span>
+                    </div>
+                    <div className="flex justify-between font-semibold text-lg border-t pt-3 dark:border-gray-700">
+                      <span className="text-gray-800 dark:text-gray-200">
+                        Total:
+                      </span>
+                      <span className="text-gray-900 dark:text-gray-100">
+                        ${subtotalAproximado.toLocaleString()}
+                      </span>
+                    </div>
+
+                    <div className="space-y-2">
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                        Día de renta:
+                      </label>
+                      <input
+                        type="date"
+                        value={rentalDate}
+                        onChange={handleRentalDateChange}
+                        min={getTodayDate()}
+                        max={getMaxDate(new Date())}
+                        className="w-full p-2 border border-gray-300 dark:border-gray-700 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all dark:bg-gray-800 dark:text-gray-300"
+                        aria-label="Seleccionar día de renta"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                        Día de devolución:
+                      </label>
+                      <input
+                        type="date"
+                        value={returnDate}
+                        onChange={handleReturnDateChange}
+                        min={rentalDate ? getNextDay(rentalDate) : getTodayDate()}
+                        max={
+                          rentalDate
+                            ? getMaxDate(rentalDate)
+                            : getMaxDate(new Date())
+                        }
+                        className="w-full p-2 border border-gray-300 dark:border-gray-700 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all dark:bg-gray-800 dark:text-gray-300"
+                        aria-label="Seleccionar día de devolución"
+                        disabled={!rentalDate}
                       />
                     </div>
 
-                    <div className="flex-1 space-y-1 sm:space-y-2">
-                      {isOutOfStock ? (
-                        <span className="out-of-stock dark:out-of-stock-dark text-xs sm:text-sm">
-                          Producto sin stock
-                        </span>
-                      ) : isOverStock ? (
-                        <span className="out-of-stock dark:out-of-stock-dark text-xs sm:text-sm">
-                          La cantidad es mayor a la disponible. Por favor, disminuye la cantidad.
-                        </span>
-                      ) : null}
-                      {remainingTime.showTimer && !isOutOfStock && !isOverStock && (
-                        <span className="timer dark:timer-dark text-xs sm:text-sm">
-                          <ClockIcon className="h-4 w-4 mr-2" />
-                          Tiempo restante: {remainingTime.timeString}
-                        </span>
-                      )}
-                      <p
-                        className={`font-semibold text-base sm:text-lg md:text-xl text-gray-900 dark:text-gray-100 transition-colors ${
-                          (isOutOfStock || isOverStock)
-                            ? "text-gray-500 dark:text-gray-400"
-                            : "hover:text-indigo-600 dark:hover:text-indigo-400"
-                        }`}
-                      >
-                        {item.nombre}
-                      </p>
-
-                      <div className="flex flex-wrap items-center gap-1 sm:gap-2">
-                        <span
-                          className={`bubble text-xs sm:text-sm ${
-                            (isOutOfStock || isOverStock)
-                              ? "bg-gray-200 text-gray-500 dark:bg-gray-700 dark:text-gray-400"
-                              : "bg-indigo-50 text-indigo-700 dark:bg-indigo-900 dark:text-indigo-200 hover:bg-indigo-100 dark:hover:bg-indigo-800 transition-colors"
-                          }`}
-                        >
-                          <PaintBrushIcon className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
-                          Color: {item.color}
-                        </span>
-                        <span
-                          className={`bubble text-xs sm:text-sm ${
-                            (isOutOfStock || isOverStock)
-                              ? "bg-gray-200 text-gray-500 dark:bg-gray-700 dark:text-gray-400"
-                              : "bg-indigo-50 text-indigo-700 dark:bg-indigo-900 dark:text-indigo-200 hover:bg-indigo-100 dark:hover:bg-indigo-800 transition-colors"
-                          }`}
-                        >
-                          <WrenchScrewdriverIcon className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
-                          Material: {item.material}
-                        </span>
-                      </div>
-
-                      <p
-                        className={`text-xs sm:text-sm ${
-                          (isOutOfStock || isOverStock)
-                            ? "text-gray-500 dark:text-gray-400"
-                            : "text-gray-600 dark:text-gray-400"
-                        }`}
-                      >
-                        <span className="font-medium">Detalles:</span>{" "}
-                        {item.detalles}
-                      </p>
-
-                      <p
-                        className={`text-xs sm:text-sm ${
-                          (isOutOfStock || isOverStock)
-                            ? "text-gray-500 dark:text-gray-400"
-                            : "text-gray-600 dark:text-gray-400"
-                        }`}
-                      >
-                        <span className="font-medium">Precio por día:</span>{" "}
-                        <span
-                          className={`font-semibold ${
-                            (isOutOfStock || isOverStock)
-                              ? "text-gray-500 dark:text-gray-400"
-                              : "text-indigo-600 dark:text-indigo-400"
-                          }`}
-                        >
-                          ${item.precioPorDia.toLocaleString()}
-                        </span>
-                      </p>
-
-                      <div className="quantity-controls flex items-center space-x-2 sm:space-x-3 mt-2 sm:mt-3 justify-center sm:justify-start">
-                        <button
-                          onClick={() =>
-                            handleChangeQuantity(item.id, item.cantidad - 1)
-                          }
-                          className={`p-1 sm:p-2 rounded-full transition-all ${
-                            canDecrease && !isItemLoading
-                              ? "bg-indigo-100 text-indigo-600 hover:bg-indigo-200 dark:bg-indigo-700 dark:text-indigo-200 dark:hover:bg-indigo-600"
-                              : "bg-gray-200 text-gray-400 dark:bg-gray-600 dark:text-gray-500 cursor-not-allowed"
-                          }`}
-                          aria-label="Reducir cantidad"
-                          disabled={!canDecrease || isItemLoading}
-                        >
-                          {isItemLoading ? (
-                            <span className="spinner" />
-                          ) : (
-                            <MinusIcon className="h-4 w-4 sm:h-5 sm:w-5" />
-                          )}
-                        </button>
-                        <span
-                          className={`px-3 sm:px-4 py-0.5 sm:py-1 rounded-full font-medium text-xs sm:text-sm ${
-                            (isOutOfStock || isOverStock)
-                              ? "bg-gray200 text-gray-500 dark:bg-gray-700 dark:text-gray-400"
-                              : "bg-indigo-50 text-indigo-800 dark:bg-indigo-900 dark:text-indigo-200"
-                          }`}
-                        >
-                          {item.cantidad} unidades
-                        </span>
-                        <button
-                          onClick={() =>
-                            handleChangeQuantity(item.id, item.cantidad + 1)
-                          }
-                          className={`p-1 sm:p-2 rounded-full transition-all ${
-                            canIncrease && !isItemLoading
-                              ? "bg-indigo-100 text-indigo-600 hover:bg-indigo-200 dark:bg-indigo-700 dark:text-indigo-200 dark:hover:bg-indigo-600"
-                              : "bg-gray-200 text-gray-400 dark:bg-gray-600 dark:text-gray-500 cursor-not-allowed"
-                          }`}
-                          aria-label="Aumentar cantidad"
-                          disabled={!canIncrease || isItemLoading}
-                        >
-                          {isItemLoading ? (
-                            <span className="spinner" />
-                          ) : (
-                            <PlusIcon className="h-4 w-4 sm:h-5 sm:w-5" />
-                          )}
-                        </button>
-                      </div>
-                    </div>
-
-                    <div className="text-center sm:text-right space-y-1 sm:space-y-2">
-                      <p
-                        className={`text-base sm:text-lg md:text-xl font-bold ${
-                          (isOutOfStock || isOverStock)
-                            ? "text-gray-500 dark:text-gray-400"
-                            : "text-gray-900 dark:text-gray-100"
-                        }`}
-                      >
-                        ${subtotal.toLocaleString()}
-                      </p>
-                      <button
-                        onClick={() => handleRemoveItem(item.id)}
-                        className="text-gray-500 dark:text-gray-400 hover:text-red-500 dark:hover:text-red-400 transition-all p-1 sm:p-2 rounded-full hover:bg-red-50 dark:hover:bg-red-900/50"
-                        aria-label="Eliminar producto del carrito"
-                        disabled={isItemLoading}
-                      >
-                        {isItemLoading ? (
-                          <span className="spinner" />
-                        ) : (
-                          <TrashIcon className="h-4 w-4 sm:h-5 sm:w-5" />
-                        )}
-                      </button>
-                    </div>
-                  </div>
-                );
-              })
-            )}
-          </div>
-
-          <div className="summary bg-white dark:bg-gray-900 rounded-lg p-6 shadow-md self-start sticky top-4 animate-slideIn border border-gray-100 dark:border-gray-700">
-            {cartItems.length === 0 ? (
-              <div className="text-center">
-                <p className="text-gray-600 mt-4 text-lg font-medium leading-relaxed dark:text-gray-300">
-                  Aquí verás los importes de la renta de los productos
-                  <span className="block text-gray-500 text-sm font-normal mt-1 dark:text-gray-400">
-                    Una vez que agregues productos, los detalles aparecerán en
-                    esta sección.
-                  </span>
-                </p>
-              </div>
-            ) : (
-              <>
-                <h3 className="text-xl font-semibold mb-4 text-gray-800 dark:text-gray-200">
-                  Resumen de Renta
-                </h3>
-                <div className="space-y-4 text-sm">
-                  <div className="flex justify-between">
-                    <span className="text-gray-600 dark:text-gray-300">
-                      Subtotal ({selectedItems.length} productos):
-                    </span>
-                    <span className="font-medium text-gray-800 dark:text-gray-200">
-                      ${subtotalAproximado.toLocaleString()}
-                    </span>
-                  </div>
-                  <div className="flex justify-between font-semibold text-lg border-t pt-3 dark:border-gray-700">
-                    <span className="text-gray-800 dark:text-gray-200">
-                      Total:
-                    </span>
-                    <span className="text-gray-900 dark:text-gray-100">
-                      ${subtotalAproximado.toLocaleString()}
-                    </span>
-                  </div>
-
-                  <div className="space-y-2">
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                      Día de renta:
-                    </label>
-                    <input
-                      type="date"
-                      value={rentalDate}
-                      onChange={handleRentalDateChange}
-                      min={getTodayDate()}
-                      max={getMaxDate(new Date())}
-                      className="w-full p-2 border border-gray-300 dark:border-gray-700 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all dark:bg-gray-800 dark:text-gray-300"
-                      aria-label="Seleccionar día de renta"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                      Día de devolución:
-                    </label>
-                    <input
-                      type="date"
-                      value={returnDate}
-                      onChange={handleReturnDateChange}
-                      min={rentalDate ? getNextDay(rentalDate) : getTodayDate()}
-                      max={
-                        rentalDate
-                          ? getMaxDate(rentalDate)
-                          : getMaxDate(new Date())
-                      }
-                      className="w-full p-2 border border-gray-300 dark:border-gray-700 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all dark:bg-gray-800 dark:text-gray-300"
-                      aria-label="Seleccionar día de devolución"
-                      disabled={!rentalDate}
-                    />
-                  </div>
-
-                  <button
-                    onClick={handleCotizar}
-                    className="w-full bg-yellow-500 hover:bg-yellow-600 text-white font-semibold py-3 rounded-md transition-all animate-pulse dark:bg-yellow-600 dark:hover:bg-yellow-700"
-                    disabled={selectedItems.length === 0}
-                  >
-                    Cotizar
-                  </button>
-
-                  {totalCalculated !== null && (
-                    <div className="flex justify-between mt-4">
-                      <span className="font-semibold text-gray-800 dark:text-gray-200">
-                        Total a pagar:
-                      </span>
-                      <span className="text-lg font-bold text-green-600 dark:text-green-400">
-                        ${totalCalculated.toLocaleString()}
-                      </span>
-                    </div>
-                  )}
-
-                  {totalCalculated !== null && (
                     <button
-                      onClick={() => alert("Procediendo al pago...")}
-                      className="w-full mt-4 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 rounded-md transition-all dark:bg-indigo-700 dark:hover:bg-indigo-800"
+                      onClick={handleCotizar}
+                      className="w-full bg-yellow-500 hover:bg-yellow-600 text-white font-semibold py-3 rounded-md transition-all animate-pulse dark:bg-yellow-600 dark:hover:bg-yellow-700"
+                      disabled={selectedItems.length === 0}
                     >
-                      Proceder al pago
+                      Cotizar
                     </button>
-                  )}
-                </div>
 
-                <div className="mt-6">
-                  <p className="text-sm text-gray-600 mb-2 dark:text-gray-300">
-                    Métodos de pago:
-                  </p>
-                  <div className="flex space-x-3 justify-center sm:justify-start">
-                    <img
-                      src="https://upload.wikimedia.org/wikipedia/commons/4/41/Visa_Logo.png"
-                      alt="Visa"
-                      title="Visa"
-                      className="h-6 sm:h-8 object-contain transition-transform transform hover:scale-110"
-                    />
-                    <img
-                      src="https://upload.wikimedia.org/wikipedia/commons/2/2a/Mastercard-logo.svg"
-                      alt="Mastercard"
-                      title="Mastercard"
-                      className="h-6 sm:h-8 object-contain transition-transform transform hover:scale-110"
-                    />
-                    <img
-                      src="https://upload.wikimedia.org/wikipedia/commons/b/b5/PayPal.svg"
-                      alt="PayPal"
-                      title="PayPal"
-                      className="h-6 sm:h-8 object-contain transition-transform transform hover:scale-110"
-                    />
+                    {totalCalculated !== null && (
+                      <>
+                     
+                        <div className="flex justify-between mt-4">
+                          <span className="text-gray-600 dark:text-gray-300">
+                            Total calculado:
+                          </span>
+                          <span className="font-medium text-gray-800 dark:text-gray-200">
+                            ${totalCalculated.toLocaleString()}
+                          </span>
+                        </div>
+                     
+                        <div className="flex justify-between mt-2">
+                          <span className="font-semibold text-gray-800 dark:text-gray-200">
+                            Total a pagar:
+                          </span>
+                          <span className="text-lg font-bold text-green-600 dark:text-green-400">
+                            ${adjustedTotal.toLocaleString()}
+                          </span>
+                        </div>
+                    
+                        <div className="mt-2 text-sm text-gray-600 dark:text-gray-400">
+                          {totalCalculated < MINIMUM_TOTAL ? (
+                            <p>
+                              El total ha sido ajustado a ${MINIMUM_TOTAL.toLocaleString()} (precio mínimo para envío gratis).
+                            </p>
+                          ) : (
+                            <p>
+                              ¡Envío gratis! Tu total supera los ${MINIMUM_TOTAL.toLocaleString()}.
+                            </p>
+                          )}
+                        </div>
+                      </>
+                    )}
+
+                    {totalCalculated !== null && (
+                      <button
+                        onClick={handleProceedToPayment}
+                        className="w-full mt-4 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 rounded-md transition-all dark:bg-indigo-700 dark:hover:bg-indigo-800"
+                      >
+                        Proceder al pago
+                      </button>
+                    )}
                   </div>
-                </div>
-              </>
-            )}
+
+                  <div className="mt-6">
+                    <p className="text-sm text-gray-600 mb-2 dark:text-gray-300">
+                      Métodos de pago:
+                    </p>
+                    <div className="flex space-x-3 justify-center sm:justify-start">
+                      <img
+                        src="https://upload.wikimedia.org/wikipedia/commons/4/41/Visa_Logo.png"
+                        alt="Visa"
+                        title="Visa"
+                        className="h-6 sm:h-8 object-contain transition-transform transform hover:scale-110"
+                      />
+                      <img
+                        src="https://upload.wikimedia.org/wikipedia/commons/2/2a/Mastercard-logo.svg"
+                        alt="Mastercard"
+                        title="Mastercard"
+                        className="h-6 sm:h-8 object-contain transition-transform transform hover:scale-110"
+                      />
+                      <img
+                        src="https://upload.wikimedia.org/wikipedia/commons/b/b5/PayPal.svg"
+                        alt="PayPal"
+                        title="PayPal"
+                        className="h-6 sm:h-8 object-contain transition-transform transform hover:scale-110"
+                      />
+                    </div>
+                  </div>
+                </>
+              )}
+            </div>
           </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }
