@@ -415,10 +415,7 @@ const CalendarioGeneralPedidos = ({ onNavigate }) => {
                         <FontAwesomeIcon icon={faCheckCircle} className="mr-2" />
                         Estado
                       </th>
-                      <th className="px-4 sm:px-6 py-4 text-left text-xs sm:text-sm font-semibold uppercase tracking-wider">
-                        <FontAwesomeIcon icon={faEye} className="mr-2" />
-                        Acción
-                      </th>
+                   
                     </tr>
                   </thead>
                   <tbody>
@@ -512,14 +509,7 @@ const CalendarioGeneralPedidos = ({ onNavigate }) => {
                             {pedido.estado}
                           </span>
                         </td>
-                        <td className="px-4 sm:px-6 py-4 text-sm">
-                          <button
-                            onClick={() => handleViewDetails(pedido)}
-                            className="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 transition-all duration-300 p-2 rounded-full hover:bg-blue-100 dark:hover:bg-blue-900"
-                          >
-                            <FontAwesomeIcon icon={faEye} size="lg" />
-                          </button>
-                        </td>
+                      
                       </tr>
                     ))}
                   </tbody>

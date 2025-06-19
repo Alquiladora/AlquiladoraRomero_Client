@@ -275,25 +275,30 @@ function ProductTable() {
   };
 
   // ===================== ELIMINAR =====================
-  const handleDelete = async (id) => {
-    if (!window.confirm("¿Deseas eliminar este producto?")) return;
-    try {
-      const response = await api.delete(`/api/productos/products/delete/${id}`, {
-        withCredentials: true,
-        headers: { "X-CSRF-Token": csrfToken },
-      });
-      if (response.data.success) {
-        setProducts((prev) => prev.filter((p) => p.idProducto !== id));
-        handleCloseModal();
-        toast.success("Producto eliminado correctamente");
-      } else {
-        toast.error(response.data.message || "Error al eliminar producto");
-      }
-    } catch (error) {
-      console.error("Error al eliminar producto:", error);
-      toast.error("Error interno al eliminar producto");
+ const handleDelete = async (id) => {
+  if (!window.confirm("¿Deseas eliminar este producto?")) return;
+  try {
+    const response = await api.delete(`/api/productos/products/delete/${id}`, {
+      withCredentials: true,
+      headers: { "X-CSRF-Token": csrfToken },
+    });
+
+    if (response.data.success) {
+      setProducts((prev) => prev.filter((p) => p.idProducto !== id));
+      handleCloseModal();
+      toast.success("Producto eliminado correctamente");
+    } else {
+      const msg = response.data.message || "Error desconocido al eliminar el producto";
+      toast.error(msg);
     }
-  };
+  } catch (error) {
+    if (error.response && error.response.status === 400) {
+    toast.error(error.response.data.message);
+  } else {
+    toast.error("Error interno al eliminar producto");
+  }
+}
+ }
 
   // ===================== AGREGAR COLOR =====================
   const handleAddColor = () => {

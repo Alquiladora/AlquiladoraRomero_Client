@@ -35,6 +35,7 @@ function DetalleProducto() {
         if (response.data.success && response.data.product) {
           const prod = response.data.product;
           setProducto(prod);
+          console.log("daTOS OBTENIDOS DE PRODUCTO", prod)
           const primeraImagen = prod.imagenes?.split(",")[0] || fallbackImage;
           setImagenPrincipal(primeraImagen);
 
@@ -345,8 +346,7 @@ function DetalleProducto() {
                           }
                         `}
                         style={{
-                          backgroundColor:
-                            colorMap[variant.nombreColor] || "#CCCCCC",
+                          backgroundColor: variant.colorH || "#CCCCCC",
                         }}
                         onClick={() => handleColorSelect(variant)}
                         onMouseEnter={() => setHoveredColor(variant.nombreColor)}

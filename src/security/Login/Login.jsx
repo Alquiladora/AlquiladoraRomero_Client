@@ -475,9 +475,9 @@ export const Login = () => {
   };
 
   return (
-    <div className="flex justify-center items-center min-h-full  dark:from-gray-800 dark:to-gray-900 py-8">
+    <div className="flex justify-center items-center min-h-full  dark:from-gray-800 dark:to-gray-900 py-8  relative overflow-hidden">
       {/* Efecto de lluvia de meteoritos */}
-      <div className="meteor-shower">
+       <div className="meteor-shower absolute inset-0 z-0">
         {[...Array(20)].map((_, i) => (
           <div
             key={i}
@@ -666,7 +666,7 @@ export const Login = () => {
               <div className="text-right">
                 <Link
                   to="/cambiarPass"
-                  className="text-sm text-blue-500 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 transition-all duration-300"
+                  className="text-sm  text-yellow-500 hover:text-yellow-600 dark:text-yellow-500 hover:text-yellow-600 dark:hover:text-yellow-300 transition-all duration-300"
                 >
                   ¿Olvidaste tu contraseña?
                 </Link>
@@ -682,7 +682,7 @@ export const Login = () => {
         ${
           isLoading || isBlocked
             ? "bg-gray-400 dark:bg-gray-500 text-gray-200 cursor-not-allowed"
-            : "bg-blue-500 dark:bg-blue-600 text-white hover:bg-blue-600 dark:hover:bg-blue-500 focus:ring-blue-500 dark:focus:ring-blue-400"
+            : "bg-yellow-500 hover:bg-yellow-600 dark:bg-yellow-500 text-white hover:bg-yellow-600 dark:hover:bg-yellow-600 focus:ring-yellow-500 dark:focus:ring-yellow-400"
         }`}
               >
                 {isLoading ? (
@@ -721,7 +721,7 @@ export const Login = () => {
                 ¿No tienes una cuenta?{" "}
                 <Link
                   to="/registro"
-                  className="text-blue-500 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 transition-all duration-300"
+                  className="text-yellow-500 hover:text-yellow-600 dark:text-yellow-500 hover:text-yellow-600 dark:hover:text-yellow-300 transition-all duration-300"
                 >
                   Regístrate aquí
                 </Link>

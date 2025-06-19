@@ -23,6 +23,8 @@ const DetallesPago = ({ cartItems, total, rentalDate, returnDate, onBack }) => {
   const [showAddressModal, setShowAddressModal] = useState(false);
   const [editAddressId, setEditAddressId] = useState(null);
   const [updaDirrecion, setUpdaDirrecion]= useState([]);
+ ;
+  
 
  
   const itemsPerPage = 10;
@@ -75,47 +77,59 @@ const DetallesPago = ({ cartItems, total, rentalDate, returnDate, onBack }) => {
     }
   }, [updaDirrecion]);
 
+  console.log("Datos recibidos de productos")
 
-  // Manejar el envío del pedido
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
-
+  
     if (!direccionSeleccionada) {
       toast.error("Por favor, selecciona una dirección de entrega.");
       setIsLoading(false);
       return;
     }
-
+  
     try {
       const pedidoData = {
         userId: user?.idUsuarios || user?.id,
-        items: cartItems,
         total: total,
         direccion: direccionSeleccionada,
         metodoPago: metodoPago,
         rentalDate: rentalDate,
         returnDate: returnDate,
+        items: cartItems,
+        
       };
-
-      const response = await api.post("/api/pedidos/crear", pedidoData, {
+  
+      const response = await api.post("/api/carrito/procesar", pedidoData, {
         withCredentials: true,
         headers: { "X-CSRF-Token": csrfToken },
       });
-
+  
       if (response.status === 201) {
-        toast.success("¡Pedido creado exitosamente!");
-        await clearCart();
-        navigate("/confirmacion-pedido");
+        const { idPedido, idPago, estadoPago, detallesPago, trackingId } = response.data;
+  
+        if (estadoPago === "pendiente") {
+          toast.info(
+            "Tu pedido ha sido registrado, pero el pago está pendiente. Sigue las instrucciones para completar el pago.",
+            { autoClose: false }
+          );
+          navigate(`/instrucciones-pago/${trackingId}`);
+        } else if (estadoPago === "completado") {
+          toast.success("¡Pedido y pago completados exitosamente!");
+        
+          navigate(`/cliente/compra-exitosa/${idPedido}`);
+        } else {
+          toast.error("El pago falló. Por favor, intenta de nuevo.");
+        }
       }
     } catch (error) {
-      console.error("Error al crear el pedido:", error);
-      toast.error("Hubo un error al procesar tu pedido. Intenta de nuevo.");
+      console.error("Error al procesar el pedido:", error);
+      toast.error(error.response?.data?.message || "Hubo un error al procesar tu pedido. Intenta de nuevo.");
     } finally {
       setIsLoading(false);
     }
   };
-
 
   const handlePageChange = (page) => {
     if (page >= 1 && page <= totalPages) {

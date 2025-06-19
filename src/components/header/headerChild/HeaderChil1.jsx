@@ -13,7 +13,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faHeadset } from "@fortawesome/free-solid-svg-icons";
 import SearchBar from "./Seach";
 import ToggleThemeButton from "../../btnTheme/ToggleThemeButton";
-import Logo from "../../../img/Logos/logo.jpg";
+import Logo from "../../../img/Logos/LogoOriginal.jpg";
 import { Link, useLocation } from "react-router-dom";
 import Chatbox from "../../chabox/Chabox";
 import { useAuth } from "../../../hooks/ContextAuth";

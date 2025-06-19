@@ -1,6 +1,6 @@
 import React from "react";
 
-const HomeAdmin = ({ totalUsuarios, onNavigate }) => {
+const HomeAdmin = ({ totalUsuarios,totalRentas,totalIngresos, onNavigate }) => {
   const stats = [
     {
       title: "Total Usuarios",
@@ -8,10 +8,11 @@ const HomeAdmin = ({ totalUsuarios, onNavigate }) => {
       icon: "👥",
       tabToNavigate: "Usuarios",
     },
-    { title: "Rentas Activas", value: "1,123", icon: "📦" },
+    { title: "Rentas Activas", value:totalRentas, icon: "📦" },
     {
       title: "Ingresos Mensuales",
-      value: "$45,678",
+   value: `$${totalIngresos.toFixed(2).toLocaleString()}`,
+
       icon: "💰",
     },
   ];

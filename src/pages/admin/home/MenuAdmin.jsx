@@ -47,6 +47,12 @@ import {
   faTasks,
   faPalette,
   faCalendarAlt,
+  faTruck,           // Para gestión de repartidores
+  faMoneyCheckAlt,   // Para gestión de pagos
+  faBell,            // Para gestión de notificaciones
+  faDatabase,        // Para resguardo de datos
+  faHeadset,         // Para atención al cliente
+  faClipboardCheck,  // Para auditoría de datos
 } from "@fortawesome/free-solid-svg-icons";
 import AgregarProductosSubbodegas from "../inventario/AgregarProductosSubbodegas";
 import DashboardPedidos from "../dashboard/DashboardPedidos";
@@ -57,6 +63,8 @@ import PedidosGeneralesDashboard from "../gestion-pedidos/DashboardGeneralPedido
 import ProductosDashboard from "../gestion-pedidos/DasboardProductos";
 import ColorManager from "../colores/Colores";
 import Horario from "../horario/Horario";
+import AsignacionPedidosV2 from "../repartidores/asignacionPedidos";
+import GestionRepartidores from "../repartidores/gestionRepartidor";
 
 const Breadcrumbs = ({ activeTab, onNavigate }) => {
   const pageHierarchy = {
@@ -69,7 +77,7 @@ const Breadcrumbs = ({ activeTab, onNavigate }) => {
     "Pedidos Manuales": ["Inicio"],
     Inventario: ["Inicio"],
     "Agregar Productos a subodegas": ["Inicio", "Inventario"],
-    "Usuarios Sospechosos": ["Inicio"],
+    "Usuarios Sospechosos": ["Dasboard Usuarios"],
     "Subcategorias-Categorias": ["Inicio"],
     "Datos de la Empresa": ["Inicio"],
     "Dashboard-pedidos": ["Inicio", "Pedidos Manuales"],
@@ -78,12 +86,14 @@ const Breadcrumbs = ({ activeTab, onNavigate }) => {
     "Pedidos General Calendario": ["Inicio", "Gestion Pedidos"],
     "Pedidos General Dashboard": ["Inicio", "Gestion Pedidos"],
     "Dasboard Productos": ["Inicio", "Gestion Pedidos"],
+
     "Dasboard Usuarios": ["Inicio"],
+
     "Auditoría de Sesiones": ["Inicio", "Dasboard Usuarios"],
     Perfilempresa: ["Inicio", "Datos de la Empresa"],
     "Sobre Nosotros": ["Inicio", "Datos de la Empresa"],
     Politicas: ["Inicio", "Datos de la Empresa"],
-    Terminos: ["Inicio", "Datos de the Empresa"],
+    Terminos: ["Inicio", "Datos de la Empresa"],
     Deslin: ["Inicio", "Datos de la Empresa"],
     historialPoliticas: ["Inicio", "Datos de la Empresa", "Politicas"],
     historialTerminos: ["Inicio", "Datos de la Empresa", "Terminos"],
@@ -158,6 +168,9 @@ const MenuHomeAdmin = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const [totalUsuarios, setTotalUsuarios] = useState(0);
+  const [totalRentas, setTotalRentas] = useState(0);
+  const [totalFinalizado, setTotalFinalizado] = useState(0);
+  const [totalIngresos, setTotalIngresos] = useState(0);
   const [fotoEmpresa, setFotoEmpresa] = useState("");
   const [datosInventario, setDatosInventario] = useState([]);
   const [pedidos, setPedidos] = useState([]);
@@ -209,7 +222,7 @@ const MenuHomeAdmin = () => {
     try {
       setLoading(true);
       const [perfilResponse, totalUsuariosResponse] = await Promise.all([
-        api.get("api/usuarios/perfil", {
+        api.get("api/usuarios/perfil-simple", {
           withCredentials: true,
           headers: { "X-CSRF-Token": csrfToken },
         }),
@@ -219,7 +232,12 @@ const MenuHomeAdmin = () => {
         }),
       ]);
       setUsuariosC(perfilResponse.data.user);
+
       setTotalUsuarios(totalUsuariosResponse.data[0]?.totalUsuarios ?? 0);
+      setTotalRentas(totalUsuariosResponse.data[0]?.totalRentasActivas ?? 0);
+      setTotalIngresos(parseFloat(totalUsuariosResponse.data[0]?.ingresosMes ?? 0));
+      setTotalFinalizado(totalUsuariosResponse.data[0]?.totalPedidosFinalizados ?? 0)
+      console.log("Total de ingresos ",parseFloat(totalUsuariosResponse.data[0]?.ingresosMes ?? 0))
       setLoading(false);
     } catch (error) {
       setLoading(false);
@@ -258,7 +276,7 @@ const MenuHomeAdmin = () => {
         { icon: faPalette, label: "Colores" },
         { icon: faWarehouse, label: "Bodegas" },
         { icon: faClipboardList, label: "Inventario" },
-        { icon: faBoxOpen, label: "Agregar Productos a subodegas" },
+       
       ],
     },
     {
@@ -268,30 +286,43 @@ const MenuHomeAdmin = () => {
         { icon: faTasks, label: "Gestion Pedidos" },
       ],
     },
+     {
+    title: "Gestión de Repartidores",
+    items: [
+      { icon: faTruck, label: "Repartidores" },               // Gestión de repartidores
+      { icon: faClipboardList, label: "Asignación de Pedidos" }, 
+    ],
+  },
     {
       title: "Gestión Financiera",
       items: [
+        { icon: faMoneyCheckAlt, label: "Gestión de Pagos" },  // Gestión de pagos
         { icon: faDollarSign, label: "Actualizacion Precios" },
       ],
     },
+     {
+    title: "Notificaciones y Soporte",
+    items: [
+      { icon: faBell, label: "Gestión de Notificaciones" },  // Notificaciones
+      { icon: faHeadset, label: "Atención al Cliente" },     // Atención al cliente
+    ],
+  },
+
     {
       title: "Horarios",
       items: [
         { icon: faClock, label: "Horario" },
       ],
     },
-    {
-      title: "Análisis",
-      items: [
-        { icon: faChartLine, label: "Dashboard-pedidos" },
-      ],
-    },
+   
     {
       title: "Seguridad",
-      items: [
-        { icon: faUsers, label: "Dasboard Usuarios" },
-      ],
-    },
+     items: [
+      { icon: faDatabase, label: "Resguardo de Datos" },   
+      { icon: faClipboardCheck, label: "Auditoría de Datos" },
+      { icon: faUsers, label: "Dasboard Usuarios" },
+    ],
+  },
     {
       title: "Salida",
       items: [
@@ -306,11 +337,13 @@ const MenuHomeAdmin = () => {
         return (
           <HomeAdmin
             totalUsuarios={totalUsuarios}
+             totalRentas={totalRentas}
+              totalIngresos={totalIngresos}
             onNavigate={handleNavigate}
           />
         );
       case "Perfil":
-        return <PerfilAdmin />;
+        return <PerfilAdmin    totalUsuarios={totalUsuarios}    totalRentas={totalRentas}  totalFinalizado={totalFinalizado} />;
       case "Usuarios":
         return <Usuarios />;
       case "Actualizacion Precios":
@@ -321,6 +354,9 @@ const MenuHomeAdmin = () => {
         return <Horario />;
       case "Bodegas":
         return <Bodegas />;
+
+          case "Asignación de Pedidos":
+        return <AsignacionPedidosV2 />;
       case "Productos":
         return <ProductTable />;
       case "Pedidos Manuales":
@@ -347,14 +383,17 @@ const MenuHomeAdmin = () => {
             fotoEmpresa={fotoEmpresa}
           />
         );
+        //Daboar de peidodos manueles
       case "Dashboard-pedidos":
         return <DashboardPedidos orders={pedidos} />;
       case "pedidos-calendario":
         return <PedidosCalendario />;
+        
+        //Daboar de PEDIDOS GENERAL
       case "Pedidos General Dashboard":
-        return <PedidosGeneralesDashboard />;
+        return <PedidosGeneralesDashboard  />;
       case "Dasboard Productos":
-        return <ProductosDashboard />;
+        return <ProductosDashboard  orders={pedidos}/>;
       case "Gestion Pedidos":
         return <GestionPedidos onNavigate={handleNavigate} />;
       case "Pedidos General Calendario":
@@ -379,6 +418,8 @@ const MenuHomeAdmin = () => {
         return <HistorialTerminos onNavigate={handleNavigate} />;
       case "historialDeslinde":
         return <HistorialDeslindeLegal onNavigate={handleNavigate} />;
+         case "Repartidores":
+        return <GestionRepartidores/>;
       case "Cerrar Sesion":
         return <div>Cerrando sesión...</div>;
       default:

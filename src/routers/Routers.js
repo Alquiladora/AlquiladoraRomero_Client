@@ -13,13 +13,8 @@ import CarritoCompras from '../components/carrito/CarritoCompras';
 
 
 
-
-
-
-
 import Error404 from './Errors/Error404';
 import Error500 from './Errors/Error500';
-
 
 //-------------------PUBLIC------------------------
 import Home from "../pages/public/home/Home";
@@ -39,10 +34,18 @@ import TokenModal from '../pages/client/perfil/componetsPerfil/TokenModal';
 import ChangePassword from '../pages/client/perfil/componetsPerfil/ChangePassword';
 import DetalleProducto from '../components/productosCategoria/productosDetalles';
 import HistorialPedidos from '../pages/client/pedidos/HistorailPedidos';
+import MensajeCompraExitosa from '../components/carrito/MensajeExitoso';
 
 
 //-------------------ADMIN------------------------
 import MenuHomeAdmin from '../pages/admin/home/MenuAdmin';
+
+
+
+
+//================================
+//REPARTIDOR
+import MenuRepartidor from '../pages/delivery/home/homeRepartidor';
 
 
 
@@ -53,21 +56,18 @@ import MenuHomeAdmin from '../pages/admin/home/MenuAdmin';
 const Routerss = () => {
  
 
-
-
-
   return (
     <>
       <ErrorBoundary>
+
+   
 
       <div className="dark:bg-gray-950 dark:text-white">
       <ServerErrorModal />
       
       <CartProvider>
 
-        <Routes>
-     
-      
+        <Routes>      
         <Route path="/" element={<RoutePublic><LayoutHeader> <Home /></LayoutHeader> </RoutePublic>} />
         <Route path="/login" element={<RoutePublic><LayoutHeader><Login /></LayoutHeader></RoutePublic>} />
         <Route path="/registro" element={<RoutePublic><LayoutHeader><Registro /></LayoutHeader></RoutePublic>} />
@@ -77,16 +77,8 @@ const Routerss = () => {
         <Route path="/politicas-privacidad" element={<RoutePublic> <LayoutHeader>< PoliticasPrivacidad /></LayoutHeader></RoutePublic>} />
         <Route path="/deslin-legal" element={<RoutePublic> <LayoutHeader>< PoliticasPrivacidad /></LayoutHeader></RoutePublic>} />
         <Route path="/terminos-condiciones" element={<RoutePublic> <LayoutHeader>< PoliticasPrivacidad /></LayoutHeader></RoutePublic>} />
-
         <Route path="/rastrear-pedido" element={<RoutePublic> <LayoutHeader>< RastrearPedido /></LayoutHeader></RoutePublic>} />
-       
-
-         
         <Route path="/SobreNosotros" element={<RoutePublic> <LayoutHeader>< MissionVision /></LayoutHeader></RoutePublic>} />
-       
-
-
-
           {/**=====================CLIENTE============================= */}
           <Route path="/cliente" element={<RoutePrivate rolesPermitidos={['cliente']}> <LayoutHeader>< Home /></LayoutHeader></RoutePrivate>} />
           <Route path="/cliente/carrito" element={<RoutePrivate rolesPermitidos={['cliente']}> <LayoutHeader>< CarritoCompras /></LayoutHeader></RoutePrivate>} />
@@ -100,19 +92,13 @@ const Routerss = () => {
           <Route path="/cliente/terminos-condiciones" element={<RoutePrivate rolesPermitidos={['cliente']}> <LayoutHeader>< PoliticasPrivacidad /></LayoutHeader></RoutePrivate>} />
           <Route path="/cliente/SobreNosotros" element={<RoutePrivate rolesPermitidos={['cliente']}> <LayoutHeader><MissionVision /></LayoutHeader></RoutePrivate>} />
           <Route path="/cliente/historial-pedidos" element={<RoutePrivate rolesPermitidos={['cliente']}> <LayoutHeader><HistorialPedidos /></LayoutHeader></RoutePrivate>} />
-
-
-
-
+          <Route path="/cliente/compra-exitosa/:idPedido" element={<RoutePrivate rolesPermitidos={['cliente']}> <LayoutHeader><MensajeCompraExitosa   /></LayoutHeader></RoutePrivate>} />
           {/**=====================ADMINISTRADOR============================= */}
           <Route path="/administrador" element={<RoutePrivate rolesPermitidos={['administrador']}> <LayoutHeader><MenuHomeAdmin  /></LayoutHeader></RoutePrivate>} />
           <Route path="/administrador/cambiarPassword" element={<RoutePrivate rolesPermitidos={['administrador']}> <LayoutHeader><TokenModal /></LayoutHeader></RoutePrivate>} />
           <Route path="/administrador/updatePass" element={<RoutePrivate rolesPermitidos={['administrador']}> <LayoutHeader><ChangePassword /></LayoutHeader></RoutePrivate>} />
-       
-
-
-
           {/**=====================REPARTIDOR============================= */}
+           <Route path="/repartidor" element={<RoutePrivate rolesPermitidos={['repartidor']}> <LayoutHeader><MenuRepartidor  /></LayoutHeader></RoutePrivate>} />
 
           {/**===================== ERROR 404 (Cualquier ruta no encontrada) ============================= */}
           <Route path="*" element={<LayoutHeader><Error404 /></LayoutHeader>} />
@@ -121,7 +107,7 @@ const Routerss = () => {
         
         </Routes>
        
-        </CartProvider>
+      </CartProvider>
 
       </div>
 
@@ -131,6 +117,9 @@ const Routerss = () => {
     </>
   )
 }
+
+
+
 
 export default Routerss;
 

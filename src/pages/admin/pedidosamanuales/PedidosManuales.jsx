@@ -4,10 +4,12 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faTimes,
   faAddressCard,
+  faDollarSign,
   faLocationArrow,
   faHome,
   faClipboardCheck,
   faSpinner,
+  faMoneyCheckAlt,
   faUser,
   faEye,
   faMapMarkerAlt,
@@ -16,7 +18,6 @@ import {
   faCalendarAlt,
   faClock,
   faCreditCard,
-  faDollarSign,
   faBox,
   faTruck,
   faCheckCircle,
@@ -32,8 +33,8 @@ import {
   faChevronLeft,
   faChevronRight,
   faCalendar,
-  faHourglassStart, 
-  faShippingFast, 
+  faHourglassStart,
+  faShippingFast,
 } from "@fortawesome/free-solid-svg-icons";
 import { toast } from "react-toastify";
 import api from "../../../utils/AxiosConfig";
@@ -43,6 +44,7 @@ import StepOne from "./StepOne";
 import StepTwo from "./StepTwo";
 import StepThree from "./StepThree";
 import StepFour from "./StepFour";
+import PaymentModal from "./PaymentModal";
 
 function WizardAlquiler({ onNavigate, setPedidos }) {
   const { csrfToken, user } = useAuth();
@@ -105,6 +107,24 @@ function WizardAlquiler({ onNavigate, setPedidos }) {
   const [currentPage, setCurrentPage] = useState(1);
   const ordersPerPage = 10;
   const [filterEstado, setFilterEstado] = useState("Todos");
+
+  const [showPaymentsModal, setShowPaymentsModal] = useState(false);
+
+  //Funcion para el modal de pagos
+  const handleViewPayments = (order) => {
+    setSelectedOrder(order);
+    setShowPaymentsModal(true);
+  };
+
+  const handleClosePayments = () => {
+    setShowPaymentsModal(false);
+    setSelectedOrder(null);
+  };
+
+  const handlePaymentRegistered = () => {
+    fetchOrders(); 
+  }
+  //==============================================0
 
   useEffect(() => {
     setCpValido(false);
@@ -270,26 +290,13 @@ function WizardAlquiler({ onNavigate, setPedidos }) {
     telefono.trim().length === 10 &&
     (!correo.trim() || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(correo.trim()));
 
-    const paso2Valido = () => {
-      if (esClienteExistente) {
-        const direccionesValidas =
-          direccionesCliente &&
-          direccionesCliente.filter((dir) => dir.codigoPostal !== null);
-        if (direccionesValidas && direccionesValidas.length > 0) {
-          if (useNewAddress) {
-            return (
-              codigoPostal.trim().length === 5 &&
-              cpValido &&
-              pais.trim().length > 0 &&
-              estado.trim().length > 0 &&
-              municipio.trim().length > 0 &&
-              localidad.trim().length > 0 &&
-              direccion.trim().length >= 5
-            );
-          } else {
-            return selectedDireccionId !== null;
-          }
-        } else {
+  const paso2Valido = () => {
+    if (esClienteExistente) {
+      const direccionesValidas =
+        direccionesCliente &&
+        direccionesCliente.filter((dir) => dir.codigoPostal !== null);
+      if (direccionesValidas && direccionesValidas.length > 0) {
+        if (useNewAddress) {
           return (
             codigoPostal.trim().length === 5 &&
             cpValido &&
@@ -299,6 +306,8 @@ function WizardAlquiler({ onNavigate, setPedidos }) {
             localidad.trim().length > 0 &&
             direccion.trim().length >= 5
           );
+        } else {
+          return selectedDireccionId !== null;
         }
       } else {
         return (
@@ -311,7 +320,18 @@ function WizardAlquiler({ onNavigate, setPedidos }) {
           direccion.trim().length >= 5
         );
       }
-    };
+    } else {
+      return (
+        codigoPostal.trim().length === 5 &&
+        cpValido &&
+        pais.trim().length > 0 &&
+        estado.trim().length > 0 &&
+        municipio.trim().length > 0 &&
+        localidad.trim().length > 0 &&
+        direccion.trim().length >= 5
+      );
+    }
+  };
 
   const paso3Valido = () => {
     return step3Data.isValid;
@@ -351,6 +371,7 @@ function WizardAlquiler({ onNavigate, setPedidos }) {
           const dateB = new Date(b.fechas.entrega);
           return dateA - dateB;
         });
+        console.log("Este obtengo de peididos manaules", sortedOrders);
         setOrders(sortedOrders);
         setPedidos(sortedOrders);
       }
@@ -449,6 +470,7 @@ function WizardAlquiler({ onNavigate, setPedidos }) {
   }, [csrfToken]);
 
   const renderPaso1 = () => (
+    //Obtenemos los datps basico
     <StepOne
       nombre={nombre}
       setNombre={setNombre}
@@ -463,6 +485,7 @@ function WizardAlquiler({ onNavigate, setPedidos }) {
   );
 
   const renderPaso2 = () => (
+    //Obtenemos los datos de domicilio
     <StepTwo
       esClienteExistente={esClienteExistente}
       direccionesCliente={direccionesCliente}
@@ -488,12 +511,13 @@ function WizardAlquiler({ onNavigate, setPedidos }) {
       setDireccion={setDireccion}
       referencia={referencia}
       setReferencia={setReferencia}
-      useNewAddress={useNewAddress} 
-    setUseNewAddress={setUseNewAddress} 
+      useNewAddress={useNewAddress}
+      setUseNewAddress={setUseNewAddress}
     />
   );
 
   const renderPaso3 = () => (
+    //DEtalles de la compra
     <StepThree
       fechaInicio={fechaInicio}
       setFechaInicio={setFechaInicio}
@@ -557,10 +581,12 @@ function WizardAlquiler({ onNavigate, setPedidos }) {
     filterEstado === "Todos"
       ? orders
       : orders.filter((order) => order.estado === filterEstado);
-
   const indexOfLastOrder = currentPage * ordersPerPage;
   const indexOfFirstOrder = indexOfLastOrder - ordersPerPage;
-  const currentOrders = filteredOrders.slice(indexOfFirstOrder, indexOfLastOrder);
+  const currentOrders = filteredOrders.slice(
+    indexOfFirstOrder,
+    indexOfLastOrder
+  );
   const totalPages = Math.ceil(filteredOrders.length / ordersPerPage);
 
   const handlePageChange = (page) => {
@@ -573,39 +599,32 @@ function WizardAlquiler({ onNavigate, setPedidos }) {
     "Enviando",
     "Confirmado",
     "En alquiler",
-    "Entregado",
     "Devuelto",
     "Incompleto",
     "Incidente",
   ];
 
-  const handleOrganizeActiveOrders = () => {
-    console.log("Organizing active orders...");
-    toast.info("Funcionalidad de organización de pedidos activos en desarrollo.");
-  };
-
   const renderOrdersTable = () => (
-    <div className="mt-10 overflow-x-auto animate-fade-in-up rounded-xl dark:bg-gray-800 p-6">
-      <div className="flex justify-between items-center mb-4">
-        <div className="flex space-x-4">
+    <div className="mt-10 overflow-x-auto animate-fade-in-up rounded-xl  dark:bg-gray-900 p-6 ">
+      <div className="flex flex-col md:flex-row md:justify-between md:items-center mb-6 space-y-4 md:space-y-0">
+        <div className="flex flex-col sm:flex-row sm:space-x-4 space-y-2 sm:space-y-0">
           <button
             onClick={() => onNavigate("Gestion Pedidos")}
-            className="flex items-center px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition dark:bg-blue-600 dark:hover:bg-blue-700"
+            className="flex items-center justify-center px-5 py-2 bg-blue-600 text-white rounded-lg shadow-md hover:bg-blue-700 transition duration-300 focus:outline-none focus:ring-2 focus:ring-blue-400"
           >
             <FontAwesomeIcon icon={faTasks} className="mr-2" />
             Gestionar Pedidos
           </button>
           <button
             onClick={() => onNavigate("Dashboard-pedidos")}
-            className="flex items-center px-4 py-2 bg-purple-500 text-white rounded-lg hover:bg-purple-600 transition dark:bg-purple-600 dark:hover:bg-purple-700"
+            className="flex items-center justify-center px-5 py-2 bg-purple-600 text-white rounded-lg shadow-md hover:bg-purple-700 transition duration-300 focus:outline-none focus:ring-2 focus:ring-purple-400"
           >
             <FontAwesomeIcon icon={faChartBar} className="mr-2" />
             Ver Dashboard
           </button>
         </div>
 
-        {/* Filtro por estado */}
-        <div className="flex items-center space-x-2">
+        <div className="flex items-center space-x-3">
           <FontAwesomeIcon icon={faFilter} className="text-yellow-500" />
           <select
             value={filterEstado}
@@ -613,7 +632,7 @@ function WizardAlquiler({ onNavigate, setPedidos }) {
               setFilterEstado(e.target.value);
               setCurrentPage(1);
             }}
-            className="p-2 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200"
+            className="p-2 border border-gray-300 rounded-md bg-white dark:bg-gray-800 dark:border-gray-700 dark:text-white focus:outline-none focus:ring-2 focus:ring-yellow-400"
           >
             {estadosDisponibles.map((estado) => (
               <option key={estado} value={estado}>
@@ -624,151 +643,128 @@ function WizardAlquiler({ onNavigate, setPedidos }) {
         </div>
       </div>
 
-      <h2 className="text-2xl font-bold mb-6 dark:text-white flex items-center">
+      <h2 className="text-2xl font-extrabold text-gray-900 dark:text-white mb-5 flex items-center">
         <FontAwesomeIcon icon={faBox} className="mr-3 text-yellow-500" />
-        Pedidos Activos Realizados 
+        Pedidos Activos Realizados
       </h2>
 
-      <div className="border dark:border-gray-700 rounded-lg overflow-hidden">
-        <table className="min-w-full bg-white dark:bg-gray-800">
-          <thead className="bg-[#fcb900]">
+      <div className="overflow-x-auto rounded-lg shadow-md">
+        <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+          <thead className="bg-yellow-500 dark:bg-yellow-600 sticky top-0 z-10">
             <tr>
-              <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-tight text-white">
-                <FontAwesomeIcon icon={faTruck} className="mr-1 inline-block align-middle" />
-                ID Rastreo
-              </th>
-              <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-tight text-white">
-                <FontAwesomeIcon icon={faUser} className="mr-1 inline-block align-middle" />
-                Cliente
-              </th>
-              <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-tight text-white">
-                <FontAwesomeIcon icon={faPhone} className="mr-1 inline-block align-middle" />
-                Teléfono
-              </th>
-              <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-tight text-white">
-                <FontAwesomeIcon icon={faMapMarkerAlt} className="mr-1 inline-block align-middle" />
-                Dirección
-              </th>
-              <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-tight text-white">
-                <FontAwesomeIcon icon={faClock} className="mr-1 inline-block align-middle" />
-                Días
-              </th>
-              <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-tight text-white">
-                <FontAwesomeIcon icon={faCreditCard} className="mr-1 inline-block align-middle" />
-                Pago
-              </th>
-              <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-tight text-white">
-                <FontAwesomeIcon icon={faDollarSign} className="mr-1 inline-block align-middle" />
-                Total
-              </th>
-              <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-tight text-white">
-                <FontAwesomeIcon icon={faCheckCircle} className="mr-1 inline-block align-middle" />
-                Estado
-              </th>
-              <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-tight text-white">
-                <FontAwesomeIcon icon={faEye} className="mr-1 inline-block align-middle" />
-                Acción
-              </th>
+              {[
+                "ID Rastreo",
+                "Cliente",
+                "Teléfono",
+                "Dirección",
+                "Días",
+                "Pago",
+                "Total",
+                "Estado",
+                "Acción",
+              ].map((title, idx) => (
+                <th
+                  key={idx}
+                  className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-white select-none"
+                >
+                  {title}
+                </th>
+              ))}
             </tr>
           </thead>
-
-          <tbody>
+          <tbody className="bg-white dark:bg-gray-900 divide-y divide-gray-200 dark:divide-gray-700">
             {currentOrders.map((order, index) => (
               <tr
                 key={order.idPedido}
-                className={`border-b dark:border-gray-700 transition-all duration-200 ${
+                className={`transition-colors duration-200 ${
                   index % 2 === 0
-                    ? "bg-gray-50 dark:bg-gray-900"
-                    : "bg-white dark:bg-gray-800"
-                } hover:bg-gray-100 dark:hover:bg-gray-700`}
+                    ? "bg-white dark:bg-gray-800"
+                    : "bg-gray-50 dark:bg-gray-900"
+                } hover:bg-yellow-100 dark:hover:bg-yellow-900`}
               >
-                <td className="px-6 py-4 text-sm font-medium dark:text-gray-200">
+                <td
+                  className="px-4 py-3 text-sm dark:text-white whitespace-nowrap max-w-[120px] truncate"
+                  title={order.idRastreo}
+                >
                   {order.idRastreo}
                 </td>
-                <td className="px-6 py-4 text-sm font-medium dark:text-gray-200">
+                <td
+                  className="px-4 py-3 text-sm dark:text-white whitespace-nowrap max-w-[150px] truncate"
+                  title={order.cliente.nombre}
+                >
                   {order.cliente.nombre}
                 </td>
-                <td className="px-6 py-4 text-sm font-medium dark:text-gray-200">
+                <td className="px-4 py-3 text-sm dark:text-white whitespace-nowrap">
                   {order.cliente.telefono}
                 </td>
-                <td className="px-6 py-4 text-sm font-medium dark:text-gray-200">
+                <td
+                  className="px-4 py-3 text-sm dark:text-white max-w-[200px] truncate"
+                  title={order.cliente.direccion || "Sin dirección"}
+                >
                   {order.cliente.direccion
-                    ? order.cliente.direccion.slice(0, 30)
-                    : "Sin direccion"}
-                  ...
+                    ? order.cliente.direccion
+                    : "Sin dirección"}
                 </td>
-                <td className="px-6 py-4 text-sm font-medium dark:text-gray-200">
+                <td className="px-4 py-3 text-sm dark:text-white text-center">
                   {order.fechas.diasAlquiler}
                 </td>
-                <td className="px-6 py-4 text-sm font-medium dark:text-gray-200">
-                  {order.pago.formaPago}
+                <td
+                  className="px-4 py-3 text-sm dark:text-white whitespace-nowrap max-w-[120px] truncate"
+                  title={order.pago.estadoPago}
+                >
+                  {order.pago.estadoPago}
                 </td>
-                <td className="px-6 py-4 text-sm font-medium dark:text-gray-200">
-                  <span className="text-green-600 dark:text-green-400">
-                    ${order.pago.total}
-                  </span>
+                <td className="px-4 py-3 text-sm font-semibold text-green-700 dark:text-green-400 whitespace-nowrap">
+                  ${order.totalPagar}
                 </td>
-                <td className="px-6 py-4 text-sm dark:text-gray-200">
+                <td className="px-4 py-3 text-sm whitespace-nowrap">
                   <span
-                    className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold shadow-sm ${
+                    className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold select-none ${
                       order.estado === "Procesando"
-                        ? "bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-300"
-                        : order.estado === "Enviando"
-                        ? "bg-indigo-100 text-indigo-800 dark:bg-indigo-900 dark:text-indigo-300"
+                        ? "bg-orange-200 text-orange-800" // naranja claro
                         : order.estado === "Confirmado"
-                        ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300"
+                        ? "bg-green-200 text-green-800" // verde claro
+                        : order.estado === "Enviando"
+                        ? "bg-blue-200 text-blue-800" // azul claro
                         : order.estado === "En alquiler"
-                        ? "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300"
-                        : order.estado === "Entregado"
-                        ? "bg-teal-100 text-teal-800 dark:bg-teal-900 dark:text-teal-300"
+                        ? "bg-purple-200 text-purple-800" // morado claro
                         : order.estado === "Devuelto"
-                        ? "bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-300"
+                        ? "bg-gray-200 text-gray-800" // gris claro
                         : order.estado === "Incompleto"
-                        ? "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300"
+                        ? "bg-yellow-200 text-yellow-800" // amarillo
                         : order.estado === "Incidente"
-                        ? "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300"
-                        : order.estado === "Finalizado"
-                        ? "bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-300"
+                        ? "bg-red-200 text-red-800" // rojo
                         : order.estado === "Cancelado"
-                        ? "bg-gray-200 text-gray-800 dark:bg-gray-800 dark:text-gray-300"
-                        : "bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-300"
+                        ? "bg-black text-white" // negro con texto blanco
+                        : order.estado === "Finalizado"
+                        ? "bg-green-800 text-green-100" // verde oscuro
+                        : "bg-gray-100 text-gray-800" // default gris claro
                     }`}
                   >
-                    <FontAwesomeIcon
-                      icon={
-                        order.estado === "Procesando"
-                          ? faHourglassStart
-                          : order.estado === "Enviando"
-                          ? faShippingFast
-                          : order.estado === "Confirmado"
-                          ? faCheckCircle
-                          : order.estado === "En alquiler"
-                          ? faTruck
-                          : order.estado === "Entregado"
-                          ? faBoxOpen
-                          : order.estado === "Devuelto"
-                          ? faUndo
-                          : order.estado === "Incompleto"
-                          ? faExclamationTriangle
-                          : order.estado === "Incidente"
-                          ? faExclamationCircle
-                          : order.estado === "Finalizado"
-                          ? faCheckCircle
-                          : order.estado === "Cancelado"
-                          ? faBan
-                          : faQuestionCircle
-                      }
-                      className="mr-1"
-                    />
+                    <FontAwesomeIcon icon={faCheckCircle} className="mr-1" />
                     {order.estado}
                   </span>
                 </td>
-                <td className="px-6 py-4 text-sm">
+                <td className="px-4 py-3 text-sm flex space-x-2 justify-center text-blue-600 dark:text-blue-400">
                   <button
                     onClick={() => handleViewTicket(order)}
-                    className="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 transition-all duration-200 p-2 rounded-full hover:bg-blue-100 dark:hover:bg-blue-900"
+                    className="p-2 rounded-full hover:bg-blue-100 dark:hover:bg-blue-900 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-400"
+                    aria-label="Ver ticket"
                   >
                     <FontAwesomeIcon icon={faEye} size="lg" />
+                  </button>
+
+                  <button
+                    onClick={() => handleViewPayments(order)}
+                    className="p-2 rounded-full hover:bg-green-100 dark:hover:bg-green-900 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-green-400"
+                    title="Ver pagos"
+                    aria-label="Ver pagos"
+                  >
+                    <FontAwesomeIcon
+                      icon={faDollarSign}
+                      size="lg"
+                      className="text-green-600 dark:text-green-400"
+                    />
                   </button>
                 </td>
               </tr>
@@ -777,9 +773,16 @@ function WizardAlquiler({ onNavigate, setPedidos }) {
         </table>
       </div>
 
-      {/* Paginación */}
-      <div className="flex justify-between items-center mt-4">
-        <p className="text-sm dark:text-gray-300">
+      {showPaymentsModal && selectedOrder && (
+        <PaymentModal
+          selectedOrder={selectedOrder}
+          onClose={handleClosePayments}
+          onPaymentRegistered={handlePaymentRegistered}
+        />
+      )}
+
+      <div className="flex flex-col md:flex-row justify-between items-center mt-6 space-y-2 md:space-y-0">
+        <p className="text-sm text-gray-700 dark:text-gray-300">
           Mostrando {indexOfFirstOrder + 1} -{" "}
           {Math.min(indexOfLastOrder, filteredOrders.length)} de{" "}
           {filteredOrders.length} pedidos
@@ -788,11 +791,12 @@ function WizardAlquiler({ onNavigate, setPedidos }) {
           <button
             onClick={() => handlePageChange(currentPage - 1)}
             disabled={currentPage === 1}
-            className={`px-3 py-1 rounded ${
+            className={`px-3 py-1 rounded-md transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-yellow-400 ${
               currentPage === 1
                 ? "bg-gray-300 text-gray-500 cursor-not-allowed dark:bg-gray-600"
-                : "bg-yellow-500 text-white hover:bg-yellow-600 dark:bg-yellow-500 dark:hover:bg-yellow-600"
+                : "bg-yellow-500 text-white hover:bg-yellow-600"
             }`}
+            aria-label="Página anterior"
           >
             <FontAwesomeIcon icon={faChevronLeft} />
           </button>
@@ -800,11 +804,12 @@ function WizardAlquiler({ onNavigate, setPedidos }) {
             <button
               key={page}
               onClick={() => handlePageChange(page)}
-              className={`px-3 py-1 rounded ${
+              className={`px-3 py-1 rounded-md transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-yellow-400 ${
                 currentPage === page
-                  ? "bg-yellow-600 text-white dark:bg-yellow-600"
-                  : "bg-gray-200 text-gray-700 hover:bg-gray-300 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600"
+                  ? "bg-yellow-600 text-white"
+                  : "bg-gray-200 text-gray-700 hover:bg-gray-300 dark:bg-gray-700 dark:text-gray-200"
               }`}
+              aria-label={`Página ${page}`}
             >
               {page}
             </button>
@@ -812,22 +817,22 @@ function WizardAlquiler({ onNavigate, setPedidos }) {
           <button
             onClick={() => handlePageChange(currentPage + 1)}
             disabled={currentPage === totalPages}
-            className={`px-3 py-1 rounded ${
+            className={`px-3 py-1 rounded-md transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-yellow-400 ${
               currentPage === totalPages
                 ? "bg-gray-300 text-gray-500 cursor-not-allowed dark:bg-gray-600"
-                : "bg-yellow-500 text-white hover:bg-yellow-600 dark:bg-yellow-500 dark:hover:bg-yellow-600"
+                : "bg-yellow-500 text-white hover:bg-yellow-600"
             }`}
+            aria-label="Página siguiente"
           >
             <FontAwesomeIcon icon={faChevronRight} />
           </button>
         </div>
       </div>
 
-      {/* Botón de Organización de Pedidos Activos */}
       <div className="flex justify-center mt-6">
         <button
           onClick={() => onNavigate("pedidos-calendario")}
-          className="flex items-center px-4 py-2 bg-teal-500 text-white rounded-lg hover:bg-teal-600 transition dark:bg-teal-600 dark:hover:bg-teal-700"
+          className="flex items-center px-4 py-2 bg-teal-600 text-white rounded-lg shadow-md hover:bg-teal-700 transition duration-300 focus:outline-none focus:ring-2 focus:ring-teal-400"
         >
           <FontAwesomeIcon icon={faCalendar} className="mr-2" />
           Organización de Pedidos Activos
@@ -837,203 +842,407 @@ function WizardAlquiler({ onNavigate, setPedidos }) {
   );
 
   const renderTicketModal = () => (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60 p-4 animate-fade-in">
-      <div className="bg-white dark:bg-gray-800 w-full max-w-3xl rounded-xl shadow-2xl max-h-[90vh] overflow-y-auto relative">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-2 sm:p-4 animate-fade-in">
+      <div className="bg-white dark:bg-gray-900 w-full max-w-4xl rounded-2xl shadow-2xl max-h-[95vh] overflow-hidden relative border border-gray-200 dark:border-gray-700">
         {/* Header */}
-        <div className="bg-gradient-to-r from-yellow-400 to-yellow-600 dark:from-yellow-500 dark:to-yellow-700 p-4 rounded-t-xl flex justify-between items-center">
-          <h2 className="text-xl font-bold text-white flex items-center">
-            <FontAwesomeIcon icon={faClipboardCheck} className="mr-2" />
-            Ticket del Pedido
-          </h2>
+        <div className="bg-gradient-to-r from-amber-400 to-orange-500 dark:from-amber-600 dark:via-yellow-600 dark:to-orange-600 p-4 flex justify-between items-center sticky top-0 z-10 rounded-t-2xl">
+          <div className="flex items-center space-x-3">
+            <div className="bg-white/20 rounded-full p-2 sm:p-3">
+              <FontAwesomeIcon
+                icon={faClipboardCheck}
+                className="text-white text-base sm:text-lg"
+              />
+            </div>
+            <h2 className="text-xl sm:text-2xl font-bold text-white select-none">
+              Ticket del Pedido
+            </h2>
+          </div>
           <button
             onClick={() => setShowTicketModal(false)}
-            className="text-white hover:text-red-200 transition"
+            className="bg-white/20 hover:bg-white/30 rounded-full p-2 text-white transition-all duration-200 hover:scale-110"
+            aria-label="Cerrar modal ticket"
           >
             <FontAwesomeIcon icon={faTimes} size="lg" />
           </button>
         </div>
 
-        {/* Content */}
-        <div className="p-6 space-y-6">
-          {selectedOrder && (
-            <>
-              {/* Order Summary */}
-              <div className="border-b dark:border-gray-700 pb-4">
-                <div className="flex justify-between items-center">
-                  <div>
-                    <p className="text-sm text-gray-500 dark:text-gray-400 flex items-center">
+        {/* Contenido con scroll */}
+        <div className="overflow-y-auto max-h-[calc(95vh-72px)] scrollbar-thin scrollbar-thumb-yellow-500 scrollbar-track-gray-100 dark:scrollbar-thumb-yellow-600 dark:scrollbar-track-gray-800">
+          <div className="p-5 space-y-6">
+            {selectedOrder && (
+              <>
+                {/* Status Cards */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="bg-blue-100 rounded-xl p-4 border border-blue-300 dark:bg-blue-900/20 dark:border-blue-700 flex items-center space-x-3">
+                    <div className="bg-blue-600 rounded-full p-2 sm:p-3">
                       <FontAwesomeIcon
                         icon={faTruck}
-                        className="mr-2 text-yellow-500"
+                        className="text-white text-xs sm:text-sm"
                       />
-                      ID Rastreo
-                    </p>
-                    <p className="text-lg font-semibold dark:text-white">
-                      {selectedOrder.idRastreo}
-                    </p>
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium text-blue-800 dark:text-blue-400">
+                        ID de Rastreo
+                      </p>
+                      <p className="font-bold text-lg text-blue-900 dark:text-white break-all">
+                        {selectedOrder.idRastreo}
+                      </p>
+                    </div>
                   </div>
-                  <div>
-                    <p className="text-sm text-gray-500 dark:text-gray-400 flex items-center">
-                      <FontAwesomeIcon
-                        icon={faCheckCircle}
-                        className="mr-2 text-yellow-500"
-                      />
-                      Estado
-                    </p>
-                    <p
-                      className={`text-lg font-semibold ${
-                        selectedOrder.estado === "Confirmado"
-                          ? "text-green-600 dark:text-green-400"
-                          : selectedOrder.estado === "Pendiente"
-                          ? "text-yellow-600 dark:text-yellow-400"
-                          : "text-red-600 dark:text-red-400"
+
+                  <div className="bg-green-100 rounded-xl p-4 border border-green-300 dark:bg-green-900/20 dark:border-green-700 flex items-center space-x-3 shadow-md">
+                    <div
+                      className={`rounded-full p-2 sm:p-3 transition-colors duration-300 ${
+                        selectedOrder.estado === "Procesando"
+                          ? "bg-orange-500"
+                          : selectedOrder.estado === "Confirmado"
+                          ? "bg-green-500"
+                          : selectedOrder.estado === "Enviando"
+                          ? "bg-blue-500"
+                          : selectedOrder.estado === "En alquiler"
+                          ? "bg-purple-500"
+                          : selectedOrder.estado === "Devuelto"
+                          ? "bg-gray-500"
+                          : selectedOrder.estado === "Incompleto"
+                          ? "bg-yellow-500"
+                          : selectedOrder.estado === "Incidente"
+                          ? "bg-red-500"
+                          : selectedOrder.estado === "Cancelado"
+                          ? "bg-black"
+                          : selectedOrder.estado === "Finalizado"
+                          ? "bg-green-800"
+                          : "bg-gray-400"
                       }`}
                     >
-                      {selectedOrder.estado}
-                    </p>
+                      <FontAwesomeIcon
+                        icon={faCheckCircle}
+                        className="text-white text-xs sm:text-sm"
+                      />
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium text-gray-900 dark:text-gray-100 select-none">
+                        Estado del Pedido
+                      </p>
+                      <p
+                        className={`font-bold text-lg select-text transition-colors duration-300 ${
+                          selectedOrder.estado === "Procesando"
+                            ? "text-orange-600 dark:text-orange-400"
+                            : selectedOrder.estado === "Confirmado"
+                            ? "text-green-600 dark:text-green-400"
+                            : selectedOrder.estado === "Enviando"
+                            ? "text-blue-600 dark:text-blue-400"
+                            : selectedOrder.estado === "En alquiler"
+                            ? "text-purple-600 dark:text-purple-400"
+                            : selectedOrder.estado === "Devuelto"
+                            ? "text-gray-600 dark:text-gray-400"
+                            : selectedOrder.estado === "Incompleto"
+                            ? "text-yellow-600 dark:text-yellow-400"
+                            : selectedOrder.estado === "Incidente"
+                            ? "text-red-600 dark:text-red-400"
+                            : selectedOrder.estado === "Cancelado"
+                            ? "text-black dark:text-gray-300"
+                            : selectedOrder.estado === "Finalizado"
+                            ? "text-green-800 dark:text-green-600"
+                            : "text-gray-600 dark:text-gray-400"
+                        }`}
+                      >
+                        {selectedOrder.estado}
+                      </p>
+                    </div>
                   </div>
                 </div>
-              </div>
 
-              {/* Customer Info */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <p className="text-sm text-gray-500 dark:text-gray-400 flex items-center">
-                    <FontAwesomeIcon
-                      icon={faUser}
-                      className="mr-2 text-yellow-500"
-                    />
-                    Cliente
-                  </p>
-                  <p className="font-semibold dark:text-white">
-                    {selectedOrder.cliente.nombre}
-                  </p>
+                {/* Información del Cliente */}
+                <div className="bg-gray-50 dark:bg-gray-800/50 rounded-xl p-5 border border-gray-300 dark:border-gray-700">
+                  <div className="flex items-center space-x-3 mb-5">
+                    <div className="bg-purple-600 rounded-full p-2 sm:p-3">
+                      <FontAwesomeIcon
+                        icon={faUser}
+                        className="text-white text-xs sm:text-sm"
+                      />
+                    </div>
+                    <h3 className="text-lg sm:text-xl font-semibold text-gray-900 dark:text-white select-none">
+                      Información del Cliente
+                    </h3>
+                  </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div>
+                      <p className="text-xs text-gray-600 dark:text-gray-400 font-medium">
+                        Nombre
+                      </p>
+                      <p className="font-semibold text-base sm:text-lg text-gray-900 dark:text-white break-words">
+                        {selectedOrder.cliente.nombre}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-gray-600 dark:text-gray-400 font-medium flex items-center">
+                        <FontAwesomeIcon
+                          icon={faPhone}
+                          className="mr-2 text-purple-600 text-xs sm:text-sm"
+                        />
+                        Teléfono
+                      </p>
+                      <p className="font-semibold text-base sm:text-lg text-gray-900 dark:text-white break-words">
+                        {selectedOrder.cliente.telefono}
+                      </p>
+                    </div>
+                    <div className="sm:col-span-2 lg:col-span-1">
+                      <p className="text-xs text-gray-600 dark:text-gray-400 font-medium flex items-center">
+                        <FontAwesomeIcon
+                          icon={faMapMarkerAlt}
+                          className="mr-2 text-purple-600 text-xs sm:text-sm"
+                        />
+                        Dirección
+                      </p>
+                      <p className="font-semibold text-sm sm:text-base text-gray-900 dark:text-white break-words leading-relaxed">
+                        {selectedOrder.cliente.direccion ||
+                          "Cliente sin dirección"}
+                      </p>
+                    </div>
+                  </div>
                 </div>
-                <div>
-                  <p className="text-sm text-gray-500 dark:text-gray-400 flex items-center">
-                    <FontAwesomeIcon
-                      icon={faPhone}
-                      className="mr-2 text-yellow-500"
-                    />
-                    Teléfono
-                  </p>
-                  <p className="font-semibold dark:text-white">
-                    {selectedOrder.cliente.telefono}
-                  </p>
-                </div>
-                <div className="md:col-span-2">
-                  <p className="text-sm text-gray-500 dark:text-gray-400 flex items-center">
-                    <FontAwesomeIcon
-                      icon={faMapMarkerAlt}
-                      className="mr-2 text-yellow-500"
-                    />
-                    Dirección
-                  </p>
-                  <p className="font-semibold dark:text-white">
-                    {selectedOrder.cliente.direccion || "Cliente sin direccion"}
-                  </p>
-                </div>
-              </div>
 
-              {/* Dates and Times */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 border-t dark:border-gray-700 pt-4">
-                <div>
-                  <p className="text-sm text-gray-500 dark:text-gray-400 flex items-center">
-                    <FontAwesomeIcon
-                      icon={faCalendarAlt}
-                      className="mr-2 text-yellow-500"
-                    />
-                    Fecha Inicio
-                  </p>
-                  <p className="font-semibold dark:text-white">
-                    {new Date(selectedOrder.fechas.inicio).toLocaleDateString()}
-                  </p>
+                {/* Fechas y Horarios */}
+                <div className="bg-gradient-to-br from-indigo-50 to-purple-50 dark:from-indigo-900/30 dark:to-purple-900/30 rounded-xl p-5 border border-indigo-200 dark:border-indigo-700">
+                  <div className="flex items-center space-x-3 mb-5">
+                    <div className="bg-indigo-600 rounded-full p-2">
+                      <FontAwesomeIcon
+                        icon={faCalendarAlt}
+                        className="text-white text-xs"
+                      />
+                    </div>
+                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white select-none">
+                      Programación del Alquiler
+                    </h3>
+                  </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+                    <div className="bg-white dark:bg-gray-800 rounded-lg p-3 border border-gray-300 dark:border-gray-600 text-center">
+                      <p className="text-xs text-gray-600 dark:text-gray-400 font-medium mb-1">
+                        Fecha Inicio
+                      </p>
+                      <p className="font-bold text-gray-900 dark:text-white text-sm">
+                        {new Date(
+                          selectedOrder.fechas.inicio
+                        ).toLocaleDateString("es-ES", {
+                          weekday: "short",
+                          year: "numeric",
+                          month: "short",
+                          day: "numeric",
+                        })}
+                      </p>
+                    </div>
+                    <div className="bg-white dark:bg-gray-800 rounded-lg p-3 border border-gray-300 dark:border-gray-600 text-center">
+                      <p className="text-xs text-gray-600 dark:text-gray-400 font-medium mb-1">
+                        Fecha Entrega
+                      </p>
+                      <p className="font-bold text-gray-900 dark:text-white text-sm">
+                        {new Date(
+                          selectedOrder.fechas.entrega
+                        ).toLocaleDateString("es-ES", {
+                          weekday: "short",
+                          year: "numeric",
+                          month: "short",
+                          day: "numeric",
+                        })}
+                      </p>
+                    </div>
+                    <div className="bg-white dark:bg-gray-800 rounded-lg p-3 border border-gray-300 dark:border-gray-600 text-center">
+                      <p className="text-xs text-gray-600 dark:text-gray-400 font-medium mb-1 flex items-center justify-center">
+                        <FontAwesomeIcon
+                          icon={faClock}
+                          className="mr-1 text-indigo-600"
+                        />
+                        Hora
+                      </p>
+                      <p className="font-bold text-gray-900 dark:text-white text-sm">
+                        {selectedOrder.fechas.horaAlquiler}
+                      </p>
+                    </div>
+                    <div className="bg-white dark:bg-gray-800 rounded-lg p-3 border border-gray-300 dark:border-gray-600 text-center">
+                      <p className="text-xs text-gray-600 dark:text-gray-400 font-medium mb-1">
+                        Días Totales
+                      </p>
+                      <p className="font-bold text-gray-900 dark:text-white text-sm">
+                        {selectedOrder.fechas.diasAlquiler} días
+                      </p>
+                    </div>
+                  </div>
                 </div>
-                <div>
-                  <p className="text-sm text-gray-500 dark:text-gray-400 flex items-center">
-                    <FontAwesomeIcon
-                      icon={faCalendarAlt}
-                      className="mr-2 text-yellow-500"
-                    />
-                    Fecha Entrega
-                  </p>
-                  <p className="font-semibold dark:text-white">
-                    {new Date(selectedOrder.fechas.entrega).toLocaleDateString()}
-                  </p>
-                </div>
-                <div>
-                  <p className="text-sm text-gray-500 dark:text-gray-400 flex items-center">
-                    <FontAwesomeIcon
-                      icon={faClock}
-                      className="mr-2 text-yellow-500"
-                    />
-                    Hora Alquiler
-                  </p>
-                  <p className="font-semibold dark:text-white">
-                    {selectedOrder.fechas.horaAlquiler}
-                  </p>
-                </div>
-                <div>
-                  <p className="text-sm text-gray-500 dark:text-gray-400 flex items-center">
-                    <FontAwesomeIcon
-                      icon={faClock}
-                      className="mr-2 text-yellow-500"
-                    />
-                    Días de Alquiler
-                  </p>
-                  <p className="font-semibold dark:text-white">
-                    {selectedOrder.fechas.diasAlquiler}
-                  </p>
-                </div>
-              </div>
 
-              {/* Products */}
-              <div className="border-t dark:border-gray-700 pt-4">
-                <p className="text-sm text-gray-500 dark:text-gray-400 flex items-center mb-2">
-                  <FontAwesomeIcon
-                    icon={faBox}
-                    className="mr-2 text-yellow-500"
-                  />
-                  Productos
-                </p>
-                <ul className="list-disc list-inside dark:text-white space-y-1">
-                  {selectedOrder.productos.map((producto, index) => (
-                    <li key={index} className="text-sm">
-                      {producto}
-                    </li>
-                  ))}
-                </ul>
-              </div>
+                {/* Tabla Productos */}
+                <div className="bg-amber-50 dark:bg-amber-900/20 rounded-xl p-4 sm:p-6 border border-amber-200 dark:border-amber-700">
+                  <div className="flex items-center space-x-3 mb-4">
+                    <div className="bg-amber-600 rounded-full p-2">
+                      <FontAwesomeIcon
+                        icon={faBox}
+                        className="text-white text-sm"
+                      />
+                    </div>
+                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white select-none">
+                      Productos del Pedido
+                    </h3>
+                  </div>
 
-              {/* Payment */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 border-t dark:border-gray-700 pt-4">
-                <div>
-                  <p className="text-sm text-gray-500 dark:text-gray-400 flex items-center">
-                    <FontAwesomeIcon
-                      icon={faCreditCard}
-                      className="mr-2 text-yellow-500"
-                    />
-                    Forma de Pago
-                  </p>
-                  <p className="font-semibold dark:text-white">
-                    {selectedOrder.pago.formaPago}
-                  </p>
+                  <div className="overflow-auto max-h-56 rounded-md border border-amber-300 dark:border-amber-700">
+                    <table className="min-w-full divide-y divide-amber-300 dark:divide-amber-700 text-sm text-left">
+                      <thead className="bg-amber-200 dark:bg-amber-700 sticky top-0 z-10">
+                        <tr>
+                          <th className="px-4 py-2 font-semibold text-gray-700 dark:text-amber-200">
+                            Cantidad
+                          </th>
+                          <th className="px-4 py-2 font-semibold text-gray-700 dark:text-amber-200">
+                            Nombre
+                          </th>
+                          <th className="px-4 py-2 font-semibold text-gray-700 dark:text-amber-200">
+                            Color
+                          </th>
+                          <th className="px-4 py-2 font-semibold text-gray-700 dark:text-amber-200">
+                            Precio Unitario
+                          </th>
+                          <th className="px-4 py-2 font-semibold text-gray-700 dark:text-amber-200">
+                            Subtotal
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-amber-300 dark:divide-amber-700">
+                        {selectedOrder.productos.map((producto, index) => (
+                          <tr
+                            key={index}
+                            className={`${
+                              index % 2 === 0
+                                ? "bg-white dark:bg-gray-900"
+                                : "bg-gray-50 dark:bg-gray-800"
+                            }`}
+                          >
+                            <td className="px-4 py-3 text-gray-900 dark:text-white">
+                              {producto.cantidad}
+                            </td>
+                            <td className="px-4 py-3 text-gray-900 dark:text-white">
+                              {producto.nombre}
+                            </td>
+                            <td className="px-4 py-3 text-gray-900 dark:text-white">
+                              {producto.color}
+                            </td>
+                            <td className="px-4 py-3 text-gray-900 dark:text-white">
+                              ${producto.precioUnitario}
+                            </td>
+                            <td className="px-4 py-3 text-gray-900 dark:text-white">
+                              ${producto.subtotal}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
                 </div>
-                <div>
-                  <p className="text-sm text-gray-500 dark:text-gray-400 flex items-center">
-                    <FontAwesomeIcon
-                      icon={faDollarSign}
-                      className="mr-2 text-yellow-500"
-                    />
-                    Total
-                  </p>
-                  <p className="font-semibold text-lg dark:text-white">
-                    ${selectedOrder.pago.total}
-                  </p>
+
+                {/* Información de Pago */}
+                <div className="bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/30 dark:to-emerald-900/30 rounded-xl p-4 sm:p-6 border border-green-200 dark:border-green-700">
+                  <div className="flex items-center space-x-3 mb-4">
+                    <div className="bg-green-600 rounded-full p-2">
+                      <FontAwesomeIcon
+                        icon={faCreditCard}
+                        className="text-white text-sm"
+                      />
+                    </div>
+                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white select-none">
+                      Información de Pago
+                    </h3>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
+                    <div className="bg-white dark:bg-gray-800 rounded-lg p-4 border border-green-200 dark:border-green-600">
+                      <p className="text-sm text-gray-500 dark:text-gray-400 font-medium mb-2">
+                        Forma de Pago
+                      </p>
+                      <p
+                        className="font-bold text-gray-900 dark:text-white"
+                        title={selectedOrder.pago.formaPago}
+                      >
+                        {selectedOrder.pago.formaPago}
+                      </p>
+                    </div>
+
+                    <div className="bg-white dark:bg-gray-800 rounded-lg p-4 border border-green-200 dark:border-green-600">
+                      <p className="text-sm text-gray-500 dark:text-gray-400 font-medium mb-2 flex items-center">
+                        <FontAwesomeIcon
+                          icon={faDollarSign}
+                          className="mr-2 text-green-500"
+                        />
+                        Total del Pedido
+                      </p>
+                      <p className="font-bold text-2xl text-green-600 dark:text-green-400">
+                        ${selectedOrder.totalPagar}
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Resumen de Pagos */}
+                  <div className="border-t border-green-200 dark:border-green-700 pt-4">
+                    <div className="flex items-center space-x-3 mb-3">
+                      <FontAwesomeIcon
+                        icon={faMoneyCheckAlt}
+                        className="text-green-500"
+                      />
+                      <h4 className="font-semibold text-gray-900 dark:text-white">
+                        Historial de Pagos
+                      </h4>
+                    </div>
+
+                    {selectedOrder.pago.resumen &&
+                    selectedOrder.pago.resumen.length > 0 ? (
+                      <div className="space-y-2 max-h-32 overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-green-500 scrollbar-track-green-100 dark:scrollbar-thumb-green-600 dark:scrollbar-track-green-900 mb-4">
+                        {selectedOrder.pago.resumen.map((pagoStr, idx) => (
+                          <div
+                            key={idx}
+                            className="bg-green-100 dark:bg-green-900/50 rounded-lg p-3 text-sm border border-green-200 dark:border-green-700"
+                            title={pagoStr}
+                          >
+                            <span className="text-gray-800 dark:text-gray-200 break-words">
+                              {pagoStr}
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <p className="text-sm text-gray-500 dark:text-gray-400 italic mb-4 p-3 bg-gray-100 dark:bg-gray-800 rounded-lg">
+                        No hay pagos registrados aún.
+                      </p>
+                    )}
+
+                    {/* Estado de Pago */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div className="bg-white dark:bg-gray-800 rounded-lg p-3 border border-green-200 dark:border-green-600">
+                        <p className="text-xs text-gray-500 dark:text-gray-400 font-medium mb-1">
+                          Total Pagado
+                        </p>
+                        <p className="text-lg font-bold text-green-600 dark:text-green-400">
+                          ${selectedOrder.pago.totalPagado ?? 0}
+                        </p>
+                      </div>
+
+                      <div className="bg-white dark:bg-gray-800 rounded-lg p-3 border border-green-200 dark:border-green-600">
+                        <p className="text-xs text-gray-500 dark:text-gray-400 font-medium mb-1">
+                          Estado de Pago
+                        </p>
+                        <p
+                          className={`text-lg font-bold capitalize ${
+                            selectedOrder.pago.estadoPago === "completado"
+                              ? "text-green-600 dark:text-green-400"
+                              : selectedOrder.pago.estadoPago === "parcial"
+                              ? "text-yellow-600 dark:text-yellow-400"
+                              : "text-red-600 dark:text-red-400"
+                          }`}
+                        >
+                          {selectedOrder.pago.estadoPago || "pendiente"}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
                 </div>
-              </div>
-            </>
-          )}
+              </>
+            )}
+          </div>
         </div>
       </div>
     </div>

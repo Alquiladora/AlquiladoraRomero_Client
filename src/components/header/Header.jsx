@@ -29,7 +29,7 @@ const Header=()=>{
    return(
     <>
       <NavEncabezado />
-      {user?.rol !== "administrador" && <HeaderChild1 />}
+      {user?.rol !== "administrador" && user?.rol !== 'repartidor' && <HeaderChild1 />}
 
     
     </>

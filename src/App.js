@@ -8,9 +8,12 @@ import { ToastContainer } from "react-toastify";
 
 
 
+
+
+
 function App() {
   const [cargando, setCargando] = useState(document.readyState !== "complete");
-  
+
   useEffect(() => {
     if (!cargando) return;
     const handleLoad = () => setCargando(false);
@@ -19,14 +22,27 @@ function App() {
     return () => window.removeEventListener("load", handleLoad);
   }, [cargando]);
  
+
+
+
+
   return (
     <div className="dark:bg-gray-800 dark:text-white">
+    
     
      
       {cargando ? (
         <SpinerCarga />
       ) : (
-        <GoogleReCaptchaProvider reCaptchaKey="6Leoy8cqAAAAANFIwr6Jlu32QxWBzf6S9CUVy4gq">
+        <GoogleReCaptchaProvider 
+        reCaptchaKey={process.env.REACT_APP_RECAPTCHA_SITE_KEY}
+        language="es"
+        scriptProps={{
+          async: true,
+          defer:true,
+          appendTo: "body"
+        }}
+         >
           <Routerss />
           <ToastContainer
               position="top-right"
@@ -39,6 +55,7 @@ function App() {
               draggable
               pauseOnHover
               theme="colored"
+              limit={3}
             />
 
         </GoogleReCaptchaProvider>

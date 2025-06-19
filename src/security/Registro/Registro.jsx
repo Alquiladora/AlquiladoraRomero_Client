@@ -13,7 +13,8 @@ import Paso2 from './Paso2';
 import Paso3 from './Paso3';
 
 const Registro = () => {
-  const [step, setStep] = useState(0); // Starting at 0 for instructions
+  const [step, setStep] = useState(0); 
+  
   const [animate, setAnimate] = useState(false);
   const [guardarCorreo, setGuardarCorreo] = useState("");
 
@@ -26,8 +27,7 @@ const Registro = () => {
     }, 300);
   };
 
-  // Steps configuration for better visual representation
-  // Now starting at actual step 1 (email verification)
+ 
   const steps = [
     { label: "Verificar Correo", icon: faEnvelope },
     { label: "Validar Código", icon: faKey },

@@ -59,7 +59,7 @@ import { useAuth } from "../../../hooks/ContextAuth";
 import api from "../../../utils/AxiosConfig";
 import axios from "axios";
 
-const PerfilAdmin = () => {
+const PerfilAdmin = ( {totalUsuarios , totalRentas, totalFinalizado}) => {
 
   const fileInputRef = useRef(null);
   const [uploading, setUploading] = useState(false);
@@ -72,12 +72,12 @@ const PerfilAdmin = () => {
   const [uploadProgress, setUploadProgress] = useState(0);
   const [isBlocked, setIsBlocked] = useState(false);
   const [loading, setLoading] = useState(true);
-  const { csrfToken, user } = useAuth();
+  const { csrfToken, user ,  checkAuth} = useAuth();
   const [openMfaModal, setOpenMfaModal] = useState(false);
   const [activo, setActivo] = useState(false);
   const [sessions, setSessions] = useState([]);
   const [openModal, setOpenModal] = useState(false);
-  const BASE_URL = "http://localhost:3001";
+  
   const [activeTab, setActiveTab] = useState("personal");
   const isMounted = useRef(true);
   const controls = useAnimation();
@@ -104,6 +104,7 @@ const PerfilAdmin = () => {
         withCredentials: true,
         headers: { "X-CSRF-Token": csrfToken },
       });
+       checkAuth()
 
       if (isMounted.current) {
         setUsuariosC(response.data.user);
@@ -523,45 +524,57 @@ const PerfilAdmin = () => {
 
       <div className="min-h-screen from-blue-50 to-white p-4 dark:bg-gray-950 dark:text-white">
         <div className="max-w-6xl mx-auto space-y-6">
+          
           <div className="bg-white rounded-2xl shadow-lg overflow-hidden dark:bg-gray-800">
-            {/* Fondo amarillo sólido */}
+            {/* Header con gradiente mejorado */}
             <div className="h-32 bg-[#fcb900] relative dark:bg-gray-900">
-              <div className="absolute top-4 right-4 bg-white/90 rounded-lg px-4 py-2 shadow-sm dark:bg-gray-700 dark:text-white">
-                <span className="text-blue-600 font-medium dark:text-blue-300">
-                  Administrador desde:{" "}
-                  {new Date(usuariosC.fechaCreacion).toLocaleString("es-ES", {
-                    day: "2-digit",
-                    month: "long",
-                  })}
-                </span>
+              {/* Patrón decorativo */}
+              <div className="absolute inset-0 opacity-10">
+                <div className="absolute top-4 left-4 w-16 h-16 border-2 border-white rounded-full"></div>
+                <div className="absolute top-8 right-8 w-8 h-8 border border-white rounded-full"></div>
+                <div className="absolute bottom-4 left-1/3 w-4 h-4 bg-white rounded-full"></div>
+              </div>
+
+              {/* Badge de administrador */}
+              <div className="absolute top-3 right-3 sm:top-4 sm:right-4 bg-white/95 backdrop-blur-sm rounded-xl px-3 py-2 sm:px-4 sm:py-2 shadow-lg dark:bg-gray-700/95 dark:text-white border border-white/20">
+                <div className="flex items-center gap-2">
+                  <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
+                  <span className="text-xs sm:text-sm text-blue-600 font-semibold dark:text-blue-300">
+                    Admin desde{" "}
+                    {new Date(usuariosC.fechaCreacion).toLocaleString("es-ES", {
+                      day: "2-digit",
+                      month: "short",
+                    })}
+                  </span>
+                </div>
               </div>
             </div>
 
-            <div className="px-4 sm:px-6 pb-6">
+            <div className="px-4 sm:px-6 lg:px-8 pb-6 sm:pb-8">
               {/* Contenedor principal */}
-              <div className="flex flex-col items-center -mt-16 space-y-6">
-                {/* Foto de Perfil */}
-
-                <div className="relative">
-                  <div className="w-28 h-28 md:w-32 md:h-32 rounded-full border-4 border-white bg-white overflow-hidden shadow-lg dark:border-gray-700 dark:bg-gray-700">
+              <div className="flex flex-col items-center -mt-12 sm:-mt-16 space-y-6 sm:space-y-8">
+                {/* Foto de Perfil con mejor diseño */}
+                <div className="relative group">
+                  <div className="w-24 h-24 sm:w-28 sm:h-28 md:w-32 md:h-32 rounded-full border-4 border-white bg-white overflow-hidden shadow-2xl dark:border-gray-600 dark:bg-gray-700 ring-4 ring-white/50 dark:ring-gray-700/50">
                     <img
                       src={
                         usuariosC.fotoPerfil ||
                         `https://ui-avatars.com/api/?name=${encodeURIComponent(
                           usuariosC.nombre ? usuariosC.nombre.charAt(0) : "U"
-                        )}&background=0D6EFD&color=fff`
+                        )}&background=0D6EFD&color=fff&size=128`
                       }
                       alt="Foto de Perfil"
-                      className="w-full h-full object-cover"
+                      className="w-full h-full object-cover transition-transform group-hover:scale-105"
                     />
-
-                    <button
-                      className="absolute bottom-1 right-1 p-2 bg-white rounded-full shadow-md hover:bg-gray-50 transition-all dark:bg-gray-600 dark:hover:bg-gray-500"
-                      onClick={() => fileInputRef.current.click()}
-                    >
-                      <Camera className="w-4 h-4 text-gray-600 dark:text-gray-200" />
-                    </button>
                   </div>
+
+                  {/* Botón de cámara mejorado */}
+                  <button
+                    className="absolute bottom-0 right-0 p-2 sm:p-2.5 bg-blue-500 hover:bg-blue-600 rounded-full shadow-lg hover:shadow-xl transition-all duration-200 text-white transform hover:scale-110 dark:bg-blue-600 dark:hover:bg-blue-700"
+                    onClick={() => fileInputRef.current.click()}
+                  >
+                    <Camera className="w-3 h-3 sm:w-4 sm:h-4" />
+                  </button>
 
                   <input
                     type="file"
@@ -573,87 +586,148 @@ const PerfilAdmin = () => {
                 </div>
 
                 {/* Información Principal */}
-                <div className="text-center">
-                  <h2 className="text-xl md:text-2xl font-bold text-gray-800 dark:text-white">
+                <div className="text-center space-y-2">
+                  <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-800 dark:text-white">
                     {`${usuariosC.nombre} ${usuariosC.apellidoP}`}
                   </h2>
+                  <div className="flex items-center justify-center gap-2 px-4 py-2 bg-gray-100 dark:bg-gray-700 rounded-full">
+                    <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                    <span className="text-sm text-gray-600 dark:text-gray-300 font-medium">
+                      Administrador Activo
+                    </span>
+                  </div>
                 </div>
 
-                {/* Resumen de Alquileres */}
-                <div className="w-full max-w-md mx-auto">
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                {/* Estadísticas mejoradas */}
+                <div className="w-full max-w-5xl mx-auto">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
                     {/* Alquileres Activos */}
-                    <div className="bg-blue-50 p-4 rounded-xl shadow-sm text-center dark:bg-gray-700 transition transform hover:scale-105">
-                      <div className="flex justify-center mb-2">
-                        <svg
-                          className="w-6 h-6 text-blue-600 dark:text-blue-300"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M9 17v-5a2 2 0 012-2h2a2 2 0 012 2v5m-4 0h4m-4 0H7"
-                          />
-                        </svg>
+                    <div className="group bg-gradient-to-br from-blue-50 to-blue-100 dark:from-gray-700 dark:to-gray-600 p-4 sm:p-6 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 border border-blue-100 dark:border-gray-600">
+                      <div className="flex items-center justify-between mb-3">
+                        <div className="flex justify-center items-center w-12 h-12 bg-blue-500 rounded-xl shadow-md group-hover:scale-110 transition-transform">
+                          <svg
+                            className="w-6 h-6 text-white"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2-2z"
+                            />
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M8 7V5a2 2 0 012-2h4a2 2 0 012 2v2"
+                            />
+                          </svg>
+                        </div>
+                        <div className="text-2xl sm:text-3xl font-bold text-blue-600 dark:text-blue-300">
+                          {totalRentas}
+                        </div>
                       </div>
-                      <div className="text-xs md:text-sm text-gray-600 dark:text-gray-300">
+                      <div className="text-sm sm:text-base font-medium text-gray-700 dark:text-gray-200">
                         Alquileres Activos
                       </div>
-                      <div className="text-xl md:text-2xl font-bold text-blue-600 dark:text-blue-300">
-                        2
+                      <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                        En proceso actual
                       </div>
                     </div>
 
                     {/* Completados */}
-                    <div className="bg-green-50 p-4 rounded-xl shadow-sm text-center dark:bg-gray-700 transition transform hover:scale-105">
-                      <div className="flex justify-center mb-2">
-                        <svg
-                          className="w-6 h-6 text-green-600 dark:text-green-300"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M5 13l4 4L19 7"
-                          />
-                        </svg>
+                    <div className="group bg-gradient-to-br from-green-50 to-green-100 dark:from-gray-700 dark:to-gray-600 p-4 sm:p-6 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 border border-green-100 dark:border-gray-600">
+                      <div className="flex items-center justify-between mb-3">
+                        <div className="flex justify-center items-center w-12 h-12 bg-green-500 rounded-xl shadow-md group-hover:scale-110 transition-transform">
+                          <svg
+                            className="w-6 h-6 text-white"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                            />
+                          </svg>
+                        </div>
+                        <div className="text-2xl sm:text-3xl font-bold text-green-600 dark:text-green-300">
+                          {totalFinalizado}
+                        </div>
                       </div>
-                      <div className="text-xs md:text-sm text-gray-600 dark:text-gray-300">
+                      <div className="text-sm sm:text-base font-medium text-gray-700 dark:text-gray-200">
                         Completados
                       </div>
-                      <div className="text-xl md:text-2xl font-bold text-green-600 dark:text-green-300">
-                        15
+                      <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                        Exitosamente finalizados
                       </div>
                     </div>
 
                     {/* Usuarios Registrados */}
-                    <div className="bg-purple-50 p-4 rounded-xl shadow-sm text-center dark:bg-gray-700 transition transform hover:scale-105">
-                      <div className="flex justify-center mb-2">
-                        <svg
-                          className="w-6 h-6 text-purple-600 dark:text-purple-300"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M17 20h5v-2a4 4 0 00-3-3.87M9 20H4v-2a4 4 0 013-3.87m8-4.13a4 4 0 11-8 0 4 4 0 018 0z"
-                          />
-                        </svg>
+                    <div className="group bg-gradient-to-br from-purple-50 to-purple-100 dark:from-gray-700 dark:to-gray-600 p-4 sm:p-6 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 border border-purple-100 dark:border-gray-600 sm:col-span-2 lg:col-span-1">
+                      <div className="flex items-center justify-between mb-3">
+                        <div className="flex justify-center items-center w-12 h-12 bg-purple-500 rounded-xl shadow-md group-hover:scale-110 transition-transform">
+                          <svg
+                            className="w-6 h-6 text-white"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z"
+                            />
+                          </svg>
+                        </div>
+                        <div className="text-2xl sm:text-3xl font-bold text-purple-600 dark:text-purple-300">
+                          {totalUsuarios}
+                        </div>
                       </div>
-                      <div className="text-xs md:text-sm text-gray-600 dark:text-gray-300">
+                      <div className="text-sm sm:text-base font-medium text-gray-700 dark:text-gray-200">
                         Usuarios Registrados
                       </div>
-                      <div className="text-xl md:text-2xl font-bold text-purple-600 dark:text-purple-300">
-                        120
+                      <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                        Total en la plataforma
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Información adicional */}
+                <div className="w-full max-w-2xl mx-auto mt-6">
+                  <div className="bg-gray-50 dark:bg-gray-700 rounded-2xl p-4 sm:p-6">
+                    <h3 className="text-lg font-semibold text-gray-800 dark:text-white mb-3">
+                      Resumen de Actividad
+                    </h3>
+                    <div className="grid grid-cols-2 gap-4 text-center">
+                      <div>
+                        <div className="text-sm text-gray-600 dark:text-gray-400">
+                          Tasa de Éxito
+                        </div>
+                        <div className="text-xl font-bold text-green-600 dark:text-green-400">
+                          {totalRentas + totalFinalizado > 0
+                            ? Math.round(
+                                (totalFinalizado /
+                                  (totalRentas + totalFinalizado)) *
+                                  100
+                              )
+                            : 0}
+                          %
+                        </div>
+                      </div>
+                      <div>
+                        <div className="text-sm text-gray-600 dark:text-gray-400">
+                          Promedio Mensual
+                        </div>
+                        <div className="text-xl font-bold text-blue-600 dark:text-blue-400">
+                          {Math.round((totalRentas + totalFinalizado) / 12)}
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -667,7 +741,6 @@ const PerfilAdmin = () => {
               {[
                 { id: "personal", icon: User, label: "Datos Personales" },
                 { id: "Seguridad", icon: Shield, label: "Seguridad" },
-               
               ].map((tab) => (
                 <button
                   key={tab.id}
@@ -784,7 +857,6 @@ const PerfilAdmin = () => {
                     open={openModal}
                     onClose={handleCloseModal}
                     usuario={usuariosC}
-                   
                   />
                   {/* 🔹 Cambiar Contraseña */}
                   <motion.div
@@ -978,8 +1050,6 @@ const PerfilAdmin = () => {
                 </motion.div>
               </div>
             )}
-
-          
           </div>
         </div>
       </div>

@@ -1,19 +1,17 @@
-import React, { useMemo } from "react";
+import React, { useEffect, useMemo } from "react";
 import { Navigate, useLocation } from "react-router-dom";
 import { useAuth } from "../hooks/ContextAuth";
 import SpinerCarga from "../utils/SpinerCarga";
 
 const RoutePrivate = ({ children, rolesPermitidos = [] }) => {
-  const { user, isLoading } = useAuth();
+  const { user, isLoading, checkAuth } = useAuth();
   const location = useLocation();
-
- 
   const rolesValidos = Array.isArray(rolesPermitidos) ? rolesPermitidos : [];
-
-  
   const tienePermiso = useMemo(() => user?.rol && rolesValidos.includes(user.rol), [user?.rol, rolesValidos]);
+ useEffect(()=>{
+   checkAuth();
+ },[])
 
- 
   if (isLoading) {
     return (
       <div className="flex justify-center items-center h-screen bg-gray-50 dark:bg-gray-900">

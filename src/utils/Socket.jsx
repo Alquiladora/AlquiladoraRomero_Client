@@ -3,12 +3,12 @@ import { io } from "socket.io-client";
 import { useAuth } from "../hooks/ContextAuth";
 
 
-// const SOCKET_SERVER_URL = process.env.REACT_APP_SOCKET_SERVER_URL ||  "http://localhost:3001";    
-const SOCKET_SERVER_URL = process.env.REACT_APP_SOCKET_SERVER_URL ||  "https://alquiladora-romero-server.onrender.com";
+const SOCKET_SERVER_URL = process.env.REACT_APP_SOCKET_SERVER_URL ||  "http://localhost:3001";    
+// const SOCKET_SERVER_URL = process.env.REACT_APP_SOCKET_SERVER_URL ||  "https://alquiladora-romero-server.onrender.com";
 
 export const useSocket = () => {
   const socketRef = useRef(null); 
-  const { user } = useAuth() || {};
+  const { user } = useAuth();
 
   useEffect(() => {
     if (!user) return;
@@ -44,14 +44,14 @@ export const useSocket = () => {
     });
 
    
-    return () => {
+     return () => {
       if (socketRef.current) {
         socketRef.current.disconnect();
         console.log(`🔌 Socket desconectado para usuario ${userId}`);
         socketRef.current = null;
       }
     };
-  }, [user]);
+  }, [user?.id, user?.idUsuarios, user?.idUsuario]);
 
   return socketRef.current;
 };

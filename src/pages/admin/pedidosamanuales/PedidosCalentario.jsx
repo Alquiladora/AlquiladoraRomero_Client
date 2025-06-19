@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import Calendar from "react-calendar";
-import "react-calendar/dist/Calendar.css"; // Default calendar styles
+import "react-calendar/dist/Calendar.css";
 import { format, isSameDay, startOfMonth, endOfMonth, isBefore, addYears } from "date-fns";
 import { toZonedTime } from "date-fns-tz";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -14,18 +14,18 @@ import {
   faDollarSign,
   faCheckCircle,
   faEye,
+  faBox,
+  faTimes,
+  faCalendarAlt,
+  faHourglassStart,
   faBoxOpen,
+  faClipboardCheck,
+  faShippingFast,
   faUndo,
   faExclamationTriangle,
   faExclamationCircle,
-  faTimes,
   faBan,
-  faQuestionCircle,
-  faCalendarAlt,
-  faBox,
-  faClipboardCheck,
-  faHourglassStart, // For "Procesando"
-  faShippingFast, // For "Enviando"
+  faQuestionCircle
 } from "@fortawesome/free-solid-svg-icons";
 import api from "../../../utils/AxiosConfig";
 import { useAuth } from "../../../hooks/ContextAuth";
@@ -127,16 +127,14 @@ function PedidosCalendario({ onNavigate }) {
     return null;
   };
 
-  const tileDisabled = ({ date, view }) => {
-    if (view === "month") {
-      const zonedDate = toZonedTime(date, "America/Mexico_City");
-      return (
-        isBefore(zonedDate, startOfMonth(currentDateMexico)) ||
-        isBefore(zonedDate, currentDateMexico)
-      );
-    }
-    return false;
-  };
+ const tileDisabled = ({ date, view }) => {
+  if (view === "month") {
+    const zonedDate = toZonedTime(date, "America/Mexico_City");
+    return isBefore(zonedDate, currentDateMexico); 
+  }
+  return false;
+};
+
 
   const renderTicketModal = () => (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60 p-4 animate-fade-in">
@@ -161,7 +159,7 @@ function PedidosCalendario({ onNavigate }) {
             <>
               {/* Order Summary */}
               <div className="border-b dark:border-gray-700 pb-4">
-                <div className="flex justify-between items-center">
+                <div className="flex justify-between items-center flex-wrap gap-4">
                   <div>
                     <p className="text-sm text-gray-500 dark:text-gray-400 flex items-center">
                       <FontAwesomeIcon
@@ -170,7 +168,7 @@ function PedidosCalendario({ onNavigate }) {
                       />
                       ID Rastreo
                     </p>
-                    <p className="text-lg font-semibold dark:text-white">
+                    <p className="text-lg font-semibold dark:text-white break-all">
                       {selectedOrder.idRastreo}
                     </p>
                   </div>
@@ -183,7 +181,7 @@ function PedidosCalendario({ onNavigate }) {
                       Estado
                     </p>
                     <p
-                      className={`text-lg font-semibold ${
+                      className={`text-lg font-semibold flex items-center gap-2 ${
                         selectedOrder.estado === "Confirmado"
                           ? "text-green-600 dark:text-green-400"
                           : selectedOrder.estado === "Pendiente"
@@ -192,6 +190,12 @@ function PedidosCalendario({ onNavigate }) {
                       }`}
                     >
                       {selectedOrder.estado}
+                      {selectedOrder.estado === "En alquiler" && (
+                        <FontAwesomeIcon
+                          icon={faShippingFast}
+                          className="text-blue-600 dark:text-blue-400"
+                        />
+                      )}
                     </p>
                   </div>
                 </div>
@@ -231,7 +235,7 @@ function PedidosCalendario({ onNavigate }) {
                     />
                     Dirección
                   </p>
-                  <p className="font-semibold dark:text-white">
+                  <p className="font-semibold dark:text-white break-words">
                     {selectedOrder.cliente.direccion || "Cliente sin dirección"}
                   </p>
                 </div>
@@ -301,7 +305,7 @@ function PedidosCalendario({ onNavigate }) {
                 <ul className="list-disc list-inside dark:text-white space-y-1">
                   {selectedOrder.productos.map((producto, index) => (
                     <li key={index} className="text-sm">
-                      {producto}
+                      {producto.nombre} - {producto.cantidad} ({producto.color}) - ${producto.precioUnitario} c/u - Subtotal: ${producto.subtotal}
                     </li>
                   ))}
                 </ul>
@@ -318,7 +322,7 @@ function PedidosCalendario({ onNavigate }) {
                     Forma de Pago
                   </p>
                   <p className="font-semibold dark:text-white">
-                    {selectedOrder.pago.formaPago}
+                    {selectedOrder.pago.formaPago || "No especificado"}
                   </p>
                 </div>
                 <div>
@@ -451,10 +455,7 @@ function PedidosCalendario({ onNavigate }) {
                       <FontAwesomeIcon icon={faCheckCircle} className="mr-2" />
                       Estado
                     </th>
-                    <th className="px-4 sm:px-6 py-4 text-left text-xs sm:text-sm font-semibold uppercase tracking-wider">
-                      <FontAwesomeIcon icon={faEye} className="mr-2" />
-                      Acción
-                    </th>
+                 
                   </tr>
                 </thead>
                 <tbody>
@@ -548,14 +549,8 @@ function PedidosCalendario({ onNavigate }) {
                           {order.estado}
                         </span>
                       </td>
-                      <td className="px-4 sm:px-6 py-4 text-sm">
-                        <button
-                          onClick={() => handleViewOrder(order)}
-                          className="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 transition-all duration-300 p-2 rounded-full hover:bg-blue-100 dark:hover:bg-blue-900"
-                        >
-                          <FontAwesomeIcon icon={faEye} size="lg" />
-                        </button>
-                      </td>
+                   
+                   
                     </tr>
                   ))}
                 </tbody>

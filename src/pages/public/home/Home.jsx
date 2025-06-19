@@ -8,12 +8,7 @@ import Informacion from "./Informacion";
 import PaymentMethods from "./MetodosPago";
 
 const Home=()=>{
-
-  
-
-
     return (
-
         <>
         
         <div className="dark:bg-gray-950 dark:text-white">
