@@ -15,116 +15,22 @@ import { toast } from "react-toastify";
 import api from "../../../utils/AxiosConfig";
 import { useAuth } from "../../../hooks/ContextAuth";
 
+
 const statusColors = {
+  procesando: "bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200",
+  confirmado: "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200",
   enviando: "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200",
-  en_alquiler:
-    "bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200",
+  en_alquiler: "bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200",
   devuelto: "bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200",
-  incompleto:
-    "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200",
+  incompleto: "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200",
   incidente: "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200",
-  finalizado:
-    "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200",
+  cancelado: "bg-black text-white dark:bg-black dark:text-white",
+  finalizado: "bg-green-200 text-green-900 dark:bg-green-800 dark:text-green-100",
 };
 
 
 
-const staticHistorial = {
-  1: [
-    {
-      id: 101,
-      fecha: "2025-06-01T10:30:00Z",
-      estado: "finalizado",
-      clienteNombre: "Lucía Torres",
-      productos: [
-        { id: "PROD001", nombre: "Laptop Dell XPS 15", cantidad: 1, precio: 1500 },
-        { id: "PROD002", nombre: "Mouse Logitech MX Master", cantidad: 1, precio: 75 },
-      ],
-    },
-    {
-      id: 102,
-      fecha: "2025-06-02T14:00:00Z",
-      estado: "enviando",
-      clienteNombre: "Pedro Ramírez",
-      productos: [
-        { id: "PROD003", nombre: "Monitor Curvo Samsung", cantidad: 1, precio: 300 },
-        { id: "PROD004", nombre: "Teclado Mecánico RGB", cantidad: 1, precio: 120 },
-      ],
-    },
-    {
-      id: 103,
-      fecha: "2025-06-03T09:15:00Z",
-      estado: "incidente",
-      clienteNombre: "Sofía Vargas",
-      productos: [
-        { id: "PROD005", nombre: "Impresora HP LaserJet", cantidad: 1, precio: 250 },
-      ],
-    },
-  ],
-  2: [
-    {
-      id: 201,
-      fecha: "2025-06-01T11:45:00Z",
-      estado: "en_alquiler",
-      clienteNombre: "Diego Morales",
-      productos: [
-        { id: "PROD006", nombre: "Cámara Sony Alpha", cantidad: 1, precio: 900 },
-        { id: "PROD007", nombre: "Trípode Manfrotto", cantidad: 1, precio: 150 },
-      ],
-    },
-    {
-      id: 202,
-      fecha: "2025-06-02T16:20:00Z",
-      estado: "finalizado",
-      clienteNombre: "Elena Castro",
-      productos: [
-        { id: "PROD008", nombre: "Auriculares Bose QC35", cantidad: 1, precio: 280 },
-      ],
-    },
-  ],
-  3: [
-    {
-      id: 301,
-      fecha: "2025-05-30T08:00:00Z",
-      estado: "devuelto",
-      clienteNombre: "Miguel Ángel",
-      productos: [
-        { id: "PROD009", nombre: "Disco Duro Externo 2TB", cantidad: 1, precio: 90 },
-      ],
-    },
-    {
-      id: 302,
-      fecha: "2025-05-31T13:00:00Z",
-      estado: "incompleto",
-      clienteNombre: "Laura Méndez",
-      productos: [
-        { id: "PROD010", nombre: "Router WiFi 6", cantidad: 1, precio: 110 },
-        { id: "PROD011", nombre: "Extensor de Rango", cantidad: 1, precio: 40 },
-      ],
-    },
-  ],
-  4: [
-    {
-      id: 401,
-      fecha: "2025-06-04T10:10:00Z",
-      estado: "finalizado",
-      clienteNombre: "Clara Ortiz",
-      productos: [
-        { id: "PROD012", nombre: "Smartwatch Apple Watch", cantidad: 1, precio: 400 },
-      ],
-    },
-    {
-      id: 402,
-      fecha: "2025-06-05T15:30:00Z",
-      estado: "enviando",
-      clienteNombre: "Raúl Jiménez",
-      productos: [
-        { id: "PROD013", nombre: "Tablet Samsung Galaxy", cantidad: 1, precio: 320 },
-        { id: "PROD014", nombre: "Funda para Tablet", cantidad: 1, precio: 25 },
-      ],
-    },
-  ],
-};
+
 
 const staticResenas = {
   1: [
@@ -314,7 +220,7 @@ const AxiosHistorialPedidos = async (repartidorId) => {
     return history.reduce(
       (acc, pedido) => ({
         ...acc,
-        [pedido.estado]: (acc[pedido.estado] || 0) + 1,
+        [pedido.estadoActual]: (acc[pedido.estadoActual] || 0) + 1,
       }),
       {}
     );
@@ -793,113 +699,164 @@ const AxiosHistorialPedidos = async (repartidorId) => {
                 </div>
               )}
 
-              {openDialog === "history" && repartidorData.history && (
-                <div className="space-y-4 fadeIn">
-                  {repartidorData.history.length > 0 ? (
-                    <div className="space-y-4">
-                      {repartidorData.history.map((pedido, index) => (
-                        <div
-                          key={pedido.id}
-                          className="bg-gray-100 dark:bg-gray-700 rounded-lg p-4 border border-gray-200 dark:border-gray-600 shadow-sm transition-all duration-200 ease-in-out hover:shadow-md"
-                        >
-                          <div
-                            className="flex justify-between items-center cursor-pointer"
-                            onClick={() =>
-                              handleToggleOrderExpansion(pedido.id)
-                            }
-                          >
-                            <div className="flex items-center gap-3">
-                              <FontAwesomeIcon
-                                icon={faHistory}
-                                className="text-blue-500 text-lg"
-                              />
-                              <div>
-                                <h4 className="font-semibold text-gray-800 dark:text-gray-100">
-                                  Pedido #{pedido.id}
-                                </h4>
-                                <p className="text-sm text-gray-600 dark:text-gray-400">
-                                  {new Date(pedido.fecha).toLocaleDateString(
-                                    "es-ES",
-                                    {
-                                      year: "numeric",
-                                      month: "short",
-                                      day: "numeric",
-                                      hour: "2-digit",
-                                      minute: "2-digit",
-                                    }
-                                  )}
-                                </p>
-                              </div>
-                            </div>
-                            <span
-                              className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${
-                                statusColors[pedido.estado]
-                              }`}
-                            >
-                              {pedido.estado
-                                .replace("_", " ")
-                                .charAt(0)
-                                .toUpperCase() +
-                                pedido.estado.slice(1).replace(/_/g, " ")}
-                            </span>
-                          </div>
 
-                          {expandedOrders[pedido.id] && (
-                            <div className="mt-4 pt-4 border-t border-gray-300 dark:border-gray-600 slideIn">
-                              <h5 className="text-md font-semibold text-gray-700 dark:text-gray-200 mb-3 flex items-center gap-2">
-                                <FontAwesomeIcon icon={faBoxes} /> Productos del
-                                Pedido:
-                              </h5>
-                              {pedido.productos &&
-                              pedido.productos.length > 0 ? (
-                                <ul className="space-y-2">
-                                  {pedido.productos.map((product, pIndex) => (
-                                    <li
-                                      key={pIndex}
-                                      className="flex justify-between items-center bg-white dark:bg-gray-800 p-3 rounded-lg shadow-sm text-sm border border-gray-200 dark:border-gray-600"
-                                    >
-                                      <span className="text-gray-800 dark:text-gray-100 font-medium">
-                                        {product.nombre}
-                                      </span>
-                                      <span className="text-gray-600 dark:text-gray-300">
-                                        Cant: {product.cantidad} | Precio: $
-                                        {product.precio.toFixed(2)}
-                                      </span>
-                                    </li>
-                                  ))}
-                                </ul>
-                              ) : (
-                                <p className="text-gray-600 dark:text-gray-400 text-sm italic">
-                                  No hay productos registrados para este pedido.
-                                </p>
-                              )}
-                              <p className="mt-3 text-sm text-gray-600 dark:text-gray-400">
-                                Cliente:{" "}
-                                <span className="font-medium text-gray-800 dark:text-gray-100">
-                                  {pedido.clienteNombre}
-                                </span>
-                              </p>
-                            </div>
-                          )}
-                        </div>
-                      ))}
-                    </div>
-                  ) : (
-                    <div className="flex flex-col items-center justify-center h-64 text-center p-8">
-                      <FontAwesomeIcon
-                        icon={faHistory}
-                        className="text-4xl text-gray-400 mb-4"
-                      />
-                      <p className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">
-                        Sin pedidos registrados
-                      </p>
-                      <p className="text-gray-600 dark:text-gray-400">
-                        No hay historial de pedidos para este repartidor.
-                      </p>
-                    </div>
-                  )}
+
+
+
+
+
+
+
+
+          {openDialog === "history" && repartidorData.history && (
+  <div className="space-y-4 fadeIn">
+    {repartidorData.history.length > 0 ? (
+      <div className="space-y-4">
+        {repartidorData.history.map((pedido, index) => (
+          <div
+            key={pedido.idAsignacion} // Use idAsignacion as the unique key
+            className="bg-gray-100 dark:bg-gray-700 rounded-lg p-4 border border-gray-200 dark:border-gray-600 shadow-sm transition-all duration-200 ease-in-out hover:shadow-md"
+          >
+            <div
+              className="flex justify-between items-center cursor-pointer"
+              onClick={() => handleToggleOrderExpansion(pedido.idAsignacion)}
+            >
+              <div className="flex items-center gap-3">
+                <FontAwesomeIcon
+                  icon={faHistory}
+                  className="text-blue-500 text-lg"
+                />
+                <div>
+                  <h4 className="font-semibold text-gray-800 dark:text-gray-100">
+                    Pedido #{pedido.idPedido} (Rastreo: {pedido.idRastreo})
+                  </h4>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">
+                    {new Date(pedido.fechaPedido).toLocaleDateString("es-MX", {
+                      year: "numeric",
+                      month: "long",
+                      day: "numeric",
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })}
+                  </p>
                 </div>
-              )}
+              </div>
+              <span
+                className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${
+                  statusColors[pedido.estadoActual.toLowerCase()] || "bg-gray-100 text-gray-800"
+                }`}
+              >
+                {pedido.estadoActual.charAt(0).toUpperCase() +
+                  pedido.estadoActual.slice(1).toLowerCase()}
+              </span>
+            </div>
+
+         {expandedOrders[pedido.idAsignacion] && (
+  <div className="p-4 space-y-4 border-t border-gray-200 dark:border-gray-700">
+    {/* Products Section */}
+    <div>
+      <h5 className="text-md font-semibold text-gray-700 dark:text-gray-200 mb-2 flex items-center gap-2">
+        <FontAwesomeIcon icon={faBoxes} /> Productos del Pedido:
+      </h5>
+      {pedido.productos && pedido.productos.length > 0 ? (
+        <ul className="space-y-3">
+          {pedido.productos.map((product, pIndex) => (
+            <li
+              key={pIndex}
+              className="flex justify-between items-start bg-gray-50 dark:bg-gray-700 p-3 rounded-md border border-gray-100 dark:border-gray-600"
+            >
+              <div className="flex-1">
+                <span className="text-gray-800 dark:text-gray-100 font-medium">
+                  {product.nombreProducto}
+                </span>
+                {product.colorProducto || product.detallesProducto ? (
+                  <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
+                    {product.colorProducto && `Color: ${product.colorProducto}`}
+                    {product.colorProducto && product.detallesProducto && " | "}
+                    {product.detallesProducto}
+                  </p>
+                ) : null}
+              </div>
+              <div className="text-right ml-4">
+                <p className="text-sm text-gray-600 dark:text-gray-300">
+                  Cant: {product.cantidad}
+                </p>
+                <p className="text-sm text-gray-600 dark:text-gray-300">
+                  Precio: ${parseFloat(product.precioUnitario).toFixed(2)}
+                </p>
+                <p className="text-sm font-medium text-gray-800 dark:text-gray-100">
+                  Subtotal: ${parseFloat(product.subtotal).toFixed(2)}
+                </p>
+              </div>
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <p className="text-gray-600 dark:text-gray-400 text-sm italic">
+          No hay productos registrados para este pedido.
+        </p>
+      )}
+    </div>
+
+    {/* Client and Order Details (unchanged) */}
+    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
+      <div>
+        <p className="text-gray-600 dark:text-gray-400">Cliente:</p>
+        <p className="font-medium text-gray-800 dark:text-gray-100">
+          {pedido.cliente.nombre}
+        </p>
+      </div>
+      <div>
+        <p className="text-gray-600 dark:text-gray-400">Correo:</p>
+        <p className="font-medium text-gray-800 dark:text-gray-100">
+          {pedido.cliente.correo}
+        </p>
+      </div>
+      <div>
+        <p className="text-gray-600 dark:text-gray-400">Total a Pagar:</p>
+        <p className="font-medium text-gray-800 dark:text-gray-100">
+          ${parseFloat(pedido.totalPagar).toFixed(2)}
+        </p>
+      </div>
+      <div>
+        <p className="text-gray-600 dark:text-gray-400">Tipo de Pedido:</p>
+        <p className="font-medium text-gray-800 dark:text-gray-100">
+          {pedido.tipoPedido}
+        </p>
+      </div>
+    </div>
+  </div>
+)}
+          </div>
+        ))}
+      </div>
+    ) : (
+      <div className="flex flex-col items-center justify-center h-64 text-center p-8">
+        <FontAwesomeIcon
+          icon={faHistory}
+          className="text-4xl text-gray-400 mb-4"
+        />
+        <p className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">
+          Sin pedidos registrados
+        </p>
+        <p className="text-gray-600 dark:text-gray-400">
+          No hay historial de pedidos para este repartidor.
+        </p>
+      </div>
+    )}
+  </div>
+)}
+
+
+
+
+
+
+
+
+
+
+
 
               {openDialog === "reviews" && repartidorData.reviews && (
                 <div className="space-y-4 fadeIn">

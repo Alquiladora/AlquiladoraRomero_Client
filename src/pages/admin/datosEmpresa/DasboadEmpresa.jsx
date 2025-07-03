@@ -36,7 +36,17 @@ const modulesData = [
     description:
       "Términos y condiciones de uso de nuestros servicios.",
   },
+   {
+    key: "Aviso de privacidad",
+    title: "privacidad",
+    route: "/empresa/privacidad",
+    description:
+      "Aviso de privacidad para lso consumidores.",
+  },
 ];
+
+
+
 
 const atomicKeyframes = `
   @keyframes atomicMovement {
@@ -125,6 +135,15 @@ function getModuleIcon(key) {
           <path d="M3 10h18" />
         </svg>
       );
+      case "Aviso de privacidad":
+      return (
+         <svg className="w-16 h-16 mx-auto text-red-500 mb-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+          <path d="M12 2L2 7l10 5 10-5-10-5z" />
+          <path d="M2 17l10 5 10-5" />
+          <path d="M2 12l10 5 10-5" />
+        </svg>
+      );
+
     default:
       return <DefaultIcon />;
   }
@@ -134,6 +153,11 @@ function DashboardModulosEmpresa({ onNavigate, fotoEmpresa }) {
   const handleModuleClick = (mod) => {
     onNavigate(mod.title);
   };
+
+
+
+
+
 
   return (
     <div className="dark:bg-gray-900 py-10 min-h-screen">
@@ -198,3 +222,18 @@ function DashboardModulosEmpresa({ onNavigate, fotoEmpresa }) {
 }
 
 export default DashboardModulosEmpresa;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

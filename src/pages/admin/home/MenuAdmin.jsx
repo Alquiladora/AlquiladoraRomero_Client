@@ -54,6 +54,7 @@ import {
   faHeadset,         // Para atención al cliente
   faClipboardCheck,  // Para auditoría de datos
 } from "@fortawesome/free-solid-svg-icons";
+
 import AgregarProductosSubbodegas from "../inventario/AgregarProductosSubbodegas";
 import DashboardPedidos from "../dashboard/DashboardPedidos";
 import GestionPedidos from "../gestion-pedidos/GestionPedidos";
@@ -65,6 +66,7 @@ import ColorManager from "../colores/Colores";
 import Horario from "../horario/Horario";
 import AsignacionPedidosV2 from "../repartidores/asignacionPedidos";
 import GestionRepartidores from "../repartidores/gestionRepartidor";
+import WearOsLogin from "../../../components/wearOs/WearOsLogin";
 
 const Breadcrumbs = ({ activeTab, onNavigate }) => {
   const pageHierarchy = {
@@ -323,6 +325,12 @@ const MenuHomeAdmin = () => {
       { icon: faUsers, label: "Dasboard Usuarios" },
     ],
   },
+  {
+    title: "Wear OS",
+    items: [
+       { icon: faClock, label: "Dispositivos Wear OS" },  // Aquí tu nueva opción
+    ],
+  },
     {
       title: "Salida",
       items: [
@@ -354,6 +362,8 @@ const MenuHomeAdmin = () => {
         return <Horario />;
       case "Bodegas":
         return <Bodegas />;
+        case "Dispositivos Wear OS":
+        return <WearOsLogin />;
 
           case "Asignación de Pedidos":
         return <AsignacionPedidosV2 />;
@@ -411,6 +421,8 @@ const MenuHomeAdmin = () => {
       case "Terminos":
         return <Terminos onNavigate={handleNavigate} />;
       case "Deslin":
+        return <DeslindeLegal onNavigate={handleNavigate} />;
+         case "privacidad":
         return <DeslindeLegal onNavigate={handleNavigate} />;
       case "historialPoliticas":
         return <HistorialPoliticas onNavigate={handleNavigate} />;
