@@ -3,6 +3,7 @@ import {
   Search,
   Package,
   Check,
+  X,
   User,
   CheckCircle,
   Clock,
@@ -20,11 +21,24 @@ import {
   ShieldCheck,
   MessageCircle,
   AlertTriangle,
-  Truck, Navigation
+  Truck,
+  Navigation,
 } from "lucide-react";
 import api from "../../../utils/AxiosConfig";
-import { useAuth, csrfToken } from "../../../hooks/ContextAuth";
+import { useAuth } from "../../../hooks/ContextAuth";
 import { toast } from "react-toastify";
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
+import {
+  AiFillCheckCircle,
+  AiOutlineCar,
+  AiOutlineShoppingCart,
+  AiOutlineUndo,
+  AiOutlineWarning,
+  AiFillExclamationCircle,
+  AiOutlineCloseCircle,
+  AiOutlineQuestionCircle,
+} from "react-icons/ai";
 
 // Tooltip Component
 const Tooltip = ({ content, children }) => {
@@ -89,12 +103,12 @@ const NoDataDisplay = ({ message }) => (
   </div>
 );
 
-//__________________________________________________---DISEÑO INICIAL DE REPARTIDORES TOTALES, PEDIDOS--------------------
+// StatCard Component
 const StatCard = ({ icon: Icon, label, value, color }) => (
   <div className="flex items-center p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
     <div
       className="p-3 rounded-full mr-4"
-      style={{ backgroundColor: `${color}1A` }} // Use the color with low opacity for the background
+      style={{ backgroundColor: `${color}1A` }}
     >
       <Icon className="h-6 w-6" style={{ color }} />
     </div>
@@ -110,7 +124,7 @@ const StatCard = ({ icon: Icon, label, value, color }) => (
 );
 
 const SummaryCard = ({ totalPedidos, totalRepartidores, assignedPedidos }) => {
-  const accentColor = "#ffb300"; // Your specified color
+  const accentColor = "#ffb300";
 
   return (
     <div className="bg-white dark:bg-gray-800 p-4 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm mb-6">
@@ -125,159 +139,281 @@ const SummaryCard = ({ totalPedidos, totalRepartidores, assignedPedidos }) => {
           icon={User}
           label="Repartidores"
           value={totalRepartidores}
-          color="#3b82f6" // A distinct color for repartidores (blue)
+          color="#3b82f6"
         />
         <StatCard
           icon={CheckCircle}
           label="Pedidos Asignados"
           value={assignedPedidos}
-          color="#22c55e" // A distinct color for assigned (green)
+          color="#22c55e"
         />
       </div>
     </div>
   );
 };
 
-//__________________________________________________--- FILTRO DE PEDIDOS--------------------
-const FilterPanel = ({ onFilterChange }) => {
-  const [filters, setFilters] = useState({ status: "", type: "", direccionEstado: "", municipio: "" });
+// FilterPanel Component
+const FilterPanel = ({ onFilterChange, totalsByLocation }) => {
+  const initialFilterState = { estado: "", municipio: "", localidad: "" };
+  const [filters, setFilters] = useState(initialFilterState);
+  const [availableMunicipios, setAvailableMunicipios] = useState([]);
+  const [availableLocalidades, setAvailableLocalidades] = useState([]);
+
+  useEffect(() => {
+    if (filters.estado && totalsByLocation) {
+      const municipios = [
+        ...new Set(
+          totalsByLocation
+            .filter((loc) => loc.estado === filters.estado)
+            .map((loc) => loc.municipio)
+        ),
+      ].sort();
+      setAvailableMunicipios(municipios);
+      setAvailableLocalidades([]);
+      setFilters((prevFilters) => ({
+        ...prevFilters,
+        municipio: "",
+        localidad: "",
+      }));
+    } else {
+      setAvailableMunicipios([]);
+      setAvailableLocalidades([]);
+      setFilters((prevFilters) => ({
+        ...prevFilters,
+        municipio: "",
+        localidad: "",
+      }));
+    }
+  }, [filters.estado, totalsByLocation]);
+
+  useEffect(() => {
+    if (filters.municipio && totalsByLocation) {
+      const localidades = [
+        ...new Set(
+          totalsByLocation
+            .filter(
+              (loc) =>
+                loc.estado === filters.estado &&
+                loc.municipio === filters.municipio
+            )
+            .map((loc) => loc.localidad)
+        ),
+      ].sort();
+      setAvailableLocalidades(localidades);
+      setFilters((prevFilters) => ({ ...prevFilters, localidad: "" }));
+    } else {
+      setAvailableLocalidades([]);
+      setFilters((prevFilters) => ({ ...prevFilters, localidad: "" }));
+    }
+  }, [filters.municipio, totalsByLocation]);
 
   const handleApply = () => {
     onFilterChange(filters);
   };
 
+  const handleClear = () => {
+    setFilters(initialFilterState);
+    onFilterChange(initialFilterState);
+  };
+
   const accentColor = "#ffb300";
 
+  const estados = totalsByLocation
+    ? [...new Set(totalsByLocation.map((loc) => loc.estado))].sort()
+    : [];
+
   return (
-    <div className="bg-white dark:bg-gray-800 p-4 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm mb-6">
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-        <div className="flex-grow flex flex-col sm:flex-row sm:items-center gap-4">
-          <h3 className="text-md font-semibold text-gray-900 dark:text-gray-100 flex items-center shrink-0">
-            <Filter className="h-5 w-5 mr-2" style={{ color: accentColor }} />
-            Filtros
-          </h3>
-          <div className="w-full grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
-            <select
-              value={filters.direccionEstado}
-              onChange={(e) => setFilters({ ...filters, direccionEstado: e.target.value })}
-              className="w-full p-2 border rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-gray-100 border-gray-300 dark:border-gray-600 focus:ring-2 focus:border-transparent"
-              style={{ "--tw-ring-color": accentColor }}
-            >
-              <option value="">Todos los estados</option>
-              <option value="Hidalgo">Hidalgo</option>
-              <option value="Veracruz">Veracruz</option>
-              {/* Agrega más estados según tus datos */}
-            </select>
-            <select
-              value={filters.municipio}
-              onChange={(e) => setFilters({ ...filters, municipio: e.target.value })}
-              className="w-full p-2 border rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-gray-100 border-gray-300 dark:border-gray-600 focus:ring-2 focus:border-transparent"
-              style={{ "--tw-ring-color": accentColor }}
-            >
-              <option value="">Todos los municipios</option>
-              <option value="Huejutla de Reyes">Huejutla de Reyes</option>
-              <option value="Pachuca">Pachuca</option>
-              {/* Agrega más municipios según tus datos */}
-            </select>
-          </div>
-        </div>
+    <div className="bg-white dark:bg-gray-800 p-6 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-md mb-6">
+      <div className="flex justify-between items-center mb-4">
+        <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100 flex items-center">
+          <Filter className="h-5 w-5 mr-2" style={{ color: accentColor }} />
+          Filtros de Búsqueda
+        </h3>
+        <button
+          onClick={handleClear}
+          className="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors flex items-center gap-1"
+        >
+          <X className="h-4 w-4" />
+          Limpiar
+        </button>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <select
+          value={filters.estado}
+          onChange={(e) => setFilters({ ...filters, estado: e.target.value })}
+          className="w-full p-3 border rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-gray-100 border-gray-300 dark:border-gray-600 focus:ring-2 focus:border-transparent transition"
+          style={{ "--tw-ring-color": accentColor }}
+        >
+          <option value="">Seleccionar Estado</option>
+          {estados.map((estado) => (
+            <option key={estado} value={estado}>
+              {estado}
+            </option>
+          ))}
+        </select>
+
+        <select
+          value={filters.municipio}
+          onChange={(e) =>
+            setFilters({ ...filters, municipio: e.target.value })
+          }
+          disabled={!filters.estado}
+          className="w-full p-3 border rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-gray-100 border-gray-300 dark:border-gray-600 focus:ring-2 focus:border-transparent transition disabled:opacity-50 disabled:cursor-not-allowed"
+          style={{ "--tw-ring-color": accentColor }}
+        >
+          <option value="">Seleccionar Municipio</option>
+          {availableMunicipios.map((municipio) => (
+            <option key={municipio} value={municipio}>
+              {municipio}
+            </option>
+          ))}
+        </select>
+
+        <select
+          value={filters.localidad}
+          onChange={(e) =>
+            setFilters({ ...filters, localidad: e.target.value })
+          }
+          disabled={!filters.municipio}
+          className="w-full p-3 border rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-gray-100 border-gray-300 dark:border-gray-600 focus:ring-2 focus:border-transparent transition disabled:opacity-50 disabled:cursor-not-allowed"
+          style={{ "--tw-ring-color": accentColor }}
+        >
+          <option value="">Seleccionar Localidad</option>
+          {availableLocalidades.map((localidad) => (
+            <option key={localidad} value={localidad}>
+              {localidad}
+            </option>
+          ))}
+        </select>
+      </div>
+
+      <div className="mt-6 flex justify-end">
         <button
           onClick={handleApply}
-          className="px-4 py-2 text-black text-sm font-bold rounded-lg transition-all duration-200 flex items-center justify-center gap-2 shadow-sm hover:opacity-90"
+          className="px-6 py-2.5 text-black text-sm font-bold rounded-lg transition-all duration-200 flex items-center justify-center gap-2 shadow-sm hover:opacity-90"
           style={{ backgroundColor: accentColor }}
         >
           <Check className="h-5 w-5" />
-          Aplicar
+          Aplicar Filtros
         </button>
       </div>
     </div>
   );
 };
 
-//---------------------------------------------------CARD DE REPARTIDORES-----------------------------
+// RepartidorCard Component
 const RepartidorCard = ({
   repartidor,
   seleccionado,
   onSelect,
   pedidosAsignados,
-}) => (
-  <div
-    onClick={() => onSelect(repartidor.id)}
-    className={`
-      p-4 rounded-xl cursor-pointer transition-all duration-200 border
-      flex items-center justify-between
-      ${
-        seleccionado
-          ? "bg-amber-50 dark:bg-amber-900/20 border-amber-400 shadow-md"
-          : "bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600 hover:shadow-md"
-      }
-    `}
-  >
-    {/* Información del Repartidor */}
-    <div className="flex items-center space-x-4">
-      <User className="h-7 w-7 text-amber-500" />
-      <div>
-        <p className="font-bold text-md text-gray-900 dark:text-gray-100">
+}) => {
+  const avatarSrc = repartidor?.fotoPerfil;
+  const hasAvatar = !!avatarSrc;
+
+  return (
+    <div
+      onClick={() => onSelect(repartidor.id)}
+      className={`flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-colors duration-200
+        ${
+          seleccionado
+            ? "bg-[#F5B800]/20 border-[#F5B800]"
+            : "bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700"
+        }`}
+    >
+      <div className="w-10 h-10 rounded-full overflow-hidden border border-gray-300 dark:border-gray-600 flex items-center justify-center bg-gray-100 dark:bg-gray-700">
+        {hasAvatar ? (
+          <img
+            src={avatarSrc}
+            alt={`Avatar de ${repartidor.nombre}`}
+            className="w-full h-full object-cover"
+          />
+        ) : (
+          <User className="w-6 h-6 text-gray-500 dark:text-gray-300" />
+        )}
+      </div>
+
+      <div className="flex-1 min-w-0">
+        <p className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">
           {repartidor.nombre}
         </p>
-        <p className="text-xs text-gray-500 dark:text-gray-400">
-          {repartidor.correo}
+        <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
+          {repartidor.correo || "Sin correo"}
+        </p>
+        <p className="text-xs text-gray-400 dark:text-gray-500">
+          {pedidosAsignados?.length || 0} pedidos asignados
         </p>
       </div>
     </div>
-
-    {/* Estado de Selección o Conteo de Pedidos */}
-    <div>
-      {seleccionado ? (
-        <CheckCircle className="h-6 w-6 text-green-500" />
-      ) : (
-        <div className="flex items-center gap-2 text-sm font-semibold bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 px-3 py-1 rounded-full">
-          <Package className="h-4 w-4" />
-          <span>{pedidosAsignados}</span>
-        </div>
-      )}
-    </div>
-  </div>
-);
-
-
-
-const formatDate = (dateString) => {
-  if (!dateString || !/^\d{4}-\d{2}-\d{2}/.test(dateString)) {
-    return "Fecha inválida";
-  }
-  const [year, month, day] = dateString.split("T")[0].split("-");
-  return `${day}/${month}/${year}`;
+  );
 };
 
-//funcion de telefono
+// Format Date Function
+const formatDate = (dateString) => {
+  if (!dateString) return "Fecha no disponible";
+  const options = { year: "numeric", month: "short", day: "numeric" };
+  return new Date(dateString).toLocaleDateString("es-MX", options);
+};
+
+// Format Phone Number for WhatsApp
 const formatPhoneNumberForWhatsApp = (phone) => {
   if (!phone) return null;
-
   let cleanPhone = phone.toString().replace(/\D/g, "");
-
   if (cleanPhone.length === 10) {
     cleanPhone = "52" + cleanPhone;
   }
-
   return cleanPhone;
 };
 
-//---------------------------------------------------CARD DE reocger o entregar-----------------------------
-
+// PedidoCard Component
 const PedidoCard = ({ pedido, seleccionado, onToggle }) => {
   const totalAPagar = parseFloat(pedido.totalPagar) || 0;
   const totalPagado = parseFloat(pedido.totalPagado) || 0;
   const isFullyPaid = totalAPagar > 0 && totalAPagar === totalPagado;
   const displayDate = formatDate(
-    pedido.tipo === "entrega" ? pedido.fechaEntrega : pedido.entregaReal || pedido.fechaInicio
+    pedido.tipo === "entrega"
+      ? pedido.fechaEntrega
+      : pedido.entregaReal || pedido.fechaInicio
   );
   const whatsAppNumber = formatPhoneNumberForWhatsApp(pedido.telefono);
   const message = encodeURIComponent(
     `Alquiladora Romero, hola te contacto sobre tu pedido ${pedido.idRastreo}.`
   );
   const whatsAppLink = `https://wa.me/${whatsAppNumber}?text=${message}`;
-  const paymentProgress = totalAPagar > 0 ? (totalPagado / totalAPagar) * 100 : 0;
+  const paymentProgress =
+    totalAPagar > 0 ? (totalPagado / totalAPagar) * 100 : 0;
+
+  const [isCanceling, setIsCanceling] = useState(false);
+  const { csrfToken } = useAuth();
+
+  const handleCancel = async () => {
+    if (isCanceling) return;
+    setIsCanceling(true);
+    try {
+      const response = await api.put(
+        `/api/repartidor/pedidos/${pedido.id}`,
+        { estadoActual: "Cancelado" },
+        {
+          headers: { "X-CSRF-Token": csrfToken },
+          withCredentials: true,
+        }
+      );
+      toast.success(response.data.message || "Pedido cancelado exitosamente.");
+      onToggle(pedido.id);
+      window.dispatchEvent(
+        new CustomEvent("updatePedidos", { detail: { id: pedido.id } })
+      );
+    } catch (error) {
+      const errorMessage =
+        error.response?.data?.message ||
+        "Error al cancelar el pedido. Inténtalo de nuevo.";
+      console.error("Error al cancelar el pedido:", error);
+      toast.error(errorMessage);
+    } finally {
+      setIsCanceling(false);
+    }
+  };
 
   return (
     <div
@@ -294,17 +430,23 @@ const PedidoCard = ({ pedido, seleccionado, onToggle }) => {
         ${pedido.atrasado ? "border-red-200 dark:border-red-800" : ""}
       `}
     >
-      <div className={`absolute left-0 top-0 bottom-0 w-2 ${
-        pedido.atrasado
-          ? "bg-gradient-to-b from-red-400 to-red-600"
-          : pedido.tipo === "entrega"
-          ? "bg-gradient-to-b from-green-400 to-green-600"
-          : "bg-gradient-to-b from-orange-400 to-orange-600"
-      }`} />
+      <div
+        className={`absolute left-0 top-0 bottom-0 w-2 ${
+          pedido.atrasado
+            ? "bg-gradient-to-b from-red-400 to-red-600"
+            : pedido.tipo === "entrega"
+            ? "bg-gradient-to-b from-green-400 to-green-600"
+            : "bg-gradient-to-b from-orange-400 to-orange-600"
+        }`}
+      />
 
       {(pedido.isUrgent || pedido.atrasado) && (
         <div className="absolute -top-1 -right-1 z-10">
-          <div className={`bg-${pedido.atrasado ? "red" : "red"}-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow-md animate-pulse`}>
+          <div
+            className={`bg-${
+              pedido.atrasado ? "red" : "red"
+            }-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow-md animate-pulse`}
+          >
             {pedido.atrasado ? "ATRASADO" : "URGENTE"}
           </div>
         </div>
@@ -333,12 +475,16 @@ const PedidoCard = ({ pedido, seleccionado, onToggle }) => {
 
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-1 mb-1">
-              <span className={`inline-flex items-center px-2 py-1 rounded-full text-[11px] font-semibold
-                ${pedido.atrasado
-                  ? "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400"
-                  : pedido.tipo === "entrega"
-                  ? "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400"
-                  : "bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-400"}`}>
+              <span
+                className={`inline-flex items-center px-2 py-1 rounded-full text-[11px] font-semibold
+                ${
+                  pedido.atrasado
+                    ? "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400"
+                    : pedido.tipo === "entrega"
+                    ? "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400"
+                    : "bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-400"
+                }`}
+              >
                 {pedido.atrasado ? (
                   <>
                     <AlertTriangle className="h-3 w-3 mr-1" />
@@ -357,7 +503,7 @@ const PedidoCard = ({ pedido, seleccionado, onToggle }) => {
                 )}
               </span>
 
-              <span className="text-[11px] font-mono text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-700 px-2 py-0.5 rounded">
+              <span className="text-[11px] font-mono text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-700 px-2 py-0.5 rounded-full">
                 #{pedido.idRastreo || pedido.id}
               </span>
             </div>
@@ -395,8 +541,8 @@ const PedidoCard = ({ pedido, seleccionado, onToggle }) => {
 
               <div className="flex items-center gap-2 text-[12px]">
                 <span className="flex items-center text-gray-600 dark:text-gray-400">
-                  <CircleDollarSign className="h-3 w-3 mr-1" />
-                  ${totalAPagar.toFixed(2)}
+                  <CircleDollarSign className="h-3 w-3 mr-1" />$
+                  {totalAPagar.toFixed(2)}
                 </span>
                 <span className="flex items-center text-blue-600 dark:text-blue-400">
                   <Wallet className="h-3 w-3 mr-1" />
@@ -412,7 +558,9 @@ const PedidoCard = ({ pedido, seleccionado, onToggle }) => {
             <MapPin className="h-3 w-3 text-gray-500" />
             <span className="truncate font-medium">{pedido.localidad}</span>
             {pedido.municipio !== pedido.localidad && (
-              <span className="text-gray-400 hidden sm:inline">• {pedido.municipio}</span>
+              <span className="text-gray-400 hidden sm:inline">
+                • {pedido.municipio}
+              </span>
             )}
           </div>
 
@@ -424,21 +572,33 @@ const PedidoCard = ({ pedido, seleccionado, onToggle }) => {
           {pedido.direccion && (
             <div className="flex items-start gap-1">
               <Navigation className="h-3 w-3 text-gray-500 mt-0.5" />
-              <span className="line-clamp-2 text-gray-500">{pedido.direccion}</span>
+              <span className="line-clamp-2 text-gray-500">
+                {pedido.direccion}
+              </span>
             </div>
           )}
         </div>
 
         <div className="mt-2 pt-2 border-t border-gray-100 dark:border-gray-700">
           <div className="flex items-center justify-between gap-2">
-            <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium
-              ${pedido.status === "Confirmado"
-                ? "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400"
-                : pedido.status === "En proceso"
-                ? "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400"
-                : "bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300"}`}>
-              {pedido.status}
-            </span>
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                handleCancel();
+              }}
+              disabled={isCanceling || pedido.status === "Cancelado"}
+              className="inline-flex items-center gap-1 px-2 py-0.5 bg-red-500 hover:bg-red-600 text-white text-[11px] font-semibold rounded-full transition-all duration-200 hover:scale-105 disabled:bg-gray-400 disabled:cursor-not-allowed"
+            >
+              {isCanceling ? (
+                <Loader2 className="h-3 w-3 animate-spin" />
+              ) : (
+                <>
+                  <X className="h-3 w-3" />
+                  <span className="hidden sm:inline">Cancelar</span>
+                  <span className="sm:hidden">X</span>
+                </>
+              )}
+            </button>
 
             {whatsAppNumber && (
               <a
@@ -461,7 +621,6 @@ const PedidoCard = ({ pedido, seleccionado, onToggle }) => {
     </div>
   );
 };
-
 
 // Pagination Component
 const Pagination = ({ currentPage, totalPages, onPageChange, localityKey }) => {
@@ -530,83 +689,186 @@ const Pagination = ({ currentPage, totalPages, onPageChange, localityKey }) => {
   );
 };
 
-// Historial Card Component
 const HistorialCard = ({ repartidor, pedidos, onViewDetails }) => {
-  const entregaCount = pedidos.filter((p) => p.tipo === "entrega").length;
-  const recogidaCount = pedidos.filter((p) => p.tipo === "recogida").length;
+  const entregaCount = pedidos.filter(
+    (p) => p.tipoPedidoEstado === "Enviando"
+  ).length;
+  const recogidaCount = pedidos.filter(
+    (p) => p.tipoPedidoEstado === "Recogiendo"
+  ).length;
   const tipos = [];
-  if (entregaCount > 0) tipos.push("entrega");
-  if (recogidaCount > 0) tipos.push("recogida");
+  if (entregaCount > 0) tipos.push("Enviando");
+  if (recogidaCount > 0) tipos.push("Recogiendo");
+
+  const stateStyles = {
+    confirmado: {
+      color: "text-green-500",
+      icon: <AiFillCheckCircle className="h-4 w-4" />,
+    },
+    enviando: {
+      color: "text-blue-500",
+      icon: <AiOutlineCar className="h-4 w-4" />,
+    },
+    "en alquiler": {
+      color: "text-purple-500",
+      icon: <AiOutlineCar className="h-4 w-4" />,
+    },
+    recogiendo: {
+      color: "text-yellow-500",
+      icon: <AiOutlineShoppingCart className="h-4 w-4" />,
+    },
+    devuelto: {
+      color: "text-gray-300",
+      icon: <AiOutlineUndo className="h-4 w-4" />,
+    },
+    incompleto: {
+      color: "text-yellow-600",
+      icon: <AiOutlineWarning className="h-4 w-4" />,
+    },
+    incidente: {
+      color: "text-red-500",
+      icon: <AiFillExclamationCircle className="h-4 w-4" />,
+    },
+    cancelado: {
+      color: "text-gray-800",
+      icon: <AiOutlineCloseCircle className="h-4 w-4" />,
+    },
+    finalizado: {
+      color: "text-green-800",
+      icon: <AiFillCheckCircle className="h-4 w-4" />,
+    },
+  };
+
+  const firstPedidoState =
+    pedidos?.[0]?.tipoPedidoEstado?.toLowerCase() || "desconocido";
+  const stateStyle = stateStyles[firstPedidoState] || {
+    color: "text-gray-500",
+    icon: <AiOutlineQuestionCircle className="h-4 w-4" />,
+  };
+  const avatarSrc = pedidos?.[0]?.repartidor?.fotoPerfil || null;
+  const hasAvatar = !!avatarSrc;
 
   return (
-    <div className="flex items-center justify-between p-3 rounded-xl bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 shadow-lg hover:shadow-xl hover:border-indigo-300 dark:hover:border-indigo-600 transition-all duration-200">
-      <div className="flex items-center space-x-3">
-        <User className="h-5 w-5 text-indigo-600 dark:text-indigo-400" />
-        <div>
-          <p className="font-semibold text-sm text-gray-900 dark:text-gray-100">
-            {repartidor?.nombre || "Desconocido"}
-          </p>
-          <p className="text-xs text-gray-600 dark:text-gray-400">
-            {repartidor?.correo || "Sin correo"}
-          </p>
-          <p className="text-xs text-gray-600 dark:text-gray-400">
-            {tipos.join(" y ") || "Sin asignación"} (
-            {entregaCount + recogidaCount} pedidos)
-          </p>
+    <div className="group relative w-full max-w-[95%] sm:max-w-sm mx-auto rounded-xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md transition-all duration-300 p-3 sm:p-4 overflow-hidden">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
+        <div className="flex items-center gap-3">
+          <div className="shrink-0">
+            {hasAvatar ? (
+              <img
+                src={avatarSrc}
+                alt="Perfil"
+                className="w-10 h-10 rounded-full object-cover border border-gray-300 dark:border-gray-600"
+              />
+            ) : (
+              <User className="w-10 h-10 text-gray-400 dark:text-gray-500" />
+            )}
+          </div>
+          <div className="text-sm overflow-hidden">
+            <p className={`font-semibold ${stateStyle.color} truncate`}>
+              {pedidos[0]?.repartidor?.nombre || "Desconocido"}
+            </p>
+            <p className="text-gray-500 text-xs truncate">
+              {pedidos[0]?.repartidor?.correo || "Sin correo"}
+            </p>
+            <p className="text-gray-500 text-xs truncate">
+              {tipos.join(" y ") || "Sin asignación"} (
+              {entregaCount + recogidaCount})
+            </p>
+          </div>
+        </div>
+
+        <div className="flex justify-end sm:justify-center">
+          <button
+            onClick={() => onViewDetails(repartidor?.id)}
+            className="flex items-center gap-1 bg-indigo-600 text-white text-xs px-2 py-1 rounded hover:bg-indigo-700 transition disabled:opacity-50"
+            disabled={!repartidor?.id}
+          >
+            <Eye className="w-3.5 h-3.5" />
+            Ver
+          </button>
         </div>
       </div>
-      <Tooltip content="Ver detalles del repartidor y sus pedidos">
-        <button
-          onClick={() => onViewDetails(repartidor?.id)}
-          className="px-3 py-1 bg-indigo-600 dark:bg-indigo-700 text-white text-sm rounded-lg hover:bg-indigo-700 dark:hover:bg-indigo-800 transition-colors duration-200 flex items-center disabled:opacity-50"
-          disabled={!repartidor}
-        >
-          <Eye className="h-4 w-4 mr-1" /> Ver más detalles
-        </button>
-      </Tooltip>
+
+      <div className="mt-3 border-t pt-2 border-gray-200 dark:border-gray-700 flex items-center gap-2">
+        {stateStyle.icon}
+        <span className={`text-sm font-medium ${stateStyle.color} truncate`}>
+          {firstPedidoState.charAt(0).toUpperCase() + firstPedidoState.slice(1)}
+        </span>
+      </div>
     </div>
   );
 };
 
-// Modal Component
-const Modal = ({ isOpen, onClose, repartidor, pedidos, repartidores }) => {
+const Modal = ({
+  isOpen,
+  onClose,
+  pedidos,
+  pedidoDetalles,
+  selectedLocation,
+}) => {
+  // Salir si no está abierto
   if (!isOpen) return null;
 
-  const repartidorData = Array.isArray(repartidores)
-    ? repartidores.find((r) => r.id === repartidor?.id) || {
-        nombre: "Desconocido",
-        correo: "Sin correo",
-      }
-    : { nombre: "Desconocido", correo: "Sin correo" };
-  const entregas = pedidos.filter((p) => p.tipo === "entrega");
-  const recogidas = pedidos.filter((p) => p.tipo === "recogida");
+  const repartidorData =
+    pedidos.length > 0
+      ? pedidos[0].repartidor
+      : {
+          nombre: "Desconocido",
+          correo: "Sin correo",
+        };
 
-  const handlePrint = () => {
-    window.print();
+  const formatPhoneNumberForWhatsApp = (phone) => {
+    if (!phone) return null;
+    let cleanPhone = phone.toString().replace(/\D/g, "");
+    if (cleanPhone.length === 10) cleanPhone = "52" + cleanPhone;
+    return cleanPhone;
   };
+
+  const whatsappNumber = formatPhoneNumberForWhatsApp(repartidorData.telefono);
+  const whatsappMessage = encodeURIComponent(
+    `Hola ${repartidorData.nombre}, te contacto sobre tus pedidos asignados.`
+  );
+  const whatsappLink = whatsappNumber
+    ? `https://wa.me/${whatsappNumber}?text=${whatsappMessage}`
+    : null;
+
+  
+  const handlePrint = () => window.print();
 
   const handleExportCSV = () => {
     const csv = [
       [
         "ID",
-        "Descripción",
-        "Fecha",
-        "Tipo",
+        "Rastreo",
+        "Fecha Asignación",
         "Estado",
         "Municipio",
-        "Localidad",
-        "Status",
+        "Total a Pagar",
+        "Monto Pagado",
+        "Productos",
       ],
-      ...pedidos.map((p) => [
-        p.id,
-        p.descripcion,
-        p.tipo === "entrega" ? p.fechaEntrega : p.fechaInicio,
-        p.tipo,
-        p.estado,
-        p.municipio,
-        p.localidad,
-        p.status,
-      ]),
+      ...pedidos.map((p) => {
+        const detalles = pedidoDetalles[p.idPedido] || {
+          productos: [],
+          montoPagado: "0.00",
+          totalPagar: p.totalPagar || "0.00",
+        };
+        return [
+          p.idPedido,
+          p.idRastreo,
+          p.fechaAsignacion,
+          p.tipoPedidoEstado,
+          p.municipio,
+          detalles.totalPagar,
+          detalles.montoPagado,
+          detalles.productos
+            .map(
+              (prod) =>
+                `${prod.nombreProducto} (${prod.cantidad} x $${prod.precioUnitario}, Subtotal: $${prod.subtotal}, Color: ${prod.color})`
+            )
+            .join(", ") || "Sin productos",
+        ];
+      }),
     ]
       .map((row) => row.join(","))
       .join("\n");
@@ -622,84 +884,374 @@ const Modal = ({ isOpen, onClose, repartidor, pedidos, repartidores }) => {
     window.URL.revokeObjectURL(url);
   };
 
+
+  const totalGeneral = pedidos.reduce((sum, p) => {
+    const detalles = pedidoDetalles[p.idPedido] || { totalPagar: "0.00" };
+    return sum + (parseFloat(detalles.totalPagar) || 0);
+  }, 0);
+
+  const totalPagado = pedidos.reduce((sum, p) => {
+    const detalles = pedidoDetalles[p.idPedido] || { montoPagado: "0.00" };
+    return sum + (parseFloat(detalles.montoPagado) || 0);
+  }, 0);
+
+  // 4. Estilos y Íconos por Estado
+  const stateStyles = {
+    confirmado: {
+      color: "text-emerald-700",
+      bg: "bg-emerald-50",
+      icon: <AiFillCheckCircle className="h-4 w-4" />,
+    },
+    enviando: {
+      color: "text-blue-700",
+      bg: "bg-blue-50",
+      icon: <AiOutlineCar className="h-4 w-4" />,
+    },
+    "en alquiler": {
+      color: "text-purple-700",
+      bg: "bg-purple-50",
+      icon: <AiOutlineCar className="h-4 w-4" />,
+    },
+    recogiendo: {
+      color: "text-amber-700",
+      bg: "bg-amber-50",
+      icon: <AiOutlineShoppingCart className="h-4 w-4" />,
+    },
+    devuelto: {
+      color: "text-gray-700",
+      bg: "bg-gray-50",
+      icon: <AiOutlineUndo className="h-4 w-4" />,
+    },
+    incompleto: {
+      color: "text-orange-700",
+      bg: "bg-orange-50",
+      icon: <AiOutlineWarning className="h-4 w-4" />,
+    },
+    incidente: {
+      color: "text-red-700",
+      bg: "bg-red-50",
+      icon: <AiFillExclamationCircle className="h-4 w-4" />,
+    },
+    cancelado: {
+      color: "text-gray-700",
+      bg: "bg-gray-100",
+      icon: <AiOutlineCloseCircle className="h-4 w-4" />,
+    },
+    finalizado: {
+      color: "text-emerald-700",
+      bg: "bg-emerald-100",
+      icon: <AiFillCheckCircle className="h-4 w-4" />,
+    },
+  };
+
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 dark:bg-gray-900 dark:bg-opacity-75 flex items-center justify-center z-50">
-      <div className="bg-white dark:bg-gray-800 p-6 rounded-xl w-full max-w-lg mx-4 sm:mx-auto shadow-2xl">
-        <div className="flex items-center mb-4">
-          <User className="h-8 w-8 text-indigo-600 dark:text-indigo-400 mr-3" />
-          <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">
-            {repartidorData.nombre}
-          </h2>
+    <div className="fixed inset-0 bg-gray-900/60 backdrop-blur-sm flex items-center justify-center z-50 p-2 md:p-4">
+      <div className="bg-white dark:bg-gray-900 rounded-2xl w-full max-w-7xl h-[95vh] shadow-xl border border-gray-200 dark:border-gray-800 overflow-hidden transform transition-all duration-300 hover:shadow-2xl flex flex-col">
+        {/* Header - Fijo */}
+        <div className="bg-gradient-to-r from-[#F59E0B] to-[#FBBF24] px-6 py-4 border-b border-[#F59E0B]/20 flex-shrink-0">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-5">
+              <div className="p-2.5 bg-white/30 rounded-xl">
+                <User className="h-7 w-7 text-white" />
+              </div>
+              <div>
+                <h2 className="text-2xl font-bold text-white">
+                  {repartidorData.nombre}
+                </h2>
+                <div className="flex flex-col sm:flex-row sm:items-center gap-2 mt-1">
+                  <p className="text-sm text-yellow-100">
+                    {repartidorData.correo}
+                  </p>
+                  {whatsappLink && (
+                    <a
+                      href={whatsappLink}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center text-sm text-yellow-100 hover:text-white transition-colors"
+                    >
+                      <MessageCircle className="h-4 w-4 mr-1" />
+                      {repartidorData.telefono}
+                    </a>
+                  )}
+                </div>
+              </div>
+            </div>
+            <button
+              onClick={onClose}
+              className="p-2 hover:bg-white/20 rounded-xl transition-colors"
+            >
+              <X className="h-6 w-6 text-white" />
+            </button>
+          </div>
         </div>
-        {entregas.length > 0 && (
-          <div className="mb-4">
-            <h3 className="font-medium text-md text-green-700 dark:text-green-400 mb-2">
-              Entregas
-            </h3>
-            <ul className="space-y-2 max-h-60 overflow-y-auto">
-              {entregas.map((p) => (
-                <li
-                  key={p.id}
-                  className="p-3 bg-green-50 dark:bg-green-900 rounded-lg"
-                >
-                  <p className="text-sm font-medium text-gray-900 dark:text-gray-100">
-                    #{p.id} – {p.descripcion}
-                  </p>
-                  <p className="text-xs text-gray-600 dark:text-gray-400">
-                    Fecha: {p.fechaEntrega}
-                  </p>
-                  <p className="text-xs text-gray-600 dark:text-gray-400">
-                    Estado: {p.status}
-                  </p>
-                </li>
-              ))}
-            </ul>
+
+        {/* Resumen - Fijo */}
+        <div className="bg-gray-50 dark:bg-gray-800 px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex-shrink-0">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
+            <div className="bg-white dark:bg-gray-700 p-3 rounded-lg">
+              <p className="text-xs text-gray-600 dark:text-gray-400 uppercase font-medium">
+                Pedidos
+              </p>
+              <p className="text-2xl font-bold text-[#F59E0B] mt-1">
+                {pedidos.length}
+              </p>
+            </div>
+            <div className="bg-white dark:bg-gray-700 p-3 rounded-lg">
+              <p className="text-xs text-gray-600 dark:text-gray-400 uppercase font-medium">
+                Ubicación
+              </p>
+              <p className="text-sm font-semibold text-gray-900 dark:text-gray-100 mt-1">
+                {selectedLocation?.localidad}
+              </p>
+            </div>
+            <div className="bg-white dark:bg-gray-700 p-3 rounded-lg">
+              <p className="text-xs text-gray-600 dark:text-gray-400 uppercase font-medium">
+                Total
+              </p>
+              <p className="text-2xl font-bold text-green-600 mt-1">
+                ${totalGeneral.toFixed(2)}
+              </p>
+            </div>
+            <div className="bg-white dark:bg-gray-700 p-3 rounded-lg">
+              <p className="text-xs text-gray-600 dark:text-gray-400 uppercase font-medium">
+                Pagado
+              </p>
+              <p className="text-2xl font-bold text-emerald-600 mt-1">
+                ${totalPagado.toFixed(2)}
+              </p>
+            </div>
           </div>
-        )}
-        {recogidas.length > 0 && (
-          <div>
-            <h3 className="font-medium text-md text-orange-700 dark:text-orange-400 mb-2">
-              Recogidas
-            </h3>
-            <ul className="space-y-2 max-h-60 overflow-y-auto">
-              {recogidas.map((p) => (
-                <li
-                  key={p.id}
-                  className="p-3 bg-orange-50 dark:bg-orange-900 rounded-lg"
-                >
-                  <p className="text-sm font-medium text-gray-900 dark:text-gray-100">
-                    #{p.id} – {p.descripcion}
-                  </p>
-                  <p className="text-xs text-gray-600 dark:text-gray-400">
-                    Fecha: {p.fechaInicio}
-                  </p>
-                  <p className="text-xs text-gray-600 dark:text-gray-400">
-                    Estado: {p.status}
-                  </p>
-                </li>
-              ))}
-            </ul>
+        </div>
+
+        {/* Contenido Principal - Scrollable */}
+        <div className="flex-1 overflow-y-auto">
+          <div className="p-6">
+            {pedidos.length > 0 ? (
+              <div className="space-y-6">
+                {pedidos.map((p) => {
+                  const detalles = pedidoDetalles[p.idPedido] || {
+                    productos: [],
+                    montoPagado: "0.00",
+                    totalPagar: p.totalPagar || "0.00",
+                  };
+                  const totalAPagar = parseFloat(detalles.totalPagar) || 0;
+                  const totalPagado = parseFloat(detalles.montoPagado) || 0;
+                  const isFullyPaid =
+                    totalAPagar > 0 && totalAPagar === totalPagado;
+                  const paymentProgress =
+                    totalAPagar > 0 ? (totalPagado / totalAPagar) * 100 : 0;
+                  const stateStyle = stateStyles[
+                    p.tipoPedidoEstado.toLowerCase()
+                  ] || {
+                    color: "text-gray-500",
+                    bg: "bg-gray-50",
+                    icon: <AiOutlineQuestionCircle className="h-4 w-4" />,
+                  };
+
+                  return (
+                    <div
+                      key={p.idPedido}
+                      className="border border-gray-200 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-800 hover:shadow-lg transition-all duration-200 overflow-hidden"
+                    >
+                      {/* Encabezado del Pedido */}
+                      <div className="bg-gray-50 dark:bg-gray-700 px-4 py-3 border-b border-gray-200 dark:border-gray-600">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center space-x-3">
+                            <div className="p-2 bg-[#F59E0B]/10 dark:bg-[#F59E0B]/20 rounded-lg">
+                              <Package className="h-5 w-5 text-[#F59E0B] dark:text-amber-400" />
+                            </div>
+                            <div>
+                              <h4 className="font-semibold text-gray-900 dark:text-gray-100 text-lg">
+                                Pedido #{p.idRastreo || p.idPedido}
+                              </h4>
+                              <p className="text-sm text-gray-500 dark:text-gray-400">
+                                {formatDate(p.fechaAsignacion)}
+                              </p>
+                            </div>
+                          </div>
+                          <span
+                            className={`px-3 py-1 text-sm font-medium rounded-full flex items-center gap-1 ${stateStyle.color} ${stateStyle.bg}`}
+                          >
+                            {stateStyle.icon}
+                            {p.tipoPedidoEstado}
+                          </span>
+                        </div>
+                      </div>
+
+                      <div className="p-4 space-y-4">
+                        {/* Información General */}
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                          <div className="bg-gray-50 dark:bg-gray-700 p-3 rounded-lg">
+                            <p className="text-xs text-gray-500 dark:text-gray-400 uppercase font-medium mb-1">
+                              Municipio
+                            </p>
+                            <p className="text-sm font-semibold text-gray-900 dark:text-gray-100">
+                              {p.municipio}
+                            </p>
+                          </div>
+                          <div className="bg-gray-50 dark:bg-gray-700 p-3 rounded-lg">
+                            <p className="text-xs text-gray-500 dark:text-gray-400 uppercase font-medium mb-1">
+                              Tipo
+                            </p>
+                            <p className="text-sm font-semibold text-gray-900 dark:text-gray-100">
+                              {detalles.tipoPedido || "N/A"}
+                            </p>
+                          </div>
+                          <div className="bg-gray-50 dark:bg-gray-700 p-3 rounded-lg">
+                            <p className="text-xs text-gray-500 dark:text-gray-400 uppercase font-medium mb-1">
+                              Días Alquiler
+                            </p>
+                            <p className="text-sm font-semibold text-gray-900 dark:text-gray-100">
+                              {detalles.diasAlquiler || "N/A"}
+                            </p>
+                          </div>
+                        </div>
+
+                        {/* Estado de Pago */}
+                        <div className="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
+                          <div className="flex justify-between items-center mb-3">
+                            <span className="text-sm font-semibold text-gray-700 dark:text-gray-300">
+                              Estado de Pago
+                            </span>
+                            <span className="text-lg font-bold text-gray-900 dark:text-gray-100">
+                              ${totalPagado.toFixed(2)} / $
+                              {totalAPagar.toFixed(2)}
+                            </span>
+                          </div>
+
+                          {isFullyPaid ? (
+                            <div className="flex items-center gap-2 p-3 bg-emerald-50 dark:bg-emerald-900/20 rounded-lg border border-emerald-200 dark:border-emerald-800">
+                              <ShieldCheck className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
+                              <span className="text-sm font-medium text-emerald-700 dark:text-emerald-300">
+                                Pago Completado
+                              </span>
+                            </div>
+                          ) : (
+                            <div className="space-y-2">
+                              <div className="w-full bg-gray-200 dark:bg-gray-600 rounded-full h-3">
+                                <div
+                                  className="bg-gradient-to-r from-[#F59E0B] to-[#FBBF24] h-3 rounded-full transition-all duration-500"
+                                  style={{
+                                    width: `${Math.min(paymentProgress, 100)}%`,
+                                  }}
+                                />
+                              </div>
+                              <div className="flex justify-between text-sm text-gray-600 dark:text-gray-400">
+                                <span className="font-medium">
+                                  {paymentProgress.toFixed(1)}% completado
+                                </span>
+                                <span className="font-medium">
+                                  Pendiente: $
+                                  {(totalAPagar - totalPagado).toFixed(2)}
+                                </span>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Productos */}
+                        {detalles.productos.length > 0 && (
+                          <div className="border-t border-gray-300 dark:border-gray-700 pt-4">
+                            <h5 className="text-base font-semibold text-gray-800 dark:text-gray-100 mb-3 flex items-center">
+                              <Package className="h-5 w-5 mr-2 text-[#F59E0B]" />
+                              Productos ({detalles.productos.length})
+                            </h5>
+
+                            <div className="space-y-3">
+                              {detalles.productos.map((prod, index) => (
+                                <div
+                                  key={index}
+                                  className="p-4 rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+                                >
+                                  <div className="flex justify-between items-center mb-1">
+                                    <p className="text-base font-semibold text-gray-900 dark:text-gray-100">
+                                      {prod.nombreProducto}
+                                    </p>
+                                    <p className="text-lg font-bold text-green-700 dark:text-green-300">
+                                      ${prod.subtotal.toFixed(2)}
+                                    </p>
+                                  </div>
+
+                                  <p className="text-sm text-gray-700 dark:text-gray-300">
+                                    <span className="mr-4">
+                                      <strong>Color:</strong> {prod.color}
+                                    </span>
+                                    <span className="mr-4">
+                                      <strong>Cantidad:</strong> {prod.cantidad}
+                                    </span>
+                                    <span>
+                                      <strong>Precio :</strong> $
+                                      {prod.precioUnitario}
+                                    </span>
+                                  </p>
+
+                                  {(prod.observaciones ||
+                                    prod.estadoProducto) && (
+                                    <div className="mt-2 pt-2 border-t border-gray-200 dark:border-gray-600 text-sm text-gray-600 dark:text-gray-400 space-y-1">
+                                      {prod.observaciones && (
+                                        <p>
+                                          <strong>Observaciones:</strong>{" "}
+                                          {prod.observaciones}
+                                        </p>
+                                      )}
+                                      {prod.estadoProducto && (
+                                        <p>
+                                          <strong>Estado:</strong>{" "}
+                                          {prod.estadoProducto}
+                                        </p>
+                                      )}
+                                    </div>
+                                  )}
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            ) : (
+              <div className="text-center py-16">
+                <div className="p-4 bg-gray-100 dark:bg-gray-800 rounded-full w-20 h-20 mx-auto mb-4 flex items-center justify-center">
+                  <Package className="h-10 w-10 text-gray-400 dark:text-gray-600" />
+                </div>
+                <p className="text-xl text-gray-500 dark:text-gray-400">
+                  No hay pedidos asignados
+                </p>
+                <p className="text-sm text-gray-400 dark:text-gray-500 mt-2">
+                  en {selectedLocation?.localidad}
+                </p>
+              </div>
+            )}
           </div>
-        )}
-        <div className="flex gap-2 mt-4">
+        </div>
+
+        {/* Footer - Fijo */}
+        <div className="bg-gray-50 dark:bg-gray-800 px-6 py-4 border-t border-gray-200 dark:border-gray-700 flex justify-between items-center flex-shrink-0">
           <button
             onClick={onClose}
-            className="w-full px-4 py-2 bg-red-600 dark:bg-red-700 text-white text-sm rounded-lg hover:bg-red-700 dark:hover:bg-red-800 transition-colors duration-200"
+            className="px-5 py-2 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors text-sm font-medium"
           >
             Cerrar
           </button>
-          <button
-            onClick={handlePrint}
-            className="w-full px-4 py-2 bg-blue-600 dark:bg-blue-700 text-white text-sm rounded-lg hover:bg-blue-700 dark:hover:bg-blue-800 transition-colors duration-200"
-          >
-            <Printer className="h-4 w-4 mr-1 inline" /> Imprimir
-          </button>
-          <button
-            onClick={handleExportCSV}
-            className="w-full px-4 py-2 bg-green-600 dark:bg-green-700 text-white text-sm rounded-lg hover:bg-green-700 dark:hover:bg-green-800 transition-colors duration-200"
-          >
-            <Download className="h-4 w-4 mr-1 inline" /> Exportar CSV
-          </button>
+          <div className="flex gap-3">
+            <button
+              onClick={handlePrint}
+              className="px-5 py-2 bg-[#F59E0B] text-white rounded-lg hover:bg-[#D97706] transition-colors text-sm font-medium flex items-center gap-2"
+            >
+              <Printer className="h-4 w-4" />
+              Imprimir
+            </button>
+            <button
+              onClick={handleExportCSV}
+              className="px-5 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors text-sm font-medium flex items-center gap-2"
+            >
+              <Download className="h-4 w-4" />
+              Exportar CSV
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -722,10 +1274,13 @@ const initialState = {
   selectedRepartidorId: null,
   historialPage: 1,
   isLoading: true,
- filters: { status: "", type: "", direccionEstado: "", municipio: "" }, // Añade estos cam
+  filters: { estado: "", municipio: "", localidad: "" },
   notification: null,
   days: [],
   totals: { totalPedidos: 0, totalRepartidores: 0, totalPedidosAsignados: 0 },
+  totalsByLocation: [],
+  historialPedidos: [],
+  pedidoDetalles: {},
 };
 
 const reducer = (state, action) => {
@@ -739,9 +1294,14 @@ const reducer = (state, action) => {
         repartidoresError: action.repartidoresError || null,
         pedidosEmpty: action.pedidosEmpty || false,
         repartidoresEmpty: action.repartidoresEmpty || false,
-       days: action.days || [],
-       totals: action.totals || { totalPedidos: 0, totalRepartidores: 0, totalPedidosAsignados: 0 },
-      isLoading: false,
+        days: action.days || [],
+        totals: action.totals || {
+          totalPedidos: 0,
+          totalRepartidores: 0,
+          totalPedidosAsignados: 0,
+        },
+        totalsByLocation: action.totalsByLocation || [],
+        isLoading: false,
       };
     case "SET_REPARTIDOR_SEL":
       return { ...state, repartidorSel: action.id };
@@ -764,9 +1324,9 @@ const reducer = (state, action) => {
         repartidorSel: null,
         totals: {
           ...state.totals,
-          totalPedidosAsignados: state.totals.totalPedidosAsignados + state.pedidosSel.length,
+          totalPedidosAsignados:
+            state.totals.totalPedidosAsignados + state.pedidosSel.length,
         },
-        
       };
     case "SET_BUSQUEDA_REP":
       return { ...state, busquedaRep: action.value };
@@ -783,6 +1343,8 @@ const reducer = (state, action) => {
         ...state,
         modalOpen: action.open,
         selectedRepartidorId: action.id || null,
+        selectedLocation: action.selectedLocation || null,
+        filteredPedidos: action.filteredPedidos || [], 
       };
     case "SET_HISTORIAL_PAGE":
       return { ...state, historialPage: action.page };
@@ -797,21 +1359,43 @@ const reducer = (state, action) => {
         filtroDia: "hoy",
         pagination: {},
         historialPage: 1,
-        filters: { status: "", type: "" },
+        filters: { estado: "", municipio: "", localidad: "" },
       };
     case "SET_NOTIFICATION":
       return { ...state, notification: action.notification };
+    case "SET_HISTORIAL":
+      return { ...state, historialPedidos: action.historial || [] };
+    case "SET_DETALLES_PEDIDO":
+      return {
+        ...state,
+        pedidoDetalles: {
+          ...state.pedidoDetalles,
+          [action.idPedido]: action.detalles,
+        },
+      };
+    case "UPDATE_PEDIDO":
+      return {
+        ...state,
+        pedidos: state.pedidos.filter((p) => p.id !== action.id),
+      };
     default:
       return state;
   }
 };
 
-
-
+const now = new Date();
+now.setHours(0, 0, 0, 0);
+const today = now.toISOString().split("T")[0];
+const tomorrow = new Date(now);
+tomorrow.setDate(now.getDate() + 1);
+const tomorrowStr = tomorrow.toISOString().split("T")[0];
 
 const AsignacionPedidosGeo = () => {
   const [state, dispatch] = useReducer(reducer, initialState);
   const { csrfToken } = useAuth();
+  const [isAssigning, setIsAssigning] = useState(false);
+  const [selectedDate, setSelectedDate] = useState(now);
+  const [isLoadingHistorial, setIsLoadingHistorial] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -822,7 +1406,12 @@ const AsignacionPedidosGeo = () => {
       let pedidosEmpty = false;
       let repartidoresEmpty = false;
       let days = [];
-      let totals = { totalPedidos: 0, totalRepartidores: 0, totalPedidosAsignados: 0 };
+      let totals = {
+        totalPedidos: 0,
+        totalRepartidores: 0,
+        totalPedidosAsignados: 0,
+      };
+      let totalsByLocation = [];
 
       try {
         const repartidoresRes = await api.get(
@@ -832,18 +1421,25 @@ const AsignacionPedidosGeo = () => {
             withCredentials: true,
           }
         );
+
+        console.log("repar", repartidoresRes);
+
         repartidores = repartidoresRes.data.data.map((r) => ({
           id: r.idRepartidor || null,
           nombre: r.nombre || "Desconocido",
           correo: r.correo || "Sin correo",
           estado: r.estado || "activo",
+          foto: r.fotoPerfil || "",
         }));
+
+        console.log("Datos oh", repartidores);
         if (repartidores.length === 0) {
           repartidoresEmpty = true;
         }
       } catch (error) {
         console.error("Error al obtener repartidores:", error);
-        repartidoresError = "Error al cargar repartidores. Se está corrigiendo este error.";
+        repartidoresError =
+          "Error al cargar repartidores. Se está corrigiendo este error.";
       }
 
       try {
@@ -863,13 +1459,20 @@ const AsignacionPedidosGeo = () => {
           totalRepartidores: pedidosRes.data.totalRepartidores || 0,
           totalPedidosAsignados: pedidosRes.data.totalPedidosAsignados || 0,
         };
+        totalsByLocation = pedidosRes.data.totalsByLocation || [];
 
         pedidos = [
           ...(pedidosRes.data.deliveries || []).map((p) => ({
             id: p.idPedido || null,
-            descripcion: p.nombre ? `${p.nombre} ${p.apellido || ""}` : `Pedido #${p.idPedido || "Desconocido"}`,
-            fechaInicio: p.fechaInicio ? new Date(p.fechaInicio).toISOString().split("T")[0] : new Date().toISOString().split("T")[0],
-            fechaEntrega: p.fechaEntrega ? new Date(p.fechaEntrega).toISOString().split("T")[0] : new Date().toISOString().split("T")[0],
+            descripcion: p.nombre
+              ? `${p.nombre} ${p.apellido || ""}`
+              : `Pedido #${p.idPedido || "Desconocido"}`,
+            fechaInicio: p.fechaInicio
+              ? new Date(p.fechaInicio).toISOString().split("T")[0]
+              : new Date().toISOString().split("T")[0],
+            fechaEntrega: p.fechaEntrega
+              ? new Date(p.fechaEntrega).toISOString().split("T")[0]
+              : new Date().toISOString().split("T")[0],
             estado: p.direccionEstado || "Desconocido",
             idRastreo: p.idRastreo || "null",
             municipio: p.municipio || "Desconocido",
@@ -890,9 +1493,15 @@ const AsignacionPedidosGeo = () => {
           })),
           ...(pedidosRes.data.lateDeliveries || []).map((p) => ({
             id: p.idPedido || null,
-            descripcion: p.nombre ? `${p.nombre} ${p.apellido || ""}` : `Pedido #${p.idPedido || "Desconocido"}`,
-            fechaInicio: p.fechaInicio ? new Date(p.fechaInicio).toISOString().split("T")[0] : new Date().toISOString().split("T")[0],
-            fechaEntrega: p.fechaEntrega ? new Date(p.fechaEntrega).toISOString().split("T")[0] : new Date().toISOString().split("T")[0],
+            descripcion: p.nombre
+              ? `${p.nombre} ${p.apellido || ""}`
+              : `Pedido #${p.idPedido || "Desconocido"}`,
+            fechaInicio: p.fechaInicio
+              ? new Date(p.fechaInicio).toISOString().split("T")[0]
+              : new Date().toISOString().split("T")[0],
+            fechaEntrega: p.fechaEntrega
+              ? new Date(p.fechaEntrega).toISOString().split("T")[0]
+              : new Date().toISOString().split("T")[0],
             estado: p.direccionEstado || "Desconocido",
             municipio: p.municipio || "Desconocido",
             localidad: p.localidad || "Desconocido",
@@ -912,13 +1521,19 @@ const AsignacionPedidosGeo = () => {
           })),
           ...(pedidosRes.data.pickups || []).map((p) => ({
             id: p.idPedido || null,
-            descripcion: p.nombre ? `${p.nombre} ${p.apellido || ""}` : `Pedido #${p.idPedido || "Desconocido"}`,
-            fechaInicio: p.fechaInicio ? new Date(p.fechaInicio).toISOString().split("T")[0] : new Date().toISOString().split("T")[0],
-            fechaEntrega: p.fechaEntrega ? new Date(p.fechaEntrega).toISOString().split("T")[0] : new Date().toISOString().split("T")[0],
+            descripcion: p.nombre
+              ? `${p.nombre} ${p.apellido || ""}`
+              : `Pedido #${p.idPedido || "Desconocido"}`,
+            fechaInicio: p.fechaInicio
+              ? new Date(p.fechaInicio).toISOString().split("T")[0]
+              : new Date().toISOString().split("T")[0],
+            fechaEntrega: p.fechaEntrega
+              ? new Date(p.fechaEntrega).toISOString().split("T")[0]
+              : new Date().toISOString().split("T")[0],
             estado: p.direccionEstado || "Desconocido",
             municipio: p.municipio || "Desconocido",
             localidad: p.localidad || "Desconocido",
-            repartidorId:  null,
+            repartidorId: null,
             totalPagado: p.totalPagado || "0.00",
             idRastreo: p.idRastreo || "null",
             tipo: "recogida",
@@ -927,7 +1542,7 @@ const AsignacionPedidosGeo = () => {
             direccion: p.direccion || "",
             referencias: p.referencias || "",
             totalPagar: p.totalPagar || "0.00",
-            entregaReal: p.fechaRecogidaReal, // Mantener formato original
+            entregaReal: p.fechaRecogidaReal || null,
             isUrgent: p.isUrgent || false,
             sameDay: p.sameDay || false,
           })),
@@ -939,7 +1554,35 @@ const AsignacionPedidosGeo = () => {
         }
       } catch (error) {
         console.error("Error al obtener pedidos:", error);
-        pedidosError = "Error al cargar pedidos. Se está corrigiendo este error.";
+        pedidosError =
+          "Error al cargar pedidos. Se está corrigiendo este error.";
+      }
+
+      // Fetch historial de pedidos asignados con la fecha seleccionada
+      try {
+        setIsLoadingHistorial(true);
+        const dateStr = selectedDate.toISOString().split("T")[0];
+        console.log("Fecha seleccionada para historial:", dateStr);
+        const historialRes = await api.get(
+          "/api/repartidor/repartidores/historial",
+          {
+            headers: { "X-CSRF-Token": csrfToken },
+            withCredentials: true,
+            params: { fecha: dateStr },
+          }
+        );
+        console.log("datos de historialres", historialRes);
+
+        if (historialRes.data.success) {
+          dispatch({
+            type: "SET_HISTORIAL",
+            historial: historialRes.data.data,
+          });
+        }
+      } catch (error) {
+        console.error("Error al obtener historial:", error);
+      } finally {
+        setIsLoadingHistorial(false);
       }
 
       dispatch({
@@ -952,52 +1595,52 @@ const AsignacionPedidosGeo = () => {
         repartidoresEmpty,
         days,
         totals,
+        totalsByLocation,
       });
     };
 
     fetchData();
-  }, [csrfToken]);
 
-  const now = new Date(); 
-  now.setHours(0, 0, 0, 0); 
-  const today = now.toISOString().split("T")[0]; 
-  console.log("Today:", today, "Day of week:", now.getDay()); 
-  const tomorrow = new Date(now);
-  tomorrow.setDate(now.getDate() + 1);
-  const tomorrowStr = tomorrow.toISOString().split("T")[0]; 
+    const handleUpdatePedidos = (event) => {
+      dispatch({ type: "UPDATE_PEDIDO", id: event.detail.id });
+    };
 
-  
+    window.addEventListener("updatePedidos", handleUpdatePedidos);
+    return () =>
+      window.removeEventListener("updatePedidos", handleUpdatePedidos);
+  }, [csrfToken, selectedDate]);
+
   const dayLabels = useMemo(() => {
     const labels = [];
     const startOfWeek = new Date(now);
-    startOfWeek.setDate(now.getDate() - now.getDay() + 1); 
+    startOfWeek.setDate(now.getDate() - now.getDay() + 1);
     for (let i = 0; i < 6; i++) {
       const date = new Date(startOfWeek);
       date.setDate(startOfWeek.getDate() + i);
       const dateStr = date.toISOString().split("T")[0];
       labels.push({
         date: dateStr,
-        label: dateStr === today ? "Hoy" : date.toLocaleDateString("es-MX", { weekday: "long" }),
+        label:
+          dateStr === today
+            ? "Hoy"
+            : date.toLocaleDateString("es-MX", { weekday: "long" }),
         dayOfWeek: date.getDay(),
       });
     }
     return labels;
   }, [today]);
 
-  console.log("Day Labels:", dayLabels);
-
-  
   const filteredPedidos = useMemo(() => {
     return state.pedidos.filter((p) => {
-      const matchesStatus = !state.filters.status || p.status === state.filters.status;
-      const matchesType = !state.filters.type || p.tipo === state.filters.type;
-      const matchesEstado = !state.filters.direccionEstado || p.estado === state.filters.direccionEstado;
-      const matchesMunicipio = !state.filters.municipio || p.municipio === state.filters.municipio;
-      return matchesStatus && matchesType && matchesEstado && matchesMunicipio;
+      const matchesEstado =
+        !state.filters.estado || p.estado === state.filters.estado;
+      const matchesMunicipio =
+        !state.filters.municipio || p.municipio === state.filters.municipio;
+      const matchesLocalidad =
+        !state.filters.localidad || p.localidad === state.filters.localidad;
+      return matchesEstado && matchesMunicipio && matchesLocalidad;
     });
   }, [state.pedidos, state.filters]);
-
-  console.log("Filtered Pedidos:", filteredPedidos);
 
   const pedidosEntrega = useMemo(() => {
     let filterDate = today;
@@ -1014,11 +1657,12 @@ const AsignacionPedidosGeo = () => {
     console.log("Filtro aplicado:", state.filtroDia, "Fecha:", filterDate);
 
     const filtered = filteredPedidos
-      .filter((p) =>
-        p.tipo === "entrega" &&
-        (p.repartidorId === null || p.repartidorId === undefined) &&
-        ((p.entregaReal && p.entregaReal.split("T")[0] === filterDate) ||
-          (p.atrasado && p.fechaInicio.split("T")[0] === filterDate))
+      .filter(
+        (p) =>
+          p.tipo === "entrega" &&
+          (p.repartidorId === null || p.repartidorId === undefined) &&
+          ((p.entregaReal && p.entregaReal.split("T")[0] === filterDate) ||
+            (p.atrasado && p.fechaInicio.split("T")[0] === filterDate))
       )
       .sort((a, b) => a.descripcion.localeCompare(b.descripcion));
 
@@ -1027,24 +1671,29 @@ const AsignacionPedidosGeo = () => {
   }, [filteredPedidos, state.filtroDia, dayLabels, today, tomorrowStr]);
 
   const pedidosRecogida = useMemo(() => {
-    const todayDate = new Date(today + "T00:00:00-06:00"); 
+    const todayDate = new Date(today + "T00:00:00-06:00");
     console.log("Today Date for Recogida:", todayDate);
 
-    const recogidaCandidates = filteredPedidos.filter(p => p.tipo === "recogida");
-    console.log("Candidatos a recogida:", recogidaCandidates.map(p => ({ id: p.id, entregaReal: p.entregaReal, repartidorId: p.repartidorId, tipo: p.tipo })));
-
     const recogida = filteredPedidos
-     .filter(
+      .filter(
         (p) =>
           p.tipo === "recogida" &&
-          (p.repartidorId === null || p.repartidorId === undefined) 
+          (p.repartidorId === null || p.repartidorId === undefined)
       )
-      .map(p => {
+      .map((p) => {
         const entregaDate = new Date(p.entregaReal + "T00:00:00-06:00");
-        console.log(`Pedido entrega reala ${p.id} - entregaReal: ${p.entregaReal}, Date: ${entregaDate}, Comparación: ${entregaDate <= todayDate}`);
+        console.log(
+          `Pedido ${p.id} - entregaReal: ${
+            p.entregaReal
+          }, Date: ${entregaDate}, Comparación: ${entregaDate <= todayDate}`
+        );
         return p;
       })
-      .sort((a, b) => new Date(b.entregaReal + "T00:00:00-06:00") - new Date(a.entregaReal + "T00:00:00-06:00"));
+      .sort(
+        (a, b) =>
+          new Date(b.entregaReal + "T00:00:00-06:00") -
+          new Date(a.entregaReal + "T00:00:00-06:00")
+      );
 
     console.log("Pedidos Recogida filtrados:", recogida);
     return recogida;
@@ -1062,27 +1711,33 @@ const AsignacionPedidosGeo = () => {
   }, [filteredPedidos]);
 
   const allPedidos = useMemo(() => {
-    const uniquePedidos = [...new Set([...pedidosEntrega, ...pedidosRecogida, ...pedidosAtrasados].map(p => JSON.stringify(p)))].map(p => JSON.parse(p));
+    const uniquePedidos = [
+      ...new Set(
+        [...pedidosEntrega, ...pedidosRecogida, ...pedidosAtrasados].map((p) =>
+          JSON.stringify(p)
+        )
+      ),
+    ].map((p) => JSON.parse(p));
     return uniquePedidos;
   }, [pedidosEntrega, pedidosRecogida, pedidosAtrasados]);
-
-  console.log("All Pedidos:", allPedidos);
-  console.log("Pedidos Recogida:", pedidosRecogida);
 
   const treePedidos = useMemo(() => {
     return allPedidos.reduce((acc, p) => {
       acc[p.estado] = acc[p.estado] || {};
       acc[p.estado][p.municipio] = acc[p.estado][p.municipio] || {};
-      acc[p.estado][p.municipio][p.localidad] = acc[p.estado][p.municipio][p.localidad] || {
+      acc[p.estado][p.municipio][p.localidad] = acc[p.estado][p.municipio][
+        p.localidad
+      ] || {
         entrega: [],
         recogida: [],
         atrasados: [],
       };
-      acc[p.estado][p.municipio][p.localidad][p.atrasado ? "atrasados" : p.tipo].push(p);
+      acc[p.estado][p.municipio][p.localidad][
+        p.atrasado ? "atrasados" : p.tipo
+      ].push(p);
       return acc;
     }, {});
   }, [allPedidos]);
-  
 
   const repartidoresActivos = useMemo(
     () =>
@@ -1113,35 +1768,67 @@ const AsignacionPedidosGeo = () => {
 
   const historialRepartidor = useMemo(() => {
     const historial = {};
-    Array.isArray(state.repartidores) &&
-      state.repartidores.forEach((r) => {
-        historial[r.id] = state.pedidos.filter((p) => p.repartidorId === r.id);
+    if (Array.isArray(state.historialPedidos)) {
+      state.historialPedidos.forEach((p) => {
+        const repartidor = p.repartidor || {
+          id: null,
+          nombre: "Desconocido",
+          correo: "Sin correo",
+        };
+        const repartidorId = repartidor.id;
+        if (repartidorId) {
+          historial[repartidorId] = historial[repartidorId] || [];
+          historial[repartidorId].push({
+            ...p,
+            idPedido: p.idPedido,
+            idRastreo: p.idRastreo,
+            fechaAsignacion: p.fechaAsignacion,
+            tipoPedidoEstado: p.tipoPedidoEstado,
+            estado: p.estado,
+            municipio: p.municipio,
+            totalPagar: p.totalPagar || "0.00",
+            estadoActual: p.estadoActual || "Desconocido",
+            repartidor, // Incluimos el objeto repartidor completo
+          });
+        }
       });
+    }
+    console.log("Historial de repartidor:", historial);
     return historial;
-  }, [state.pedidos, state.repartidores]);
+  }, [state.historialPedidos]);
 
   const treeHistorial = useMemo(() => {
     const historial = {};
     Object.values(historialRepartidor).forEach((pedidos) => {
       pedidos.forEach((p) => {
+        const repartidor = p.repartidor || {
+          id: null,
+          nombre: "Desconocido",
+          correo: "Sin correo",
+        };
         historial[p.estado] = historial[p.estado] || {};
         historial[p.estado][p.municipio] =
           historial[p.estado][p.municipio] || {};
         historial[p.estado][p.municipio][p.localidad] =
           historial[p.estado][p.municipio][p.localidad] || {};
-        historial[p.estado][p.municipio][p.localidad][p.repartidorId] =
-          historial[p.estado][p.municipio][p.localidad][p.repartidorId] || [];
-        historial[p.estado][p.municipio][p.localidad][p.repartidorId].push(p);
+        historial[p.estado][p.municipio][p.localidad][repartidor.id] =
+          historial[p.estado][p.municipio][p.localidad][repartidor.id] || [];
+        historial[p.estado][p.municipio][p.localidad][repartidor.id].push(p);
       });
     });
+    console.log("Tree Historial:", historial);
     return historial;
   }, [historialRepartidor]);
+
+ 
 
   const asignarPedidos = async () => {
     if (!state.repartidorSel || state.pedidosSel.length === 0) {
       toast.error("Seleccione un repartidor y pedidos");
       return;
     }
+
+    setIsAssigning(true);
 
     try {
       await api.post(
@@ -1155,26 +1842,33 @@ const AsignacionPedidosGeo = () => {
           withCredentials: true,
         }
       );
-
       dispatch({ type: "ASIGNAR_PEDIDOS" });
-      toast.success("Pedidos asignados con éxito", {
-        position: "top-right",
-        autoClose: 3000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-      });
+      toast.success("Pedidos asignados con éxito");
+
+      // Actualizar el historial después de asignar
+      setIsLoadingHistorial(true);
+      const dateStr = selectedDate.toISOString().split("T")[0];
+      const historialRes = await api.get(
+        "/api/repartidor/repartidores/historial",
+        {
+          headers: { "X-CSRF-Token": csrfToken },
+          withCredentials: true,
+          params: { fecha: dateStr },
+        }
+      );
+
+      if (historialRes.data.success) {
+        dispatch({
+          type: "SET_HISTORIAL",
+          historial: historialRes.data.data,
+        });
+      }
     } catch (error) {
       console.error("Error al asignar pedidos:", error);
-      toast.error("Error al asignar pedidos. Se está corrigiendo este error.", {
-        position: "top-right",
-        autoClose: 3000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-      });
+      toast.error("Error al asignar pedidos. Se está corrigiendo este error.");
+    } finally {
+      setIsAssigning(false);
+      setIsLoadingHistorial(false);
     }
   };
 
@@ -1186,8 +1880,28 @@ const AsignacionPedidosGeo = () => {
     dispatch({ type: "SET_PAGINATION", key, page });
   };
 
-  const handleViewDetails = (repartidorId) => {
-    dispatch({ type: "SET_MODAL", open: true, id: repartidorId });
+  const handleViewDetails = async (
+    repartidorId,
+    estado,
+    municipio,
+    localidad
+  ) => {
+    console.log("view", repartidorId, estado, municipio, localidad);
+
+    const pedidos =
+      treeHistorial[estado]?.[municipio]?.[localidad]?.[repartidorId] || [];
+
+    if (pedidos.length > 0) {
+      await Promise.all(pedidos.map((p) => fetchPedidoDetalles(p.idPedido)));
+    }
+
+    dispatch({
+      type: "SET_MODAL",
+      open: true,
+      id: repartidorId,
+      selectedLocation: { estado, municipio, localidad },
+      filteredPedidos: pedidos, // Usar los pedidos obtenidos directamente
+    });
   };
 
   const handleCloseModal = () => {
@@ -1198,18 +1912,56 @@ const AsignacionPedidosGeo = () => {
     dispatch({ type: "CLEAR_FILTERS" });
   };
 
-const handleFilterChange = (filters) => {
-  dispatch({ type: "SET_FILTERS", filters });
-};
+  const handleFilterChange = (filters) => {
+    dispatch({ type: "SET_FILTERS", filters });
+  };
 
+  const fetchPedidoDetalles = async (idPedido) => {
+    try {
+      const response = await api.get(
+        `/api/repartidor/repartidores/historial/${idPedido}/detalles`,
+        {
+          headers: { "X-CSRF-Token": csrfToken },
+          withCredentials: true,
+        }
+      );
+
+      console.log("Datos recibidos de pedidos detalles", response);
+      if (response.data.success) {
+        dispatch({
+          type: "SET_DETALLES_PEDIDO",
+          idPedido,
+          detalles: response.data.data,
+        });
+      }
+    } catch (error) {
+      console.error("Error al obtener detalles del pedido:", error);
+    }
+  };
 
   const totalPedidos = state.totals.totalPedidos;
   const totalRepartidoresActivos = state.totals.totalRepartidores;
   const assignedPedidos = state.totals.totalPedidosAsignados;
-  console.log("taotal de pedidos ", assignedPedidos)
 
   if (state.isLoading) return <Loading />;
   console.log("State completo:", state);
+
+  // Paginación del historial
+  const itemsPerPageHistorial = 2;
+  const totalHistorialPages = Math.ceil(
+    state.historialPedidos.length / itemsPerPageHistorial
+  );
+  const currentHistorialPage = Math.min(
+    state.historialPage,
+    totalHistorialPages
+  );
+  const startHistorialIndex =
+    (currentHistorialPage - 1) * itemsPerPageHistorial;
+  const endHistorialIndex = startHistorialIndex + itemsPerPageHistorial;
+  const paginatedHistorial = state.historialPedidos.slice(
+    startHistorialIndex,
+    endHistorialIndex
+  );
 
   return (
     <div className="max-w-7xl mx-auto p-4 sm:p-6 bg-gray-50 dark:bg-gray-900 min-h-screen">
@@ -1218,9 +1970,14 @@ const handleFilterChange = (filters) => {
           totalPedidos={totalPedidos}
           totalRepartidores={totalRepartidoresActivos}
           assignedPedidos={assignedPedidos}
+          className="mb-6 shadow-lg border border-gray-200 dark:border-gray-700 rounded-xl"
         />
       )}
-      <FilterPanel onFilterChange={handleFilterChange} />
+      <FilterPanel
+        onFilterChange={handleFilterChange}
+        totalsByLocation={state.totalsByLocation}
+        className="mb-6 bg-white dark:bg-gray-800 p-4 rounded-xl shadow-md border border-gray-200 dark:border-gray-700"
+      />
       {state.notification && (
         <Notification
           message={state.notification.message}
@@ -1230,22 +1987,25 @@ const handleFilterChange = (filters) => {
           }
         />
       )}
+
       <div className="flex flex-col lg:flex-row gap-6">
-        <div className="w-full lg:w-1/3 bg-white dark:bg-gray-800 rounded-2xl p-5 shadow-xl border border-gray-200 dark:border-gray-700">
-          <div className="flex justify-between items-center mb-5">
-            <h2 className="text-2xl font-bold flex items-center text-gray-900 dark:text-gray-100">
-              <User className="h-6 w-6 mr-3 text-indigo-600 dark:text-indigo-400" />
+        {/* Panel de Repartidores */}
+        <div className="w-full lg:w-1/3 bg-white dark:bg-gray-800 rounded-xl p-5 shadow-lg border border-gray-200 dark:border-gray-700 transition-all duration-300 hover:shadow-xl">
+          <div className="flex justify-between items-center mb-6 border-b border-gray-200 dark:border-gray-700 pb-4">
+            <h2 className="text-2xl font-semibold flex items-center text-gray-900 dark:text-gray-100">
+              <User className="h-6 w-6 mr-3 text-[#ffb300] dark:text-[#ffca4b]" />
               Repartidores Activos
             </h2>
             <Tooltip content="Restablecer todos los filtros">
               <button
                 onClick={resetFilters}
-                className="px-2 py-1 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded-full hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors duration-200"
+                className="px-3 py-2 bg-[#ffb300]/20 dark:bg-[#ffca4b]/20 text-[#ffb300] dark:text-[#ffca4b] rounded-full hover:bg-[#ffb300]/30 dark:hover:bg-[#ffca4b]/30 transition-colors duration-200"
               >
                 <RefreshCw className="h-5 w-5" />
               </button>
             </Tooltip>
           </div>
+
           <div className="relative mb-5">
             <Search className="h-5 w-5 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500" />
             <input
@@ -1278,52 +2038,14 @@ const handleFilterChange = (filters) => {
           )}
           {state.repartidorSel &&
             !state.repartidoresError &&
-            !state.repartidoresEmpty && (
-              <div className="mt-5">
-                <h3 className="text-xl font-semibold mb-4 flex items-center text-gray-700 dark:text-gray-300">
-                  <Package className="h-5 w-5 mr-3 text-indigo-600 dark:text-indigo-400" />
-                  Historial (
-                  {Array.isArray(state.repartidores)
-                    ? state.repartidores.find(
-                        (r) => r.id === state.repartidorSel
-                      )?.nombre || "Desconocido"
-                    : "Desconocido"}
-                  )
-                </h3>
-                {historialRepartidor[state.repartidorSel]?.length === 0 ? (
-                  <NoDataDisplay message="No hay pedidos asignados." />
-                ) : (
-                  <div className="space-y-3 max-h-48 overflow-y-auto">
-                    {historialRepartidor[state.repartidorSel]?.map((p) => (
-                      <div
-                        key={p.id}
-                        className="p-3 bg-gray-50 dark:bg-gray-700 rounded-xl border border-gray-200 dark:border-gray-600"
-                      >
-                        <p className="font-medium text-sm text-gray-900 dark:text-gray-100">
-                          #{p.id} – {p.descripcion}
-                        </p>
-                        <div className="flex items-center text-xs space-x-2 mt-1">
-                          <span className="flex items-center">
-                            <Clock className="h-4 w-4 text-gray-600 dark:text-gray-400 mr-1" />
-                            {p.fechaEntrega}
-                          </span>
-                          <span className="flex items-center">
-                            <MapPin className="h-4 w-4 text-gray-600 dark:text-gray-400 mr-1" />
-                            {p.localidad}
-                          </span>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-            )}
+            !state.repartidoresEmpty && <></>}
         </div>
 
-        <div className="w-full lg:w-2/3 bg-white dark:bg-gray-800 rounded-2xl p-5 shadow-xl border border-gray-200 dark:border-gray-700">
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-5 gap-4">
-            <h2 className="text-2xl font-bold flex items-center text-gray-900 dark:text-gray-100">
-              <Package className="h-6 w-6 mr-3 text-indigo-600 dark:text-indigo-400" />
+        {/* Panel de Pedidos */}
+        <div className="w-full lg:w-2/3 bg-white dark:bg-gray-800 rounded-xl p-5 shadow-lg border border-gray-200 dark:border-gray-700 transition-all duration-300 hover:shadow-xl">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 border-b border-gray-200 dark:border-gray-700 pb-4">
+            <h2 className="text-2xl font-semibold flex items-center text-gray-900 dark:text-gray-100">
+              <Package className="h-6 w-6 mr-3 text-[#ffb300] dark:text-[#ffca4b]" />
               Pedidos
             </h2>
             {state.repartidorSel &&
@@ -1332,35 +2054,63 @@ const handleFilterChange = (filters) => {
               !state.pedidosEmpty && (
                 <button
                   onClick={asignarPedidos}
-                  className="px-4 py-2 bg-indigo-600 dark:bg-indigo-700 text-white text-sm rounded-xl hover:bg-indigo-700 dark:hover:bg-indigo-800 transition-colors duration-200"
+                  className="w-full sm:w-auto px-3 sm:px-2 py-2 sm:py-1.5 bg-gradient-to-r from-[#ffb300] to-[#ffca4b] dark:from-[#e59400] text-white text-sm sm:text-base font-medium rounded-lg hover:from-[#e59400] hover:to-[#ffca4b] dark:hover:from-[#d07d00] dark:hover:to-[#ffca4b] transition-all duration-300 shadow-md hover:shadow-lg transform hover:scale-105 active:scale-95 focus:outline-none focus:ring-2 focus:ring-[#ffb300]/50 focus:ring-offset-2 dark:focus:ring-offset-gray-900"
                 >
-                  Asignar {state.pedidosSel.length} Pedidos
+                  <span className="flex items-center justify-center gap-1 sm:gap-2 whitespace-nowrap">
+                    {isAssigning ? (
+                      <Loader2 className="h-4 w-4 sm:h-5 sm:w-5 animate-spin" />
+                    ) : (
+                      <>
+                        <svg
+                          className="h-4 w-4 sm:h-5 sm:w-5 flex-shrink-0"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                          aria-hidden="true"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M12 6v6m0 0v6m0-6h6m-6 0H6"
+                          />
+                        </svg>
+                        <span className="hidden sm:inline">Asignar</span>
+                        <span className="font-semibold">
+                          ({state.pedidosSel.length})
+                        </span>
+                        <span className="hidden sm:inline">
+                          {state.pedidosSel.length === 1 ? "Pedido" : "Pedidos"}
+                        </span>
+                      </>
+                    )}
+                  </span>
                 </button>
               )}
           </div>
 
-          <div className="flex gap-4 mb-5">
+          <div className="flex flex-wrap gap-3 mb-4 sm:mb-6">
             <div className="flex items-center">
-              <div className="w-4 h-4 bg-green-100 dark:bg-green-900 mr-2"></div>
-              <span className="text-sm text-gray-900 dark:text-gray-100">
+              <div className="w-3 h-3 sm:w-4 sm:h-4 bg-gradient-to-br from-green-400 to-green-600 dark:from-green-500 dark:to-green-700 rounded-full mr-1 sm:mr-2"></div>
+              <span className="text-xs sm:text-sm text-gray-900 dark:text-gray-100 font-medium">
                 Entrega
               </span>
             </div>
             <div className="flex items-center">
-              <div className="w-4 h-4 bg-orange-100 dark:bg-orange-900 mr-2"></div>
-              <span className="text-sm text-gray-900 dark:text-gray-100">
+              <div className="w-3 h-3 sm:w-4 sm:h-4 bg-gradient-to-br from-orange-400 to-orange-600 dark:from-orange-500 dark:to-orange-700 rounded-full mr-1 sm:mr-2"></div>
+              <span className="text-xs sm:text-sm text-gray-900 dark:text-gray-100 font-medium">
                 Recogida
               </span>
             </div>
             <div className="flex items-center">
-              <div className="w-4 h-4 bg-red-100 dark:bg-red-900 mr-2"></div>
-              <span className="text-sm text-gray-900 dark:text-gray-100">
+              <div className="w-3 h-3 sm:w-4 sm:h-4 bg-gradient-to-br from-red-400 to-red-600 dark:from-red-500 dark:to-red-700 rounded-full mr-1 sm:mr-2"></div>
+              <span className="text-xs sm:text-sm text-gray-900 dark:text-gray-100 font-medium">
                 Atrasados
               </span>
             </div>
           </div>
 
-          <div className="flex gap-2 mb-5 flex-wrap">
+          <div className="flex gap-1.5 sm:gap-2 mb-4 sm:mb-5 overflow-x-auto pb-2 scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-600">
             {dayLabels.map((dia, idx) => (
               <button
                 key={idx}
@@ -1371,11 +2121,15 @@ const handleFilterChange = (filters) => {
                     filtroDia: idx.toString(),
                   });
                 }}
-                className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all duration-200
-                  ${state.filtroDia === idx.toString()
-                    ? "bg-gradient-to-r from-blue-600 to-indigo-700 text-white shadow-md ring-2 ring-blue-400"
-                    : "bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-600 hover:shadow-sm"
-                  }`}
+                className={`
+                  flex-shrink-0 px-2.5 sm:px-3 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-medium 
+                  transition-all duration-200 whitespace-nowrap border
+                  ${
+                    state.filtroDia === idx.toString()
+                      ? "bg-blue-600 text-white border-blue-600 shadow-sm"
+                      : "bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border-gray-200 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 hover:border-gray-300 dark:hover:border-gray-500"
+                  }
+                `}
               >
                 {dia.label}
               </button>
@@ -1387,118 +2141,145 @@ const handleFilterChange = (filters) => {
           ) : state.pedidosEmpty ? (
             <NoDataDisplay message="Sin pedidos disponibles" />
           ) : (
-            <div className="space-y-5">
+            <div className="space-y-3">
               {Object.keys(treePedidos).length === 0 ? (
                 <NoDataDisplay message="No hay pedidos de entrega para esta fecha." />
               ) : (
                 Object.entries(treePedidos).map(([estado, municipios]) => (
                   <details
                     key={estado}
-                    className="group dark:bg-gray-800 p-3 dark:border-gray-700"
+                    className="group dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700"
                   >
-                    <summary className="list-none cursor-pointer flex justify-between items-center font-bold text-lg text-gray-900 dark:text-gray-100 py-2">
-                      {estado} (
-                      {Object.values(municipios)
-                        .flatMap(Object.values)
-                        .flat()
-                        .reduce(
-                          (sum, loc) =>
-                            sum + loc.entrega.length + loc.recogida.length + loc.atrasados.length,
-                          0
-                        )}
-                      )
-                      <span className="text-indigo-600 dark:text-indigo-400 transition-transform duration-200 group-open:rotate-180">
+                    <summary className="list-none cursor-pointer flex justify-between items-center font-semibold text-base text-gray-900 dark:text-gray-100 p-4 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-lg transition-colors">
+                      <span>
+                        {estado} (
+                        {Object.values(municipios)
+                          .flatMap(Object.values)
+                          .flat()
+                          .reduce(
+                            (sum, loc) =>
+                              sum +
+                              loc.entrega.length +
+                              loc.recogida.length +
+                              loc.atrasados.length,
+                            0
+                          )}
+                        )
+                      </span>
+                      <span className="text-indigo-600 dark:text-indigo-400 transition-transform duration-200 group-open:rotate-180 ml-2">
                         ▼
                       </span>
                     </summary>
-                    {Object.entries(municipios).map(
-                      ([municipio, localidades]) => (
-                        <details
-                          key={municipio}
-                          className="ml-4 mt-2 group bg-white dark:bg-gray-800 rounded-xl p-3 border-2 border-gray-200 dark:border-gray-700 shadow-md"
-                        >
-                          <summary className="list-none cursor-pointer flex justify-between items-center font-medium text-md text-gray-700 dark:text-gray-300 py-2">
-                            {municipio} (
-                            {Object.values(localidades)
-                              .flat()
-                              .reduce(
-                                (sum, loc) =>
-                                  sum +
-                                  loc.entrega.length +
-                                  loc.recogida.length +
-                                  loc.atrasados.length,
-                                0
-                              )}
-                            )
-                            <span className="text-indigo-600 dark:text-indigo-400 transition-transform duration-200 group-open:rotate-180">
-                              ▼
-                            </span>
-                          </summary>
-                          {Object.entries(localidades).map(
-                            ([localidad, { entrega, recogida, atrasados }]) => {
-                              const itemsPerPage = 6;
-                              const totalEntregaPages = Math.ceil(
-                                entrega.length / itemsPerPage
-                              );
-                              const totalRecogidaPages = Math.ceil(
-                                recogida.length / itemsPerPage
-                              );
-                              const totalAtrasadosPages = Math.ceil(
-                                atrasados.length / itemsPerPage
-                              );
-                              const currentEntregaPage =
-                                state.pagination[
-                                  `${estado}-${municipio}-${localidad}-entrega`
-                                ] || 1;
-                              const currentRecogidaPage =
-                                state.pagination[
-                                  `${estado}-${municipio}-${localidad}-recogida`
-                                ] || 1;
-                              const currentAtrasadosPage =
-                                state.pagination[
-                                  `${estado}-${municipio}-${localidad}-atrasados`
-                                ] || 1;
-                              const startEntregaIndex =
-                                (currentEntregaPage - 1) * itemsPerPage;
-                              const startRecogidaIndex =
-                                (currentRecogidaPage - 1) * itemsPerPage;
-                              const startAtrasadosIndex =
-                                (currentAtrasadosPage - 1) * itemsPerPage;
-                              const paginatedEntrega = entrega.slice(
-                                startEntregaIndex,
-                                startEntregaIndex + itemsPerPage
-                              );
-                              const paginatedRecogida = recogida.slice(
-                                startRecogidaIndex,
-                                startRecogidaIndex + itemsPerPage
-                              );
-                              const paginatedAtrasados = atrasados.slice(
-                                startAtrasadosIndex,
-                                startAtrasadosIndex + itemsPerPage
-                              );
 
-                              return (
-                                <details
-                                  key={localidad}
-                                  className="ml-4 mt-2 group dark:bg-gray-800 rounded-xl p-3 border-gray-200 dark:border-gray-700"
-                                >
-                                  <summary className="list-none cursor-pointer flex justify-between items-center font-medium text-sm text-gray-600 dark:text-gray-400 py-2">
-                                    {localidad} (Entrega: {entrega.length},
-                                    Recogida: {recogida.length}, Atrasados:{" "}
-                                    {atrasados.length})
-                                    <span className="text-indigo-600 dark:text-indigo-400 transition-transform duration-200 group-open:rotate-180">
-                                      ▼
-                                    </span>
-                                  </summary>
+                    <div className="px-4 pb-4 space-y-3 dark:bg-gray-750 dark:border-gray-600">
+                      {Object.entries(municipios).map(
+                        ([municipio, localidades]) => (
+                          <details
+                            key={municipio}
+                            className="group dark:bg-gray-750 rounded-lg border border-gray-100 dark:border-gray-600"
+                          >
+                            <summary className="list-none cursor-pointer flex justify-between items-center font-medium text-sm text-gray-700 dark:text-gray-300 p-3 hover:bg-gray-100 dark:hover:bg-gray-600 rounded-lg transition-colors">
+                              <span>
+                                {municipio} (
+                                {Object.values(localidades)
+                                  .flat()
+                                  .reduce(
+                                    (sum, loc) =>
+                                      sum +
+                                      loc.entrega.length +
+                                      loc.recogida.length +
+                                      loc.atrasados.length,
+                                    0
+                                  )}
+                                )
+                              </span>
+                              <span className="text-indigo-600 dark:text-indigo-400 transition-transform duration-200 group-open:rotate-180 ml-2">
+                                ▼
+                              </span>
+                            </summary>
 
-                                  <div className="ml-4 space-y-4 mt-2">
-                                    {entrega.length > 0 && (
-                                      <div>
-                                        <h6 className="text-sm font-medium text-green-700 dark:text-green-400 mb-2">
-                                          Entrega
-                                        </h6>
-                                        <div className="px-4">
-                                          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-4">
+                            <div className="px-3 pb-3 space-y-2">
+                              {Object.entries(localidades).map(
+                                ([
+                                  localidad,
+                                  { entrega, recogida, atrasados },
+                                ]) => {
+                                  const itemsPerPage = 6;
+                                  const totalEntregaPages = Math.ceil(
+                                    entrega.length / itemsPerPage
+                                  );
+                                  const totalRecogidaPages = Math.ceil(
+                                    recogida.length / itemsPerPage
+                                  );
+                                  const totalAtrasadosPages = Math.ceil(
+                                    atrasados.length / itemsPerPage
+                                  );
+
+                                  const currentEntregaPage =
+                                    state.pagination[
+                                      `${estado}-${municipio}-${localidad}-entrega`
+                                    ] || 1;
+                                  const currentRecogidaPage =
+                                    state.pagination[
+                                      `${estado}-${municipio}-${localidad}-recogida`
+                                    ] || 1;
+                                  const currentAtrasadosPage =
+                                    state.pagination[
+                                      `${estado}-${municipio}-${localidad}-atrasados`
+                                    ] || 1;
+
+                                  const startEntregaIndex =
+                                    (currentEntregaPage - 1) * itemsPerPage;
+                                  const startRecogidaIndex =
+                                    (currentRecogidaPage - 1) * itemsPerPage;
+                                  const startAtrasadosIndex =
+                                    (currentAtrasadosPage - 1) * itemsPerPage;
+
+                                  const paginatedEntrega = entrega
+                                    .slice(
+                                      startEntregaIndex,
+                                      startEntregaIndex + itemsPerPage
+                                    )
+                                    .sort((a, b) =>
+                                      a.descripcion.localeCompare(b.descripcion)
+                                    );
+                                  const paginatedRecogida = recogida
+                                    .slice(
+                                      startRecogidaIndex,
+                                      startRecogidaIndex + itemsPerPage
+                                    )
+                                    .sort((a, b) =>
+                                      a.descripcion.localeCompare(b.descripcion)
+                                    );
+                                  const paginatedAtrasados = atrasados
+                                    .slice(
+                                      startAtrasadosIndex,
+                                      startAtrasadosIndex + itemsPerPage
+                                    )
+                                    .sort((a, b) =>
+                                      a.descripcion.localeCompare(b.descripcion)
+                                    );
+
+                                  return (
+                                    <div key={localidad} className="space-y-3">
+                                      {(paginatedEntrega.length > 0 ||
+                                        paginatedRecogida.length > 0 ||
+                                        paginatedAtrasados.length > 0) && (
+                                        <h3 className="text-md font-semibold text-gray-900 dark:text-gray-100 px-2">
+                                          {localidad} (
+                                          {entrega.length +
+                                            recogida.length +
+                                            atrasados.length}
+                                          )
+                                        </h3>
+                                      )}
+
+                                      {paginatedEntrega.length > 0 && (
+                                        <div>
+                                          <h4 className="text-sm font-medium text-green-700 dark:text-green-400 px-2 mb-1">
+                                            Entregas
+                                          </h4>
+                                          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
                                             {paginatedEntrega.map((p) => (
                                               <PedidoCard
                                                 key={p.id}
@@ -1510,25 +2291,28 @@ const handleFilterChange = (filters) => {
                                               />
                                             ))}
                                           </div>
+                                          {totalEntregaPages > 1 && (
+                                            <Pagination
+                                              currentPage={currentEntregaPage}
+                                              totalPages={totalEntregaPages}
+                                              onPageChange={(page) =>
+                                                handlePageChange(
+                                                  `${estado}-${municipio}-${localidad}-entrega`,
+                                                  page
+                                                )
+                                              }
+                                              localityKey={`${estado}-${municipio}-${localidad}-entrega`}
+                                            />
+                                          )}
                                         </div>
+                                      )}
 
-                                        {totalEntregaPages > 1 && (
-                                          <Pagination
-                                            currentPage={currentEntregaPage}
-                                            totalPages={totalEntregaPages}
-                                            onPageChange={handlePageChange}
-                                            localityKey={`${estado}-${municipio}-${localidad}-entrega`}
-                                          />
-                                        )}
-                                      </div>
-                                    )}
-                                    {recogida.length > 0 && (
-                                      <div>
-                                        <h6 className="text-sm font-medium text-orange-700 dark:text-orange-400 mt-4 mb-2">
-                                          Recogida
-                                        </h6>
-                                        <div className="px-4">
-                                          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-4">
+                                      {paginatedRecogida.length > 0 && (
+                                        <div>
+                                          <h4 className="text-sm font-medium text-orange-700 dark:text-orange-400 px-2 mb-1">
+                                            Recogidas
+                                          </h4>
+                                          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
                                             {paginatedRecogida.map((p) => (
                                               <PedidoCard
                                                 key={p.id}
@@ -1540,25 +2324,28 @@ const handleFilterChange = (filters) => {
                                               />
                                             ))}
                                           </div>
+                                          {totalRecogidaPages > 1 && (
+                                            <Pagination
+                                              currentPage={currentRecogidaPage}
+                                              totalPages={totalRecogidaPages}
+                                              onPageChange={(page) =>
+                                                handlePageChange(
+                                                  `${estado}-${municipio}-${localidad}-recogida`,
+                                                  page
+                                                )
+                                              }
+                                              localityKey={`${estado}-${municipio}-${localidad}-recogida`}
+                                            />
+                                          )}
                                         </div>
+                                      )}
 
-                                        {totalRecogidaPages > 1 && (
-                                          <Pagination
-                                            currentPage={currentRecogidaPage}
-                                            totalPages={totalRecogidaPages}
-                                            onPageChange={handlePageChange}
-                                            localityKey={`${estado}-${municipio}-${localidad}-recogida`}
-                                          />
-                                        )}
-                                      </div>
-                                    )}
-                                    {atrasados.length > 0 && (
-                                      <div>
-                                        <h6 className="text-sm font-medium text-red-700 dark:text-red-400 mt-4 mb-2">
-                                          Atrasados
-                                        </h6>
-                                        <div className="px-4">
-                                          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-4">
+                                      {paginatedAtrasados.length > 0 && (
+                                        <div>
+                                          <h4 className="text-sm font-medium text-red-700 dark:text-red-400 px-2 mb-1">
+                                            Atrasados
+                                          </h4>
+                                          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
                                             {paginatedAtrasados.map((p) => (
                                               <PedidoCard
                                                 key={p.id}
@@ -1570,149 +2357,220 @@ const handleFilterChange = (filters) => {
                                               />
                                             ))}
                                           </div>
+                                          {totalAtrasadosPages > 1 && (
+                                            <Pagination
+                                              currentPage={currentAtrasadosPage}
+                                              totalPages={totalAtrasadosPages}
+                                              onPageChange={(page) =>
+                                                handlePageChange(
+                                                  `${estado}-${municipio}-${localidad}-atrasados`,
+                                                  page
+                                                )
+                                              }
+                                              localityKey={`${estado}-${municipio}-${localidad}-atrasados`}
+                                            />
+                                          )}
                                         </div>
-
-                                        {totalAtrasadosPages > 1 && (
-                                          <Pagination
-                                            currentPage={currentAtrasadosPage}
-                                            totalPages={totalAtrasadosPages}
-                                            onPageChange={handlePageChange}
-                                            localityKey={`${estado}-${municipio}-${localidad}-atrasados`}
-                                          />
-                                        )}
-                                      </div>
-                                    )}
-                                  </div>
-                                </details>
-                              );
-                            }
-                          )}
-                        </details>
-                      )
-                    )}
+                                      )}
+                                    </div>
+                                  );
+                                }
+                              )}
+                            </div>
+                          </details>
+                        )
+                      )}
+                    </div>
                   </details>
                 ))
               )}
             </div>
           )}
+
+          {/* Historial Section */}
+
+          <div className="mt-6 px-2 sm:px-0">
+            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-4 gap-2">
+              <h2 className="text-xl font-bold flex items-center text-gray-900 dark:text-gray-100">
+                <Clock className="h-5 w-5 mr-2 text-indigo-600 dark:text-indigo-400" />
+                Historial de Asignaciones
+              </h2>
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="text-sm text-gray-600 dark:text-gray-400">
+                  Selecciona fecha:
+                </span>
+                <DatePicker
+                  selected={selectedDate}
+                  onChange={(date) => setSelectedDate(date)}
+                  dateFormat="dd/MM/yyyy"
+                  className="p-2 border rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 border-gray-200 dark:border-gray-600 focus:ring-2 focus:ring-indigo-500 dark:focus:ring-indigo-400 text-sm w-full sm:w-auto"
+                  minDate={new Date("2023-01-01")}
+                  maxDate={new Date()}
+                />
+              </div>
+            </div>
+
+            {isLoadingHistorial ? (
+              <Loading />
+            ) : state.historialPedidos.length > 0 ? (
+              <div className="space-y-3">
+                {Object.entries(treeHistorial).map(([estado, municipios]) => {
+                  const total = Object.values(municipios)
+                    .flatMap(Object.values)
+                    .flatMap(Object.values)
+                    .reduce(
+                      (sum, loc) => sum + Object.values(loc).flat().length,
+                      0
+                    );
+                  const itemsPerPage = 3; // Número de municipios por página
+                  const totalMunicipios = Object.keys(municipios).length;
+                  const totalPages = Math.ceil(totalMunicipios / itemsPerPage);
+                  const currentPage = state.pagination[`${estado}`] || 1;
+                  const startIndex = (currentPage - 1) * itemsPerPage;
+                  const endIndex = startIndex + itemsPerPage;
+                  const paginatedMunicipios = Object.entries(municipios)
+                    .slice(startIndex, endIndex)
+                    .reduce((acc, [key, value]) => {
+                      acc[key] = value;
+                      return acc;
+                    }, {});
+
+                  return (
+                    <details
+                      key={estado}
+                      className="group rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden"
+                    >
+                      <summary className="list-none cursor-pointer flex justify-between items-center font-semibold text-base text-gray-900 dark:text-gray-100 px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                        <span className="truncate max-w-[80%]">
+                          {estado} ({total})
+                        </span>
+                        <span className="text-indigo-600 dark:text-indigo-400 transition-transform duration-200 group-open:rotate-180 ml-2">
+                          ▼
+                        </span>
+                      </summary>
+
+                      <div className="px-4 pb-4 space-y-3">
+                        {Object.entries(municipios).map(
+                          ([municipio, localidades]) => {
+                            const totalMunicipio = Object.values(localidades)
+                              .flat()
+                              .reduce(
+                                (sum, loc) =>
+                                  sum + Object.values(loc).flat().length,
+                                0
+                              );
+
+                            return (
+                              <details
+                                key={municipio}
+                                className="group rounded-md border border-gray-100 dark:border-gray-600 bg-white dark:bg-gray-750 overflow-hidden"
+                              >
+                                <summary className="list-none cursor-pointer flex justify-between items-center font-medium text-sm text-gray-700 dark:text-gray-300 px-3 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors">
+                                  <span className="truncate max-w-[80%]">
+                                    {municipio} ({totalMunicipio})
+                                  </span>
+                                  <span className="text-indigo-600 dark:text-indigo-400 transition-transform duration-200 group-open:rotate-180 ml-2">
+                                    ▼
+                                  </span>
+                                </summary>
+
+                                <div className="px-3 pb-3 space-y-3">
+                                  {Object.entries(localidades).map(
+                                    ([localidad, repartidores]) => (
+                                      <div
+                                        key={localidad}
+                                        className="space-y-2 px-2"
+                                      >
+                                        <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100 truncate">
+                                          {localidad} (
+                                          {
+                                            Object.values(repartidores).flat()
+                                              .length
+                                          }
+                                          )
+                                        </h3>
+                                        <div className="space-y-2">
+                                          {Object.entries(repartidores).map(
+                                            ([repartidorId, pedidos]) => {
+                                              const repartidor =
+                                                state.repartidores.find(
+                                                  (r) =>
+                                                    r.id ===
+                                                    parseInt(repartidorId)
+                                                ) || {
+                                                  id: repartidorId,
+                                                  nombre: "Desconocido",
+                                                  correo: "Sin correo",
+                                                };
+                                              return (
+                                                <div
+                                                  className="w-full overflow-hidden"
+                                                  key={repartidorId}
+                                                >
+                                                  <HistorialCard
+                                                    repartidor={repartidor}
+                                                    pedidos={pedidos}
+                                                    onViewDetails={() =>
+                                                      handleViewDetails(
+                                                        repartidor.id,
+                                                        estado,
+                                                        municipio,
+                                                        localidad
+                                                      )
+                                                    }
+                                                  />
+                                                </div>
+                                              );
+                                            }
+                                          )}
+                                        </div>
+                                      </div>
+                                    )
+                                  )}
+                                </div>
+                              </details>
+                            );
+                          }
+                        )}
+
+                        {/* {totalPages > 1 && (
+                          <Pagination
+                            currentPage={currentPage}
+                            totalPages={totalPages}
+                            onPageChange={(page) =>
+                              dispatch({
+                                type: "SET_PAGINATION",
+                                key: `${estado}`,
+                                page,
+                              })
+                            }
+                            localityKey={`${estado}`}
+                          />
+                        )} */}
+                      </div>
+                    </details>
+                  );
+                })}
+              </div>
+            ) : (
+              <NoDataDisplay message="No hay historial para la fecha seleccionada." />
+            )}
+          </div>
+
         </div>
       </div>
 
-      {(state.pedidos.length > 0 || state.repartidores.length > 0) && (
-        <div className="mt-6 bg-white dark:bg-gray-800 rounded-2xl p-5 shadow-xl border border-gray-200 dark:border-gray-700">
-          <h2 className="text-2xl font-bold mb-5 flex items-center text-gray-900 dark:text-gray-100">
-            <Package className="h-6 w-6 mr-3 text-indigo-600 dark:text-indigo-400" />
-            Historial Pedidos
-          </h2>
-          {Object.keys(treeHistorial).length === 0 ? (
-            <NoDataDisplay message="No hay historial de pedidos." />
-          ) : (
-            Object.entries(treeHistorial).map(([estado, municipios]) => (
-              <details
-                key={estado}
-                className="group bg-white dark:bg-gray-800 rounded-xl p-3 border-2 border-gray-200 dark:border-gray-700 shadow-md mb-2"
-              >
-                <summary className="list-none cursor-pointer flex justify-between items-center font-bold text-lg text-gray-900 dark:text-gray-100 py-2">
-                  {estado}
-                  <span className="text-indigo-600 dark:text-indigo-400 transition-transform duration-200 group-open:rotate-180">
-                    ▼
-                  </span>
-                </summary>
-                {Object.entries(municipios).map(([municipio, localidades]) => (
-                  <details
-                    key={municipio}
-                    className="ml-4 mt-2 group bg-white dark:bg-gray-800 rounded-xl p-3 border-2 border-gray-200 dark:border-gray-700 shadow-md"
-                  >
-                    <summary className="list-none cursor-pointer flex justify-between items-center font-medium text-md text-gray-700 dark:text-gray-300 py-2">
-                      {municipio}
-                      <span className="text-indigo-600 dark:text-indigo-400 transition-transform duration-200 group-open:rotate-180">
-                        ▼
-                      </span>
-                    </summary>
-                    {Object.entries(localidades).map(
-                      ([localidad, repartidores]) => {
-                        const localityPedidos = Object.values(repartidores).flat();
-                        const totalItems = localityPedidos.length;
-                        const itemsPerPage = 2;
-                        const totalPages = Math.ceil(totalItems / itemsPerPage);
-                        const localityKey = `${estado}-${municipio}-${localidad}`;
-                        const currentPage = state.pagination[localityKey] || 1;
-                        const startIndex = (currentPage - 1) * itemsPerPage;
-                        const endIndex = startIndex + itemsPerPage;
-                        const paginatedPedidos = localityPedidos.slice(
-                          startIndex,
-                          endIndex
-                        );
-
-                        return (
-                          <details
-                            key={localidad}
-                            className="ml-4 mt-2 group bg-white dark:bg-gray-800 rounded-xl p-3 border-2 border-gray-200 dark:border-gray-700 shadow-md"
-                          >
-                            <summary className="list-none cursor-pointer flex justify-between items-center font-medium text-sm text-gray-600 dark:text-gray-400 py-2">
-                              {localidad} ({totalItems} pedidos)
-                              <span className="text-indigo-600 dark:text-indigo-400 transition-transform duration-200 group-open:rotate-180">
-                                ▼
-                              </span>
-                            </summary>
-                            <div className="ml-4 space-y-3 mt-2">
-                              {paginatedPedidos.map((p) => {
-                                const repartidor = Array.isArray(state.repartidores)
-                                  ? state.repartidores.find((r) => r.id === p.repartidorId) || {
-                                      nombre: "Desconocido",
-                                      correo: "Sin correo",
-                                    }
-                                  : {
-                                      nombre: "Desconocido",
-                                      correo: "Sin correo",
-                                    };
-                                return (
-                                  <HistorialCard
-                                    key={p.id}
-                                    repartidor={repartidor}
-                                    pedidos={[p]}
-                                    onViewDetails={handleViewDetails}
-                                  />
-                                );
-                              })}
-                              {totalPages > 1 && (
-                                <Pagination
-                                  currentPage={currentPage}
-                                  totalPages={totalPages}
-                                  onPageChange={handlePageChange}
-                                  localityKey={localityKey}
-                                />
-                              )}
-                            </div>
-                          </details>
-                        );
-                      }
-                    )}
-                  </details>
-                ))}
-              </details>
-            ))
-          )}
-        </div>
-      )}
       <Modal
         isOpen={state.modalOpen}
         onClose={handleCloseModal}
-        repartidor={
-          Array.isArray(state.repartidores)
-            ? state.repartidores.find((r) => r.id === state.selectedRepartidorId) || {
-                id: null,
-                nombre: "Desconocido",
-                correo: "Sin correo",
-              }
-            : { id: null, nombre: "Desconocido", correo: "Sin correo" }
-        }
-        pedidos={historialRepartidor[state.selectedRepartidorId] || []}
-        repartidores={state.repartidores}
+        pedidos={state.filteredPedidos}
+        pedidoDetalles={state.pedidoDetalles}
+        selectedLocation={state.selectedLocation}
       />
     </div>
   );
-};
 
+  
+};
 
 export default AsignacionPedidosGeo;
