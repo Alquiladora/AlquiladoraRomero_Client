@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
@@ -31,10 +30,9 @@ import {
   faMinus,
   faTicketAlt,
   faChartBar,
-  faMoneyBillWave,
-  faUsers,
   faBox,
   faCalendar,
+  faUserShield,
 } from "@fortawesome/free-solid-svg-icons";
 import { toast } from "react-toastify";
 import TicketCompra from "./Ticket";
@@ -44,11 +42,160 @@ import CustomLoading from "../../../components/spiner/SpinerGlobal";
 
 // Función para capitalizar estados
 const capitalizeStatus = (status) => {
-  if (!status || typeof status !== 'string') return 'Desconocido';
+  if (!status || typeof status !== "string") return "Desconocido";
   return status.charAt(0).toUpperCase() + status.slice(1).toLowerCase();
 };
 
-const GestionPedidos = ({ onNavigate }) => {
+// Componente para el modal de actualización de estado
+const UpdateStatusModal = ({ pedido, onClose, onUpdateStatus }) => {
+  const [newStatus, setNewStatus] = useState(pedido.estado);
+  const [productStatuses, setProductStatuses] = useState(
+    pedido.productos.map((prod) => ({
+      idProductoColores: prod.idProductoColores,
+      estado: prod.estado,
+    }))
+  );
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const estadosProducto = ["Completado", "Incidente", "Faltante"];
+  const estadosCambioPedido = [
+    "Procesando",
+    "Enviando",
+    "Recogiendo",
+    "En alquiler",
+    "Devuelto",
+    "Incompleto",
+    "Incidente",
+    "Cancelado",
+    "Finalizado",
+  ];
+
+  const handleProductStatusChange = (idProductoColores, newEstado) => {
+    setProductStatuses((prev) =>
+      prev.map((prod) =>
+        prod.idProductoColores === idProductoColores
+          ? { ...prod, estado: newEstado }
+          : prod
+      )
+    );
+  };
+
+  const handleSubmit = async () => {
+    // Validar que el pedido no se marque como "Finalizado" si hay productos no completados
+    const hasNonCompletedProducts = productStatuses.some(
+      (prod) => prod.estado !== "Completado"
+    );
+    if (newStatus === "Finalizado" && hasNonCompletedProducts) {
+      toast.error(
+        "No se puede finalizar el pedido: todos los productos deben estar en estado 'Completado'."
+      );
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      await onUpdateStatus(pedido.idPedido, newStatus, productStatuses);
+    } catch (error) {
+      toast.error("Error al actualizar el estado");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 animate-fade-in">
+      <div className="bg-white rounded-2xl shadow-xl max-w-lg w-full p-6 space-y-6 dark:bg-gray-900">
+        <div className="flex justify-between items-center bg-gradient-to-r from-amber-400 to-orange-500 p-4 rounded-t-2xl">
+          <h2 className="text-xl font-extrabold text-white flex items-center space-x-3">
+            <FontAwesomeIcon icon={faTasks} />
+            <span>Actualizar Estado del Pedido</span>
+          </h2>
+          <button
+            onClick={onClose}
+            className="text-white hover:text-yellow-200 transition"
+            aria-label="Cerrar modal"
+          >
+            <FontAwesomeIcon icon={faTimes} />
+          </button>
+        </div>
+        <div className="space-y-4">
+          <div>
+            <label className="text-sm font-semibold text-gray-700 dark:text-gray-300">
+              Estado del Pedido
+            </label>
+            <select
+              value={newStatus}
+              onChange={(e) => setNewStatus(e.target.value)}
+              className="p-2 border rounded-lg bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200 w-full focus:outline-none focus:ring-2 focus:ring-yellow-500 transition-all duration-200"
+            >
+              {estadosCambioPedido.map((estado) => (
+                <option key={estado} value={estado}>
+                  {estado}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <h3 className="text-lg font-bold text-gray-800 dark:text-gray-100">
+              Estado de Productos
+            </h3>
+            {pedido.productos.map((producto, i) => (
+              <div key={i} className="flex items-center justify-between py-2">
+                <span className="text-sm text-gray-700 dark:text-gray-300">
+                  {producto.cantidad}x {producto.nombre} ({producto.color})
+                </span>
+                <select
+                  value={
+                    productStatuses.find(
+                      (p) => p.idProductoColores === producto.idProductoColores
+                    )?.estado || "Completado"
+                  }
+                  onChange={(e) =>
+                    handleProductStatusChange(
+                      producto.idProductoColores,
+                      e.target.value
+                    )
+                  }
+                  className="p-2 border rounded-lg bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200 w-40 focus:outline-none focus:ring-2 focus:ring-yellow-500 transition-all duration-200"
+                >
+                  {estadosProducto.map((estado) => (
+                    <option key={estado} value={estado}>
+                      {estado}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            ))}
+          </div>
+          <div className="flex justify-end space-x-3">
+            <button
+              onClick={onClose}
+              className="px-4 py-2 bg-gray-300 text-gray-800 rounded-md hover:bg-gray-400 dark:bg-gray-600 dark:text-gray-200 dark:hover:bg-gray-500 transition-all duration-200"
+            >
+              Cancelar
+            </button>
+            <button
+              onClick={handleSubmit}
+              disabled={isSubmitting}
+              className={`px-4 py-2 bg-gradient-to-r from-yellow-500 to-yellow-600 text-white rounded-md hover:from-yellow-600 hover:to-yellow-700 transition-all duration-200 flex items-center ${
+                isSubmitting ? "opacity-50 cursor-not-allowed" : ""
+              }`}
+            >
+              {isSubmitting ? (
+                <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
+              ) : (
+                <FontAwesomeIcon icon={faCheckCircle} className="mr-2" />
+              )}
+              Actualizar
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const GestionPedidosIncidentes = ({ onNavigate }) => {
   const [pedidos, setPedidos] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filterEstado, setFilterEstado] = useState("Todos");
@@ -58,15 +205,17 @@ const GestionPedidos = ({ onNavigate }) => {
   const [showTimelineModal, setShowTimelineModal] = useState(null);
   const [showDetailsModal, setShowDetailsModal] = useState(null);
   const [showTicketModal, setShowTicketModal] = useState(null);
-  const [showMoreTimeline, setShowMoreTimeline] = useState(false);
+  const [showUpdateStatusModal, setShowUpdateStatusModal] = useState(null);
   const [timelineData, setTimelineData] = useState([]);
   const [timelineLoading, setTimelineLoading] = useState(false);
   const [timelineError, setTimelineError] = useState(null);
+  const [repartidorData, setRepartidorData] = useState(null);
   const { csrfToken } = useAuth();
   const ordersPerPage = 10;
 
-  const estadosDisponibles = [
-    "Todos",
+  const estadosDisponibles = ["Todos", "Incidente", "Incompleto"];
+  const estadosProducto = ["Completado", "Incidente", "Faltante"];
+  const estadosCambioPedido = [
     "Procesando",
     "Enviando",
     "Recogiendo",
@@ -89,12 +238,21 @@ const GestionPedidos = ({ onNavigate }) => {
         const result = response.data;
 
         if (result.success) {
-          const transformedPedidos = result.data.map((pedido) => ({
-            ...pedido,
-            estado: capitalizeStatus(pedido.estado),
-            historialEstados: [], 
-          }));
-          setPedidos(transformedPedidos);
+          const filteredPedidos = result.data
+            .filter((pedido) =>
+              ["Incidente", "Incompleto"].includes(pedido.estado)
+            )
+            .map((pedido) => ({
+              ...pedido,
+              estado: capitalizeStatus(pedido.estado),
+              productos: pedido.productos.map((prod) => ({
+                ...prod,
+                estado: prod.estado
+                  ? capitalizeStatus(prod.estado)
+                  : "Completado",
+              })),
+            }));
+          setPedidos(filteredPedidos);
         } else {
           toast.error("Error al cargar los pedidos");
         }
@@ -115,10 +273,13 @@ const GestionPedidos = ({ onNavigate }) => {
       try {
         setTimelineLoading(true);
         setTimelineError(null);
-        const response = await api.get(`/api/pedidos/historial/${showTimelineModal.idPedido}`, {
-          headers: { "X-CSRF-Token": csrfToken },
-          withCredentials: true,
-        });
+        const response = await api.get(
+          `/api/pedidos/historial/${showTimelineModal.idPedido}`,
+          {
+            headers: { "X-CSRF-Token": csrfToken },
+            withCredentials: true,
+          }
+        );
         const result = response.data;
 
         if (result.success) {
@@ -130,7 +291,13 @@ const GestionPedidos = ({ onNavigate }) => {
               hour: "2-digit",
               minute: "2-digit",
             }),
-            descripcion: `Pedido actualizado a ${capitalizeStatus(entry.estadoNuevo).toLowerCase()}${entry.estadoAnterior ? ` desde ${capitalizeStatus(entry.estadoAnterior).toLowerCase()}` : ''}`,
+            descripcion: `Pedido actualizado a ${capitalizeStatus(
+              entry.estadoNuevo
+            ).toLowerCase()}${
+              entry.estadoAnterior
+                ? ` desde ${capitalizeStatus(entry.estadoAnterior).toLowerCase()}`
+                : ""
+            }`,
           }));
           setTimelineData(historial);
         } else {
@@ -144,8 +311,82 @@ const GestionPedidos = ({ onNavigate }) => {
       }
     };
 
+    const fetchRepartidorData = async () => {
+      if (!showDetailsModal) return;
+      try {
+        const response = await api.get(
+          `/api/pedidos/asignacion/${showDetailsModal.idPedido}`,
+          {
+            headers: { "X-CSRF-Token": csrfToken },
+            withCredentials: true,
+          }
+        );
+        const result = response.data;
+        if (result.success && result.data) {
+          setRepartidorData(result.data);
+        } else {
+          setRepartidorData(null);
+        }
+      } catch (error) {
+        setRepartidorData(null);
+        console.error("Error al obtener datos del repartidor:", error);
+      }
+    };
+
     fetchTimelineData();
-  }, [showTimelineModal, csrfToken]);
+    fetchRepartidorData();
+  }, [showTimelineModal, showDetailsModal, csrfToken]);
+
+  const handleUpdateStatus = async (idPedido, newStatus, productUpdates = []) => {
+    try {
+      const response = await api.put(
+        "/api/pedidos/actualizar-estado",
+        { idPedido, newStatus, productUpdates },
+        {
+          headers: { "X-CSRF-Token": csrfToken },
+          withCredentials: true,
+        }
+      );
+      const result = response.data;
+
+      if (result.success) {
+        setPedidos((prev) =>
+          prev.map((pedido) =>
+            pedido.idPedido === idPedido
+              ? {
+                  ...pedido,
+                  estado: capitalizeStatus(newStatus),
+                  productos: productUpdates.length > 0
+                    ? pedido.productos.map((prod) =>
+                        productUpdates.find(
+                          (p) => p.idProductoColores === prod.idProductoColores
+                        )
+                          ? {
+                              ...prod,
+                              estado: capitalizeStatus(
+                                productUpdates.find(
+                                  (p) =>
+                                    p.idProductoColores === prod.idProductoColores
+                                ).estado
+                              ),
+                            }
+                          : prod
+                      )
+                    : pedido.productos,
+                }
+              : pedido
+          )
+        );
+        toast.success("Estado actualizado correctamente");
+        setShowUpdateStatusModal(null);
+      } else {
+        toast.error(result.message || "Error al actualizar el estado");
+      }
+    } catch (error) {
+      toast.error("Error al actualizar el estado");
+      console.error(error);
+    }
+  };
 
   const filteredPedidos = pedidos
     .filter(
@@ -190,10 +431,11 @@ const GestionPedidos = ({ onNavigate }) => {
     );
   const handleShowTimeline = (pedido) => {
     setShowTimelineModal(pedido);
-    setShowMoreTimeline(false);
   };
   const handleShowDetails = (pedido) => setShowDetailsModal(pedido);
   const handleShowTicketModal = (pedido) => setShowTicketModal(pedido);
+  const handleShowUpdateStatusModal = (pedido) =>
+    setShowUpdateStatusModal(pedido);
   const handleSendTicket = (email, pdfBlob) => {
     toast.success(`Ticket enviado al correo ${email} en formato PDF.`);
     setShowTicketModal(null);
@@ -202,10 +444,6 @@ const GestionPedidos = ({ onNavigate }) => {
     toast.info(`Navegando al Dashboard de ${dashboard}... (en desarrollo)`);
 
   const renderTimelineModal = () => {
-    const visibleEvents = showMoreTimeline
-      ? timelineData
-      : timelineData.slice(0, 2);
-
     return (
       <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-70 p-4 animate-fade-in">
         <div className="bg-white dark:bg-gray-800 w-full max-w-lg rounded-2xl shadow-2xl max-h-[80vh] overflow-y-auto transform transition-all duration-300 scale-95">
@@ -243,7 +481,7 @@ const GestionPedidos = ({ onNavigate }) => {
             ) : (
               <div className="relative">
                 <div className="absolute left-4 top-0 bottom-0 w-1 bg-gradient-to-b from-green-500 to-teal-500 rounded-full"></div>
-                {visibleEvents.map((evento, index) => (
+                {timelineData.map((evento, index) => (
                   <div key={index} className="relative mb-6">
                     <div className="flex items-start">
                       <div className="w-10 h-10 bg-green-500 rounded-full flex items-center justify-center z-10 shadow-md">
@@ -288,18 +526,6 @@ const GestionPedidos = ({ onNavigate }) => {
                 ))}
               </div>
             )}
-            {timelineData.length > 2 && (
-              <button
-                onClick={() => setShowMoreTimeline(!showMoreTimeline)}
-                className="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 flex items-center mx-auto mt-4 transition-all duration-200"
-              >
-                <FontAwesomeIcon
-                  icon={showMoreTimeline ? faMinus : faPlus}
-                  className="mr-2"
-                />
-                {showMoreTimeline ? "Ver menos" : "Ver más detalles"}
-              </button>
-            )}
           </div>
         </div>
       </div>
@@ -313,7 +539,7 @@ const GestionPedidos = ({ onNavigate }) => {
         <div className="flex justify-between items-center bg-gradient-to-r from-amber-400 to-orange-500 p-4 rounded-t-2xl">
           <h2 className="text-xl font-extrabold text-white flex items-center space-x-3">
             <FontAwesomeIcon icon={faTicketAlt} />
-            <span>Ticket del Pedido</span>
+            <span>Detalles del Pedido</span>
           </h2>
           <button
             onClick={() => setShowDetailsModal(null)}
@@ -339,33 +565,24 @@ const GestionPedidos = ({ onNavigate }) => {
               </p>
             </div>
           </div>
-
           <div className="bg-green-100 rounded-lg p-4 flex items-center space-x-3 dark:bg-green-900/30 dark:border dark:border-green-700 shadow-md">
             <div
               className={`rounded-full p-2 transition-colors duration-300 ${
-                showDetailsModal.estado === "Procesando"
-                  ? "bg-orange-500"
-                  : showDetailsModal.estado === "Confirmado"
-                  ? "bg-green-500"
-                  : showDetailsModal.estado === "Enviando"
-                  ? "bg-blue-500"
-                  : showDetailsModal.estado === "En alquiler"
-                  ? "bg-purple-500"
-                  : showDetailsModal.estado === "Devuelto"
-                  ? "bg-gray-500"
+                showDetailsModal.estado === "Incidente"
+                  ? "bg-red-500"
                   : showDetailsModal.estado === "Incompleto"
                   ? "bg-yellow-500"
-                  : showDetailsModal.estado === "Incidente"
-                  ? "bg-red-500"
-                  : showDetailsModal.estado === "Cancelado"
-                  ? "bg-black"
-                  : showDetailsModal.estado === "Finalizado"
-                  ? "bg-green-800"
                   : "bg-gray-400"
               }`}
             >
               <FontAwesomeIcon
-                icon={faCheckCircle}
+                icon={
+                  showDetailsModal.estado === "Incidente"
+                    ? faExclamationCircle
+                    : showDetailsModal.estado === "Incompleto"
+                    ? faExclamationTriangle
+                    : faQuestionCircle
+                }
                 className="text-white text-xs sm:text-sm"
               />
             </div>
@@ -375,24 +592,10 @@ const GestionPedidos = ({ onNavigate }) => {
               </p>
               <p
                 className={`font-bold text-lg select-text transition-colors duration-300 ${
-                  showDetailsModal.estado === "Procesando"
-                    ? "text-orange-600 dark:text-orange-400"
-                    : showDetailsModal.estado === "Confirmado"
-                    ? "text-green-600 dark:text-green-400"
-                    : showDetailsModal.estado === "Enviando"
-                    ? "text-blue-600 dark:text-blue-400"
-                    : showDetailsModal.estado === "En alquiler"
-                    ? "text-purple-600 dark:text-purple-400"
-                    : showDetailsModal.estado === "Devuelto"
-                    ? "text-gray-600 dark:text-gray-400"
+                  showDetailsModal.estado === "Incidente"
+                    ? "text-red-600 dark:text-red-400"
                     : showDetailsModal.estado === "Incompleto"
                     ? "text-yellow-600 dark:text-yellow-400"
-                    : showDetailsModal.estado === "Incidente"
-                    ? "text-red-600 dark:text-red-400"
-                    : showDetailsModal.estado === "Cancelado"
-                    ? "text-black dark:text-gray-300"
-                    : showDetailsModal.estado === "Finalizado"
-                    ? "text-green-800 dark:text-green-600"
                     : "text-gray-600 dark:text-gray-400"
                 }`}
               >
@@ -402,13 +605,40 @@ const GestionPedidos = ({ onNavigate }) => {
           </div>
         </div>
 
+        {/* Sección Repartidor */}
+        <div className="bg-purple-100 rounded-lg p-4 space-y-3 dark:bg-purple-900/30 dark:border dark:border-purple-700">
+          <h3 className="text-lg font-bold text-purple-900 flex items-center space-x-2 dark:text-purple-300">
+            <FontAwesomeIcon icon={faUserShield} className="text-purple-600" />
+            <span>Repartidor Asignado</span>
+          </h3>
+          {repartidorData ? (
+            <div className="grid grid-cols-3 gap-4 text-sm text-purple-900 dark:text-purple-300">
+              <div>
+                <p className="font-semibold">Nombre</p>
+                <p>{repartidorData.nombre}</p>
+              </div>
+              <div>
+                <p className="font-semibold">Teléfono</p>
+                <p>{repartidorData.telefono}</p>
+              </div>
+              <div>
+                <p className="font-semibold">Correo</p>
+                <p>{repartidorData.correo}</p>
+              </div>
+            </div>
+          ) : (
+            <p className="text-sm text-purple-700 dark:text-purple-400 italic">
+              No hay repartidor asignado.
+            </p>
+          )}
+        </div>
+
         {/* Sección Información del Cliente */}
         <div className="bg-gray-100 rounded-lg p-4 space-y-3 dark:bg-gray-800/50 dark:border dark:border-gray-700">
           <h3 className="text-lg font-bold text-gray-800 flex items-center space-x-2 dark:text-gray-100">
             <FontAwesomeIcon icon={faUser} className="text-purple-600" />
             <span>Información del Cliente</span>
           </h3>
-
           <div className="grid grid-cols-3 gap-4 text-sm text-gray-700 dark:text-gray-300">
             <div>
               <p className="font-semibold">Nombre</p>
@@ -431,7 +661,6 @@ const GestionPedidos = ({ onNavigate }) => {
             <FontAwesomeIcon icon={faCalendarAlt} className="text-indigo-600" />
             <span>Programación del Alquiler</span>
           </h3>
-
           <div className="grid grid-cols-4 gap-4 text-center text-sm text-indigo-900 dark:text-indigo-300">
             <div className="bg-white rounded-lg p-3 shadow-sm dark:bg-gray-800 dark:border dark:border-gray-700">
               <p className="font-semibold mb-1">Fecha Inicio</p>
@@ -481,7 +710,6 @@ const GestionPedidos = ({ onNavigate }) => {
             <FontAwesomeIcon icon={faBox} />
             <span>Productos del Pedido</span>
           </h3>
-
           <div className="overflow-x-auto rounded-md border border-yellow-300 dark:border-yellow-700">
             <table className="min-w-full text-sm text-left text-yellow-900 dark:text-yellow-300">
               <thead className="bg-yellow-200 sticky top-0 dark:bg-yellow-700">
@@ -500,6 +728,9 @@ const GestionPedidos = ({ onNavigate }) => {
                   </th>
                   <th className="px-4 py-2 font-semibold border border-yellow-300 dark:border-yellow-700">
                     Subtotal
+                  </th>
+                  <th className="px-4 py-2 font-semibold border border-yellow-300 dark:border-yellow-700">
+                    Estado
                   </th>
                 </tr>
               </thead>
@@ -528,6 +759,21 @@ const GestionPedidos = ({ onNavigate }) => {
                     <td className="px-4 py-2 border border-yellow-300 dark:border-yellow-700">
                       ${producto.subtotal}
                     </td>
+                    <td className="px-4 py-2 border border-yellow-300 dark:border-yellow-700">
+                      <span
+                        className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-semibold shadow-sm ${
+                          producto.estado === "Completado"
+                            ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300"
+                            : producto.estado === "Incidente"
+                            ? "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300"
+                            : producto.estado === "Faltante"
+                            ? "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300"
+                            : "bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-300"
+                        }`}
+                      >
+                        {producto.estado}
+                      </span>
+                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -542,7 +788,6 @@ const GestionPedidos = ({ onNavigate }) => {
               <FontAwesomeIcon icon={faCreditCard} />
               <span>Información de Pago</span>
             </h3>
-
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
                 <p className="text-sm font-semibold text-green-700 dark:text-green-400">
@@ -570,14 +815,11 @@ const GestionPedidos = ({ onNavigate }) => {
               </div>
             </div>
           </div>
-
-          {/* Historial de Pagos */}
           <div>
             <h4 className="text-md font-semibold text-green-800 mb-3 flex items-center space-x-2 dark:text-green-300">
               <FontAwesomeIcon icon={faMoneyCheckAlt} />
               <span>Historial de Pagos</span>
             </h4>
-
             {showDetailsModal.pago.pagosRealizados &&
             showDetailsModal.pago.pagosRealizados.length > 0 ? (
               <div className="space-y-3 max-h-52 overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-green-500 scrollbar-track-green-100 dark:scrollbar-thumb-green-600 dark:scrollbar-track-green-900 rounded-md border border-green-300 dark:border-green-700 p-4 bg-green-50 dark:bg-green-900/20">
@@ -629,8 +871,6 @@ const GestionPedidos = ({ onNavigate }) => {
                 No hay pagos registrados aún.
               </p>
             )}
-
-            {/* Mensaje de estado de pago */}
             <div className="mt-4 text-center">
               {Number(showDetailsModal.pago.total) -
                 showDetailsModal.pago.pagosRealizados.reduce(
@@ -649,6 +889,17 @@ const GestionPedidos = ({ onNavigate }) => {
             </div>
           </div>
         </div>
+
+        {/* Botón para Cambiar Estado */}
+        <div className="flex justify-end">
+          <button
+            onClick={() => handleShowUpdateStatusModal(showDetailsModal)}
+            className="flex items-center px-4 py-2 bg-gradient-to-r from-yellow-500 to-yellow-600 text-white rounded-md hover:from-yellow-600 hover:to-yellow-700 transition-all duration-200"
+          >
+            <FontAwesomeIcon icon={faTasks} className="mr-2" />
+            Cambiar Estado
+          </button>
+        </div>
       </div>
     </div>
   );
@@ -656,43 +907,18 @@ const GestionPedidos = ({ onNavigate }) => {
   return (
     <div className="min-h-screen dark:from-gray-900 dark:to-gray-800 p-6 lg:p-8">
       <div className="max-w-7xl mx-auto">
-        <div className="flex justify-end space-x-2 mb-4">
-          <button
-            onClick={() => onNavigate("Pedidos General Calendario")}
-            className="flex items-center px-3 py-1.5 text-sm bg-teal-500 text-white rounded-md hover:bg-teal-600 transition-all duration-200 dark:bg-teal-600 dark:hover:bg-teal-700"
-          >
-            <FontAwesomeIcon icon={faCalendar} className="mr-1" />
-            <span className="hidden sm:inline">Pedidos Organizado</span>
-          </button>
-
-          {/* Botón para Generar Reporte */}
-          <button
-            onClick={handleGenerateReport}
-            className="flex items-center px-3 py-1.5 text-sm bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-md shadow-sm hover:from-blue-700 hover:to-blue-800 transition-all duration-200"
-          >
-            <FontAwesomeIcon icon={faFileExport} className="mr-1" />
-            <span className="hidden sm:inline">Reporte</span>
-            <span className="sm:hidden">R</span>
-          </button>
-
-          {/* Botón para Exportar CSV */}
-          <button
-            onClick={handleExportCSV}
-            className="flex items-center px-3 py-1.5 text-sm bg-gradient-to-r from-green-600 to-green-700 text-white rounded-md shadow-sm hover:from-green-700 hover:to-green-800 transition-all duration-200"
-          >
-            <FontAwesomeIcon icon={faFileExport} className="mr-1" />
-            <span className="hidden sm:inline">CSV</span>
-            <span className="sm:hidden">C</span>
-          </button>
-        </div>
+        
 
         <h2 className="text-3xl font-extrabold text-gray-800 dark:text-gray-100 mb-8 flex items-center justify-center">
-          <FontAwesomeIcon icon={faTasks} className="mr-3 text-yellow-500" />
-          Gestión de Pedidos
+          <FontAwesomeIcon
+            icon={faExclamationTriangle}
+            className="mr-3 text-red-500"
+          />
+          Gestión de Pedidos con Incidencias
         </h2>
 
         {loading ? (
-        <CustomLoading/>
+          <CustomLoading />
         ) : (
           <>
             <div className="bg-white dark:bg-gray-800 p-6 rounded-xl">
@@ -763,10 +989,10 @@ const GestionPedidos = ({ onNavigate }) => {
 
             <div className="overflow-x-auto rounded-xl shadow-lg">
               <table className="min-w-full bg-white dark:bg-gray-800">
-                <thead className="bg-gradient-to-r from-yellow-500 to-yellow-600">
+                <thead className="bg-gradient-to-r from-red-500 to-yellow-600">
                   <tr>
                     <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-tight text-white">
-                      <FontAwesomeIcon icon={faTruck} className="mr-1" />{" "}
+                      <FontAwesomeIcon icon={faTruck} className="mr-1" />
                       <span className="hidden sm:inline">ID Rastreo</span>
                       <span className="sm:hidden">ID</span>
                     </th>
@@ -774,22 +1000,22 @@ const GestionPedidos = ({ onNavigate }) => {
                       <FontAwesomeIcon icon={faUser} className="mr-1" /> Cliente
                     </th>
                     <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-tight text-white hidden sm:table-cell">
-                      <FontAwesomeIcon icon={faPhone} className="mr-1" />{" "}
+                      <FontAwesomeIcon icon={faPhone} className="mr-1" />
                       Teléfono
                     </th>
                     <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-tight text-white hidden md:table-cell">
-                      <FontAwesomeIcon icon={faMapMarkerAlt} className="mr-1" />{" "}
+                      <FontAwesomeIcon icon={faMapMarkerAlt} className="mr-1" />
                       Dirección
                     </th>
                     <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-tight text-white hidden sm:table-cell">
                       <FontAwesomeIcon icon={faClock} className="mr-1" /> Días
                     </th>
                     <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-tight text-white">
-                      <FontAwesomeIcon icon={faDollarSign} className="mr-1" />{" "}
+                      <FontAwesomeIcon icon={faDollarSign} className="mr-1" />
                       Total
                     </th>
                     <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-tight text-white">
-                      <FontAwesomeIcon icon={faCheckCircle} className="mr-1" />{" "}
+                      <FontAwesomeIcon icon={faCheckCircle} className="mr-1" />
                       Estado
                     </th>
                     <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-tight text-white">
@@ -830,47 +1056,19 @@ const GestionPedidos = ({ onNavigate }) => {
                       <td className="px-4 py-3 text-sm text-gray-800 dark:text-gray-200">
                         <span
                           className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-semibold shadow-sm select-none ${
-                            pedido.estado === "Procesando"
-                              ? "bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-300"
-                              : pedido.estado === "Enviando"
-                              ? "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300"
-                              : pedido.estado === "Confirmado"
-                              ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300"
-                              : pedido.estado === "En alquiler"
-                              ? "bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-300"
-                              : pedido.estado === "Devuelto"
-                              ? "bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-300"
+                            pedido.estado === "Incidente"
+                              ? "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300"
                               : pedido.estado === "Incompleto"
                               ? "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300"
-                              : pedido.estado === "Incidente"
-                              ? "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300"
-                              : pedido.estado === "Cancelado"
-                              ? "bg-black text-white dark:bg-gray-800 dark:text-gray-300"
-                              : pedido.estado === "Finalizado"
-                              ? "bg-green-800 text-green-100 dark:bg-green-700 dark:text-green-200"
-                              : ""
+                              : "bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-300"
                           }`}
                         >
                           <FontAwesomeIcon
                             icon={
-                              pedido.estado === "Procesando"
-                                ? faClock
-                                : pedido.estado === "Enviando"
-                                ? faTruck
-                                : pedido.estado === "Confirmado"
-                                ? faCheckCircle
-                                : pedido.estado === "En alquiler"
-                                ? faTruck
-                                : pedido.estado === "Devuelto"
-                                ? faUndo
+                              pedido.estado === "Incidente"
+                                ? faExclamationCircle
                                 : pedido.estado === "Incompleto"
                                 ? faExclamationTriangle
-                                : pedido.estado === "Incidente"
-                                ? faExclamationCircle
-                                : pedido.estado === "Cancelado"
-                                ? faBan
-                                : pedido.estado === "Finalizado"
-                                ? faCheckCircle
                                 : faQuestionCircle
                             }
                             className="mr-1"
@@ -899,6 +1097,13 @@ const GestionPedidos = ({ onNavigate }) => {
                           title="Generar Ticket"
                         >
                           <FontAwesomeIcon icon={faTicketAlt} size="lg" />
+                        </button>
+                        <button
+                          onClick={() => handleShowUpdateStatusModal(pedido)}
+                          className="text-yellow-600 hover:text-yellow-800 dark:text-yellow-400 dark:hover:text-yellow-300 transition-all duration-200 p-2 rounded-full hover:bg-yellow-100 dark:hover:bg-yellow-900"
+                          title="Cambiar Estado"
+                        >
+                          <FontAwesomeIcon icon={faTasks} size="lg" />
                         </button>
                       </td>
                     </tr>
@@ -974,6 +1179,13 @@ const GestionPedidos = ({ onNavigate }) => {
                 onSend={handleSendTicket}
               />
             )}
+            {showUpdateStatusModal && (
+              <UpdateStatusModal
+                pedido={showUpdateStatusModal}
+                onClose={() => setShowUpdateStatusModal(null)}
+                onUpdateStatus={handleUpdateStatus}
+              />
+            )}
           </>
         )}
       </div>
@@ -981,4 +1193,4 @@ const GestionPedidos = ({ onNavigate }) => {
   );
 };
 
-export default GestionPedidos;
+export default GestionPedidosIncidentes;

@@ -45,6 +45,7 @@ import StepTwo from "./StepTwo";
 import StepThree from "./StepThree";
 import StepFour from "./StepFour";
 import PaymentModal from "./PaymentModal";
+import CustomLoading from "../../../components/spiner/SpinerGlobal";
 
 function WizardAlquiler({ onNavigate, setPedidos }) {
   const { csrfToken, user } = useAuth();
@@ -110,7 +111,8 @@ function WizardAlquiler({ onNavigate, setPedidos }) {
 
   const [showPaymentsModal, setShowPaymentsModal] = useState(false);
 
-  //Funcion para el modal de pagos
+  const [isLoadingOrders, setIsLoadingOrders] = useState(false);
+
   const handleViewPayments = (order) => {
     setSelectedOrder(order);
     setShowPaymentsModal(true);
@@ -122,9 +124,8 @@ function WizardAlquiler({ onNavigate, setPedidos }) {
   };
 
   const handlePaymentRegistered = () => {
-    fetchOrders(); 
-  }
-  //==============================================0
+    fetchOrders();
+  };
 
   useEffect(() => {
     setCpValido(false);
@@ -360,6 +361,7 @@ function WizardAlquiler({ onNavigate, setPedidos }) {
   }, []);
 
   const fetchOrders = async () => {
+    setIsLoadingOrders(true);
     try {
       const response = await api.get("/api/pedidos/pedidos-manuales", {
         withCredentials: true,
@@ -367,19 +369,21 @@ function WizardAlquiler({ onNavigate, setPedidos }) {
       });
       if (response.data.success) {
         const sortedOrders = response.data.data.sort((a, b) => {
-          const dateA = new Date(a.fechas.entrega);
-          const dateB = new Date(b.fechas.entrega);
-          return dateA - dateB;
+          const dateA = new Date(a.fechas.inicio);
+          const dateB = new Date(b.fechas.inicio);
+          return dateB - dateA; // Orden descendente (mayor a menor)
         });
-        console.log("Este obtengo de peididos manaules", sortedOrders);
+    
         setOrders(sortedOrders);
         setPedidos(sortedOrders);
       }
     } catch (error) {
       console.error("Error fetching orders:", error);
       toast.error("Error al cargar los pedidos");
-    }
-  };
+   } finally {
+    setIsLoadingOrders(false);
+  }
+};
 
   const handleViewTicket = (order) => {
     setSelectedOrder(order);
@@ -395,7 +399,6 @@ function WizardAlquiler({ onNavigate, setPedidos }) {
       telefono,
       correo,
       esClienteExistente,
-
       selectedDireccionId,
       codigoPostal,
       pais,
@@ -404,17 +407,14 @@ function WizardAlquiler({ onNavigate, setPedidos }) {
       localidad,
       direccion,
       referencia,
-
       fechaInicio,
       fechaEntrega,
       horaAlquiler,
       formaPago,
       detallesPago,
-
       productosSeleccionados: step3Data.selectedProducts,
       lineItems: step3Data.lineItems,
       total: step3Data.ticketTotal,
-
       direccionesCliente,
       trackingId,
     };
@@ -431,7 +431,7 @@ function WizardAlquiler({ onNavigate, setPedidos }) {
       );
 
       toast.success("¡Pedido creado con éxito!");
-      fetchOrders();
+      fetchOrders(); // Actualiza la lista con el nuevo ordenamiento
 
       handleCerrarWizard();
 
@@ -470,7 +470,6 @@ function WizardAlquiler({ onNavigate, setPedidos }) {
   }, [csrfToken]);
 
   const renderPaso1 = () => (
-    //Obtenemos los datps basico
     <StepOne
       nombre={nombre}
       setNombre={setNombre}
@@ -485,7 +484,6 @@ function WizardAlquiler({ onNavigate, setPedidos }) {
   );
 
   const renderPaso2 = () => (
-    //Obtenemos los datos de domicilio
     <StepTwo
       esClienteExistente={esClienteExistente}
       direccionesCliente={direccionesCliente}
@@ -517,7 +515,6 @@ function WizardAlquiler({ onNavigate, setPedidos }) {
   );
 
   const renderPaso3 = () => (
-    //DEtalles de la compra
     <StepThree
       fechaInicio={fechaInicio}
       setFechaInicio={setFechaInicio}
@@ -602,10 +599,11 @@ function WizardAlquiler({ onNavigate, setPedidos }) {
     "Devuelto",
     "Incompleto",
     "Incidente",
+    "Recogiendo",
   ];
 
   const renderOrdersTable = () => (
-    <div className="mt-10 overflow-x-auto animate-fade-in-up rounded-xl  dark:bg-gray-900 p-6 ">
+    <div className="mt-10 overflow-x-auto animate-fade-in-up rounded-xl dark:bg-gray-900 p-6">
       <div className="flex flex-col md:flex-row md:justify-between md:items-center mb-6 space-y-4 md:space-y-0">
         <div className="flex flex-col sm:flex-row sm:space-x-4 space-y-2 sm:space-y-0">
           <button
@@ -647,6 +645,9 @@ function WizardAlquiler({ onNavigate, setPedidos }) {
         <FontAwesomeIcon icon={faBox} className="mr-3 text-yellow-500" />
         Pedidos Activos Realizados
       </h2>
+      {isLoadingOrders ? (
+      <CustomLoading/>
+    ) : (
 
       <div className="overflow-x-auto rounded-lg shadow-md">
         <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
@@ -721,24 +722,24 @@ function WizardAlquiler({ onNavigate, setPedidos }) {
                   <span
                     className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold select-none ${
                       order.estado === "Procesando"
-                        ? "bg-orange-200 text-orange-800" // naranja claro
+                        ? "bg-orange-200 text-orange-800"
                         : order.estado === "Confirmado"
-                        ? "bg-green-200 text-green-800" // verde claro
+                        ? "bg-green-200 text-green-800"
                         : order.estado === "Enviando"
-                        ? "bg-blue-200 text-blue-800" // azul claro
+                        ? "bg-blue-200 text-blue-800"
                         : order.estado === "En alquiler"
-                        ? "bg-purple-200 text-purple-800" // morado claro
+                        ? "bg-purple-200 text-purple-800"
                         : order.estado === "Devuelto"
-                        ? "bg-gray-200 text-gray-800" // gris claro
+                        ? "bg-gray-200 text-gray-800"
                         : order.estado === "Incompleto"
-                        ? "bg-yellow-200 text-yellow-800" // amarillo
+                        ? "bg-yellow-200 text-yellow-800"
                         : order.estado === "Incidente"
-                        ? "bg-red-200 text-red-800" // rojo
+                        ? "bg-red-200 text-red-800"
                         : order.estado === "Cancelado"
-                        ? "bg-black text-white" // negro con texto blanco
+                        ? "bg-black text-white"
                         : order.estado === "Finalizado"
-                        ? "bg-green-800 text-green-100" // verde oscuro
-                        : "bg-gray-100 text-gray-800" // default gris claro
+                        ? "bg-green-800 text-green-100"
+                        : "bg-gray-100 text-gray-800"
                     }`}
                   >
                     <FontAwesomeIcon icon={faCheckCircle} className="mr-1" />
@@ -753,7 +754,6 @@ function WizardAlquiler({ onNavigate, setPedidos }) {
                   >
                     <FontAwesomeIcon icon={faEye} size="lg" />
                   </button>
-
                   <button
                     onClick={() => handleViewPayments(order)}
                     className="p-2 rounded-full hover:bg-green-100 dark:hover:bg-green-900 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-green-400"
@@ -772,6 +772,7 @@ function WizardAlquiler({ onNavigate, setPedidos }) {
           </tbody>
         </table>
       </div>
+    )}
 
       {showPaymentsModal && selectedOrder && (
         <PaymentModal

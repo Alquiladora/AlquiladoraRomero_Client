@@ -18,6 +18,7 @@ import {
   FaPalette,
   FaCubes,
   FaStore,
+  FaWarehouse,
   FaMapMarkerAlt,
   FaSortNumericDown,
   FaLock,
@@ -29,6 +30,7 @@ import {
 } from "react-icons/fa";
 import { toast } from "react-toastify";
 import { Link } from "react-router-dom";
+import CustomLoading from "../../../components/spiner/SpinerGlobal";
 
 const ITEMS_PER_PAGE = 10;
 
@@ -464,245 +466,273 @@ const Inventatio = ({ onNavigate, setDatosInventario }) => {
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center h-screen">
-        <FaSpinner className="animate-spin text-4xl text-gray-600" />
-        <span className="ml-2 text-xl">Cargando datos de inventario...</span>
-      </div>
+      <CustomLoading />
     );
   }
 
-  return (
-    <div className="container mx-auto p-4">
-      <div className="mb-4 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-2 p-3 rounded">
-        <div className="flex flex-col sm:flex-row gap-2">
-          <div>
-            <label className="block text-sm font-semibold mb-1">Estado:</label>
-            <select
-              value={filterEstado}
-              onChange={handleFilterEstado}
-              className="border border-gray-300 dark:border-gray-700 rounded p-1 bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300"
-            >
-              <option value="all">Todos</option>
-              <option value="activo">Activos</option>
-              <option value="inactivo">Inactivos</option>
-            </select>
-          </div>
-          <div>
-            <label className="block text-sm font-semibold mb-1">Mes:</label>
-            <select
-              value={filterMonth}
-              onChange={handleFilterMonth}
-              className="border border-gray-300 dark:border-gray-700 rounded p-1 bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300"
-            >
-              <option value="all">Todos</option>
-              <option value="01">Enero</option>
-              <option value="02">Febrero</option>
-              <option value="03">Marzo</option>
-              <option value="04">Abril</option>
-              <option value="05">Mayo</option>
-              <option value="06">Junio</option>
-              <option value="07">Julio</option>
-              <option value="08">Agosto</option>
-              <option value="09">Septiembre</option>
-              <option value="10">Octubre</option>
-              <option value="11">Noviembre</option>
-              <option value="12">Diciembre</option>
-            </select>
-          </div>
-          <div>
-            <label className="block text-sm font-semibold mb-1">Año:</label>
-            <select
-              value={filterYear}
-              onChange={handleFilterYear}
-              className="border border-gray-300 dark:border-gray-700 rounded p-1 bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300"
-            >
-              <option value="all">Todos</option>
-              {years.map((y) => (
-                <option key={y} value={y}>
-                  {y}
-                </option>
-              ))}
-            </select>
-          </div>
-        </div>
 
-        <div className="flex items-center">
-          <button
-            onClick={() => onNavigate("Agregar Productos a subodegas")}
-            className="flex items-center gap-2 text-sm font-medium text-yellow-600 bg-yellow-100 hover:bg-yellow-200 dark:bg-yellow-900 dark:hover:bg-yellow-800 dark:text-yellow-300 px-3 py-2 rounded transition-colors shadow"
-          >
-            <FaPlus className="w-4 h-4" />
-            <span>Agregar productos a Bodegas Secundarias</span>
-          </button>
+
+
+  return (
+    <div className="container mx-auto p-4 bg-gray-50 dark:bg-gray-900 min-h-screen">
+      {/* Header con filtros mejorado */}
+      <div className="mb-8 bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6">
+        <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-6">
+          {/* Filtros */}
+          <div className="flex flex-col sm:flex-row gap-4">
+            <div className="flex flex-col">
+              <label className="block text-sm font-semibold mb-2 text-gray-700 dark:text-gray-300">
+                📅 Filtrar por Mes:
+              </label>
+              <select
+                value={filterMonth}
+                onChange={handleFilterMonth}
+                className="border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-2 bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 focus:ring-2 focus:ring-yellow-500 focus:border-transparent transition-all duration-200"
+              >
+                <option value="all">🗓️ Todos los meses</option>
+                <option value="01">🌟 Enero</option>
+                <option value="02">💝 Febrero</option>
+                <option value="03">🌸 Marzo</option>
+                <option value="04">🌿 Abril</option>
+                <option value="05">🌺 Mayo</option>
+                <option value="06">☀️ Junio</option>
+                <option value="07">🏖️ Julio</option>
+                <option value="08">🌾 Agosto</option>
+                <option value="09">🍂 Septiembre</option>
+                <option value="10">🎃 Octubre</option>
+                <option value="11">🍁 Noviembre</option>
+                <option value="12">🎄 Diciembre</option>
+              </select>
+            </div>
+            
+            <div className="flex flex-col">
+              <label className="block text-sm font-semibold mb-2 text-gray-700 dark:text-gray-300">
+                📆 Filtrar por Año:
+              </label>
+              <select
+                value={filterYear}
+                onChange={handleFilterYear}
+                className="border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-2 bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 focus:ring-2 focus:ring-yellow-500 focus:border-transparent transition-all duration-200"
+              >
+                <option value="all">📅 Todos los años</option>
+                {years.map((y) => (
+                  <option key={y} value={y}>
+                    {y}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+
+          {/* Botón agregar productos */}
+          <div className="flex items-center">
+            <button
+              onClick={() => onNavigate("Agregar Productos a subodegas")}
+              className="group flex items-center gap-3 text-sm font-semibold text-white bg-gradient-to-r from-yellow-500 to-yellow-600 hover:from-yellow-600 hover:to-yellow-700 px-6 py-3 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
+            >
+              <FaPlus className="w-5 h-5 group-hover:rotate-90 transition-transform duration-300" />
+              <span>Agregar a Bodegas Secundarias</span>
+            </button>
+          </div>
         </div>
       </div>
 
-      <div>
-        <h2 className="text-3xl font-bold mb-6 text-yellow-600 text-center">
-          Inventario Principal 
-        </h2>
-        {aggregatedMainInventory.length === 0 ? (
-          <div className="flex flex-col justify-center items-center py-8 animate-fade-in-up">
-            <FaBoxOpen className="text-4xl text-gray-500" />
-            <p className="text-xl text-gray-600 dark:text-gray-300 mt-4">
-              Sin producto en el inventario principal
+      {/* Inventario Principal */}
+      <div className="mb-12">
+        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg overflow-hidden">
+          {/* Header del inventario principal */}
+          <div className="bg-gradient-to-r from-yellow-500 to-yellow-600 px-6 py-4">
+            <h2 className="text-3xl font-bold text-white text-center flex items-center justify-center gap-3">
+              <FaBoxOpen className="text-4xl" />
+              Inventario Principal
+            </h2>
+          </div>
+
+          {aggregatedMainInventory.length === 0 ? (
+            <div className="flex flex-col justify-center items-center py-16 animate-fade-in-up">
+              <div className="bg-gray-100 dark:bg-gray-700 rounded-full p-8 mb-6">
+                <FaBoxOpen className="text-6xl text-gray-400" />
+              </div>
+              <p className="text-2xl text-gray-500 dark:text-gray-400 font-medium">
+                Sin productos en el inventario principal
+              </p>
+              <p className="text-gray-400 dark:text-gray-500 mt-2">
+                Agrega productos para comenzar a gestionar tu inventario
+              </p>
+            </div>
+          ) : (
+            <div className="p-6">
+              <div className="overflow-x-auto animate-fade-in-up">
+                <table className="w-full">
+                  <thead>
+                    <tr className="bg-yellow-50 dark:bg-yellow-900/20 border-b-2 border-yellow-200 dark:border-yellow-700">
+                      <th className="px-4 py-3 text-left text-xs font-semibold text-yellow-800 dark:text-yellow-200 uppercase tracking-wider">
+                        ID Inventario
+                      </th>
+                      <th className="px-4 py-3 text-left text-xs font-semibold text-yellow-800 dark:text-yellow-200 uppercase tracking-wider">
+                        Producto
+                      </th>
+                     
+                      <th className="px-4 py-3 text-left text-xs font-semibold text-yellow-800 dark:text-yellow-200 uppercase tracking-wider">
+                        Cantidad
+                      </th>
+                      <th className="px-4 py-3 text-left text-xs font-semibold text-yellow-800 dark:text-yellow-200 uppercase tracking-wider">
+                        Stock
+                      </th>
+                      <th className="px-4 py-3 text-left text-xs font-semibold text-yellow-800 dark:text-yellow-200 uppercase tracking-wider">
+                        Reservado
+                      </th>
+                      <th className="px-4 py-3 text-left text-xs font-semibold text-yellow-800 dark:text-yellow-200 uppercase tracking-wider">
+                        Precio
+                      </th>
+                      <th className="px-4 py-3 text-left text-xs font-semibold text-yellow-800 dark:text-yellow-200 uppercase tracking-wider">
+                        Estado
+                      </th>
+                      <th className="px-4 py-3 text-left text-xs font-semibold text-yellow-800 dark:text-yellow-200 uppercase tracking-wider">
+                        Notas
+                      </th>
+                      <th className="px-4 py-3 text-left text-xs font-semibold text-yellow-800 dark:text-yellow-200 uppercase tracking-wider">
+                        Fecha
+                      </th>
+                      <th className="px-4 py-3 text-left text-xs font-semibold text-yellow-800 dark:text-yellow-200 uppercase tracking-wider">
+                        Acciones
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
+                    {mainInventoryPage.map((row, index) => {
+                      if (row.type === "category") {
+                        return (
+                          <tr
+                            key={`cat-${row.cat}-${index}`}
+                            className="bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-700 dark:to-gray-600"
+                          >
+                            <td
+                              colSpan={11}
+                              className="px-4 py-4 text-lg font-bold text-gray-800 dark:text-gray-200"
+                            >
+                              📂 Categoría: {row.cat}
+                            </td>
+                          </tr>
+                        );
+                      } else {
+                        const item = row.item;
+                        return (
+                          <tr
+                            key={item.idInventario}
+                            className="hover:bg-yellow-50 dark:hover:bg-yellow-900/10 transition-colors duration-200"
+                          >
+                            <td className="px-4 py-4 text-sm font-medium text-gray-900 dark:text-gray-100">
+                              #{item.idInventario}
+                            </td>
+                            <td className="px-4 py-4 text-sm text-gray-900 dark:text-gray-100 font-medium">
+                              {item.nombre}
+                            </td>
+                           
+                            <td className="px-4 py-4 text-sm text-gray-900 dark:text-gray-100">
+                              <span className="bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 px-2 py-1 rounded-full text-xs font-medium">
+                                {item.stockReal}
+                              </span>
+                            </td>
+                            <td className="px-4 py-4 text-sm">
+                              {renderStock(item.stock)}
+                            </td>
+                            <td className="px-4 py-4 text-sm text-gray-900 dark:text-gray-100">
+                              <span className="bg-orange-100 dark:bg-orange-900 text-orange-800 dark:text-orange-200 px-2 py-1 rounded-full text-xs font-medium">
+                                {item.stockReservado}
+                              </span>
+                            </td>
+                            <td className="px-4 py-4 text-sm text-gray-900 dark:text-gray-100">
+                              {item.precioAlquiler == null
+                                ? <span className="text-gray-400 italic">Sin precio</span>
+                                : <span className="text-green-600 dark:text-green-400 font-semibold">${item.precioAlquiler}</span>}
+                            </td>
+                            <td className="px-4 py-4 text-sm">
+                              <button
+                                onClick={() => confirmDesactivar(item)}
+                                className="hover:underline transition-all duration-200"
+                              >
+                                {renderEstado(item.estado)}
+                              </button>
+                            </td>
+                            <td className="px-4 py-4 text-sm text-gray-600 dark:text-gray-400 max-w-xs truncate">
+                              {item.notas || <span className="italic">Sin notas</span>}
+                            </td>
+                            <td className="px-4 py-4 text-sm text-gray-600 dark:text-gray-400">
+                              <div className="flex items-center gap-2">
+                                <FaClock className="text-gray-400" />
+                                {formatDate(item.fechaRegistro)}
+                              </div>
+                            </td>
+                            <td className="px-4 py-4 text-sm">
+                              <div className="flex gap-2">
+                                <button
+                                  onClick={() => openEditModal(item)}
+                                  className="group flex items-center gap-1 bg-yellow-500 hover:bg-yellow-600 text-white py-2 px-3 rounded-lg transition-all duration-200 transform hover:scale-105"
+                                >
+                                  <FaEdit className="group-hover:rotate-12 transition-transform duration-200" />
+                                  <span className="hidden sm:inline">Editar</span>
+                                </button>
+                                <button
+                                  onClick={() => openDetailModal(item)}
+                                  className="group flex items-center gap-1 bg-blue-500 hover:bg-blue-600 text-white py-2 px-3 rounded-lg transition-all duration-200 transform hover:scale-105"
+                                >
+                                  <FaEye className="group-hover:scale-110 transition-transform duration-200" />
+                                  <span className="hidden sm:inline">Ver</span>
+                                </button>
+                              </div>
+                            </td>
+                          </tr>
+                        );
+                      }
+                    })}
+                  </tbody>
+                </table>
+              </div>
+
+              {/* Paginación mejorada */}
+              {totalMainPages > 1 && (
+                <div className="flex justify-center items-center mt-6 gap-4">
+                  <button
+                    onClick={() => handlePageChangeMain(currentPageMain - 1)}
+                    disabled={currentPageMain === 1}
+                    className="flex items-center gap-2 px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
+                  >
+                    ← Anterior
+                  </button>
+                  <div className="flex items-center gap-2">
+                    <span className="text-gray-700 dark:text-gray-300 font-medium">
+                      Página {currentPageMain} de {totalMainPages}
+                    </span>
+                  </div>
+                  <button
+                    onClick={() => handlePageChangeMain(currentPageMain + 1)}
+                    disabled={currentPageMain === totalMainPages}
+                    className="flex items-center gap-2 px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
+                  >
+                    Siguiente →
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Inventarios Secundarios */}
+      {Object.keys(aggregatedSecondaryByBodega).length === 0 ? (
+        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg">
+          <div className="flex flex-col justify-center items-center py-16 animate-fade-in-up">
+            <div className="bg-gray-100 dark:bg-gray-700 rounded-full p-8 mb-6">
+              <FaBoxOpen className="text-6xl text-gray-400" />
+            </div>
+            <p className="text-2xl text-gray-500 dark:text-gray-400 font-medium">
+              Sin productos en inventarios secundarios
+            </p>
+            <p className="text-gray-400 dark:text-gray-500 mt-2">
+              Los inventarios secundarios aparecerán aquí cuando agregues productos
             </p>
           </div>
-        ) : (
-          <>
-            <div className="overflow-x-auto  animate-fade-in-up">
-              <table className="table-auto w-full border border-gray-300 dark:border-gray-700">
-                <thead className="bg-yellow-500 text-white text-sm">
-                  <tr>
-                    <th className="border border-gray-300 dark:border-gray-700 px-3 py-2 text-left">
-                      ID Inventario
-                    </th>
-                    <th className="border border-gray-300 dark:border-gray-700 px-3 py-2 text-left">
-                      Producto
-                    </th>
-                    <th className="border border-gray-300 dark:border-gray-700 px-3 py-2 text-left">
-                      Bodega
-                    </th>
-                    <th className="border border-gray-300 dark:border-gray-700 px-3 py-2 text-left">
-                      Cantidad Productos
-                    </th>
-                    <th className="border border-gray-300 dark:border-gray-700 px-3 py-2 text-left">
-                      Stock
-                    </th>
-                    <th className="border border-gray-300 dark:border-gray-700 px-3 py-2 text-left">
-                      Stock Reservado
-                    </th>
-                    <th className="border border-gray-300 dark:border-gray-700 px-3 py-2 text-left">
-                      Precio Alquiler
-                    </th>
-                    <th className="border border-gray-300 dark:border-gray-700 px-3 py-2 text-left">
-                      Estado
-                    </th>
-                    <th className="border border-gray-300 dark:border-gray-700 px-3 py-2 text-left">
-                      Notas
-                    </th>
-                    <th className="border border-gray-300 dark:border-gray-700 px-3 py-2 text-left">
-                      Fecha Registro
-                    </th>
-                    <th className="border border-gray-300 dark:border-gray-700 px-3 py-2 text-left">
-                      Acción
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="text-sm">
-                  {mainInventoryPage.map((row, index) => {
-                    if (row.type === "category") {
-                      return (
-                        <tr
-                          key={`cat-${row.cat}-${index}`}
-                          className="bg-gray-100 dark:bg-gray-700 font-semibold transition-all duration-300 ease-in-out"
-                        >
-                          <td
-                            colSpan={11}
-                            className="border border-gray-300 dark:border-gray-700 px-3 py-2"
-                          >
-                            Categoría: {row.cat}
-                          </td>
-                        </tr>
-                      );
-                    } else {
-                      const item = row.item;
-                      return (
-                        <tr
-                          key={item.idInventario}
-                          className="hover:bg-gray-50 dark:hover:bg-gray-600 transition-all duration-300 ease-in-out"
-                        >
-                          <td className="border border-gray-300 dark:border-gray-700 px-3 py-2">
-                            {item.idInventario}
-                          </td>
-                          <td className="border border-gray-300 dark:border-gray-700 px-3 py-2">
-                            {item.nombre}
-                          </td>
-                          <td className="border border-gray-300 dark:border-gray-700 px-3 py-2">
-                            {item.nombreBodega}
-                          </td>
-                          <td className="border border-gray-300 dark:border-gray-700 px-3 py-2">
-                            {item.stockReal}
-                          </td>
-                          <td className="border border-gray-300 dark:border-gray-700 px-3 py-2">
-                            {renderStock(item.stock)}
-                          </td>
-                          <td className="border border-gray-300 dark:border-gray-700 px-3 py-2">
-                            {item.stockReservado}
-                          </td>
-                          <td className="border border-gray-300 dark:border-gray-700 px-3 py-2">
-                            {item.precioAlquiler == null
-                              ? "Sin precio definido"
-                              : `$${item.precioAlquiler}`}
-                          </td>
-                          <td className="border border-gray-300 dark:border-gray-700 px-3 py-2">
-                            <button
-                              onClick={() => confirmDesactivar(item)}
-                              className="hover:underline"
-                            >
-                              {renderEstado(item.estado)}
-                            </button>
-                          </td>
-                          <td className="border border-gray-300 dark:border-gray-700 px-3 py-2">
-                            {item.notas}
-                          </td>
-                          <td className="border border-gray-300 dark:border-gray-700 px-3 py-2 flex items-center gap-1">
-                            <FaClock className="text-gray-500" />{" "}
-                            {formatDate(item.fechaRegistro)}
-                          </td>
-                          <td className="border border-gray-300 dark:border-gray-700 px-3 py-2">
-                            <div className="flex gap-2">
-                              <button
-                                onClick={() => openEditModal(item)}
-                                className="flex items-center gap-1 bg-yellow-500 text-white py-1 px-3 rounded hover:bg-yellow-600"
-                              >
-                                <FaEdit /> Editar
-                              </button>
-                              <button
-                                onClick={() => openDetailModal(item)}
-                                className="flex items-center gap-1 bg-yellow-500 text-white py-1 px-3 rounded hover:bg-yellow-600"
-                              >
-                                <FaEye /> Ver más
-                              </button>
-                            </div>
-                          </td>
-                        </tr>
-                      );
-                    }
-                  })}
-                </tbody>
-              </table>
-            </div>
-
-            {totalMainPages > 1 && (
-              <div className="flex justify-center items-center mt-4 gap-2">
-                <button
-                  onClick={() => handlePageChangeMain(currentPageMain - 1)}
-                  className="px-3 py-1 bg-gray-200 dark:bg-gray-600 rounded hover:bg-gray-300 dark:hover:bg-gray-500"
-                >
-                  Anterior
-                </button>
-                <span className="text-gray-700 dark:text-gray-300">
-                  Página {currentPageMain} de {totalMainPages}
-                </span>
-                <button
-                  onClick={() => handlePageChangeMain(currentPageMain + 1)}
-                  className="px-3 py-1 bg-gray-200 dark:bg-gray-600 rounded hover:bg-gray-300 dark:hover:bg-gray-500"
-                >
-                  Siguiente
-                </button>
-              </div>
-            )}
-          </>
-        )}
-      </div>
-
-      {Object.keys(aggregatedSecondaryByBodega).length === 0 ? (
-        <div className="flex flex-col justify-center items-center py-8 animate-fade-in-up">
-          <FaBoxOpen className="text-4xl text-gray-500" />
-          <p className="text-xl text-gray-600 dark:text-gray-300 mt-4">
-            Sin producto en el inventario secundario
-          </p>
         </div>
       ) : (
         Object.keys(aggregatedSecondaryByBodega).map((bodega) => {
@@ -723,193 +753,205 @@ const Inventatio = ({ onNavigate, setDatosInventario }) => {
           const pageData = secondaryPages[currentPage - 1] || [];
 
           return (
-            <div key={bodega} className={`mt-10 relative `}>
-              <h2 className="text-3xl font-bold mb-6 text-yellow-600 text-center">
-                Inventario: {bodega}
-              </h2>
-
-              <div className="overflow-x-auto relative animate-fade-in-up">
-                {bodegaInactiva && (
-                  <div
-                    className="animate-fade-in-up absolute flex items-center justify-center w-full pointer-events-none z-10"
-                    style={{ top: "0.75rem" }}
-                  >
-                    <div className="transform ">
-                      <span className="text-6xl font-bold text-red-600 opacity-25">
+            <div key={bodega} className="mb-12">
+              <div className={`bg-white dark:bg-gray-800 rounded-xl shadow-lg overflow-hidden ${bodegaInactiva ? 'opacity-75' : ''}`}>
+                {/* Header del inventario secundario */}
+                <div className={`px-6 py-4 relative ${bodegaInactiva ? 'bg-gradient-to-r from-red-500 to-red-600' : 'bg-gradient-to-r from-blue-500 to-blue-600'}`}>
+                  <h2 className="text-3xl font-bold text-white text-center flex items-center justify-center gap-3">
+                    <FaWarehouse className="text-4xl" />
+                    Inventario: {bodega}
+                  </h2>
+                  {bodegaInactiva && (
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <span className="text-6xl font-bold text-white opacity-30 transform rotate-12">
                         INACTIVA
                       </span>
                     </div>
-                  </div>
-                )}
+                  )}
+                </div>
 
-                <div
-                  className={`overflow-x-auto relative  ${
-                    bodegaInactiva ? "bg-red-200" : ""
-                  }`}
-                >
-                  <table className="table-auto w-full border border-gray-300 dark:border-gray-700 animate-fade-in-up">
-                    <thead className="bg-yellow-500 text-white text-sm">
-                      <tr>
-                        <th className="border border-gray-300 dark:border-gray-700 px-3 py-2 text-left">
-                          ID Inventario
-                        </th>
-                        <th className="border border-gray-300 dark:border-gray-700 px-3 py-2 text-left">
-                          Producto
-                        </th>
-                        <th className="border border-gray-300 dark:border-gray-700 px-3 py-2 text-left">
-                          Cantidad Productos
-                        </th>
-                        <th className="border border-gray-300 dark:border-gray-700 px-3 py-2 text-left">
-                          Stock
-                        </th>
-                        <th className="border border-gray-300 dark:border-gray-700 px-3 py-2 text-left">
-                          Stock Reservado
-                        </th>
-                        <th className="border border-gray-300 dark:border-gray-700 px-3 py-2 text-left">
-                          Precio Alquiler
-                        </th>
-                        <th className="border border-gray-300 dark:border-gray-700 px-3 py-2 text-left">
-                          Estado
-                        </th>
-                        <th className="border border-gray-300 dark:border-gray-700 px-3 py-2 text-left">
-                          Notas
-                        </th>
-                        <th className="border border-gray-300 dark:border-gray-700 px-3 py-2 text-left">
-                          Fecha Registro
-                        </th>
-                        <th className="border border-gray-300 dark:border-gray-700 px-3 py-2 text-left">
-                          Acción
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody className="text-sm">
-                      {pageData.map((row, idx) => {
-                        if (row.type === "category") {
-                          return (
-                            <tr
-                              key={`cat-${row.cat}-${idx}`}
-                              className="bg-gray-100 dark:bg-gray-700 font-semibold transition-all duration-300 ease-in-out"
-                            >
-                              <td
-                                colSpan={10}
-                                className="border border-gray-300 dark:border-gray-700 px-3 py-2"
+                <div className={`p-6 ${bodegaInactiva ? 'bg-red-50 dark:bg-red-900/10' : ''}`}>
+                  <div className="overflow-x-auto animate-fade-in-up">
+                    <table className="w-full">
+                      <thead>
+                        <tr className="bg-blue-50 dark:bg-blue-900/20 border-b-2 border-blue-200 dark:border-blue-700">
+                          <th className="px-4 py-3 text-left text-xs font-semibold text-blue-800 dark:text-blue-200 uppercase tracking-wider">
+                            ID Inventario
+                          </th>
+                          <th className="px-4 py-3 text-left text-xs font-semibold text-blue-800 dark:text-blue-200 uppercase tracking-wider">
+                            Producto
+                          </th>
+                          <th className="px-4 py-3 text-left text-xs font-semibold text-blue-800 dark:text-blue-200 uppercase tracking-wider">
+                            Cantidad
+                          </th>
+                          <th className="px-4 py-3 text-left text-xs font-semibold text-blue-800 dark:text-blue-200 uppercase tracking-wider">
+                            Stock
+                          </th>
+                          <th className="px-4 py-3 text-left text-xs font-semibold text-blue-800 dark:text-blue-200 uppercase tracking-wider">
+                            Reservado
+                          </th>
+                          <th className="px-4 py-3 text-left text-xs font-semibold text-blue-800 dark:text-blue-200 uppercase tracking-wider">
+                            Precio
+                          </th>
+                          <th className="px-4 py-3 text-left text-xs font-semibold text-blue-800 dark:text-blue-200 uppercase tracking-wider">
+                            Estado
+                          </th>
+                          <th className="px-4 py-3 text-left text-xs font-semibold text-blue-800 dark:text-blue-200 uppercase tracking-wider">
+                            Notas
+                          </th>
+                          <th className="px-4 py-3 text-left text-xs font-semibold text-blue-800 dark:text-blue-200 uppercase tracking-wider">
+                            Fecha
+                          </th>
+                          <th className="px-4 py-3 text-left text-xs font-semibold text-blue-800 dark:text-blue-200 uppercase tracking-wider">
+                            Acciones
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
+                        {pageData.map((row, idx) => {
+                          if (row.type === "category") {
+                            return (
+                              <tr
+                                key={`cat-${row.cat}-${idx}`}
+                                className="bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-700 dark:to-gray-600"
                               >
-                                Categoría: {row.cat}
-                              </td>
-                            </tr>
-                          );
-                        } else {
-                          const item = row.item;
-                          return (
-                            <tr
-                              key={item.idInventario}
-                              className="hover:bg-gray-50 dark:hover:bg-gray-600 transition-all duration-300 ease-in-out"
-                            >
-                              <td className="border border-gray-300 dark:border-gray-700 px-3 py-2">
-                                {item.idInventario}
-                              </td>
-                              <td className="border border-gray-300 dark:border-gray-700 px-3 py-2">
-                                {item.nombre}
-                              </td>
-                              <td className="border border-gray-300 dark:border-gray-700 px-3 py-2">
-                                {item.stockReal}
-                              </td>
-                              <td className="border border-gray-300 dark:border-gray-700 px-3 py-2">
-                                {renderStock(item.stock)}
-                              </td>
-                              <td className="border border-gray-300 dark:border-gray-700 px-3 py-2">
-                                {item.stockReservado}
-                              </td>
-                              <td className="border border-gray-300 dark:border-gray-700 px-3 py-2">
-                                {item.precioAlquiler == null
-                                  ? "Sin precio definido"
-                                  : `$${item.precioAlquiler}`}
-                              </td>
-                              <td className="border border-gray-300 dark:border-gray-700 px-3 py-2">
-                                <button
-                                  onClick={() => confirmDesactivar(item)}
-                                  className="hover:underline"
+                                <td
+                                  colSpan={10}
+                                  className="px-4 py-4 text-lg font-bold text-gray-800 dark:text-gray-200"
                                 >
-                                  {renderEstado(item.estado)}
-                                </button>
-                              </td>
-                              <td className="border border-gray-300 dark:border-gray-700 px-3 py-2">
-                                {item.notas}
-                              </td>
-                              <td className="border border-gray-300 dark:border-gray-700 px-3 py-2 flex items-center gap-1">
-                                <FaClock className="text-gray-500" />{" "}
-                                {formatDate(item.fechaRegistro)}
-                              </td>
-                              <td className="border border-gray-300 dark:border-gray-700 px-3 py-2">
-                                <div className="flex gap-2">
+                                  📂 Categoría: {row.cat}
+                                </td>
+                              </tr>
+                            );
+                          } else {
+                            const item = row.item;
+                            return (
+                              <tr
+                                key={item.idInventario}
+                                className="hover:bg-blue-50 dark:hover:bg-blue-900/10 transition-colors duration-200"
+                              >
+                                <td className="px-4 py-4 text-sm font-medium text-gray-900 dark:text-gray-100">
+                                  #{item.idInventario}
+                                </td>
+                                <td className="px-4 py-4 text-sm text-gray-900 dark:text-gray-100 font-medium">
+                                  {item.nombre}
+                                </td>
+                                <td className="px-4 py-4 text-sm text-gray-900 dark:text-gray-100">
+                                  <span className="bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 px-2 py-1 rounded-full text-xs font-medium">
+                                    {item.stockReal}
+                                  </span>
+                                </td>
+                                <td className="px-4 py-4 text-sm">
+                                  {renderStock(item.stock)}
+                                </td>
+                                <td className="px-4 py-4 text-sm text-gray-900 dark:text-gray-100">
+                                  <span className="bg-orange-100 dark:bg-orange-900 text-orange-800 dark:text-orange-200 px-2 py-1 rounded-full text-xs font-medium">
+                                    {item.stockReservado}
+                                  </span>
+                                </td>
+                                <td className="px-4 py-4 text-sm text-gray-900 dark:text-gray-100">
+                                  {item.precioAlquiler == null
+                                    ? <span className="text-gray-400 italic">Sin precio</span>
+                                    : <span className="text-green-600 dark:text-green-400 font-semibold">${item.precioAlquiler}</span>}
+                                </td>
+                                <td className="px-4 py-4 text-sm">
                                   <button
-                                    onClick={() => openEditModal(item)}
-                                    disabled={bodegaInactiva}
-                                    className={`flex items-center gap-1 py-1 px-3 rounded ${
-                                      bodegaInactiva
-                                        ? "bg-gray-400 text-gray-200 cursor-not-allowed"
-                                        : "bg-yellow-500 text-white hover:bg-yellow-600"
-                                    }`}
+                                    onClick={() => confirmDesactivar(item)}
+                                    className="hover:underline transition-all duration-200"
                                   >
-                                    <FaEdit /> Editar
+                                    {renderEstado(item.estado)}
                                   </button>
-                                  <button
-                                    onClick={() => openDetailModal(item)}
-                                    disabled={bodegaInactiva}
-                                    className={`flex items-center gap-1 py-1 px-3 rounded ${
-                                      bodegaInactiva
-                                        ? "bg-gray-400 text-gray-200 cursor-not-allowed"
-                                        : "bg-yellow-500 text-white hover:bg-yellow-600"
-                                    }`}
-                                  >
-                                    <FaEye /> Ver más
-                                  </button>
-                                </div>
-                              </td>
-                            </tr>
-                          );
+                                </td>
+                                <td className="px-4 py-4 text-sm text-gray-600 dark:text-gray-400 max-w-xs truncate">
+                                  {item.notas || <span className="italic">Sin notas</span>}
+                                </td>
+                                <td className="px-4 py-4 text-sm text-gray-600 dark:text-gray-400">
+                                  <div className="flex items-center gap-2">
+                                    <FaClock className="text-gray-400" />
+                                    {formatDate(item.fechaRegistro)}
+                                  </div>
+                                </td>
+                                <td className="px-4 py-4 text-sm">
+                                  <div className="flex gap-2">
+                                    <button
+                                      onClick={() => openEditModal(item)}
+                                      disabled={bodegaInactiva}
+                                      className={`group flex items-center gap-1 py-2 px-3 rounded-lg transition-all duration-200 transform hover:scale-105 ${
+                                        bodegaInactiva
+                                          ? "bg-gray-400 text-gray-200 cursor-not-allowed"
+                                          : "bg-yellow-500 hover:bg-yellow-600 text-white"
+                                      }`}
+                                    >
+                                      <FaEdit className="group-hover:rotate-12 transition-transform duration-200" />
+                                      <span className="hidden sm:inline">Editar</span>
+                                    </button>
+                                    <button
+                                      onClick={() => openDetailModal(item)}
+                                      disabled={bodegaInactiva}
+                                      className={`group flex items-center gap-1 py-2 px-3 rounded-lg transition-all duration-200 transform hover:scale-105 ${
+                                        bodegaInactiva
+                                          ? "bg-gray-400 text-gray-200 cursor-not-allowed"
+                                          : "bg-blue-500 hover:bg-blue-600 text-white"
+                                      }`}
+                                    >
+                                      <FaEye className="group-hover:scale-110 transition-transform duration-200" />
+                                      <span className="hidden sm:inline">Ver</span>
+                                    </button>
+                                  </div>
+                                </td>
+                              </tr>
+                            );
+                          }
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
+
+                  {/* Paginación para inventario secundario */}
+                  {totalPages > 1 && (
+                    <div className="flex justify-center items-center mt-6 gap-4">
+                      <button
+                        onClick={() =>
+                          handlePageChangeSecondary(
+                            bodega,
+                            currentPage - 1,
+                            totalPages
+                          )
                         }
-                      })}
-                    </tbody>
-                  </table>
+                        disabled={currentPage === 1}
+                        className="flex items-center gap-2 px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
+                      >
+                        ← Anterior
+                      </button>
+                      <div className="flex items-center gap-2">
+                        <span className="text-gray-700 dark:text-gray-300 font-medium">
+                          Página {currentPage} de {totalPages}
+                        </span>
+                      </div>
+                      <button
+                        onClick={() =>
+                          handlePageChangeSecondary(
+                            bodega,
+                            currentPage + 1,
+                            totalPages
+                          )
+                        }
+                        disabled={currentPage === totalPages}
+                        className="flex items-center gap-2 px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
+                      >
+                        Siguiente →
+                      </button>
+                    </div>
+                  )}
                 </div>
               </div>
-
-              {totalPages > 1 && (
-                <div className="flex justify-center items-center mt-4 gap-2">
-                  <button
-                    onClick={() =>
-                      handlePageChangeSecondary(
-                        bodega,
-                        currentPage - 1,
-                        totalPages
-                      )
-                    }
-                    className="px-3 py-1 bg-gray-200 dark:bg-gray-600 rounded hover:bg-gray-300 dark:hover:bg-gray-500"
-                  >
-                    Anterior
-                  </button>
-                  <span className="text-gray-700 dark:text-gray-300">
-                    Página {currentPage} de {totalPages}
-                  </span>
-                  <button
-                    onClick={() =>
-                      handlePageChangeSecondary(
-                        bodega,
-                        currentPage + 1,
-                        totalPages
-                      )
-                    }
-                    className="px-3 py-1 bg-gray-200 dark:bg-gray-600 rounded hover:bg-gray-300 dark:hover:bg-gray-500"
-                  >
-                    Siguiente
-                  </button>
-                </div>
-              )}
             </div>
           );
         })
       )}
+
+
+
 
       {/* ===== MODAL DE EDICIÓN ===== */}
       {showEditModal && (
@@ -1151,6 +1193,8 @@ const Inventatio = ({ onNavigate, setDatosInventario }) => {
 
     </div>
   );
+
+
 };
 
 export default Inventatio;

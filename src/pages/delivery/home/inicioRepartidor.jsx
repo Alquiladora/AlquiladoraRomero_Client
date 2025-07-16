@@ -9,7 +9,14 @@ import {
   RadialBar,
   ResponsiveContainer,
 } from "recharts";
-import { Truck, Package, CheckCircle, Clock, BarChart2, Target } from "lucide-react";
+import {
+  Truck,
+  Package,
+  CheckCircle,
+  Clock,
+  BarChart2,
+  Target,
+} from "lucide-react";
 import api from "../../../utils/AxiosConfig";
 import { useAuth } from "../../../hooks/ContextAuth";
 import CustomLoading from "../../../components/spiner/SpinerGlobal";
@@ -36,17 +43,17 @@ const InicioRepartidor = () => {
 
   // Datos para el gráfico circular de distribución de pedidos
   const pieData = [
-    { name: "Recogiendo", value: estadisticas.totalRecogiendo, color: "#3B82F6" },
+    { name: "Recogiendo", value: estadisticas.totalRecogiendo, color: "#2563EB" },
     { name: "En Alquiler", value: estadisticas.totalEnAlquiler, color: "#F59E0B" },
-    { name: "Enviando", value: estadisticas.totalEnviando, color: "#EF4444" },
-    { name: "Finalizado", value: estadisticas.totalFinalizado, color: "#10B981" },
+    { name: "Enviando", value: estadisticas.totalEnviando, color: "#DC2626" },
+    { name: "Finalizado", value: estadisticas.totalFinalizado, color: "#065F46" },
   ];
 
   // Datos para el gráfico radial de rendimiento mensual
-  const radialData = pedidosFinalizadosPorMes.map((item) => ({
+  const radialData = pedidosFinalizadosPorMes.map((item, index) => ({
     name: item.mes,
     value: item.completados || 0,
-    fill: `hsl(${Math.random() * 360}, 70%, 50%)`,
+    fill: `hsl(${(index * 60) % 360}, 70%, 50%)`,
   }));
 
   // Datos para el gráfico radial de valoración
@@ -54,7 +61,7 @@ const InicioRepartidor = () => {
     {
       name: "Puntuación",
       value: estadisticas.promedioValoracion * 20,
-      color: estadisticas.promedioValoracion >= 4 ? "#10B981" : "#EF4444",
+      color: estadisticas.promedioValoracion >= 4 ? "#065F46" : "#DC2626",
     },
   ];
 
@@ -62,7 +69,6 @@ const InicioRepartidor = () => {
     const fetchData = async () => {
       try {
         setLoading(true);
-       
 
         const response = await api.get("/api/repartidor/repartidor/datos", {
           withCredentials: true,
@@ -128,39 +134,37 @@ const InicioRepartidor = () => {
     estadisticas.promedioValoracion > 0;
 
   if (loading) {
-    return (
-      <CustomLoading/>
-    );
+    return <CustomLoading />;
   }
 
   return (
-    <div className="min-h-screen  text-gray-900 dark:bg-gray-900 dark:text-gray-100">
+    <div className="min-h-screen bg-gray-50 text-gray-900 dark:bg-gray-900 dark:text-gray-100 transition-colors duration-300">
       {/* Header */}
-      <header className="bg-white shadow-lg border-b border-gray-200 dark:bg-gray-800 dark:border-gray-700 p-5 md:p-8">
-        <div className="flex flex-col items-center md:flex-row md:justify-between">
-          <div className="flex items-center space-x-5">
+      <header className="bg-white shadow-xl border-b border-gray-200 dark:bg-gray-800 dark:border-gray-700 p-6 md:p-8">
+        <div className="max-w-7xl mx-auto flex flex-col md:flex-row md:items-center md:justify-between">
+          <div className="flex items-center space-x-6">
             <div className="relative">
-              <div className="w-16 h-16 bg-blue-600 rounded-full flex items-center justify-center text-white text-2xl font-bold">
+              <div className="w-20 h-20 bg-gradient-to-br from-blue-700 to-blue-900 rounded-full flex items-center justify-center text-white text-3xl font-bold shadow-lg">
                 {repartidor.nombre.charAt(0) || "R"}
               </div>
               <div
-                className={`absolute -bottom-1 -right-1 w-5 h-5 rounded-full border-2 border-white dark:border-gray-800 ${
-                  repartidor.cuentaActiva ? "bg-green-500" : "bg-red-500"
+                className={`absolute -bottom-2 -right-2 w-6 h-6 rounded-full border-2 border-white dark:border-gray-800 ${
+                  repartidor.cuentaActiva ? "bg-emerald-500" : "bg-red-500"
                 }`}
               ></div>
             </div>
             <div>
-              <h1 className="text-xl font-bold text-gray-900 dark:text-gray-100 md:text-2xl">
+              <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100 md:text-3xl">
                 {repartidor.nombre} {repartidor.apellidoP} {repartidor.apellidoM}
               </h1>
-              <p className="text-sm text-gray-600 dark:text-gray-400 md:text-lg">
+              <p className="text-sm font-medium text-gray-600 dark:text-gray-400 md:text-base">
                 Estado: {repartidor.cuentaActiva ? "Activo" : "Desactivado"}
               </p>
-              <p className="text-xs text-gray-500 dark:text-gray-400 md:text-base">
+              <p className="text-xs text-gray-500 dark:text-gray-400 md:text-sm">
                 {repartidor.cuentaActiva
-                  ? `Repartidor Activado: ${new Date(repartidor.fechaAlta).toLocaleDateString()}`
+                  ? `Activado desde: ${new Date(repartidor.fechaAlta).toLocaleDateString()}`
                   : repartidor.fechaBaja
-                  ? `Repartidor Desactivado: ${new Date(repartidor.fechaBaja).toLocaleDateString()}`
+                  ? `Desactivado desde: ${new Date(repartidor.fechaBaja).toLocaleDateString()}`
                   : "Sin fecha de baja"}
               </p>
             </div>
@@ -169,77 +173,81 @@ const InicioRepartidor = () => {
       </header>
 
       {/* Estadísticas */}
-      <section className="p-5 md:p-8">
-        <h2 className="text-lg font-semibold mb-5 text-gray-800 dark:text-gray-200 md:text-2xl">Resumen de hoy</h2>
-        <div className="grid grid-cols-2 gap-4 md:grid-cols-4 md:gap-6">
-          <div className="bg-white p-4 rounded-xl shadow-lg border border-gray-100 hover:shadow-md transition-shadow dark:bg-gray-800 dark:border-gray-700">
+      <section className="max-w-7xl mx-auto p-6 md:p-8">
+        <h2 className="text-xl font-semibold mb-6 text-gray-800 dark:text-gray-200 md:text-2xl">
+          Resumen de Desempeño
+        </h2>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="bg-white p-5 rounded-xl shadow-md border border-gray-100 hover:shadow-lg transition-shadow duration-300 dark:bg-gray-800 dark:border-gray-700">
             <div className="flex flex-col items-center">
-              <div className="w-12 h-12 bg-blue-50 rounded-full flex items-center justify-center mb-3 dark:bg-blue-900">
-                <Clock className="w-6 h-6 text-blue-600 dark:text-blue-400" />
+              <div className="w-14 h-14 bg-blue-100 rounded-full flex items-center justify-center mb-4 dark:bg-blue-900/50">
+                <Clock className="w-6 h-6 text-blue-700 dark:text-blue-300" />
               </div>
-              <span className="text-2xl font-bold text-gray-900 dark:text-gray-100 md:text-4xl">{estadisticas.totalRecogiendo}</span>
-              <span className="text-xs text-gray-500 dark:text-gray-400 md:text-base">Recogiendo</span>
+              <span className="text-2xl font-bold text-gray-900 dark:text-gray-100">{estadisticas.totalRecogiendo}</span>
+              <span className="text-sm text-gray-600 dark:text-gray-400">Recogiendo</span>
             </div>
           </div>
-          <div className="bg-white p-4 rounded-xl shadow-lg border border-gray-100 hover:shadow-md transition-shadow dark:bg-gray-800 dark:border-gray-700">
+          <div className="bg-white p-5 rounded-xl shadow-md border border-gray-100 hover:shadow-lg transition-shadow duration-300 dark:bg-gray-800 dark:border-gray-700">
             <div className="flex flex-col items-center">
-              <div className="w-12 h-12 bg-amber-50 rounded-full flex items-center justify-center mb-3 dark:bg-amber-900">
-                <Clock className="w-6 h-6 text-amber-600 dark:text-amber-400" />
+              <div className="w-14 h-14 bg-amber-100 rounded-full flex items-center justify-center mb-4 dark:bg-amber-900/50">
+                <Package className="w-6 h-6 text-amber-700 dark:text-amber-300" />
               </div>
-              <span className="text-2xl font-bold text-gray-900 dark:text-gray-100 md:text-4xl">{estadisticas.totalEnAlquiler}</span>
-              <span className="text-xs text-gray-500 dark:text-gray-400 md:text-base">En Alquiler</span>
+              <span className="text-2xl font-bold text-gray-900 dark:text-gray-100">{estadisticas.totalEnAlquiler}</span>
+              <span className="text-sm text-gray-600 dark:text-gray-400">En Alquiler</span>
             </div>
           </div>
-          <div className="bg-white p-4 rounded-xl shadow-lg border border-gray-100 hover:shadow-md transition-shadow dark:bg-gray-800 dark:border-gray-700">
+          <div className="bg-white p-5 rounded-xl shadow-md border border-gray-100 hover:shadow-lg transition-shadow duration-300 dark:bg-gray-800 dark:border-gray-700">
             <div className="flex flex-col items-center">
-              <div className="w-12 h-12 bg-red-50 rounded-full flex items-center justify-center mb-3 dark:bg-red-900">
-                <Clock className="w-6 h-6 text-red-600 dark:text-red-400" />
+              <div className="w-14 h-14 bg-red-100 rounded-full flex items-center justify-center mb-4 dark:bg-red-900/50">
+                <Truck className="w-6 h-6 text-red-700 dark:text-red-300" />
               </div>
-              <span className="text-2xl font-bold text-gray-900 dark:text-gray-100 md:text-4xl">{estadisticas.totalEnviando}</span>
-              <span className="text-xs text-gray-500 dark:text-gray-400 md:text-base">Enviando</span>
+              <span className="text-2xl font-bold text-gray-900 dark:text-gray-100">{estadisticas.totalEnviando}</span>
+              <span className="text-sm text-gray-600 dark:text-gray-400">Enviando</span>
             </div>
           </div>
-          <div className="bg-white p-4 rounded-xl shadow-lg border border-gray-100 hover:shadow-md transition-shadow dark:bg-gray-800 dark:border-gray-700">
+          <div className="bg-white p-5 rounded-xl shadow-md border border-gray-100 hover:shadow-lg transition-shadow duration-300 dark:bg-gray-800 dark:border-gray-700">
             <div className="flex flex-col items-center">
-              <div className="w-12 h-12 bg-green-50 rounded-full flex items-center justify-center mb-3 dark:bg-green-900">
-                <CheckCircle className="w-6 h-6 text-green-600 dark:text-green-400" />
+              <div className="w-14 h-14 bg-emerald-100 rounded-full flex items-center justify-center mb-4 dark:bg-emerald-900/50">
+                <CheckCircle className="w-6 h-6 text-emerald-700 dark:text-emerald-300" />
               </div>
-              <span className="text-2xl font-bold text-gray-900 dark:text-gray-100 md:text-4xl">{estadisticas.totalFinalizado}</span>
-              <span className="text-xs text-gray-500 dark:text-gray-400 md:text-base">Finalizado</span>
+              <span className="text-2xl font-bold text-gray-900 dark:text-gray-100">{estadisticas.totalFinalizado}</span>
+              <span className="text-sm text-gray-600 dark:text-gray-400">Finalizado</span>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Gráficos circulares */}
-      <section className="p-5 md:p-8">
-        <h2 className="text-lg font-semibold mb-5 text-gray-800 dark:text-gray-200 flex items-center md:text-2xl">
-          <BarChart2 className="w-5 h-5 mr-2" />
-          Estadísticas y rendimiento
+      {/* Gráficos */}
+      <section className="max-w-7xl mx-auto p-6 md:p-8">
+        <h2 className="text-xl font-semibold mb-6 text-gray-800 dark:text-gray-200 flex items-center md:text-2xl">
+          <BarChart2 className="w-6 h-6 mr-3" />
+          Análisis de Rendimiento
         </h2>
         {!hasDataForCharts && (
-          <div className="bg-white p-4 rounded-xl shadow-lg border border-gray-100 dark:bg-gray-800 dark:border-gray-700 text-center">
-            <p className="text-gray-500 dark:text-gray-400 text-sm md:text-base">No hay datos disponibles para mostrar.</p>
+          <div className="bg-white p-6 rounded-xl shadow-md border border-gray-100 dark:bg-gray-800 dark:border-gray-700 text-center">
+            <p className="text-gray-500 dark:text-gray-400 text-base md:text-lg">No hay datos disponibles para mostrar.</p>
           </div>
         )}
         {hasDataForCharts && (
-          <div className="space-y-5">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {/* Gráfico circular - Distribución de pedidos */}
-            <div className="bg-white p-4 rounded-xl shadow-lg border border-gray-100 dark:bg-gray-800 dark:border-gray-700">
-              <h3 className="text-sm font-medium mb-3 text-gray-700 dark:text-gray-300 md:text-lg">Distribución de pedidos</h3>
-              <div className="h-48 md:h-72">
+            <div className="bg-white p-6 rounded-xl shadow-md border border-gray-100 dark:bg-gray-800 dark:border-gray-700">
+              <h3 className="text-lg font-medium mb-4 text-gray-700 dark:text-gray-300">Distribución de Pedidos</h3>
+              <div className="h-64">
                 <ResponsiveContainer width="100%" height="100%">
                   <PieChart>
                     <Pie
                       data={pieData}
                       cx="50%"
                       cy="50%"
-                      innerRadius={30}
-                      outerRadius={60}
+                      innerRadius={40}
+                      outerRadius={80}
                       paddingAngle={2}
                       dataKey="value"
                       labelLine={false}
-                      label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(1)}%`}
+                      label={({ name, percent }) =>
+                        percent > 0.05 ? `${name}: ${(percent * 100).toFixed(1)}%` : null
+                      }
                     >
                       {pieData.map((entry, index) => (
                         <Cell key={`cell-${index}`} fill={entry.color} />
@@ -250,18 +258,18 @@ const InicioRepartidor = () => {
                         backgroundColor: "#fff",
                         border: "1px solid #e5e7eb",
                         borderRadius: "8px",
-                        fontSize: "12px",
-                        boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1)",
+                        fontSize: "14px",
+                        boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
                       }}
                       wrapperStyle={{ backgroundColor: "transparent" }}
                       className="dark:bg-gray-800 dark:border-gray-600 dark:text-gray-100"
                     />
                     <Legend
                       verticalAlign="bottom"
-                      height={36}
+                      height={48}
                       iconType="circle"
-                      wrapperStyle={{ fontSize: "12px", color: "#000" }}
-                      className="dark:text-gray-100"
+                      wrapperStyle={{ fontSize: "14px", color: "#374151" }}
+                      className="dark:text-gray-300"
                     />
                   </PieChart>
                 </ResponsiveContainer>
@@ -269,9 +277,9 @@ const InicioRepartidor = () => {
             </div>
 
             {/* Gráfico radial - Pedidos finalizados por mes */}
-            <div className="bg-white p-4 rounded-xl shadow-lg border border-gray-100 dark:bg-gray-800 dark:border-gray-700">
-              <h3 className="text-sm font-medium mb-3 text-gray-700 dark:text-gray-300 md:text-lg">Pedidos finalizados por mes</h3>
-              <div className="h-48 md:h-72">
+            <div className="bg-white p-6 rounded-xl shadow-md border border-gray-100 dark:bg-gray-800 dark:border-gray-700">
+              <h3 className="text-lg font-medium mb-4 text-gray-700 dark:text-gray-300">Pedidos Finalizados por Mes</h3>
+              <div className="h-64">
                 <ResponsiveContainer width="100%" height="100%">
                   <RadialBarChart
                     cx="50%"
@@ -279,13 +287,13 @@ const InicioRepartidor = () => {
                     innerRadius="20%"
                     outerRadius="80%"
                     data={radialData}
-                    startAngle={90}
-                    endAngle={-270}
+                    startAngle={0}
+                    endAngle={360}
                   >
                     <RadialBar
                       minAngle={15}
-                      label={{ position: "insideStart", fill: "#fff", fontSize: 10 }}
-                      background
+                      label={{ position: "inside", fill: "#fff", fontSize: 12 }}
+                      background={{ fill: "#e5e7eb", dark: { fill: "#4b5563" } }}
                       dataKey="value"
                     />
                     <Tooltip
@@ -293,8 +301,8 @@ const InicioRepartidor = () => {
                         backgroundColor: "#fff",
                         border: "1px solid #e5e7eb",
                         borderRadius: "8px",
-                        fontSize: "12px",
-                        boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1)",
+                        fontSize: "14px",
+                        boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
                       }}
                       wrapperStyle={{ backgroundColor: "transparent" }}
                       className="dark:bg-gray-800 dark:border-gray-600 dark:text-gray-100"
@@ -305,10 +313,10 @@ const InicioRepartidor = () => {
             </div>
 
             {/* Gráfico radial - Valoración promedio */}
-            <div className="bg-white p-4 rounded-xl shadow-lg border border-gray-100 dark:bg-gray-800 dark:border-gray-700">
-              <h3 className="text-sm font-medium mb-3 text-gray-700 dark:text-gray-300 md:text-lg">Puntuación promedio</h3>
+            <div className="bg-white p-6 rounded-xl shadow-md border border-gray-100 dark:bg-gray-800 dark:border-gray-700">
+              <h3 className="text-lg font-medium mb-4 text-gray-700 dark:text-gray-300">Puntuación Promedio</h3>
               {estadisticas.promedioValoracion > 0 ? (
-                <div className="h-48 md:h-72 flex items-center justify-center">
+                <div className="h-64 flex items-center justify-center">
                   <ResponsiveContainer width="80%" height="80%">
                     <RadialBarChart
                       cx="50%"
@@ -318,18 +326,18 @@ const InicioRepartidor = () => {
                       data={valoracionData}
                     >
                       <RadialBar
-                        label={{ fill: "#fff", position: "inside", fontSize: 12 }}
-                        background={{ fill: "#eee", dark: { fill: "#4b5563" } }}
+                        label={{ fill: "#fff", position: "inside", fontSize: 14 }}
+                        background={{ fill: "#e5e7eb", dark: { fill: "#4b5563" } }}
                         dataKey="value"
-                        cornerRadius={10}
+                        cornerRadius={15}
                       />
                       <Tooltip
                         contentStyle={{
                           backgroundColor: "#fff",
                           border: "1px solid #e5e7eb",
                           borderRadius: "8px",
-                          fontSize: "12px",
-                          boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1)",
+                          fontSize: "14px",
+                          boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
                         }}
                         wrapperStyle={{ backgroundColor: "transparent" }}
                         className="dark:bg-gray-800 dark:border-gray-600 dark:text-gray-100"
@@ -339,8 +347,8 @@ const InicioRepartidor = () => {
                         y="50%"
                         textAnchor="middle"
                         dominantBaseline="middle"
-                        className="text-gray-800 font-bold dark:text-gray-100"
-                        style={{ fontSize: "16px" }}
+                        className="text-gray-900 font-bold dark:text-gray-100"
+                        style={{ fontSize: "20px" }}
                       >
                         {estadisticas.promedioValoracion.toFixed(1)}
                       </text>
@@ -348,7 +356,7 @@ const InicioRepartidor = () => {
                   </ResponsiveContainer>
                 </div>
               ) : (
-                <p className="text-center text-gray-500 dark:text-gray-400 text-sm md:text-base">Sin datos</p>
+                <p className="text-center text-gray-500 dark:text-gray-400 text-base md:text-lg">Sin datos</p>
               )}
             </div>
           </div>
@@ -356,23 +364,23 @@ const InicioRepartidor = () => {
       </section>
 
       {/* Métricas adicionales */}
-      <section className="p-5 md:p-8">
-        <h2 className="text-lg font-semibold mb-5 text-gray-800 dark:text-gray-200 flex items-center md:text-2xl">
-          <Target className="w-5 h-5 mr-2" />
-          Métricas de rendimiento
+      <section className="max-w-7xl mx-auto p-6 md:p-8">
+        <h2 className="text-xl font-semibold mb-6 text-gray-800 dark:text-gray-200 flex items-center md:text-2xl">
+          <Target className="w-6 h-6 mr-3" />
+          Indicadores de Rendimiento
         </h2>
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-1 md:gap-6">
-          <div className="bg-white p-4 rounded-xl shadow-lg border border-gray-100 hover:shadow-md transition-shadow dark:bg-gray-800 dark:border-gray-700">
+        <div className="grid grid-cols-1 gap-6">
+          <div className="bg-white p-6 rounded-xl shadow-md border border-gray-100 hover:shadow-lg transition-shadow duration-300 dark:bg-gray-800 dark:border-gray-700">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-600 dark:text-gray-400 md:text-lg">Promedio semanal</p>
-                <p className="text-2xl font-bold text-gray-900 dark:text-gray-100 md:text-4xl">
+                <p className="text-base font-medium text-gray-600 dark:text-gray-400">Promedio Semanal</p>
+                <p className="text-3xl font-bold text-gray-900 dark:text-gray-100 mt-2">
                   {(estadisticas.totalFinalizado / 7).toFixed(1)}
                 </p>
-                <p className="text-xs text-gray-500 dark:text-gray-400 md:text-base">entregas/día</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Entregas por día</p>
               </div>
-              <div className="w-12 h-12 bg-blue-50 rounded-full flex items-center justify-center dark:bg-blue-900">
-                <Target className="w-6 h-6 text-blue-600 dark:text-blue-400" />
+              <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center dark:bg-blue-900/50">
+                <Target className="w-8 h-8 text-blue-700 dark:text-blue-300" />
               </div>
             </div>
           </div>

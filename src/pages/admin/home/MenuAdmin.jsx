@@ -39,6 +39,7 @@ import {
   faBoxOpen,
   faShoppingCart,
   faClipboardList,
+   faArrowUp,
   faChartLine,
   faExclamationTriangle,
   faSignOutAlt,
@@ -68,6 +69,7 @@ import AsignacionPedidosV2 from "../repartidores/asignacionPedidos";
 import GestionRepartidores from "../repartidores/gestionRepartidor";
 import WearOsLogin from "../../../components/wearOs/WearOsLogin";
 import GestionPagos from "../pagos/GestionPagos";
+import GestionPedidosIncidentes from "../gestion-pedidos/PedidosIncidentes";
 
 const Breadcrumbs = ({ activeTab, onNavigate }) => {
   const pageHierarchy = {
@@ -177,6 +179,7 @@ const MenuHomeAdmin = () => {
   const [fotoEmpresa, setFotoEmpresa] = useState("");
   const [datosInventario, setDatosInventario] = useState([]);
   const [pedidos, setPedidos] = useState([]);
+   const [showScrollButton, setShowScrollButton] = useState(false);
 
   const socket = useSocket();
 
@@ -261,6 +264,27 @@ const MenuHomeAdmin = () => {
     }
   }, [user]);
 
+// Handle scroll to show/hide button
+  useEffect(() => {
+    const handleScroll = () => {
+      if (window.scrollY > 300) {
+        setShowScrollButton(true);
+      } else {
+        setShowScrollButton(false);
+      }
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  // Scroll to top function
+  const scrollToTop = () => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+
+
   const navSections = [
     {
       title: "General",
@@ -287,6 +311,7 @@ const MenuHomeAdmin = () => {
       items: [
         { icon: faShoppingCart, label: "Pedidos Manuales" },
         { icon: faTasks, label: "Gestion Pedidos" },
+         { icon: faTasks, label: "Gestion Pedidos Inicidentes" },
       ],
     },
      {
@@ -409,6 +434,10 @@ const MenuHomeAdmin = () => {
         return <GestionPedidos onNavigate={handleNavigate} />;
       case "Pedidos General Calendario":
         return <CalendarioGeneralPedidos />;
+        case "Gestion Pedidos Inicidentes":
+        return <GestionPedidosIncidentes />;
+
+
       case "Dasboard Usuarios":
         return <DasboardUsuarios onNavigate={handleNavigate} />;
       case "Auditoría de Sesiones":
@@ -616,6 +645,17 @@ const MenuHomeAdmin = () => {
           <Breadcrumbs activeTab={activeTab} onNavigate={handleNavigate} />
           {renderContent()}
         </main>
+
+        {/* Scroll to Top Button */}
+                {showScrollButton && (
+                  <button
+                    onClick={scrollToTop}
+                    className="fixed bottom-16 right-6 z-50 w-14 h-14 rounded-full bg-gradient-to-br from-yellow-400 to-orange-500 text-white flex items-center justify-center shadow-xl hover:shadow-2xl hover:scale-110 transition-transform duration-300"
+                    aria-label="Volver arriba"
+                  >
+                    <FontAwesomeIcon icon={faArrowUp} className="w-6 h-6" />
+                  </button>
+                )}
       </div>
 
       <style jsx>{`

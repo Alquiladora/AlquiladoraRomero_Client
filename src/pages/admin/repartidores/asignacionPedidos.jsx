@@ -39,6 +39,7 @@ import {
   AiOutlineCloseCircle,
   AiOutlineQuestionCircle,
 } from "react-icons/ai";
+import CustomLoading from "../../../components/spiner/SpinerGlobal";
 
 // Tooltip Component
 const Tooltip = ({ content, children }) => {
@@ -1943,7 +1944,7 @@ const AsignacionPedidosGeo = () => {
   const totalRepartidoresActivos = state.totals.totalRepartidores;
   const assignedPedidos = state.totals.totalPedidosAsignados;
 
-  if (state.isLoading) return <Loading />;
+  if (state.isLoading) return < CustomLoading />;
   console.log("State completo:", state);
 
   // Paginación del historial

@@ -21,6 +21,7 @@ import { toast } from "react-toastify";
 import DatePicker from "react-datepicker";
 import api from "../../../utils/AxiosConfig";
 import { useAuth } from "../../../hooks/ContextAuth";
+import CustomLoading from "../../../components/spiner/SpinerGlobal";
 
 const statusColors = {
   procesando:
@@ -745,12 +746,7 @@ const handleToggleStatus = async (repartidorId, currentStatus) => {
             {/* Modal Content */}
             <div className="flex-1 overflow-y-auto max-h-[calc(92vh-180px)] scrollbar-thin p-4 sm:p-6">
               {detailsLoading ? (
-                <div className="spinner-container">
-                  <FontAwesomeIcon
-                    icon={faSpinner}
-                    className="text-5xl text-[#fcb900] animate-spin"
-                  />
-                </div>
+                < CustomLoading/>
               ) : (
                 <>
                   {openDialog === "details" && repartidorData.details && (

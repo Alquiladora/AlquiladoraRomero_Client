@@ -181,7 +181,7 @@ const MenuHomeDelivery = () => {
     {
       title: "Gestión de Entregas",
       items: [
-        { icon: faTruck, label: "Pedidos Asignados", count: totalDeliveries },
+        { icon: faTruck, label: "Pedidos Asignados"},
         { icon: faHistory, label: "Historial de Entregas" },
       ],
     },

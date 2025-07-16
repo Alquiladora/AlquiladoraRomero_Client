@@ -24,9 +24,11 @@ function PaymentModal({ selectedOrder, onClose, onPaymentRegistered }) {
   const [success, setSuccess] = useState(false);
   const { csrfToken } = useAuth();
 
-  const total = Number(selectedOrder.totalPagar) || 0;
-  const totalPagado = Number(selectedOrder.pago.totalPagado) || 0;
-  const pendiente = total - totalPagado;
+  // Determinar dinámicamente las propiedades de selectedOrder
+  const idPedido = selectedOrder.idPedido ?? selectedOrder.id ?? 0;
+  const total = Number(selectedOrder.totalPagar ?? selectedOrder.totalToPay) || 0;
+  const totalPagado = Number(selectedOrder.pago?.totalPagado ?? selectedOrder.totalPaid) || 0;
+  const pendiente = Math.max(total - totalPagado, 0);
 
   const validateMonto = (value) => {
     const numValue = parseFloat(value);
@@ -89,14 +91,20 @@ function PaymentModal({ selectedOrder, onClose, onPaymentRegistered }) {
     setLoading(true);
 
     try {
-      const response = await api.post("/api/pedidos/pagos/registrar", {
-        idPedido: selectedOrder.idPedido,
+      console.log("Payload enviado:", {
+        idPedido,
         monto: parseFloat(montoPago),
         formaPago,
         metodoPago: metodoPago.trim(),
         detallesPago: detallesPago.trim(),
-      },
-      {
+      });
+      const response = await api.post("/api/pedidos/pagos/registrar", {
+        idPedido,
+        monto: parseFloat(montoPago),
+        formaPago,
+        metodoPago: metodoPago.trim(),
+        detallesPago: detallesPago.trim(),
+      }, {
         headers: {
           "X-CSRF-Token": csrfToken,
         },
@@ -115,6 +123,9 @@ function PaymentModal({ selectedOrder, onClose, onPaymentRegistered }) {
     } catch (error) {
       setError("Error de conexión. Verifica tu internet e intenta nuevamente.");
       console.error("Error al registrar pago:", error);
+      if (error.response) {
+        console.error("Respuesta del servidor:", error.response.data);
+      }
     } finally {
       setLoading(false);
     }
@@ -134,13 +145,12 @@ function PaymentModal({ selectedOrder, onClose, onPaymentRegistered }) {
   return (
     <div className="fixed inset-0 z-[1000] flex items-center justify-center bg-black bg-opacity-60 p-4 backdrop-blur-sm transition-all duration-300">
       <div className="bg-white dark:bg-gray-900 rounded-2xl w-full max-w-lg sm:max-w-xl md:max-w-2xl max-h-[90vh] overflow-hidden shadow-2xl border border-gray-200 dark:border-gray-700 transform transition-all duration-300 scale-100 hover:scale-[1.02]">
-        {/* Header */}
         <div className="bg-gradient-to-r from-yellow-500 to-yellow-600 px-4 sm:px-6 py-4">
           <div className="flex justify-between items-center">
             <div className="text-white">
               <h3 className="text-lg sm:text-xl font-bold">Registrar Pago</h3>
               <p className="text-yellow-100 text-sm sm:text-base">
-                Pedido #{selectedOrder.idPedido}
+                Pedido #{idPedido}
               </p>
             </div>
             <button
@@ -155,10 +165,8 @@ function PaymentModal({ selectedOrder, onClose, onPaymentRegistered }) {
         </div>
 
         <div className="p-4 sm:p-6 overflow-y-auto max-h-[calc(90vh-80px)]">
-          {/* Si hay pendiente mostrar formulario */}
           {pendiente > 0 ? (
             <>
-              {/* Información del pendiente */}
               <div className="bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-800 rounded-lg p-4 mb-6">
                 <div className="flex items-center space-x-3">
                   <FontAwesomeIcon
@@ -184,7 +192,6 @@ function PaymentModal({ selectedOrder, onClose, onPaymentRegistered }) {
                 </div>
               </div>
 
-              {/* Mensajes de error o éxito */}
               {error && (
                 <div className="bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 rounded-lg p-4 mb-4">
                   <div className="flex items-center space-x-2">
@@ -213,9 +220,7 @@ function PaymentModal({ selectedOrder, onClose, onPaymentRegistered }) {
                 </div>
               )}
 
-              {/* Formulario de pago */}
               <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
-                {/* Monto a pagar */}
                 <div>
                   <label className="block text-sm font-semibold mb-2 text-gray-700 dark:text-gray-300">
                     Monto a Pagar *
@@ -254,7 +259,6 @@ function PaymentModal({ selectedOrder, onClose, onPaymentRegistered }) {
                   )}
                 </div>
 
-                {/* Forma de Pago */}
                 <div>
                   <label className="block text-sm font-semibold mb-2 text-gray-700 dark:text-gray-300">
                     Forma de Pago *
@@ -272,7 +276,6 @@ function PaymentModal({ selectedOrder, onClose, onPaymentRegistered }) {
                   </select>
                 </div>
 
-                {/* Método de Pago */}
                 <div>
                   <label className="block text-sm font-semibold mb-2 text-gray-700 dark:text-gray-300">
                     Detalles del Pago *
@@ -288,7 +291,6 @@ function PaymentModal({ selectedOrder, onClose, onPaymentRegistered }) {
                   />
                 </div>
 
-                {/* Botones */}
                 <div className="flex justify-end space-x-3 pt-4">
                   <button
                     type="button"
@@ -326,7 +328,6 @@ function PaymentModal({ selectedOrder, onClose, onPaymentRegistered }) {
             </>
           ) : (
             <>
-              {/* Mensaje cuando no hay saldo pendiente */}
               <div className="bg-green-100 dark:bg-green-900/30 border border-green-200 dark:border-green-800 rounded-lg p-6 mb-6 flex flex-col sm:flex-row items-center space-y-4 sm:space-y-0 sm:space-x-6">
                 <div className="bg-green-200 dark:bg-green-800 p-3 rounded-full text-green-700 dark:text-green-300 text-3xl sm:text-5xl flex items-center justify-center shadow-lg">
                   <FontAwesomeIcon icon={faCalendarCheck} />
@@ -341,7 +342,6 @@ function PaymentModal({ selectedOrder, onClose, onPaymentRegistered }) {
                 </div>
               </div>
 
-              {/* Historial de pagos */}
               <div className="border-t border-gray-200 dark:border-gray-700 pt-6 sm:pt-8 max-h-[30vh] overflow-y-auto">
                 <h4 className="text-base sm:text-lg font-bold text-gray-900 dark:text-gray-100 mb-4 flex items-center space-x-3">
                   <FontAwesomeIcon
@@ -351,7 +351,7 @@ function PaymentModal({ selectedOrder, onClose, onPaymentRegistered }) {
                   <span>Historial de Pagos</span>
                 </h4>
 
-                {selectedOrder.pago.resumen.length > 0 ? (
+                {selectedOrder.pago?.resumen?.length > 0 ? (
                   <div className="space-y-3 pr-2">
                     {selectedOrder.pago.resumen.map((pago, idx) => (
                       <div
