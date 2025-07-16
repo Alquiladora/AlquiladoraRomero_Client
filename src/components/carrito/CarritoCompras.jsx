@@ -31,7 +31,9 @@ function CarritoRentaSheinStyle() {
   const [showDetallesPago, setShowDetallesPago] = useState(false);
   const allSelected = selectedItems.length === cartItems.length;
 
-  const MINIMUM_TOTAL = 150; 
+  const MINIMUM_TOTAL = 150; // Mínimo para evitar ajuste
+  const STRIPE_FEE_PERCENT = 0.036; // 3.6% comisión de Stripe
+  const STRIPE_FEE_FIXED = 3; // $3 MXN fijo por transacción
 
   const getTodayDate = () => {
     const today = new Date();
@@ -408,6 +410,13 @@ function CarritoRentaSheinStyle() {
     return selectedItems.includes(item.id) ? acc + calcularSubtotal(item) : acc;
   }, 0);
 
+  const calculateTotalToPay = (subtotal) => {
+    const adjustedSubtotal = subtotal < MINIMUM_TOTAL ? MINIMUM_TOTAL : subtotal;
+    const stripeFee = adjustedSubtotal * STRIPE_FEE_PERCENT + STRIPE_FEE_FIXED;
+    const total = adjustedSubtotal + stripeFee;
+    return { subtotal: adjustedSubtotal, stripeFee, total };
+  };
+
   const handleCotizar = () => {
     if (!rentalDate || !returnDate) {
       toast.error("Por favor selecciona las fechas de renta y devolución.");
@@ -511,8 +520,10 @@ function CarritoRentaSheinStyle() {
     setShowDetallesPago(false);
   };
 
- 
-  const adjustedTotal = totalCalculated !== null ? Math.max(totalCalculated, MINIMUM_TOTAL) : null;
+  const { subtotal, stripeFee, total } =
+    totalCalculated !== null
+      ? calculateTotalToPay(totalCalculated)
+      : { subtotal: 0, stripeFee: 0, total: 0 };
 
   return (
     <div className="min-h-screen bg-gray-100 text-gray-900 dark:bg-gray-900 dark:text-gray-100">
@@ -619,7 +630,7 @@ function CarritoRentaSheinStyle() {
       {showDetallesPago ? (
         <DetallesPago
           cartItems={cartItems.filter((item) => selectedItems.includes(item.id))}
-          total={adjustedTotal} 
+          total={total}
           rentalDate={rentalDate}
           returnDate={returnDate}
           onBack={handleBackToCart}
@@ -826,7 +837,7 @@ function CarritoRentaSheinStyle() {
                           <span
                             className={`px-3 sm:px-4 py-0.5 sm:py-1 rounded-full font-medium text-xs sm:text-sm ${
                               (isOutOfStock || isOverStock)
-                                ? "bg-gray200 text-gray-500 dark:bg-gray-700 dark:text-gray-400"
+                                ? "bg-gray-200 text-gray-500 dark:bg-gray-700 dark:text-gray-400"
                                 : "bg-indigo-50 text-indigo-800 dark:bg-indigo-900 dark:text-indigo-200"
                             }`}
                           >
@@ -899,21 +910,15 @@ function CarritoRentaSheinStyle() {
                     Resumen de Renta
                   </h3>
                   <div className="space-y-4 text-sm">
-                    <div className="flex justify-between">
-                      <span className="text-gray-600 dark:text-gray-300">
-                        Subtotal ({selectedItems.length} productos):
-                      </span>
-                      <span className="font-medium text-gray-800 dark:text-gray-200">
-                        ${subtotalAproximado.toLocaleString()}
-                      </span>
-                    </div>
-                    <div className="flex justify-between font-semibold text-lg border-t pt-3 dark:border-gray-700">
-                      <span className="text-gray-800 dark:text-gray-200">
-                        Total:
-                      </span>
-                      <span className="text-gray-900 dark:text-gray-100">
-                        ${subtotalAproximado.toLocaleString()}
-                      </span>
+                    <div className="space-y-2">
+                      <div className="flex justify-between">
+                        <span className="text-gray-600 dark:text-gray-300">
+                          Subtotal ({selectedItems.length} productos):
+                        </span>
+                        <span className="font-medium text-gray-800 dark:text-gray-200">
+                          ${subtotalAproximado.toLocaleString()}
+                        </span>
+                      </div>
                     </div>
 
                     <div className="space-y-2">
@@ -959,38 +964,42 @@ function CarritoRentaSheinStyle() {
                     </button>
 
                     {totalCalculated !== null && (
-                      <>
-                     
-                        <div className="flex justify-between mt-4">
-                          <span className="text-gray-600 dark:text-gray-300">
-                            Total calculado:
-                          </span>
-                          <span className="font-medium text-gray-800 dark:text-gray-200">
-                            ${totalCalculated.toLocaleString()}
-                          </span>
+                      <div className="mt-4 border-t pt-3 dark:border-gray-700">
+                        <div className="space-y-2">
+                          <div className="flex justify-between">
+                            <span className="text-gray-600 dark:text-gray-300">
+                              Subtotal Calculado:
+                            </span>
+                            <span className="font-medium text-gray-800 dark:text-gray-200">
+                              ${subtotal.toLocaleString()}
+                            </span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-gray-600 dark:text-gray-300">
+                              Comisión Stripe (IVA incluido):
+                            </span>
+                            <span className="font-medium text-gray-800 dark:text-gray-200">
+                              ${stripeFee.toFixed(2)}
+                            </span>
+                          </div>
+                          <div className="flex justify-between font-semibold text-lg border-t pt-3 dark:border-gray-700">
+                            <span className="text-gray-800 dark:text-gray-200">
+                              Total a Pagar:
+                            </span>
+                            <span className="text-green-600 dark:text-green-400 text-xl">
+                              ${total.toLocaleString()}
+                            </span>
+                          </div>
                         </div>
-                     
-                        <div className="flex justify-between mt-2">
-                          <span className="font-semibold text-gray-800 dark:text-gray-200">
-                            Total a pagar:
-                          </span>
-                          <span className="text-lg font-bold text-green-600 dark:text-green-400">
-                            ${adjustedTotal.toLocaleString()}
-                          </span>
-                        </div>
-                    
                         <div className="mt-2 text-sm text-gray-600 dark:text-gray-400">
-                          {totalCalculated < MINIMUM_TOTAL ? (
+                          {subtotalAproximado < MINIMUM_TOTAL && (
                             <p>
-                              El total ha sido ajustado a ${MINIMUM_TOTAL.toLocaleString()} (precio mínimo para envío gratis).
-                            </p>
-                          ) : (
-                            <p>
-                              ¡Envío gratis! Tu total supera los ${MINIMUM_TOTAL.toLocaleString()}.
+                              El subtotal ha sido ajustado a ${MINIMUM_TOTAL.toLocaleString()} porque no superó el mínimo requerido.
                             </p>
                           )}
+                          <p>La comisión de Stripe incluye el IVA.</p>
                         </div>
-                      </>
+                      </div>
                     )}
 
                     {totalCalculated !== null && (
@@ -1018,12 +1027,6 @@ function CarritoRentaSheinStyle() {
                         src="https://upload.wikimedia.org/wikipedia/commons/2/2a/Mastercard-logo.svg"
                         alt="Mastercard"
                         title="Mastercard"
-                        className="h-6 sm:h-8 object-contain transition-transform transform hover:scale-110"
-                      />
-                      <img
-                        src="https://upload.wikimedia.org/wikipedia/commons/b/b5/PayPal.svg"
-                        alt="PayPal"
-                        title="PayPal"
                         className="h-6 sm:h-8 object-contain transition-transform transform hover:scale-110"
                       />
                     </div>

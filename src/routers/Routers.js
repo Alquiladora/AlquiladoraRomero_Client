@@ -16,6 +16,8 @@ import CarritoCompras from '../components/carrito/CarritoCompras';
 import Error404 from './Errors/Error404';
 import Error500 from './Errors/Error500';
 
+
+
 //-------------------PUBLIC------------------------
 import Home from "../pages/public/home/Home";
 import { Login } from '../security/Login/Login';
@@ -79,6 +81,8 @@ const Routerss = () => {
         <Route path="/terminos-condiciones" element={<RoutePublic> <LayoutHeader>< PoliticasPrivacidad /></LayoutHeader></RoutePublic>} />
         <Route path="/rastrear-pedido" element={<RoutePublic> <LayoutHeader>< RastrearPedido /></LayoutHeader></RoutePublic>} />
         <Route path="/SobreNosotros" element={<RoutePublic> <LayoutHeader>< MissionVision /></LayoutHeader></RoutePublic>} />
+         
+         
           {/**=====================CLIENTE============================= */}
           <Route path="/cliente" element={<RoutePrivate rolesPermitidos={['cliente']}> <LayoutHeader>< Home /></LayoutHeader></RoutePrivate>} />
           <Route path="/cliente/carrito" element={<RoutePrivate rolesPermitidos={['cliente']}> <LayoutHeader>< CarritoCompras /></LayoutHeader></RoutePrivate>} />
@@ -99,6 +103,9 @@ const Routerss = () => {
           <Route path="/administrador/updatePass" element={<RoutePrivate rolesPermitidos={['administrador']}> <LayoutHeader><ChangePassword /></LayoutHeader></RoutePrivate>} />
           {/**=====================REPARTIDOR============================= */}
            <Route path="/repartidor" element={<RoutePrivate rolesPermitidos={['repartidor']}> <LayoutHeader><MenuRepartidor  /></LayoutHeader></RoutePrivate>} />
+            <Route path="/repartidor/cambiarPassword" element={<RoutePrivate rolesPermitidos={['repartidor']}> <LayoutHeader><TokenModal  /></LayoutHeader></RoutePrivate>} />
+            <Route path="/repartidor/updatePass" element={<RoutePrivate rolesPermitidos={['repartidor']}> <LayoutHeader><ChangePassword /></LayoutHeader></RoutePrivate>} />
+     
 
           {/**===================== ERROR 404 (Cualquier ruta no encontrada) ============================= */}
           <Route path="*" element={<LayoutHeader><Error404 /></LayoutHeader>} />

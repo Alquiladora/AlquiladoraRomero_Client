@@ -16,6 +16,8 @@
     "@react-google-maps/api": "^2.20.5",
     "@react-spring/web": "^9.7.5",
     "@shadcn/ui": "^0.0.4",
+    "@stripe/react-stripe-js": "^3.7.0",
+    "@stripe/stripe-js": "^7.4.0",
     "alert": "^6.0.2",
     "animejs": "^3.2.2",
     "apexcharts": "^4.5.0",

@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import Logo from '../../../img/Logos/logo.jpg'
+import Logo from "../../../img/Logos/LogoOriginal.png";
 
 const modulesData = [
   {
@@ -8,7 +8,7 @@ const modulesData = [
     description:
       "Administra los datos y la configuración del perfil de la empresa.",
     logo: true,
-    logoSrc: {Logo},
+    logoSrc: { Logo },
   },
   {
     key: "Sobre Nosotros",
@@ -26,27 +26,21 @@ const modulesData = [
     key: "Politicas",
     title: "Politicas",
     route: "/empresa/politicas",
-    description:
-      "Nuestras políticas y lineamientos internos y externos.",
+    description: "Nuestras políticas y lineamientos internos y externos.",
   },
   {
     key: "Terminos",
     title: "Terminos",
     route: "/empresa/terminos",
-    description:
-      "Términos y condiciones de uso de nuestros servicios.",
+    description: "Términos y condiciones de uso de nuestros servicios.",
   },
-   {
+  {
     key: "Aviso de privacidad",
     title: "privacidad",
     route: "/empresa/privacidad",
-    description:
-      "Aviso de privacidad para lso consumidores.",
+    description: "Aviso de privacidad para lso consumidores.",
   },
 ];
-
-
-
 
 const atomicKeyframes = `
   @keyframes atomicMovement {
@@ -61,7 +55,6 @@ const atomicKeyframes = `
     animation: atomicMovement 3s infinite;
   }
 `;
-
 
 function DefaultIcon() {
   return (
@@ -135,9 +128,15 @@ function getModuleIcon(key) {
           <path d="M3 10h18" />
         </svg>
       );
-      case "Aviso de privacidad":
+    case "Aviso de privacidad":
       return (
-         <svg className="w-16 h-16 mx-auto text-red-500 mb-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+        <svg
+          className="w-16 h-16 mx-auto text-red-500 mb-4"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth={2}
+          viewBox="0 0 24 24"
+        >
           <path d="M12 2L2 7l10 5 10-5-10-5z" />
           <path d="M2 17l10 5 10-5" />
           <path d="M2 12l10 5 10-5" />
@@ -149,15 +148,26 @@ function getModuleIcon(key) {
   }
 }
 
+const LoadingSkeleton = () => (
+  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
+    {Array.from({ length: 6 }).map((_, index) => (
+      <div
+        key={index}
+        className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-md animate-pulse"
+      >
+        <div className="w-16 h-16 mx-auto bg-gray-300 dark:bg-gray-700 rounded-full mb-4"></div>
+        <div className="h-6 w-3/4 mx-auto bg-gray-300 dark:bg-gray-700 rounded mb-4"></div>
+        <div className="h-4 w-full bg-gray-300 dark:bg-gray-700 rounded mb-2"></div>
+        <div className="h-4 w-5/6 mx-auto bg-gray-300 dark:bg-gray-700 rounded"></div>
+      </div>
+    ))}
+  </div>
+);
+
 function DashboardModulosEmpresa({ onNavigate, fotoEmpresa }) {
   const handleModuleClick = (mod) => {
     onNavigate(mod.title);
   };
-
-
-
-
-
 
   return (
     <div className="dark:bg-gray-900 py-10 min-h-screen">
@@ -181,18 +191,21 @@ function DashboardModulosEmpresa({ onNavigate, fotoEmpresa }) {
                 overflow-hidden p-6 cursor-pointer flex flex-col
               "
             >
-            
               {mod.key === "perfil" ? (
+                //...
                 fotoEmpresa ? (
-                  <img
-                    src={fotoEmpresa}
-                    alt="Foto de la Empresa"
-                    className="mx-auto h-16 w-16 object-cover rounded-full mb-4"
-                  />
+                  <img src={fotoEmpresa} alt="Foto de la Empresa" />
                 ) : (
-                  <DefaultIcon />
+                  // Muestra el Logo importado si no hay foto de la empresa
+                  <img
+                    src={Logo}
+                    alt="Logo de la Empresa"
+                    className="mx-auto h-16 w-16 object-contain rounded-full mb-4"
+                  />
                 )
               ) : (
+                //...
+
                 getModuleIcon(mod.title)
               )}
 
@@ -222,18 +235,3 @@ function DashboardModulosEmpresa({ onNavigate, fotoEmpresa }) {
 }
 
 export default DashboardModulosEmpresa;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

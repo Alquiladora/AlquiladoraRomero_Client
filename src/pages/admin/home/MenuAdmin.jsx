@@ -10,7 +10,7 @@ import DashboardModulosEmpresa from "../datosEmpresa/DasboadEmpresa";
 import api from "../../../utils/AxiosConfig";
 import SpinerCarga from "../../../utils/SpinerCarga";
 import PerfilAdmin from "../perfil/PerilAdmin";
-import Logo from "../../../img/Logos/logo.jpg";
+import Logo from "../../../img/Logos/LogoOriginal.png";
 import DasboardUsuarios from "../usuarios/usuariosSospechosos/DasboardUsuariso";
 import UsuariosSospechosos from "../usuarios/usuariosSospechosos/UsuariosSospechosos";
 import Auditoria from "../usuarios/usuariosSospechosos/AuditoriaLogin";
@@ -67,6 +67,7 @@ import Horario from "../horario/Horario";
 import AsignacionPedidosV2 from "../repartidores/asignacionPedidos";
 import GestionRepartidores from "../repartidores/gestionRepartidor";
 import WearOsLogin from "../../../components/wearOs/WearOsLogin";
+import GestionPagos from "../pagos/GestionPagos";
 
 const Breadcrumbs = ({ activeTab, onNavigate }) => {
   const pageHierarchy = {
@@ -430,8 +431,10 @@ const MenuHomeAdmin = () => {
         return <HistorialTerminos onNavigate={handleNavigate} />;
       case "historialDeslinde":
         return <HistorialDeslindeLegal onNavigate={handleNavigate} />;
-         case "Repartidores":
+     case "Repartidores":
         return <GestionRepartidores/>;
+           case "Gestión de Pagos":
+        return <GestionPagos/>;
       case "Cerrar Sesion":
         return <div>Cerrando sesión...</div>;
       default:
@@ -539,14 +542,17 @@ const MenuHomeAdmin = () => {
       </aside>
 
       <div className="flex-1 flex flex-col min-w-0">
-        <header className="sticky top-0 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-4 sm:px-6 py-3 flex items-center justify-between z-30 shadow-sm">
-          <div className="flex items-center space-x-2 sm:space-x-4">
+        <header className="sticky top-0 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-3 sm:px-4 lg:px-6 py-3 flex items-center justify-between z-30 shadow-sm">
+          {/* Sección izquierda */}
+          <div className="flex items-center space-x-2 sm:space-x-3 min-w-0 flex-1">
+            {/* Botón menú móvil */}
             <button
               onClick={() => setIsOpen(!isOpen)}
-              className="lg:hidden p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+              className="lg:hidden p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors flex-shrink-0"
+              aria-label="Toggle menu"
             >
               <svg
-                className="w-6 h-6 text-gray-600 dark:text-gray-300"
+                className="w-5 h-5 sm:w-6 sm:h-6 text-gray-600 dark:text-gray-300"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -560,23 +566,33 @@ const MenuHomeAdmin = () => {
               </svg>
             </button>
 
-            <div className="flex items-center space-x-3">
+            {/* Logo y título */}
+            <div className="flex items-center space-x-2 sm:space-x-3 min-w-0 flex-1">
               <img
                 src={fotoEmpresa || Logo}
                 alt="Logo"
-                className="h-10 w-10 sm:h-12 sm:w-12 object-contain rounded-lg bg-white p-1 shadow-sm"
+                className="h-8 w-8 sm:h-10 sm:w-10 lg:h-12 lg:w-12 object-contain rounded-lg bg-white p-1 shadow-sm flex-shrink-0"
               />
-              <h1 className="text-xl sm:text-2xl font-bold text-gray-800 dark:text-white truncate">
+              <h1 className="text-base sm:text-lg lg:text-xl xl:text-2xl font-bold text-gray-800 dark:text-white truncate">
                 Alquiladora Romero
               </h1>
             </div>
           </div>
 
-          <div className="flex items-center space-x-3 sm:space-x-4">
-            <ToggleThemeButton />
-            <button className="relative p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+          {/* Sección derecha */}
+          <div className="flex items-center space-x-2 sm:space-x-3 flex-shrink-0 ml-2">
+            {/* Toggle theme button */}
+            <div className="flex-shrink-0">
+              <ToggleThemeButton />
+            </div>
+
+            {/* Botón de notificaciones */}
+            <button
+              className="relative p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors flex-shrink-0"
+              aria-label="Notifications"
+            >
               <svg
-                className="w-6 h-6 text-gray-600 dark:text-gray-300"
+                className="w-5 h-5 sm:w-6 sm:h-6 text-gray-600 dark:text-gray-300"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -588,20 +604,20 @@ const MenuHomeAdmin = () => {
                   d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"
                 />
               </svg>
-              <span className="absolute top-0 right-0 w-5 h-5 bg-red-500 text-white text-xs font-semibold rounded-full flex items-center justify-center">
+              <span className="absolute -top-1 -right-1 w-4 h-4 sm:w-5 sm:h-5 bg-red-500 text-white text-xs font-semibold rounded-full flex items-center justify-center">
                 3
               </span>
             </button>
           </div>
         </header>
 
-        <main className="p-4 sm:p-6 max-w-7xl w-full mx-auto flex-1">
+        {/* Main content */}
+        <main className="p-3 sm:p-4 lg:p-6 max-w-7xl w-full mx-auto flex-1">
           <Breadcrumbs activeTab={activeTab} onNavigate={handleNavigate} />
           {renderContent()}
         </main>
       </div>
 
-    
       <style jsx>{`
         .scrollbar-none {
           -ms-overflow-style: none; /* Internet Explorer 10+ */

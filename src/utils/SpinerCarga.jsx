@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
- import Logo2 from '../img/Logos/LogoOriginal.jpg'
+ import Logo2 from '../img/Logos/LogoOriginal.png'
 import api from "./AxiosConfig";
 
 const SpinerCarga = () => {

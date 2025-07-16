@@ -196,6 +196,7 @@ export const Login = () => {
       setIsLoading(true);
 
       const ip = await obtenerIPUsuario();
+      console.log("Datos de mfa", mfaToken)
 
       // Hacemos una solicitud POST
       const response = await api.post(
@@ -402,6 +403,8 @@ export const Login = () => {
   const handleMfaSubmit = async (e) => {
     e.preventDefault();
     setErrorMessage("");
+     const ip = await obtenerIPUsuario();
+
     const deviceType = getDeviceType();
     try {
       setIsLoading(true);
@@ -410,7 +413,7 @@ export const Login = () => {
 
       if (!captchaToken)
         throw new Error("Error al obtener el token de reCAPTCHA.");
-
+      console.log("Datos de mfa-1", mfaToken)
       const response = await api.post(
         `/api/usuarios/login`,
         {
@@ -419,6 +422,7 @@ export const Login = () => {
           tokenMFA: mfaToken,
           deviceType: deviceType,
           captchaToken: captchaToken,
+          ip,
         },
 
         {
