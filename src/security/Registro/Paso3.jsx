@@ -7,6 +7,7 @@ import {
   Typography,
   InputAdornment,
   IconButton,
+  CircularProgress,
 } from "@mui/material";
 import zxcvbn from "zxcvbn";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -37,6 +38,7 @@ const Paso3 = ({ guardarCorreo }) => {
   const [usuarios, setUsuarios] = useState([]);
   const navigate = useNavigate();
   const passwordStrengthBarRef = useRef(null);
+  const [isLoading, setIsLoading] = useState(false);
 
   const {csrfToken} = useAuth() ;
   const [isCompromised, setIsCompromised] = useState(false);
@@ -222,6 +224,7 @@ const Paso3 = ({ guardarCorreo }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+     setIsLoading(true);
 
     if (validateForm()) {
       if (isCompromised) {
@@ -229,6 +232,7 @@ const Paso3 = ({ guardarCorreo }) => {
           ...errors,
           contrasena: "Esta contraseña ha sido comprometida. Elige otra.",
         });
+           setIsLoading(false);
         return;
       }
 
@@ -240,6 +244,7 @@ const Paso3 = ({ guardarCorreo }) => {
 
       if (usuarioCorreo) {
         setErrors("Correo ya existe");
+          setIsLoading(false);
       } else {
         try {
           const response = await api.post(
@@ -277,10 +282,15 @@ const Paso3 = ({ guardarCorreo }) => {
           setErrors({
             api: "Hubo un error al registrar el usuario, intente más tarde.",
           });
+        } finally {
+          setIsLoading(false); 
         }
       }
+    } else {
+      setIsLoading(false);
     }
   };
+
 
   const getPasswordStrengthColor = (score) => {
     switch (score) {
@@ -549,16 +559,19 @@ const Paso3 = ({ guardarCorreo }) => {
           </Box>
         )}
 
-        <Button
+          <Button
           type="submit"
           variant="contained"
           color="primary"
           fullWidth
-          disabled={!isFormValid && isCompromised}
-           className=" dark:text-white [&_input]:dark:text-white [&_label]:dark:text-[#fcb900]"
-          
+          disabled={!isFormValid || isCompromised || isLoading}
+          className="dark:text-white [&_input]:dark:text-white [&_label]:dark:text-[#fcb900]"
         >
-          Completar Registro
+          {isLoading ? (
+            <CircularProgress size={24} color="inherit" />
+          ) : (
+            "Completar Registro"
+          )}
         </Button>
       </Box>
     </div>

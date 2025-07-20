@@ -31,9 +31,9 @@ function CarritoRentaSheinStyle() {
   const [showDetallesPago, setShowDetallesPago] = useState(false);
   const allSelected = selectedItems.length === cartItems.length;
 
-  const MINIMUM_TOTAL = 150; // Mínimo para evitar ajuste
-  const STRIPE_FEE_PERCENT = 0.036; // 3.6% comisión de Stripe
-  const STRIPE_FEE_FIXED = 3; // $3 MXN fijo por transacción
+  const MINIMUM_TOTAL = 150; 
+  const STRIPE_FEE_PERCENT = 0.036; 
+  const STRIPE_FEE_FIXED = 3;
 
   const getTodayDate = () => {
     const today = new Date();

@@ -27,10 +27,15 @@ import {
   FaStickyNote,
   FaUser,
   FaCalendarAlt,
+   FaFilePdf,
 } from "react-icons/fa";
 import { toast } from "react-toastify";
 import { Link } from "react-router-dom";
 import CustomLoading from "../../../components/spiner/SpinerGlobal";
+import ReportGenerator from "./reporteInventario";
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
+import Logo from "../../../img/Logos/LogoOriginal.png";
 
 const ITEMS_PER_PAGE = 10;
 
@@ -118,6 +123,8 @@ const Inventatio = ({ onNavigate, setDatosInventario }) => {
   const [currentPageSecondary, setCurrentPageSecondary] = useState({});
   const [bodegas, setBodegas] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [showPreview, setShowPreview] = useState(false);
+const [previewData, setPreviewData] = useState(null);
 
   const { csrfToken } = useAuth();
 
@@ -464,6 +471,308 @@ const Inventatio = ({ onNavigate, setDatosInventario }) => {
     years.push(y);
   }
 
+
+const generatePreview = () => {
+  if (inventory.length > 0) {
+    // Agrupar por idProducto para consolidar colores y stocks
+    const groupedByProduct = inventory.reduce((acc, item) => {
+      if (!acc[item.idProducto]) {
+        acc[item.idProducto] = {
+          idProducto: item.idProducto,
+          nombre: item.nombre,
+          detalles: item.detalles || 'Sin descripción',
+          colores: [],
+          stockTotal: 0,
+          stockRealTotal: 0,
+          stockReservadoTotal: 0,
+          precioAlquiler: item.precioAlquiler,
+          fechaRegistro: item.fechaRegistro,
+          categoria: item.nombreCategoria
+        };
+      }
+      // Agregar color solo si no está duplicado
+      if (!acc[item.idProducto].colores.some(c => c.color === (item.colores || 'Sin color'))) {
+        acc[item.idProducto].colores.push({
+          color: item.colores || 'Sin color',
+          stock: item.stock,
+          stockReal: item.stockReal,
+          stockReservado: item.stockReservado,
+          idInventario: item.idInventario
+        });
+      }
+      acc[item.idProducto].stockTotal += item.stock || 0;
+      acc[item.idProducto].stockRealTotal += item.stockReal || 0;
+      acc[item.idProducto].stockReservadoTotal += item.stockReservado || 0;
+      return acc;
+    }, {});
+
+    const preview = `
+      <div style="text-align: center; margin-bottom: 20px; display: flex; justify-content: center; align-items: center; gap: 20px;">
+        <img src="${Logo}" alt="Logo Alquiladora Romero" style="max-width: 150px; height: auto;" />
+        <div>
+          <h2 style="font-size: 24px; font-weight: bold; color: #333; margin: 0;">Alquiladora Romero</h2>
+          <p style="font-size: 12px; color: #666; margin: 5px 0;">Tel: 771 300 0849 | 709 600 5949</p>
+          <p style="font-size: 12px; color: #666; margin: 0;">Av. San Luis Potosí #58, Col. Tahuizan, Huejutla de Reyes Hidalgo - México</p>
+        </div>
+      </div>
+      <hr style="border: 1px solid #333; margin: 15px 0;" />
+      <h3 style="text-align: center; font-size: 18px; font-weight: bold; color: #444; margin: 10px 0;">Reporte de Inventario</h3>
+      <hr style="border: 1px solid #333; margin: 15px 0;" />
+      <p><strong>Fecha:</strong> ${new Date().toLocaleString('es-MX', { timeZone: 'America/Mexico_City', hour12: true }).replace(/,/g, '')}</p>
+      <table style="width: 100%; border-collapse: collapse; margin-top: 20px; background-color: #fff; box-shadow: 0 4px 6px rgba(0,0,0,0.1); border-radius: 8px; overflow: hidden;">
+        <thead>
+          <tr style="background-color: #ffeb3b; color: #333;">
+            <th style="border: 1px solid #ddd; padding: 15px; text-align: left; font-size: 14px;">ID Producto</th>
+            <th style="border: 1px solid #ddd; padding: 15px; text-align: left; font-size: 14px;">Producto</th>
+            <th style="border: 1px solid #ddd; padding: 15px; text-align: left; font-size: 14px;">Descripción</th>
+            <th style="border: 1px solid #ddd; padding: 15px; text-align: left; font-size: 14px;">Colores</th>
+            <th style="border: 1px solid #ddd; padding: 15px; text-align: left; font-size: 14px;">Stock Disponible</th>
+            <th style="border: 1px solid #ddd; padding: 15px; text-align: left; font-size: 14px;">Cantidad Física Total</th>
+            <th style="border: 1px solid #ddd; padding: 15px; text-align: left; font-size: 14px;">Reservado Total</th>
+            <th style="border: 1px solid #ddd; padding: 15px; text-align: left; font-size: 14px;">Precio</th>
+            <th style="border: 1px solid #ddd; padding: 15px; text-align: left; font-size: 14px;">Fecha Registro</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${Object.entries(groupedByProduct).map(([idProducto, product]) => `
+            <tr style="border: 1px solid #ddd;">
+              <td style="padding: 12px; font-size: 13px;">${product.idProducto}</td>
+              <td style="padding: 12px; font-size: 13px;">${product.nombre}</td>
+              <td style="padding: 12px; font-size: 13px;">${product.detalles}</td>
+              <td style="padding: 12px; font-size: 13px;">${product.colores.length === 1 ? product.colores[0].color : product.colores.map(c => c.color).join(', ')}</td>
+              <td style="padding: 12px; font-size: 13px;">${product.stockTotal}</td>
+              <td style="padding: 12px; font-size: 13px;">${product.stockRealTotal}</td>
+              <td style="padding: 12px; font-size: 13px;">${product.stockReservadoTotal}</td>
+              <td style="padding: 12px; font-size: 13px;">${product.precioAlquiler ? `$${product.precioAlquiler}` : 'N/A'}</td>
+              <td style="padding: 12px; font-size: 13px;">${new Date(product.fechaRegistro).toLocaleDateString('es-MX', { timeZone: 'America/Mexico_City' })}</td>
+            </tr>
+          `).join('')}
+          <tr style="background-color: #e0e0e0; font-weight: bold;">
+            <td colspan="6" style="border: 1px solid #ddd; padding: 15px; text-align: right; font-size: 14px;">Total</td>
+            <td colspan="3" style="border: 1px solid #ddd; padding: 15px; font-size: 14px;">${mainInventoryFiltered
+              .reduce((sum, item) => sum + (item.stockReal * (item.precioAlquiler || 0)), 0)
+              .toFixed(2)} MXN</td>
+          </tr>
+        </tbody>
+      </table>
+      <p style="margin-top: 20px; font-size: 12px; color: #666;"><strong>Notas:</strong> Este reporte refleja el estado del inventario al ${new Date().toLocaleString('es-MX', { timeZone: 'America/Mexico_City', hour12: true }).replace(/,/g, '')}.</p>
+      <p style="font-size: 12px; color: #666;"><strong>Importe con letra:</strong> ${numberToWords(mainInventoryFiltered
+        .reduce((sum, item) => sum + (item.stockReal * (item.precioAlquiler || 0)), 0)
+        .toFixed(2))} pesos (la suma de la cantidad física multiplicada por el precio de todos los productos).</p>
+    `;
+    setPreviewData(preview);
+    setShowPreview(true);
+  }
+};
+
+// Función auxiliar para convertir números a palabras
+const numberToWords = (number) => {
+  const units = ['', 'uno', 'dos', 'tres', 'cuatro', 'cinco', 'seis', 'siete', 'ocho', 'nueve'];
+  const teens = ['diez', 'once', 'doce', 'trece', 'catorce', 'quince', 'dieciséis', 'diecisiete', 'dieciocho', 'diecinueve'];
+  const tens = ['', '', 'veinte', 'treinta', 'cuarenta', 'cincuenta', 'sesenta', 'setenta', 'ochenta', 'noventa'];
+
+  const num = Math.floor(number);
+  if (num === 0) return 'cero';
+  if (num < 10) return units[num];
+  if (num < 20) return teens[num - 10];
+  if (num < 100) {
+    const ten = Math.floor(num / 10);
+    const unit = num % 10;
+    return tens[ten] + (unit > 0 ? ' y ' + units[unit] : '');
+  }
+  if (num < 1000) {
+    const hundred = Math.floor(num / 100);
+    const rest = num % 100;
+    return units[hundred] + ' cien' + (rest > 0 ? ' ' + numberToWords(rest) : '');
+  }
+  return num.toString();
+};
+
+
+
+const generatePDF = () => {
+  if (!inventory || inventory.length === 0) {
+    toast.error("No hay inventario disponible para generar el reporte.");
+    return;
+  }
+
+  const doc = new jsPDF();
+
+  const imgData = typeof Logo === 'string' ? Logo : Logo;
+  const currentDate = new Date().toLocaleString('es-MX', {
+    timeZone: 'America/Mexico_City',
+    hour12: true,
+  }).replace(/,/g, '');
+
+  // --- Encabezado alineado (logo izquierda, texto derecha sin empalme) ---
+  const logoX = 20;
+  const logoY = 15;
+  const logoWidth = 20;
+  const logoHeight = 20;
+  const textStartX = logoX + logoWidth + 5; // separación de 5mm
+
+  doc.addImage(imgData, 'PNG', logoX, logoY, logoWidth, logoHeight);
+
+  doc.setFontSize(16);
+  doc.setTextColor(33, 33, 33);
+  doc.text('Alquiladora Romero', textStartX, 20);
+
+  doc.setFontSize(9);
+  doc.setTextColor(100, 100, 100);
+  doc.text('Tel: 771 300 0849 | 709 600 5949', textStartX, 26);
+  doc.text('Av. San Luis Potosí #58, Col. Tahuizan, Huejutla de Reyes Hidalgo - México', textStartX, 32);
+
+  // Línea divisoria
+  doc.setLineWidth(0.4);
+  doc.setDrawColor(180, 180, 180);
+  doc.line(20, 38, 190, 38);
+
+  // Título del reporte
+  doc.setFontSize(14);
+  doc.setTextColor(50, 50, 50);
+  doc.text('Reporte de Inventario', 105, 46, { align: 'center' });
+  doc.line(20, 50, 190, 50);
+
+  // Fecha
+  doc.setFontSize(11);
+  doc.setTextColor(0, 0, 0);
+  doc.text(`Fecha: ${currentDate}`, 20, 58);
+
+  // --- Agrupar por producto ---
+  const groupedByProduct = inventory.reduce((acc, item) => {
+    const precio = Number(item.precioAlquiler);
+    if (!acc[item.idProducto]) {
+      acc[item.idProducto] = {
+        idProducto: item.idProducto,
+        nombre: item.nombre,
+        detalles: item.detalles || 'Sin descripción',
+        colores: [],
+        stockTotal: 0,
+        stockRealTotal: 0,
+        stockReservadoTotal: 0,
+        precioAlquiler: !isNaN(precio) ? precio : 0,
+        fechaRegistro: item.fechaRegistro,
+        categoria: item.nombreCategoria,
+      };
+    }
+
+    if (!acc[item.idProducto].colores.some(c => c.color === (item.colores || 'Sin color'))) {
+      acc[item.idProducto].colores.push({
+        color: item.colores || 'Sin color',
+        stock: item.stock,
+        stockReal: item.stockReal,
+        stockReservado: item.stockReservado,
+        idInventario: item.idInventario,
+      });
+    }
+
+    acc[item.idProducto].stockTotal += item.stock || 0;
+    acc[item.idProducto].stockRealTotal += item.stockReal || 0;
+    acc[item.idProducto].stockReservadoTotal += item.stockReservado || 0;
+    return acc;
+  }, {});
+
+  // --- Preparar tabla ---
+  const tableData = Object.values(groupedByProduct).map(product => [
+    product.idProducto,
+    product.nombre,
+    product.detalles,
+    product.colores.length === 1
+      ? product.colores[0].color
+      : product.colores.map(c => c.color).join(', '),
+    product.stockTotal,
+    product.stockRealTotal,
+    product.stockReservadoTotal,
+    product.precioAlquiler ? `$${Number(product.precioAlquiler).toFixed(2)}` : 'N/A',
+    new Date(product.fechaRegistro).toLocaleDateString('es-MX', { timeZone: 'America/Mexico_City' }),
+  ]);
+
+  // --- Calcular total ---
+  const total = mainInventoryFiltered.reduce((sum, item) => {
+    const precio = !isNaN(Number(item.precioAlquiler)) ? Number(item.precioAlquiler) : 0;
+    return sum + ((item.stockReal || 0) * precio);
+  }, 0).toFixed(2);
+
+
+
+  let pageCount = 0;
+
+autoTable(doc, {
+  startY: 64,
+  head: [[
+    'ID Producto',
+    'Producto',
+    'Descripción',
+    'Colores',
+    'Stock Disponible',
+    'Cantidad Física',
+    'Reservado',
+    'Precio',
+    'Fecha Registro'
+  ]],
+  body: tableData,
+  theme: 'grid',
+  headStyles: {
+    fillColor: [255, 235, 59],
+    textColor: [0, 0, 0],
+    fontSize: 10,
+    fontStyle: 'bold',
+    halign: 'center'
+  },
+  bodyStyles: {
+    textColor: [33, 33, 33],
+    fontSize: 9,
+    halign: 'left',
+    cellPadding: 2
+  },
+  alternateRowStyles: { fillColor: [245, 245, 245] },
+  foot: [['', '', '', '', '', '', '', 'Total', `${total} MXN`]],
+  footStyles: {
+    fillColor: [230, 230, 230],
+    textColor: [0, 0, 0],
+    fontStyle: 'bold',
+    halign: 'right'
+  },
+  margin: { left: 20, right: 20 },
+  tableWidth: 'auto',
+
+  /** ✅ ENCABEZADO y PAGINACIÓN EN CADA PÁGINA **/
+  didDrawPage: (data) => {
+    pageCount++;
+
+    // Encabezado simple (sin logo para ahorrar espacio)
+    doc.setFontSize(10);
+    doc.setTextColor(120);
+    doc.text('Reporte de Inventario - Alquiladora Romero', 20, 14);
+
+    // Paginación: Pie de página
+    const pageSize = doc.internal.pageSize;
+    const pageHeight = pageSize.height || pageSize.getHeight();
+    doc.setFontSize(9);
+    doc.setTextColor(100);
+    doc.text(`Página ${doc.internal.getNumberOfPages()}`, pageSize.width - 40, pageHeight - 10);
+  }
+});
+
+
+  // --- Notas finales ---
+  const finalY = doc.lastAutoTable.finalY + 10;
+  doc.setFontSize(10);
+  doc.setTextColor(90, 90, 90);
+  doc.text(`Notas: Este reporte refleja el estado del inventario al ${currentDate}.`, 20, finalY);
+  doc.text(`Importe con letra: ${numberToWords(total)} pesos (valor total de la cantidad física x precio).`, 20, finalY + 8);
+
+  // --- Guardar PDF ---
+  const fileName = `Reporte_Inventario_${new Date().toISOString().split('T')[0]}.pdf`;
+  doc.save(fileName);
+  setShowPreview(false);
+  toast.success(`PDF "${fileName}" generado y descargado correctamente.`);
+};
+
+
+
+
+
   if (loading) {
     return (
       <CustomLoading />
@@ -475,6 +784,27 @@ const Inventatio = ({ onNavigate, setDatosInventario }) => {
 
   return (
     <div className="container mx-auto p-4 bg-gray-50 dark:bg-gray-900 min-h-screen">
+      
+
+
+      <div className="mb-8 bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6">
+  <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-6">
+    <h2 className="text-2xl font-bold text-gray-800 dark:text-gray-200 flex items-center gap-3">
+      <FaFilePdf className="text-yellow-600" />
+      Generar Reportes
+    </h2>
+    <button
+      onClick={generatePreview}
+      disabled={loading || inventory.length === 0}
+      className={`group flex items-center gap-2 text-sm font-semibold text-white bg-gradient-to-r from-yellow-500 to-yellow-600 hover:from-yellow-600 hover:to-yellow-700 px-6 py-3 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 ${
+        loading || inventory.length === 0 ? 'opacity-50 cursor-not-allowed' : ''
+      }`}
+    >
+      <FaEye className="w-5 h-5 group-hover:rotate-12 transition-transform duration-200" />
+      <span>Previsualizar</span>
+    </button>
+  </div>
+</div>
       {/* Header con filtros mejorado */}
       <div className="mb-8 bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6">
         <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-6">
@@ -954,105 +1284,96 @@ const Inventatio = ({ onNavigate, setDatosInventario }) => {
 
 
       {/* ===== MODAL DE EDICIÓN ===== */}
-      {showEditModal && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
-          <div className="bg-white dark:bg-gray-800 rounded-lg p-6 w-96">
-            <h3 className="text-2xl font-bold mb-4 text-yellow-600">
-              Editar Stock
-            </h3>
+   {showEditModal && (
+  <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+    <div className="bg-white dark:bg-gray-800 rounded-xl p-6 w-full max-w-md shadow-2xl transform transition-all duration-300 ease-in-out hover:shadow-3xl">
+      <h3 className="text-2xl font-bold mb-6 text-yellow-600 flex items-center gap-2">
+        <FaEdit className="text-yellow-500" />
+        Editar Stock
+      </h3>
 
-            {/* Si el producto tiene varias variantes (por color), mostramos una entrada por variante */}
-            {selectedItem &&
-            selectedItem.variants &&
-            selectedItem.variants.length > 1 ? (
-              selectedItem.variants.map((variant) => (
-                <div key={variant.idInventario} className="mb-4">
-                  <label className="block text-gray-700 dark:text-gray-300 mb-2">
-                    {variant.colores || "Sin color"} - Stock:
-                  </label>
-                  <input
-                    type="number"
-                    min="0"
-                    value={editStock[variant.idInventario]}
-                    onChange={(e) => {
-                      const val = e.target.value;
-                      if (Number(val) < 0) {
-                        toast.warning("No se permiten números negativos");
-                        return;
-                      }
-                      setEditStock((prev) => ({
-                        ...prev,
-                        [variant.idInventario]: val,
-                      }));
-                    }}
-                    className="w-full border border-gray-300 dark:border-gray-700 p-2 rounded 
-                     focus:outline-yellow-500 bg-white dark:bg-gray-700 
-                     text-gray-700 dark:text-gray-300"
-                  />
-                </div>
-              ))
-            ) : (
-              // Si es un único registro, se muestra el input original
-              <div className="mb-4">
-                <label className="block text-gray-700 dark:text-gray-300 mb-2">
-                  Nuevo Stock:
-                </label>
-                <input
-                  type="number"
-                  min="0"
-                  value={editStock}
-                  onChange={(e) => {
-                    const val = e.target.value;
-                    if (Number(val) < 0) {
-                      toast.warning("No se permiten números negativos");
-                      return;
-                    }
-                    setEditStock(val);
-                  }}
-                  className="w-full border border-gray-300 dark:border-gray-700 p-2 rounded 
-                     focus:outline-yellow-500 bg-white dark:bg-gray-700 
-                     text-gray-700 dark:text-gray-300"
-                />
-              </div>
-            )}
-
-            <div className="flex justify-end">
-              <button
-                onClick={updateStock}
-                disabled={
-                  isUpdating || (typeof editStock === "number" && editStock < 0)
+      {/* Si el producto tiene varias variantes (por color), mostramos una entrada por variante */}
+      {selectedItem &&
+      selectedItem.variants &&
+      selectedItem.variants.length > 1 ? (
+        selectedItem.variants.map((variant) => (
+          <div key={variant.idInventario} className="mb-5 last:mb-0">
+            <label className="block text-gray-700 dark:text-gray-300 mb-2 font-medium">
+              {variant.colores || "Sin color"} - Stock:
+            </label>
+            <input
+              type="number"
+              min="0"
+              value={editStock[variant.idInventario] || 0}
+              onChange={(e) => {
+                const val = e.target.value;
+                if (Number(val) < 0) {
+                  toast.warning("No se permiten números negativos");
+                  return;
                 }
-                className={`py-2 px-4 rounded mr-2 flex items-center gap-2 
-                      ${
-                        isUpdating
-                          ? "bg-yellow-400"
-                          : "bg-yellow-500 hover:bg-yellow-600"
-                      }
-                      text-white
-                     `}
-              >
-                {isUpdating ? (
-                  <>
-                    <FaSpinner className="animate-spin" />
-                    Guardando...
-                  </>
-                ) : (
-                  "Guardar"
-                )}
-              </button>
-
-              <button
-                onClick={closeEditModal}
-                disabled={isUpdating}
-                className="bg-gray-300 dark:bg-gray-600 text-black dark:text-white py-2 px-4 rounded 
-                     hover:bg-gray-400 dark:hover:bg-gray-500"
-              >
-                Cancelar
-              </button>
-            </div>
+                setEditStock((prev) => ({
+                  ...prev,
+                  [variant.idInventario]: val,
+                }));
+              }}
+              className="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-yellow-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-200 transition-all duration-200"
+            />
           </div>
+        ))
+      ) : (
+        // Si es un único registro, se muestra el input original con color
+        <div className="mb-5">
+          <label className="block text-gray-700 dark:text-gray-300 mb-2 font-medium">
+            {selectedItem?.colores ? `${selectedItem.colores} - ` : ""}Nuevo Stock:
+          </label>
+          <input
+            type="number"
+            min="0"
+            value={editStock || 0}
+            onChange={(e) => {
+              const val = e.target.value;
+              if (Number(val) < 0) {
+                toast.warning("No se permiten números negativos");
+                return;
+              }
+              setEditStock(val);
+            }}
+            className="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-yellow-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-200 transition-all duration-200"
+          />
         </div>
       )}
+
+      <div className="flex justify-end gap-4 mt-6">
+        <button
+          onClick={updateStock}
+          disabled={isUpdating || (typeof editStock === "number" && editStock < 0)}
+          className={`flex items-center gap-2 px-6 py-3 rounded-lg font-semibold text-white transition-all duration-200 ${
+            isUpdating
+              ? "bg-yellow-400 cursor-not-allowed"
+              : "bg-yellow-500 hover:bg-yellow-600 active:bg-yellow-700"
+          }`}
+        >
+          {isUpdating ? (
+            <>
+              <FaSpinner className="animate-spin" />
+              Guardando...
+            </>
+          ) : (
+            "Guardar"
+          )}
+        </button>
+
+        <button
+          onClick={closeEditModal}
+          disabled={isUpdating}
+          className="px-6 py-3 rounded-lg font-semibold bg-gray-300 dark:bg-gray-600 text-gray-800 dark:text-gray-200 hover:bg-gray-400 dark:hover:bg-gray-500 active:bg-gray-500 dark:active:bg-gray-700 transition-all duration-200"
+        >
+          Cancelar
+        </button>
+      </div>
+    </div>
+  </div>
+)}
 
 {showDetailModal && selectedItem && (
   <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50 p-2">
@@ -1094,6 +1415,8 @@ const Inventatio = ({ onNavigate, setDatosInventario }) => {
             )}
           </div>
 
+
+
           {/* Stock Total y Variantes */}
           {selectedItem.variants && selectedItem.variants.length > 1 ? (
             <>
@@ -1120,11 +1443,15 @@ const Inventatio = ({ onNavigate, setDatosInventario }) => {
             <div className="flex items-center gap-2 text-gray-700 dark:text-gray-300">
               <FaSortNumericDown className="text-gray-500" />
               <span>
-                <strong>Stock:</strong> {selectedItem.stock}
+              <strong>Stock:</strong> {selectedItem?.colores ? `${selectedItem.colores} - ` : ""}{selectedItem.stock}
               </span>
             </div>
           )}
+
+
         </div>
+
+
 
         {/* Columna Derecha */}
         <div className="space-y-4">
@@ -1185,6 +1512,29 @@ const Inventatio = ({ onNavigate, setDatosInventario }) => {
           className="bg-gray-300 dark:bg-gray-700 text-black dark:text-white py-2 px-4 rounded hover:bg-gray-400 dark:hover:bg-gray-600 flex items-center gap-2"
         >
           <FaTimesCircle /> Cerrar
+        </button>
+      </div>
+    </div>
+  </div>
+)}
+
+{showPreview && previewData && (
+  <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+    <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg max-h-[80vh] overflow-y-auto w-full max-w-4xl">
+      <h3 className="text-2xl font-bold mb-4 text-yellow-600">Previsualización del Reporte</h3>
+      <div dangerouslySetInnerHTML={{ __html: previewData }} />
+      <div className="mt-4 flex justify-end gap-4">
+        <button
+          onClick={generatePDF}
+          className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 transition-colors"
+        >
+          Guardar PDF
+        </button>
+        <button
+          onClick={() => setShowPreview(false)}
+          className="px-4 py-2 bg-gray-300 text-black rounded hover:bg-gray-400"
+        >
+          Cerrar
         </button>
       </div>
     </div>

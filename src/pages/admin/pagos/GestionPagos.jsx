@@ -1,36 +1,64 @@
-import React, { useState, useEffect } from 'react';
-import api from '../../../utils/AxiosConfig';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { library } from '@fortawesome/fontawesome-svg-core';
+import React, { useState, useEffect } from "react";
+import api from "../../../utils/AxiosConfig";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { library } from "@fortawesome/fontawesome-svg-core";
 import {
-  faCheckCircle, faTimesCircle, faLink, faBan, faTrash, faSpinner, faSyncAlt, faEnvelope,
-  faCrown, faShieldAlt, faExclamationTriangle, faClock
-} from '@fortawesome/free-solid-svg-icons';
-import { ToastContainer, toast } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
-import { useAuth } from '../../../hooks/ContextAuth';
+  faCheckCircle,
+  faTimesCircle,
+  faLink,
+  faBan,
+  faTrash,
+  faSpinner,
+  faSyncAlt,
+  faEnvelope,
+  faCrown,
+  faShieldAlt,
+  faExclamationTriangle,
+  faClock,
+} from "@fortawesome/free-solid-svg-icons";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import { useAuth } from "../../../hooks/ContextAuth";
 
-library.add(faCheckCircle, faTimesCircle, faLink, faBan, faTrash, faSpinner, faSyncAlt, faEnvelope, faCrown, faShieldAlt, faExclamationTriangle, faClock);
+library.add(
+  faCheckCircle,
+  faTimesCircle,
+  faLink,
+  faBan,
+  faTrash,
+  faSpinner,
+  faSyncAlt,
+  faEnvelope,
+  faCrown,
+  faShieldAlt,
+  faExclamationTriangle,
+  faClock
+);
 
 const CuentasReceptoras = () => {
   const [cuentas, setCuentas] = useState([]);
   const [loading, setLoading] = useState(true);
   const [activatingId, setActivatingId] = useState(null);
-  const [formData, setFormData] = useState({ nombre: '', email: '', banco: '', notas: '' });
-  const [formError, setFormError] = useState('');
+  const [formData, setFormData] = useState({
+    nombre: "",
+    email: "",
+    banco: "",
+    notas: "",
+  });
+  const [formError, setFormError] = useState("");
   const { csrfToken } = useAuth();
 
   const fetchCuentas = async () => {
     setLoading(true);
     try {
-      const response = await api.get('/api/tarjetas/cuentas', {
+      const response = await api.get("/api/tarjetas/cuentas", {
         withCredentials: true,
-        headers: { 'X-CSRF-Token': csrfToken },
+        headers: { "X-CSRF-Token": csrfToken },
       });
       console.log("Datos recibidos de cuentas", response.data);
       setCuentas(response.data || []);
     } catch (err) {
-      toast.error('Error al cargar las cuentas');
+      toast.error("Error al cargar las cuentas");
     } finally {
       setLoading(false);
     }
@@ -43,14 +71,14 @@ const CuentasReceptoras = () => {
   const syncConStripe = async () => {
     setLoading(true);
     try {
-      await api.get('/api/tarjetas/sync-cuentas', {
+      await api.get("/api/tarjetas/sync-cuentas", {
         withCredentials: true,
-        headers: { 'X-CSRF-Token': csrfToken },
+        headers: { "X-CSRF-Token": csrfToken },
       });
-      toast.success('Cuentas sincronizadas correctamente');
+      toast.success("Cuentas sincronizadas correctamente");
       fetchCuentas();
     } catch (err) {
-      toast.error('Error al sincronizar con Stripe');
+      toast.error("Error al sincronizar con Stripe");
     } finally {
       setLoading(false);
     }
@@ -62,22 +90,35 @@ const CuentasReceptoras = () => {
   };
 
   const validateForm = () => {
+    // Validación para nombre: debe iniciar con letra y no contener números
+    const nameRegex = /^[A-Za-zÁÉÍÓÚáéíóúÜüÑñ][A-Za-zÁÉÍÓÚáéíóúÜüÑñ\s]*$/;
     if (!formData.nombre.trim()) {
-      return 'El nombre es requerido';
+      return "El nombre es requerido";
+    } else if (!nameRegex.test(formData.nombre.trim())) {
+      return "El nombre debe iniciar con una letra y no puede contener números";
     }
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    // Validación para email: formato válido
+    const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
     if (!formData.email.trim()) {
-      return 'El email es requerido';
+      return "El email es requerido";
     } else if (!emailRegex.test(formData.email.trim())) {
-      return 'El email no es válido';
+      return "El email no tiene un formato válido (ejemplo: usuario@dominio.com)";
     }
-    if (!formData.banco.trim()) {
-      return 'El banco es requerido';
+
+    // Validación para banco: debe seleccionar una opción válida
+    if (!formData.banco || formData.banco === "") {
+      return "Debes seleccionar un banco";
     }
+
+    // Validación para notas: no vacío y con contenido significativo
     if (!formData.notas.trim()) {
-      return 'Las notas son requeridas';
+      return "Las notas son requeridas";
+    } else if (formData.notas.trim().length < 5) {
+      return "Las notas deben tener al menos 5 caracteres";
     }
-    return '';
+
+    return "";
   };
 
   const handleSubmit = async (e) => {
@@ -89,34 +130,43 @@ const CuentasReceptoras = () => {
     }
 
     setLoading(true);
-    setFormError('');
+    setFormError("");
     try {
-      const response = await api.post('/api/tarjetas/cuentas', {
-        ...formData,
-        nombre: formData.nombre.trim(),
-        email: formData.email.trim(),
-        banco: formData.banco.trim(),
-        notas: formData.notas.trim(),
-      }, {
-        withCredentials: true,
-        headers: { 'X-CSRF-Token': csrfToken },
-      });
+      const response = await api.post(
+        "/api/tarjetas/cuentas",
+        {
+          ...formData,
+          nombre: formData.nombre.trim(),
+          email: formData.email.trim(),
+          banco: formData.banco.trim(),
+          notas: formData.notas.trim(),
+        },
+        {
+          withCredentials: true,
+          headers: { "X-CSRF-Token": csrfToken },
+        }
+      );
       toast.success(response.data.message);
       if (response.data.onboarding_url) {
         toast.info(
           <div>
             Completa la configuración en Stripe:{" "}
-            <a href={response.data.onboarding_url} target="_blank" rel="noopener noreferrer" className="text-amber-600 underline">
+            <a
+              href={response.data.onboarding_url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-amber-600 underline"
+            >
               Hacer clic aquí
             </a>
           </div>,
           { autoClose: false }
         );
       }
-      setFormData({ nombre: '', email: '', banco: '', notas: '' });
+      setFormData({ nombre: "", email: "", banco: "", notas: "" });
       fetchCuentas();
     } catch (err) {
-      toast.error(err.response?.data?.error || 'Error al crear cuenta');
+      toast.error(err.response?.data?.error || "Error al crear cuenta");
     } finally {
       setLoading(false);
     }
@@ -125,30 +175,46 @@ const CuentasReceptoras = () => {
   const activarCuenta = async (id) => {
     setActivatingId(id);
     try {
-      await api.post(`/api/tarjetas/cuentas/activar/${id}`, {}, {
-        withCredentials: true,
-        headers: { 'X-CSRF-Token': csrfToken },
-      });
-      toast.success('Cuenta activada correctamente');
+      await api.post(
+        `/api/tarjetas/cuentas/activar/${id}`,
+        {},
+        {
+          withCredentials: true,
+          headers: { "X-CSRF-Token": csrfToken },
+        }
+      );
+      toast.success("Cuenta activada correctamente");
       fetchCuentas();
     } catch (err) {
-      toast.error(err.response?.data?.error || 'Error al activar cuenta');
+      const errorMessage =
+        err.response?.data?.error || "Error al activar cuenta";
+      if (
+        errorMessage.includes(
+          "link_payments capability without the card_payments capability"
+        )
+      ) {
+        toast.error(
+          "No se puede activar la cuenta: se requiere habilitar pagos con tarjeta."
+        );
+      } else {
+        toast.error(errorMessage);
+      }
     } finally {
       setActivatingId(null);
     }
   };
 
   const eliminarCuenta = async (id) => {
-    if (window.confirm('¿Estás seguro de que deseas eliminar esta cuenta?')) {
+    if (window.confirm("¿Estás seguro de que deseas eliminar esta cuenta?")) {
       try {
         await api.delete(`/api/tarjetas/cuentas/${id}`, {
           withCredentials: true,
-          headers: { 'X-CSRF-Token': csrfToken },
+          headers: { "X-CSRF-Token": csrfToken },
         });
-        toast.success('Cuenta eliminada correctamente');
+        toast.success("Cuenta eliminada correctamente");
         fetchCuentas();
       } catch (err) {
-        toast.error(err.response?.data?.error || 'Error al eliminar cuenta');
+        toast.error(err.response?.data?.error || "Error al eliminar cuenta");
       }
     }
   };
@@ -207,8 +273,15 @@ const CuentasReceptoras = () => {
     return (
       <div className="flex justify-center items-center h-64">
         <div className="text-center">
-          <FontAwesomeIcon icon={faSpinner} spin size="2x" className="text-amber-500 dark:text-amber-400 mb-4" />
-          <p className="text-gray-600 dark:text-gray-400">Cargando cuentas...</p>
+          <FontAwesomeIcon
+            icon={faSpinner}
+            spin
+            size="2x"
+            className="text-amber-500 dark:text-amber-400 mb-4"
+          />
+          <p className="text-gray-600 dark:text-gray-400">
+            Cargando cuentas...
+          </p>
         </div>
       </div>
     );
@@ -233,7 +306,10 @@ const CuentasReceptoras = () => {
             disabled={loading}
             className="flex items-center px-4 py-2 bg-amber-500 text-white rounded-md hover:bg-amber-600 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors duration-200 text-sm font-medium"
           >
-            <FontAwesomeIcon icon={faSyncAlt} className={`mr-1 ${loading ? 'animate-spin' : ''}`} />
+            <FontAwesomeIcon
+              icon={faSyncAlt}
+              className={`mr-1 ${loading ? "animate-spin" : ""}`}
+            />
             Sincronizar
           </button>
         </div>
@@ -248,16 +324,19 @@ const CuentasReceptoras = () => {
               Nueva Cuenta
             </h2>
           </div>
-          
+
           {formError && (
             <div className="p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-md">
               <p className="text-red-600 dark:text-red-400 text-sm flex items-center">
-                <FontAwesomeIcon icon={faExclamationTriangle} className="mr-2" />
+                <FontAwesomeIcon
+                  icon={faExclamationTriangle}
+                  className="mr-2"
+                />
                 {formError}
               </p>
             </div>
           )}
-          
+
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
@@ -274,7 +353,7 @@ const CuentasReceptoras = () => {
                   required
                 />
               </div>
-              
+
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">
                   Email *
@@ -289,22 +368,47 @@ const CuentasReceptoras = () => {
                   required
                 />
               </div>
-              
+
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">
                   Banco *
                 </label>
-                <input
-                  type="text"
+                <select
                   name="banco"
                   value={formData.banco}
                   onChange={handleInputChange}
                   className="w-full px-3 py-2 rounded-md border border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-amber-500 dark:bg-gray-700 dark:text-white transition-all"
-                  placeholder="BBVA, Santander"
                   required
-                />
+                >
+                  <option value="">Selecciona un banco</option>
+                  <option value="BBVA">BBVA</option>
+                  <option value="Banorte">Banorte</option>
+                  <option value="Santander">Santander</option>
+                  <option value="HSBC">HSBC</option>
+                  <option value="Banamex">Banamex</option>
+                  <option value="Scotiabank">Scotiabank</option>
+                  <option value="Inbursa">Inbursa</option>
+                  <option value="Banjercito">Banjercito</option>
+                  <option value="Banco Azteca">Banco Azteca</option>
+                  <option value="Bancoppel">Bancoppel</option>
+                  <option value="Afirme">Afirme</option>
+                  <option value="Banco del Bajío">Banco del Bajío</option>
+                  <option value="Intercam">Intercam</option>
+                  <option value="Banregio">Banregio</option>
+                  <option value="Mifel">Mifel</option>
+                  <option value="Ve por Más">Ve por Más</option>
+                  <option value="Consubanco">Consubanco</option>
+                  <option value="ABC Capital">ABC Capital</option>
+                  <option value="Klar">Klar</option>
+                  <option value="Hey Banco">Hey Banco</option>
+                  <option value="Nu México">Nu México</option>
+                  <option value="Ualá">Ualá</option>
+                  <option value="STP">
+                    STP (Sistema de Transferencias y Pagos)
+                  </option>
+                </select>
               </div>
-              
+
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">
                   Notas *
@@ -320,7 +424,7 @@ const CuentasReceptoras = () => {
                 />
               </div>
             </div>
-            
+
             <div className="flex justify-center">
               <button
                 type="submit"
@@ -355,16 +459,19 @@ const CuentasReceptoras = () => {
                   Cuentas Registradas
                 </h2>
                 <p className="text-gray-500 dark:text-gray-400 text-sm mt-1">
-                  {cuentas.length} cuenta{cuentas.length !== 1 ? 's' : ''}
+                  {cuentas.length} cuenta{cuentas.length !== 1 ? "s" : ""}
                 </p>
               </div>
             </div>
           </div>
-          
+
           {cuentas.length === 0 ? (
             <div className="p-6 text-center">
               <div className="w-16 h-16 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-3">
-                <FontAwesomeIcon icon={faEnvelope} className="text-2xl text-gray-400 dark:text-gray-500" />
+                <FontAwesomeIcon
+                  icon={faEnvelope}
+                  className="text-2xl text-gray-400 dark:text-gray-500"
+                />
               </div>
               <h3 className="text-base font-medium text-gray-700 dark:text-gray-200 mb-2">
                 No hay cuentas
@@ -399,12 +506,18 @@ const CuentasReceptoras = () => {
                   </thead>
                   <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
                     {cuentas.map((cuenta) => (
-                      <tr key={cuenta.id} className="hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-200">
+                      <tr
+                        key={cuenta.id}
+                        className="hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-200"
+                      >
                         <td className="px-3 py-2">
                           <div className="flex items-center gap-2">
                             {cuenta.activa === 1 && (
                               <div className="w-5 h-5 bg-amber-500 rounded-full flex items-center justify-center">
-                                <FontAwesomeIcon icon={faCrown} className="text-white text-xs" />
+                                <FontAwesomeIcon
+                                  icon={faCrown}
+                                  className="text-white text-xs"
+                                />
                               </div>
                             )}
                             <div>
@@ -412,7 +525,7 @@ const CuentasReceptoras = () => {
                                 {cuenta.nombre}
                               </div>
                               <div className="text-sm text-gray-500 dark:text-gray-400">
-                                {cuenta.email || 'Sin email'}
+                                {cuenta.email || "Sin email"}
                               </div>
                               {cuenta.banco && (
                                 <div className="text-xs text-gray-600 dark:text-gray-400">
@@ -429,24 +542,28 @@ const CuentasReceptoras = () => {
                           {getStripeStatus(cuenta)}
                         </td>
                         <td className="px-3 py-2 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
-                          {cuenta.fecha_creacion 
-                            ? new Date(cuenta.fecha_creacion).toLocaleDateString('es-ES')
-                            : 'No registrada'
-                          }
+                          {cuenta.fecha_creacion
+                            ? new Date(
+                                cuenta.fecha_creacion
+                              ).toLocaleDateString("es-ES")
+                            : "No registrada"}
                         </td>
                         <td className="px-3 py-2 whitespace-nowrap text-sm font-medium flex space-x-2">
                           {cuenta.onboarding_completed === 0 && (
                             <button
                               onClick={async () => {
                                 try {
-                                  const res = await api.get(`/api/tarjetas/cuentas/onboarding-link/${cuenta.stripe_account_id}`, {
-                                    withCredentials: true,
-                                    headers: { 'X-CSRF-Token': csrfToken },
-                                  });
-                                  window.open(res.data.url, '_blank');
-                                  toast.info('Completa tu cuenta en Stripe');
+                                  const res = await api.get(
+                                    `/api/tarjetas/cuentas/onboarding-link/${cuenta.stripe_account_id}`,
+                                    {
+                                      withCredentials: true,
+                                      headers: { "X-CSRF-Token": csrfToken },
+                                    }
+                                  );
+                                  window.open(res.data.url, "_blank");
+                                  toast.info("Completa tu cuenta en Stripe");
                                 } catch {
-                                  toast.error('Error generando el enlace');
+                                  toast.error("Error generando el enlace");
                                 }
                               }}
                               className="px-2 py-1 rounded-md text-xs font-medium text-amber-600 bg-amber-100 hover:bg-amber-200 dark:bg-amber-900 dark:text-amber-300 dark:hover:bg-amber-800 transition-colors duration-200"
@@ -455,39 +572,53 @@ const CuentasReceptoras = () => {
                               Configurar
                             </button>
                           )}
-                          
-                          {cuenta.onboarding_completed === 1 && cuenta.activa === 0 && (
-                            <>
-                              <button
-                                onClick={() => activarCuenta(cuenta.id)}
-                                disabled={activatingId === cuenta.id}
-                                className="px-2 py-1 rounded-md text-xs font-medium text-amber-600 bg-amber-100 hover:bg-amber-200 dark:bg-amber-900 dark:text-amber-300 dark:hover:bg-amber-800 transition-colors duration-200 disabled:bg-gray-400 disabled:cursor-not-allowed"
-                              >
-                                {activatingId === cuenta.id ? (
-                                  <>
-                                    <FontAwesomeIcon icon={faSpinner} spin className="mr-1" />
-                                    Activando...
-                                  </>
-                                ) : (
-                                  <>
-                                    <FontAwesomeIcon icon={faCheckCircle} className="mr-1" />
-                                    Activar
-                                  </>
-                                )}
-                              </button>
-                              <button
-                                onClick={() => eliminarCuenta(cuenta.id)}
-                                className="px-2 py-1 rounded-md text-xs font-medium text-red-600 bg-red-100 hover:bg-red-200 dark:bg-red-900 dark:text-red-300 dark:hover:bg-red-800 transition-colors duration-200"
-                              >
-                                <FontAwesomeIcon icon={faTrash} className="mr-1" />
-                                Eliminar
-                              </button>
-                            </>
-                          )}
-                          
+
+                          {cuenta.onboarding_completed === 1 &&
+                            cuenta.activa === 0 && (
+                              <>
+                                <button
+                                  onClick={() => activarCuenta(cuenta.id)}
+                                  disabled={activatingId === cuenta.id}
+                                  className="px-2 py-1 rounded-md text-xs font-medium text-amber-600 bg-amber-100 hover:bg-amber-200 dark:bg-amber-900 dark:text-amber-300 dark:hover:bg-amber-800 transition-colors duration-200 disabled:bg-gray-400 disabled:cursor-not-allowed"
+                                >
+                                  {activatingId === cuenta.id ? (
+                                    <>
+                                      <FontAwesomeIcon
+                                        icon={faSpinner}
+                                        spin
+                                        className="mr-1"
+                                      />
+                                      Activando...
+                                    </>
+                                  ) : (
+                                    <>
+                                      <FontAwesomeIcon
+                                        icon={faCheckCircle}
+                                        className="mr-1"
+                                      />
+                                      Activar
+                                    </>
+                                  )}
+                                </button>
+                                <button
+                                  onClick={() => eliminarCuenta(cuenta.id)}
+                                  className="px-2 py-1 rounded-md text-xs font-medium text-red-600 bg-red-100 hover:bg-red-200 dark:bg-red-900 dark:text-red-300 dark:hover:bg-red-800 transition-colors duration-200"
+                                >
+                                  <FontAwesomeIcon
+                                    icon={faTrash}
+                                    className="mr-1"
+                                  />
+                                  Eliminar
+                                </button>
+                              </>
+                            )}
+
                           {cuenta.activa === 1 && (
                             <div className="px-2 py-1 rounded-md text-xs font-medium text-amber-600 bg-amber-100 dark:bg-amber-900 dark:text-amber-300">
-                              <FontAwesomeIcon icon={faCrown} className="mr-1" />
+                              <FontAwesomeIcon
+                                icon={faCrown}
+                                className="mr-1"
+                              />
                               Actual
                             </div>
                           )}
@@ -501,12 +632,18 @@ const CuentasReceptoras = () => {
               {/* Vista de tarjetas */}
               <div className="lg:hidden p-3 space-y-3">
                 {cuentas.map((cuenta) => (
-                  <div key={cuenta.id} className="bg-white dark:bg-gray-800 rounded-md p-3 border border-gray-200 dark:border-gray-700 shadow-sm">
+                  <div
+                    key={cuenta.id}
+                    className="bg-white dark:bg-gray-800 rounded-md p-3 border border-gray-200 dark:border-gray-700 shadow-sm"
+                  >
                     <div className="flex items-start justify-between mb-2">
                       <div className="flex items-center gap-2">
                         {cuenta.activa === 1 && (
                           <div className="w-5 h-5 bg-amber-500 rounded-full flex items-center justify-center">
-                            <FontAwesomeIcon icon={faCrown} className="text-white text-xs" />
+                            <FontAwesomeIcon
+                              icon={faCrown}
+                              className="text-white text-xs"
+                            />
                           </div>
                         )}
                         <div>
@@ -514,13 +651,13 @@ const CuentasReceptoras = () => {
                             {cuenta.nombre}
                           </h3>
                           <p className="text-sm text-gray-500 dark:text-gray-400">
-                            {cuenta.email || 'Sin email'}
+                            {cuenta.email || "Sin email"}
                           </p>
                         </div>
                       </div>
                       {getStatusBadge(cuenta)}
                     </div>
-                    
+
                     <div className="space-y-2 mb-2">
                       {cuenta.banco && (
                         <div className="text-xs text-gray-600 dark:text-gray-400">
@@ -529,31 +666,37 @@ const CuentasReceptoras = () => {
                         </div>
                       )}
                       <div className="flex items-center justify-between">
-                        <span className="text-xs text-gray-500 dark:text-gray-400">Stripe:</span>
+                        <span className="text-xs text-gray-500 dark:text-gray-400">
+                          Stripe:
+                        </span>
                         {getStripeStatus(cuenta)}
                       </div>
                       <div className="text-xs text-gray-600 dark:text-gray-400">
                         <span className="font-medium mr-1">Fecha:</span>
-                        {cuenta.fecha_creacion 
-                          ? new Date(cuenta.fecha_creacion).toLocaleDateString('es-ES')
-                          : 'No registrada'
-                        }
+                        {cuenta.fecha_creacion
+                          ? new Date(cuenta.fecha_creacion).toLocaleDateString(
+                              "es-ES"
+                            )
+                          : "No registrada"}
                       </div>
                     </div>
-                    
+
                     <div className="flex flex-wrap gap-2">
                       {cuenta.onboarding_completed === 0 && (
                         <button
                           onClick={async () => {
                             try {
-                              const res = await api.get(`/api/tarjetas/cuentas/onboarding-link/${cuenta.stripe_account_id}`, {
-                                withCredentials: true,
-                                headers: { 'X-CSRF-Token': csrfToken },
-                              });
-                              window.open(res.data.url, '_blank');
-                              toast.info('Completa tu cuenta en Stripe');
+                              const res = await api.get(
+                                `/api/tarjetas/cuentas/onboarding-link/${cuenta.stripe_account_id}`,
+                                {
+                                  withCredentials: true,
+                                  headers: { "X-CSRF-Token": csrfToken },
+                                }
+                              );
+                              window.open(res.data.url, "_blank");
+                              toast.info("Completa tu cuenta en Stripe");
                             } catch {
-                              toast.error('Error generando el enlace');
+                              toast.error("Error generando el enlace");
                             }
                           }}
                           className="px-2 py-1 rounded-md text-xs font-medium text-amber-600 bg-amber-100 hover:bg-amber-200 dark:bg-amber-900 dark:text-amber-300 dark:hover:bg-amber-800 transition-colors duration-200"
@@ -562,36 +705,47 @@ const CuentasReceptoras = () => {
                           Configurar
                         </button>
                       )}
-                      
-                      {cuenta.onboarding_completed === 1 && cuenta.activa === 0 && (
-                        <>
-                          <button
-                            onClick={() => activarCuenta(cuenta.id)}
-                            disabled={activatingId === cuenta.id}
-                            className="px-2 py-1 rounded-md text-xs font-medium text-amber-600 bg-amber-100 hover:bg-amber-200 dark:bg-amber-900 dark:text-amber-300 dark:hover:bg-amber-800 transition-colors duration-200 disabled:bg-gray-400 disabled:cursor-not-allowed"
-                          >
-                            {activatingId === cuenta.id ? (
-                              <>
-                                <FontAwesomeIcon icon={faSpinner} spin className="mr-1" />
-                                Activando...
-                              </>
-                            ) : (
-                              <>
-                                <FontAwesomeIcon icon={faCheckCircle} className="mr-1" />
-                                Activar
-                              </>
-                            )}
-                          </button>
-                          <button
-                            onClick={() => eliminarCuenta(cuenta.id)}
-                            className="px-2 py-1 rounded-md text-xs font-medium text-red-600 bg-red-100 hover:bg-red-200 dark:bg-red-900 dark:text-red-300 dark:hover:bg-red-800 transition-colors duration-200"
-                          >
-                            <FontAwesomeIcon icon={faTrash} className="mr-1" />
-                            Eliminar
-                          </button>
-                        </>
-                      )}
-                      
+
+                      {cuenta.onboarding_completed === 1 &&
+                        cuenta.activa === 0 && (
+                          <>
+                            <button
+                              onClick={() => activarCuenta(cuenta.id)}
+                              disabled={activatingId === cuenta.id}
+                              className="px-2 py-1 rounded-md text-xs font-medium text-amber-600 bg-amber-100 hover:bg-amber-200 dark:bg-amber-900 dark:text-amber-300 dark:hover:bg-amber-800 transition-colors duration-200 disabled:bg-gray-400 disabled:cursor-not-allowed"
+                            >
+                              {activatingId === cuenta.id ? (
+                                <>
+                                  <FontAwesomeIcon
+                                    icon={faSpinner}
+                                    spin
+                                    className="mr-1"
+                                  />
+                                  Activando...
+                                </>
+                              ) : (
+                                <>
+                                  <FontAwesomeIcon
+                                    icon={faCheckCircle}
+                                    className="mr-1"
+                                  />
+                                  Activar
+                                </>
+                              )}
+                            </button>
+                            <button
+                              onClick={() => eliminarCuenta(cuenta.id)}
+                              className="px-2 py-1 rounded-md text-xs font-medium text-red-600 bg-red-100 hover:bg-red-200 dark:bg-red-900 dark:text-red-300 dark:hover:bg-red-800 transition-colors duration-200"
+                            >
+                              <FontAwesomeIcon
+                                icon={faTrash}
+                                className="mr-1"
+                              />
+                              Eliminar
+                            </button>
+                          </>
+                        )}
+
                       {cuenta.activa === 1 && (
                         <div className="px-2 py-1 rounded-md text-xs font-medium text-amber-600 bg-amber-100 dark:bg-amber-900 dark:text-amber-300">
                           <FontAwesomeIcon icon={faCrown} className="mr-1" />

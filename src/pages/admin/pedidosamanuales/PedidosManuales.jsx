@@ -3,6 +3,7 @@ import axios from "axios";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faTimes,
+  faTicketAlt,
   faAddressCard,
   faDollarSign,
   faLocationArrow,
@@ -15,6 +16,7 @@ import {
   faMapMarkerAlt,
   faPhone,
   faEnvelope,
+  faFrown,
   faCalendarAlt,
   faClock,
   faCreditCard,
@@ -46,6 +48,7 @@ import StepThree from "./StepThree";
 import StepFour from "./StepFour";
 import PaymentModal from "./PaymentModal";
 import CustomLoading from "../../../components/spiner/SpinerGlobal";
+import TicketCompra from "../gestion-pedidos/Ticket";
 
 function WizardAlquiler({ onNavigate, setPedidos }) {
   const { csrfToken, user } = useAuth();
@@ -57,7 +60,7 @@ function WizardAlquiler({ onNavigate, setPedidos }) {
   const [orders, setOrders] = useState([]);
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [showTicketModal, setShowTicketModal] = useState(false);
-
+ 
   const [nombre, setNombre] = useState("");
   const [apellido, setApellido] = useState("");
   const [telefono, setTelefono] = useState("");
@@ -112,6 +115,8 @@ function WizardAlquiler({ onNavigate, setPedidos }) {
   const [showPaymentsModal, setShowPaymentsModal] = useState(false);
 
   const [isLoadingOrders, setIsLoadingOrders] = useState(false);
+
+  const [showDetailsModal, setShowDetailsModal] = useState(null);
 
   const handleViewPayments = (order) => {
     setSelectedOrder(order);
@@ -390,6 +395,12 @@ function WizardAlquiler({ onNavigate, setPedidos }) {
     setShowTicketModal(true);
   };
 
+  const handleShowTicketModal = (pedido) => setShowDetailsModal(pedido);
+    const handleSendTicket = (email, pdfBlob) => {
+      toast.success(`Ticket enviado al correo ${email} en formato PDF.`);
+      setShowDetailsModal(null);
+    };
+
   const handleSubmitWizard = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
@@ -647,7 +658,20 @@ function WizardAlquiler({ onNavigate, setPedidos }) {
       </h2>
       {isLoadingOrders ? (
       <CustomLoading/>
-    ) : (
+      ): filteredOrders.length === 0 ? (
+  <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-6 text-center border border-gray-300 dark:border-gray-700">
+    <FontAwesomeIcon
+      icon={faFrown}
+      className="text-4xl text-yellow-500 dark:text-yellow-400 mb-4"
+    />
+    <p className="text-lg font-semibold text-gray-700 dark:text-gray-200">
+      No hay pedidos 
+    </p>
+    <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">
+      ¡Crea un nuevo pedido usando el botón "Realizar un Pedido"!
+    </p>
+  </div>
+) : (
 
       <div className="overflow-x-auto rounded-lg shadow-md">
         <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
@@ -766,6 +790,14 @@ function WizardAlquiler({ onNavigate, setPedidos }) {
                       className="text-green-600 dark:text-green-400"
                     />
                   </button>
+
+                   <button
+                                            onClick={() => handleShowTicketModal(order)}
+                                            className="text-orange-600 hover:text-orange-800 dark:text-orange-400 dark:hover:text-orange-300 transition-all duration-200 p-2 rounded-full hover:bg-orange-100 dark:hover:bg-orange-900"
+                                            title="Generar Ticket"
+                                          >
+                                            <FontAwesomeIcon icon={faTicketAlt} size="lg" />
+                                          </button>
                 </td>
               </tr>
             ))}
@@ -858,6 +890,7 @@ function WizardAlquiler({ onNavigate, setPedidos }) {
               Ticket del Pedido
             </h2>
           </div>
+          
           <button
             onClick={() => setShowTicketModal(false)}
             className="bg-white/20 hover:bg-white/30 rounded-full p-2 text-white transition-all duration-200 hover:scale-110"
@@ -1453,6 +1486,13 @@ function WizardAlquiler({ onNavigate, setPedidos }) {
       )}
 
       {showTicketModal && renderTicketModal()}
+       {showDetailsModal && (
+                    <TicketCompra
+                      pedido={showDetailsModal}
+                      onClose={() => setShowTicketModal(null)}
+                      onSend={handleSendTicket}
+                    />
+                  )}
     </div>
   );
 }

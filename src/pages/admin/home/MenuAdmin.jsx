@@ -37,6 +37,7 @@ import {
   faDollarSign,
   faWarehouse,
   faBoxOpen,
+  faUndoAlt ,
   faShoppingCart,
   faClipboardList,
    faArrowUp,
@@ -55,6 +56,9 @@ import {
   faHeadset,         // Para atención al cliente
   faClipboardCheck,  // Para auditoría de datos
 } from "@fortawesome/free-solid-svg-icons";
+
+
+import GestionPedidosDevueltos from "../gestion-pedidos/PedidosDevueltos";
 
 import AgregarProductosSubbodegas from "../inventario/AgregarProductosSubbodegas";
 import DashboardPedidos from "../dashboard/DashboardPedidos";
@@ -311,7 +315,11 @@ const MenuHomeAdmin = () => {
       items: [
         { icon: faShoppingCart, label: "Pedidos Manuales" },
         { icon: faTasks, label: "Gestion Pedidos" },
-         { icon: faTasks, label: "Gestion Pedidos Inicidentes" },
+       { icon: faExclamationTriangle, label: "Gestion Pedidos Inicidentes" },
+        { icon: faUndoAlt, label: "Pedidos devueltos" }
+
+
+
       ],
     },
      {
@@ -436,6 +444,8 @@ const MenuHomeAdmin = () => {
         return <CalendarioGeneralPedidos />;
         case "Gestion Pedidos Inicidentes":
         return <GestionPedidosIncidentes />;
+         case "Pedidos devueltos":
+        return <GestionPedidosDevueltos />;
 
 
       case "Dasboard Usuarios":

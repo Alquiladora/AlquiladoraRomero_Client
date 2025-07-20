@@ -53,7 +53,7 @@ function StepTwo({
       ? direccionesCliente.filter((dir) => dir.codigoPostal !== null)
       : [];
 
-  const referenciaRestante = 50 - referencia.length;
+  const referenciaRestante = 100 - referencia.length;
 
   const toggleAccordion = () => {
     setAccordionOpen((prev) => !prev);
@@ -423,7 +423,7 @@ function StepTwo({
                 }`}
                 placeholder="Calle y número"
                 value={direccion}
-                onChange={(e) => setDireccion(e.target.value.trim())}
+                onChange={(e) => setDireccion(e.target.value)}
               />
               {direccion.length > 0 && direccion.length < 5 && (
                 <p className="text-xs text-red-500 mt-1">
@@ -434,20 +434,22 @@ function StepTwo({
 
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                Referencia (máx. 50 caracteres)
+                Referencia (máx. 100 caracteres)
               </label>
               <textarea
                 className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded dark:bg-gray-700 dark:text-white"
                 placeholder="Ej: Casa blanca, frente a la panadería, etc."
                 value={referencia}
-                onChange={(e) => setReferencia(e.target.value.trim())}
-                maxLength={50}
+                onChange={(e) => setReferencia(e.target.value)}
+                maxLength={100}
                 rows={3}
               />
               <p className="text-xs text-gray-500 dark:text-gray-400 text-right mt-1">
                 {referenciaRestante} caracteres restantes
               </p>
             </div>
+
+
           </div>
         </div>
       )}

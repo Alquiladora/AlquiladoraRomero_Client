@@ -42,6 +42,7 @@ import api from "../../../utils/AxiosConfig";
 import { useAuth } from "../../../hooks/ContextAuth";
 import CustomLoading from "../../../components/spiner/SpinerGlobal";
 
+
 // Función para capitalizar estados
 const capitalizeStatus = (status) => {
   if (!status || typeof status !== 'string') return 'Desconocido';
@@ -310,97 +311,97 @@ const GestionPedidos = ({ onNavigate }) => {
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 animate-fade-in">
       <div className="bg-white rounded-2xl shadow-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto p-6 space-y-6 dark:bg-gray-900">
         {/* Header */}
-        <div className="flex justify-between items-center bg-gradient-to-r from-amber-400 to-orange-500 p-4 rounded-t-2xl">
-          <h2 className="text-xl font-extrabold text-white flex items-center space-x-3">
-            <FontAwesomeIcon icon={faTicketAlt} />
-            <span>Ticket del Pedido</span>
-          </h2>
-          <button
-            onClick={() => setShowDetailsModal(null)}
-            className="text-white hover:text-yellow-200 transition"
-            aria-label="Cerrar modal"
-          >
-            <FontAwesomeIcon icon={faTimes} />
-          </button>
-        </div>
+       <div className="flex justify-between items-center bg-[#fcb900] p-4 rounded-t-xl">
+        <h2 className="text-xl font-bold text-white flex items-center space-x-2">
+          <FontAwesomeIcon icon={faTicketAlt} />
+          <span>Ticket del Pedido</span>
+        </h2>
+        <button
+          onClick={() => setShowDetailsModal(null)}
+          className="text-white hover:text-gray-200 transition"
+          aria-label="Cerrar modal"
+        >
+          <FontAwesomeIcon icon={faTimes} />
+        </button>
+      </div>
 
         {/* Sección ID y Estado */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div className="bg-blue-100 rounded-lg p-4 flex items-center space-x-3 dark:bg-blue-900/30 dark:border dark:border-blue-700">
-            <div className="bg-blue-600 text-white p-2 rounded-full">
-              <FontAwesomeIcon icon={faTruck} />
-            </div>
-            <div>
-              <p className="text-sm text-blue-800 font-medium dark:text-blue-300">
-                ID de Rastreo
-              </p>
-              <p className="text-lg font-bold text-blue-900 break-all dark:text-blue-200">
-                {showDetailsModal.idRastreo}
-              </p>
-            </div>
+       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div className="bg-gray-50 rounded-lg p-4 flex items-center space-x-3 dark:bg-gray-700">
+          <div className="bg-[#fcb900] text-white p-2 rounded-full">
+            <FontAwesomeIcon icon={faTruck} />
           </div>
-
-          <div className="bg-green-100 rounded-lg p-4 flex items-center space-x-3 dark:bg-green-900/30 dark:border dark:border-green-700 shadow-md">
-            <div
-              className={`rounded-full p-2 transition-colors duration-300 ${
-                showDetailsModal.estado === "Procesando"
-                  ? "bg-orange-500"
-                  : showDetailsModal.estado === "Confirmado"
-                  ? "bg-green-500"
-                  : showDetailsModal.estado === "Enviando"
-                  ? "bg-blue-500"
-                  : showDetailsModal.estado === "En alquiler"
-                  ? "bg-purple-500"
-                  : showDetailsModal.estado === "Devuelto"
-                  ? "bg-gray-500"
-                  : showDetailsModal.estado === "Incompleto"
-                  ? "bg-yellow-500"
-                  : showDetailsModal.estado === "Incidente"
-                  ? "bg-red-500"
-                  : showDetailsModal.estado === "Cancelado"
-                  ? "bg-black"
-                  : showDetailsModal.estado === "Finalizado"
-                  ? "bg-green-800"
-                  : "bg-gray-400"
-              }`}
-            >
-              <FontAwesomeIcon
-                icon={faCheckCircle}
-                className="text-white text-xs sm:text-sm"
-              />
-            </div>
-            <div>
-              <p className="text-sm font-medium text-gray-900 dark:text-gray-100 select-none">
-                Estado del Pedido
-              </p>
-              <p
-                className={`font-bold text-lg select-text transition-colors duration-300 ${
-                  showDetailsModal.estado === "Procesando"
-                    ? "text-orange-600 dark:text-orange-400"
-                    : showDetailsModal.estado === "Confirmado"
-                    ? "text-green-600 dark:text-green-400"
-                    : showDetailsModal.estado === "Enviando"
-                    ? "text-blue-600 dark:text-blue-400"
-                    : showDetailsModal.estado === "En alquiler"
-                    ? "text-purple-600 dark:text-purple-400"
-                    : showDetailsModal.estado === "Devuelto"
-                    ? "text-gray-600 dark:text-gray-400"
-                    : showDetailsModal.estado === "Incompleto"
-                    ? "text-yellow-600 dark:text-yellow-400"
-                    : showDetailsModal.estado === "Incidente"
-                    ? "text-red-600 dark:text-red-400"
-                    : showDetailsModal.estado === "Cancelado"
-                    ? "text-black dark:text-gray-300"
-                    : showDetailsModal.estado === "Finalizado"
-                    ? "text-green-800 dark:text-green-600"
-                    : "text-gray-600 dark:text-gray-400"
-                }`}
-              >
-                {showDetailsModal.estado}
-              </p>
-            </div>
+          <div>
+            <p className="text-sm text-gray-600 font-medium dark:text-gray-300">
+              ID de Rastreo
+            </p>
+            <p className="text-lg font-bold text-gray-900 break-all dark:text-gray-100">
+              {showDetailsModal.idRastreo}
+            </p>
           </div>
         </div>
+        <div className="bg-gray-50 rounded-lg p-4 flex items-center space-x-3 dark:bg-gray-700">
+          <div
+            className={`rounded-full p-2 ${
+              showDetailsModal.estado === "Procesando"
+                ? "bg-orange-500"
+                : showDetailsModal.estado === "Confirmado"
+                ? "bg-green-500"
+                : showDetailsModal.estado === "Enviando"
+                ? "bg-blue-500"
+                : showDetailsModal.estado === "En alquiler"
+                ? "bg-purple-500"
+                : showDetailsModal.estado === "Devuelto"
+                ? "bg-gray-500"
+                : showDetailsModal.estado === "Incompleto"
+                ? "bg-yellow-500"
+                : showDetailsModal.estado === "Incidente"
+                ? "bg-red-500"
+                : showDetailsModal.estado === "Cancelado"
+                ? "bg-black"
+                : showDetailsModal.estado === "Finalizado"
+                ? "bg-green-800"
+                : "bg-gray-400"
+            }`}
+          ><FontAwesomeIcon
+              icon={faCheckCircle}
+              className="text-white text-xs sm:text-sm"
+            />
+          </div>
+          <div>
+            <p className="text-sm font-medium text-gray-600 dark:text-gray-300 select-none">
+              Estado del Pedido
+            </p>
+            <p
+              className={`font-bold text-lg select-text ${
+                showDetailsModal.estado === "Procesando"
+                  ? "text-orange-600 dark:text-orange-400"
+                  : showDetailsModal.estado === "Confirmado"
+                  ? "text-green-600 dark:text-green-400"
+                  : showDetailsModal.estado === "Enviando"
+                  ? "text-blue-600 dark:text-blue-400"
+                  : showDetailsModal.estado === "En alquiler"
+                  ? "text-purple-600 dark:text-purple-400"
+                  : showDetailsModal.estado === "Devuelto"
+                  ? "text-gray-600 dark:text-gray-400"
+                  : showDetailsModal.estado === "Incompleto"
+                  ? "text-yellow-600 dark:text-yellow-400"
+                  : showDetailsModal.estado === "Incidente"
+                  ? "text-red-600 dark:text-red-400"
+                  : showDetailsModal.estado === "Cancelado"
+                  ? "text-black dark:text-gray-300"
+                  : showDetailsModal.estado === "Finalizado"
+                  ? "text-green-800 dark:text-green-600"
+                  : "text-gray-600 dark:text-gray-400"
+              }`}
+            >
+              {showDetailsModal.estado}
+            </p>
+          </div>
+        </div>
+      </div>
+
+
 
         {/* Sección Información del Cliente */}
         <div className="bg-gray-100 rounded-lg p-4 space-y-3 dark:bg-gray-800/50 dark:border dark:border-gray-700">
@@ -476,11 +477,11 @@ const GestionPedidos = ({ onNavigate }) => {
         </div>
 
         {/* Sección Productos del Pedido */}
-        <div className="bg-yellow-100 rounded-lg p-4 dark:bg-yellow-900/20 border border-yellow-300 dark:border-yellow-700">
-          <h3 className="text-lg font-bold text-yellow-800 flex items-center space-x-2 mb-3 dark:text-yellow-300">
-            <FontAwesomeIcon icon={faBox} />
-            <span>Productos del Pedido</span>
-          </h3>
+       <div className="bg-gray-50 rounded-lg p-4 dark:bg-gray-700">
+        <h3 className="text-lg font-bold text-gray-900 flex items-center space-x-2 mb-3 dark:text-gray-100">
+          <FontAwesomeIcon icon={faBox} className="text-[#fcb900]" />
+          <span>Productos del Pedido</span>
+        </h3>
 
           <div className="overflow-x-auto rounded-md border border-yellow-300 dark:border-yellow-700">
             <table className="min-w-full text-sm text-left text-yellow-900 dark:text-yellow-300">
@@ -536,12 +537,12 @@ const GestionPedidos = ({ onNavigate }) => {
         </div>
 
         {/* Sección Información de Pago */}
-        <div className="bg-green-100 rounded-lg p-4 space-y-6 dark:bg-green-900/20 dark:border dark:border-green-700">
-          <div>
-            <h3 className="text-lg font-bold text-green-800 flex items-center space-x-2 mb-3 dark:text-green-300">
-              <FontAwesomeIcon icon={faCreditCard} />
-              <span>Información de Pago</span>
-            </h3>
+       <div className="bg-gray-50 rounded-lg p-4 space-y-6 dark:bg-gray-700">
+        <div> 
+         <h3 className="text-lg font-bold text-gray-900 flex items-center space-x-2 dark:text-gray-100">
+          <FontAwesomeIcon icon={faCreditCard} className="text-[#fcb900]" />
+          <span>Información de Pago</span>
+        </h3>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
@@ -653,6 +654,9 @@ const GestionPedidos = ({ onNavigate }) => {
     </div>
   );
 
+
+  
+
   return (
     <div className="min-h-screen dark:from-gray-900 dark:to-gray-800 p-6 lg:p-8">
       <div className="max-w-7xl mx-auto">
@@ -666,24 +670,9 @@ const GestionPedidos = ({ onNavigate }) => {
           </button>
 
           {/* Botón para Generar Reporte */}
-          <button
-            onClick={handleGenerateReport}
-            className="flex items-center px-3 py-1.5 text-sm bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-md shadow-sm hover:from-blue-700 hover:to-blue-800 transition-all duration-200"
-          >
-            <FontAwesomeIcon icon={faFileExport} className="mr-1" />
-            <span className="hidden sm:inline">Reporte</span>
-            <span className="sm:hidden">R</span>
-          </button>
+        
 
-          {/* Botón para Exportar CSV */}
-          <button
-            onClick={handleExportCSV}
-            className="flex items-center px-3 py-1.5 text-sm bg-gradient-to-r from-green-600 to-green-700 text-white rounded-md shadow-sm hover:from-green-700 hover:to-green-800 transition-all duration-200"
-          >
-            <FontAwesomeIcon icon={faFileExport} className="mr-1" />
-            <span className="hidden sm:inline">CSV</span>
-            <span className="sm:hidden">C</span>
-          </button>
+       
         </div>
 
         <h2 className="text-3xl font-extrabold text-gray-800 dark:text-gray-100 mb-8 flex items-center justify-center">

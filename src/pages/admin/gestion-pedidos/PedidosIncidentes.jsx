@@ -3,6 +3,8 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faTasks,
   faFilter,
+  faFrown,
+  faImage,
   faSearch,
   faFileExport,
   faFileInvoice,
@@ -52,20 +54,18 @@ const UpdateStatusModal = ({ pedido, onClose, onUpdateStatus }) => {
   const [productStatuses, setProductStatuses] = useState(
     pedido.productos.map((prod) => ({
       idProductoColores: prod.idProductoColores,
-      estado: prod.estado,
+      estadoProducto: prod.estadoProducto,
     }))
   );
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const estadosProducto = ["Completado", "Incidente", "Faltante"];
+  const estadosProducto = ["Disponible", "Incidente", "Incompleto"];
   const estadosCambioPedido = [
-    "Procesando",
+    "Seleciona un estado",
     "Enviando",
     "Recogiendo",
     "En alquiler",
     "Devuelto",
-    "Incompleto",
-    "Incidente",
     "Cancelado",
     "Finalizado",
   ];
@@ -74,37 +74,102 @@ const UpdateStatusModal = ({ pedido, onClose, onUpdateStatus }) => {
     setProductStatuses((prev) =>
       prev.map((prod) =>
         prod.idProductoColores === idProductoColores
-          ? { ...prod, estado: newEstado }
+          ? { ...prod, estadoProducto: newEstado }
           : prod
       )
     );
   };
 
-  const handleSubmit = async () => {
-    // Validar que el pedido no se marque como "Finalizado" si hay productos no completados
-    const hasNonCompletedProducts = productStatuses.some(
-      (prod) => prod.estado !== "Completado"
-    );
-    if (newStatus === "Finalizado" && hasNonCompletedProducts) {
-      toast.error(
-        "No se puede finalizar el pedido: todos los productos deben estar en estado 'Completado'."
-      );
-      return;
-    }
 
-    setIsSubmitting(true);
-    try {
-      await onUpdateStatus(pedido.idPedido, newStatus, productStatuses);
-    } catch (error) {
-      toast.error("Error al actualizar el estado");
-    } finally {
-      setIsSubmitting(false);
+const handleSubmit = async () => {
+  const hasNonCompletedProducts = productStatuses.some(
+    (prod) => prod.estadoProducto !== "Disponible"
+  );
+
+  // Estado original de productos
+  const productosOriginales = pedido.productos.map((p) => ({
+    id: p.idProductoColores,
+    estadoProducto: p.estadoProducto,
+  }));
+
+  // Detectar productos cuyo estado cambió
+  const productosCambiados = productStatuses.filter((prod) => {
+    const original = productosOriginales.find((p) => p.id === prod.idProductoColores);
+    return original && original.estadoProducto !== prod.estadoProducto;
+  });
+
+  const pedidoCambio = newStatus !== pedido.estado;
+
+  // Productos con estado original "Incidente" o "Incompleto"
+  const productosIncOInc = pedido.productos.filter(
+    (p) => p.estadoProducto === "Incidente" || p.estadoProducto === "Incompleto"
+  );
+
+  // ¿Se actualizó alguno de esos productos?
+  const algunoIncOIncModificado = productosIncOInc.some((prod) => {
+    const actualizado = productStatuses.find((p) => p.idProductoColores === prod.idProductoColores);
+    return actualizado && actualizado.estadoProducto !== prod.estadoProducto;
+  });
+
+  // ❌ Si no cambió ni el pedido ni algún producto, no permitir enviar
+  if (!pedidoCambio && productosCambiados.length === 0) {
+    toast.error("Debes modificar al menos el estado del pedido o el de algún producto para actualizar.");
+    return;
+  }
+
+  // ❌ Cambió producto pero no cambió estado del pedido, y ya no quedan productos en incidente
+  const quedanIncidentes = productStatuses.some(
+    (p) =>
+      (pedido.productos.find((x) => x.idProductoColores === p.idProductoColores)?.estadoProducto !==
+        "Disponible") &&
+      p.estadoProducto !== "Disponible"
+  );
+
+  if (productosCambiados.length > 0 && !pedidoCambio && !quedanIncidentes) {
+    toast.error(
+      "Has cambiado el estado de uno o más productos, pero no el estado del pedido. Actualízalo también."
+    );
+    return;
+  }
+
+  // ❌ Cambió pedido pero no se actualizó ningún producto en incidente/incompleto
+  if (pedidoCambio && productosIncOInc.length > 0 && !algunoIncOIncModificado) {
+    toast.error(
+      "Has cambiado el estado del pedido, pero no actualizaste productos con incidente o incompleto."
+    );
+    return;
+  }
+
+  // ❌ No finalizar si hay productos que no estén disponibles
+  if (newStatus === "Finalizado" && hasNonCompletedProducts) {
+    toast.error(
+      "No se puede finalizar el pedido: todos los productos deben estar en estado 'Disponible'."
+    );
+    return;
+  }
+
+  setIsSubmitting(true);
+  try {
+    await onUpdateStatus(pedido.idPedido, newStatus, productStatuses);
+
+    if (newStatus === "Finalizado" || newStatus === "Cancelado") {
+      toast.success("Estado actualizado y stock de productos restaurado en el inventario.");
+    } else {
+      toast.success("Estado actualizado correctamente.");
     }
-  };
+  } catch (error) {
+    toast.error("Error al actualizar el estado");
+  } finally {
+    setIsSubmitting(false);
+  }
+};
+
+
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 animate-fade-in">
       <div className="bg-white rounded-2xl shadow-xl max-w-lg w-full p-6 space-y-6 dark:bg-gray-900">
+        {/* Header */}
         <div className="flex justify-between items-center bg-gradient-to-r from-amber-400 to-orange-500 p-4 rounded-t-2xl">
           <h2 className="text-xl font-extrabold text-white flex items-center space-x-3">
             <FontAwesomeIcon icon={faTasks} />
@@ -113,87 +178,139 @@ const UpdateStatusModal = ({ pedido, onClose, onUpdateStatus }) => {
           <button
             onClick={onClose}
             className="text-white hover:text-yellow-200 transition"
-            aria-label="Cerrar modal"
           >
             <FontAwesomeIcon icon={faTimes} />
           </button>
         </div>
-        <div className="space-y-4">
-          <div>
-            <label className="text-sm font-semibold text-gray-700 dark:text-gray-300">
-              Estado del Pedido
-            </label>
-            <select
-              value={newStatus}
-              onChange={(e) => setNewStatus(e.target.value)}
-              className="p-2 border rounded-lg bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200 w-full focus:outline-none focus:ring-2 focus:ring-yellow-500 transition-all duration-200"
-            >
-              {estadosCambioPedido.map((estado) => (
-                <option key={estado} value={estado}>
-                  {estado}
-                </option>
-              ))}
-            </select>
-          </div>
-          <div>
-            <h3 className="text-lg font-bold text-gray-800 dark:text-gray-100">
-              Estado de Productos
-            </h3>
-            {pedido.productos.map((producto, i) => (
-              <div key={i} className="flex items-center justify-between py-2">
-                <span className="text-sm text-gray-700 dark:text-gray-300">
-                  {producto.cantidad}x {producto.nombre} ({producto.color})
-                </span>
-                <select
-                  value={
-                    productStatuses.find(
-                      (p) => p.idProductoColores === producto.idProductoColores
-                    )?.estado || "Completado"
-                  }
-                  onChange={(e) =>
-                    handleProductStatusChange(
-                      producto.idProductoColores,
-                      e.target.value
-                    )
-                  }
-                  className="p-2 border rounded-lg bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200 w-40 focus:outline-none focus:ring-2 focus:ring-yellow-500 transition-all duration-200"
-                >
-                  {estadosProducto.map((estado) => (
-                    <option key={estado} value={estado}>
-                      {estado}
-                    </option>
-                  ))}
-                </select>
-              </div>
+
+        {/* Estado del pedido actual y nuevo */}
+        <div>
+          <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300">
+            Estado actual del pedido:
+          </label>
+          <p className="text-sm font-bold text-gray-900 dark:text-gray-100 mb-2">
+            {pedido.estado}
+          </p>
+        </div>
+        <div>
+          <label className="text-sm font-semibold text-gray-700 dark:text-gray-300">
+            Cambiar estado del Pedido
+          </label>
+          <select
+            value={newStatus}
+            onChange={(e) => setNewStatus(e.target.value)}
+            className="p-2 border rounded-lg bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200 w-full focus:outline-none focus:ring-2 focus:ring-yellow-500 transition-all duration-200"
+          >
+            {estadosCambioPedido.map((estado) => (
+              <option key={estado} value={estado}>
+                {estado}
+              </option>
             ))}
-          </div>
-          <div className="flex justify-end space-x-3">
-            <button
-              onClick={onClose}
-              className="px-4 py-2 bg-gray-300 text-gray-800 rounded-md hover:bg-gray-400 dark:bg-gray-600 dark:text-gray-200 dark:hover:bg-gray-500 transition-all duration-200"
-            >
-              Cancelar
-            </button>
-            <button
-              onClick={handleSubmit}
-              disabled={isSubmitting}
-              className={`px-4 py-2 bg-gradient-to-r from-yellow-500 to-yellow-600 text-white rounded-md hover:from-yellow-600 hover:to-yellow-700 transition-all duration-200 flex items-center ${
-                isSubmitting ? "opacity-50 cursor-not-allowed" : ""
-              }`}
-            >
-              {isSubmitting ? (
-                <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
-              ) : (
-                <FontAwesomeIcon icon={faCheckCircle} className="mr-2" />
-              )}
-              Actualizar
-            </button>
-          </div>
+          </select>
+        </div>
+
+        {/* Productos con incidente o incompleto */}
+        <div>
+          <h3 className="text-lg font-bold text-gray-800 dark:text-gray-100">
+            Productos con Incidentes o Incompletos
+          </h3>
+          {pedido.productos
+            .filter(
+              (producto) =>
+                producto.estadoProducto === "Incidente" ||
+                producto.estadoProducto === "Incompleto"
+            )
+            .map((producto, i) => {
+              const currentStatus =
+                productStatuses.find(
+                  (p) => p.idProductoColores === producto.idProductoColores
+                )?.estadoProducto || producto.estadoProducto;
+
+              return (
+                <div
+                  key={i}
+                  className="flex flex-col gap-3 py-3 border-b dark:border-gray-700"
+                >
+                  {/* Imagen y descripción */}
+                  <div className="flex items-center gap-3">
+                    {producto.imagen && (
+                      <img
+                        src={producto.imagen}
+                        alt={producto.nombre}
+                        className="w-12 h-12 rounded object-cover border border-gray-300 dark:border-gray-600"
+                      />
+                    )}
+                    <div className="text-sm text-gray-700 dark:text-gray-300">
+                      {producto.cantidad}x {producto.nombre} ({producto.color})
+                    </div>
+                  </div>
+
+                  {/* Selector de estado */}
+                  <div className="w-full">
+                    <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1">
+                      Estado del producto
+                    </label>
+                    <select
+                      value={currentStatus}
+                      onChange={(e) =>
+                        handleProductStatusChange(
+                          producto.idProductoColores,
+                          e.target.value
+                        )
+                      }
+                      className="w-full p-2 border rounded-lg bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-yellow-500 transition-all duration-200"
+                    >
+                      <option value={currentStatus}>{currentStatus}</option>
+                      {currentStatus !== "Disponible" && (
+                        <option value="Disponible">Disponible</option>
+                      )}
+                    </select>
+                  </div>
+
+                  {/* Observaciones desde backend */}
+                  {producto.observaciones && (
+                    <div className="w-full">
+                      <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1">
+                        Observaciones
+                      </label>
+                      <p className="text-sm text-gray-800 dark:text-gray-300 bg-gray-100 dark:bg-gray-800 p-2 rounded-md border border-gray-300 dark:border-gray-600 whitespace-pre-line">
+                        {producto.observaciones}
+                      </p>
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+        </div>
+
+        {/* Botones de acción */}
+        <div className="flex justify-end space-x-3">
+          <button
+            onClick={onClose}
+            className="px-4 py-2 bg-gray-300 text-gray-800 rounded-md hover:bg-gray-400 dark:bg-gray-600 dark:text-gray-200 dark:hover:bg-gray-500 transition-all duration-200"
+          >
+            Cancelar
+          </button>
+          <button
+            onClick={handleSubmit}
+            disabled={isSubmitting}
+            className={`px-4 py-2 bg-gradient-to-r from-yellow-500 to-yellow-600 text-white rounded-md hover:from-yellow-600 hover:to-yellow-700 transition-all duration-200 flex items-center ${
+              isSubmitting ? "opacity-50 cursor-not-allowed" : ""
+            }`}
+          >
+            {isSubmitting ? (
+              <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
+            ) : (
+              <FontAwesomeIcon icon={faCheckCircle} className="mr-2" />
+            )}
+            Actualizar
+          </button>
         </div>
       </div>
     </div>
   );
 };
+
 
 const GestionPedidosIncidentes = ({ onNavigate }) => {
   const [pedidos, setPedidos] = useState([]);
@@ -214,7 +331,7 @@ const GestionPedidosIncidentes = ({ onNavigate }) => {
   const ordersPerPage = 10;
 
   const estadosDisponibles = ["Todos", "Incidente", "Incompleto"];
-  const estadosProducto = ["Completado", "Incidente", "Faltante"];
+  const estadosProducto = ["Completado", "Incidente", "Incompleto"];
   const estadosCambioPedido = [
     "Procesando",
     "Enviando",
@@ -231,11 +348,12 @@ const GestionPedidosIncidentes = ({ onNavigate }) => {
     const fetchPedidos = async () => {
       try {
         setLoading(true);
-        const response = await api.get("/api/pedidos/pedidos-general", {
+        const response = await api.get("/api/pedidos/pedidos-incidentes", {
           headers: { "X-CSRF-Token": csrfToken },
           withCredentials: true,
         });
         const result = response.data;
+        console.log("Resultados obtenidos-incidentes", result);
 
         if (result.success) {
           const filteredPedidos = result.data
@@ -281,6 +399,7 @@ const GestionPedidosIncidentes = ({ onNavigate }) => {
           }
         );
         const result = response.data;
+        console.log("historial de peido", result);
 
         if (result.success) {
           const historial = result.data.map((entry) => ({
@@ -295,7 +414,9 @@ const GestionPedidosIncidentes = ({ onNavigate }) => {
               entry.estadoNuevo
             ).toLowerCase()}${
               entry.estadoAnterior
-                ? ` desde ${capitalizeStatus(entry.estadoAnterior).toLowerCase()}`
+                ? ` desde ${capitalizeStatus(
+                    entry.estadoAnterior
+                  ).toLowerCase()}`
                 : ""
             }`,
           }));
@@ -311,6 +432,7 @@ const GestionPedidosIncidentes = ({ onNavigate }) => {
       }
     };
 
+    //Auno no existe ese enpoit
     const fetchRepartidorData = async () => {
       if (!showDetailsModal) return;
       try {
@@ -322,6 +444,7 @@ const GestionPedidosIncidentes = ({ onNavigate }) => {
           }
         );
         const result = response.data;
+        console.log("Repartidor asignacion ---", result);
         if (result.success && result.data) {
           setRepartidorData(result.data);
         } else {
@@ -337,56 +460,52 @@ const GestionPedidosIncidentes = ({ onNavigate }) => {
     fetchRepartidorData();
   }, [showTimelineModal, showDetailsModal, csrfToken]);
 
-  const handleUpdateStatus = async (idPedido, newStatus, productUpdates = []) => {
-    try {
-      const response = await api.put(
-        "/api/pedidos/actualizar-estado",
-        { idPedido, newStatus, productUpdates },
-        {
-          headers: { "X-CSRF-Token": csrfToken },
-          withCredentials: true,
-        }
-      );
-      const result = response.data;
-
-      if (result.success) {
-        setPedidos((prev) =>
-          prev.map((pedido) =>
-            pedido.idPedido === idPedido
-              ? {
-                  ...pedido,
-                  estado: capitalizeStatus(newStatus),
-                  productos: productUpdates.length > 0
-                    ? pedido.productos.map((prod) =>
-                        productUpdates.find(
-                          (p) => p.idProductoColores === prod.idProductoColores
-                        )
-                          ? {
-                              ...prod,
-                              estado: capitalizeStatus(
-                                productUpdates.find(
-                                  (p) =>
-                                    p.idProductoColores === prod.idProductoColores
-                                ).estado
-                              ),
-                            }
-                          : prod
-                      )
-                    : pedido.productos,
-                }
-              : pedido
-          )
-        );
-        toast.success("Estado actualizado correctamente");
-        setShowUpdateStatusModal(null);
-      } else {
-        toast.error(result.message || "Error al actualizar el estado");
+const handleUpdateStatus = async (idPedido, newStatus, productUpdates = []) => {
+  try {
+    const response = await api.put(
+      "/api/pedidos/pedidos/actualizar-estado",
+      { idPedido, newStatus, productUpdates },
+      {
+        headers: { "X-CSRF-Token": csrfToken },
+        withCredentials: true,
       }
-    } catch (error) {
-      toast.error("Error al actualizar el estado");
-      console.error(error);
+    );
+
+    const result = response.data;
+
+    if (result.success) {
+      setPedidos((prev) =>
+        prev.map((pedido) =>
+          pedido.idPedido === idPedido
+            ? {
+                ...pedido,
+                estado: capitalizeStatus(newStatus),
+                productos: pedido.productos.map((prod) => {
+                  const updated = productUpdates.find(
+                    (p) => p.idProductoColores === prod.idProductoColores
+                  );
+                  return updated
+                    ? {
+                        ...prod,
+                        estadoProducto: capitalizeStatus(updated.estadoProducto),
+                      }
+                    : prod;
+                }),
+              }
+            : pedido
+        )
+      );
+
+      toast.success("Estado actualizado correctamente");
+      setShowUpdateStatusModal(null);
+    } else {
+      toast.error(result.message || "Error al actualizar el estado");
     }
-  };
+  } catch (error) {
+    toast.error("Error al actualizar el estado");
+    console.error(error);
+  }
+};
 
   const filteredPedidos = pedidos
     .filter(
@@ -433,6 +552,7 @@ const GestionPedidosIncidentes = ({ onNavigate }) => {
     setShowTimelineModal(pedido);
   };
   const handleShowDetails = (pedido) => setShowDetailsModal(pedido);
+
   const handleShowTicketModal = (pedido) => setShowTicketModal(pedido);
   const handleShowUpdateStatusModal = (pedido) =>
     setShowUpdateStatusModal(pedido);
@@ -494,6 +614,8 @@ const GestionPedidosIncidentes = ({ onNavigate }) => {
                               : evento.estado === "Confirmado"
                               ? faCheckCircle
                               : evento.estado === "En alquiler"
+                              ? faCheckCircle
+                              : evento.estado === "Recogiendo"
                               ? faTruck
                               : evento.estado === "Devuelto"
                               ? faUndo
@@ -532,18 +654,20 @@ const GestionPedidosIncidentes = ({ onNavigate }) => {
     );
   };
 
+  console.log("Parametro enviado de peiddo detalles", showDetailsModal);
+
   const renderDetailsModal = () => (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 animate-fade-in">
-      <div className="bg-white rounded-2xl shadow-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto p-6 space-y-6 dark:bg-gray-900">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/50 backdrop-blur-sm p-4 animate-fade-in">
+      <div className="bg-white rounded-xl shadow-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto p-6 space-y-6 dark:bg-gray-800">
         {/* Header */}
-        <div className="flex justify-between items-center bg-gradient-to-r from-amber-400 to-orange-500 p-4 rounded-t-2xl">
-          <h2 className="text-xl font-extrabold text-white flex items-center space-x-3">
+        <div className="flex justify-between items-center bg-[#fcb900] p-4 rounded-t-xl">
+          <h2 className="text-xl font-bold text-white flex items-center space-x-2">
             <FontAwesomeIcon icon={faTicketAlt} />
-            <span>Detalles del Pedido</span>
+            <span>Detalles del Pedido #{showDetailsModal.idPedido}</span>
           </h2>
           <button
             onClick={() => setShowDetailsModal(null)}
-            className="text-white hover:text-yellow-200 transition"
+            className="text-white hover:text-gray-200 transition"
             aria-label="Cerrar modal"
           >
             <FontAwesomeIcon icon={faTimes} />
@@ -551,30 +675,22 @@ const GestionPedidosIncidentes = ({ onNavigate }) => {
         </div>
 
         {/* Sección ID y Estado */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div className="bg-blue-100 rounded-lg p-4 flex items-center space-x-3 dark:bg-blue-900/30 dark:border dark:border-blue-700">
-            <div className="bg-blue-600 text-white p-2 rounded-full">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="bg-gray-50 rounded-lg p-4 flex items-center space-x-3 dark:bg-gray-700">
+            <div className="bg-[#fcb900] text-white p-2 rounded-full">
               <FontAwesomeIcon icon={faTruck} />
             </div>
             <div>
-              <p className="text-sm text-blue-800 font-medium dark:text-blue-300">
+              <p className="text-sm text-gray-600 font-medium dark:text-gray-300">
                 ID de Rastreo
               </p>
-              <p className="text-lg font-bold text-blue-900 break-all dark:text-blue-200">
+              <p className="text-lg font-bold text-gray-900 break-all dark:text-gray-100">
                 {showDetailsModal.idRastreo}
               </p>
             </div>
           </div>
-          <div className="bg-green-100 rounded-lg p-4 flex items-center space-x-3 dark:bg-green-900/30 dark:border dark:border-green-700 shadow-md">
-            <div
-              className={`rounded-full p-2 transition-colors duration-300 ${
-                showDetailsModal.estado === "Incidente"
-                  ? "bg-red-500"
-                  : showDetailsModal.estado === "Incompleto"
-                  ? "bg-yellow-500"
-                  : "bg-gray-400"
-              }`}
-            >
+          <div className="bg-gray-50 rounded-lg p-4 flex items-center space-x-3 dark:bg-gray-700">
+            <div className="bg-[#fcb900] text-white p-2 rounded-full">
               <FontAwesomeIcon
                 icon={
                   showDetailsModal.estado === "Incidente"
@@ -583,19 +699,18 @@ const GestionPedidosIncidentes = ({ onNavigate }) => {
                     ? faExclamationTriangle
                     : faQuestionCircle
                 }
-                className="text-white text-xs sm:text-sm"
               />
             </div>
             <div>
-              <p className="text-sm font-medium text-gray-900 dark:text-gray-100 select-none">
+              <p className="text-sm font-medium text-gray-600 dark:text-gray-300">
                 Estado del Pedido
               </p>
               <p
-                className={`font-bold text-lg select-text transition-colors duration-300 ${
+                className={`font-bold text-lg ${
                   showDetailsModal.estado === "Incidente"
                     ? "text-red-600 dark:text-red-400"
                     : showDetailsModal.estado === "Incompleto"
-                    ? "text-yellow-600 dark:text-yellow-400"
+                    ? "text-[#fcb900] dark:text-yellow-400"
                     : "text-gray-600 dark:text-gray-400"
                 }`}
               >
@@ -606,40 +721,36 @@ const GestionPedidosIncidentes = ({ onNavigate }) => {
         </div>
 
         {/* Sección Repartidor */}
-        <div className="bg-purple-100 rounded-lg p-4 space-y-3 dark:bg-purple-900/30 dark:border dark:border-purple-700">
-          <h3 className="text-lg font-bold text-purple-900 flex items-center space-x-2 dark:text-purple-300">
-            <FontAwesomeIcon icon={faUserShield} className="text-purple-600" />
+        <div className="bg-gray-50 rounded-lg p-4 space-y-3 dark:bg-gray-700">
+          <h3 className="text-lg font-bold text-gray-900 flex items-center space-x-2 dark:text-gray-100">
+            <FontAwesomeIcon icon={faUserShield} className="text-[#fcb900]" />
             <span>Repartidor Asignado</span>
           </h3>
-          {repartidorData ? (
-            <div className="grid grid-cols-3 gap-4 text-sm text-purple-900 dark:text-purple-300">
+          {showDetailsModal ? (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm text-gray-700 dark:text-gray-300">
               <div>
                 <p className="font-semibold">Nombre</p>
-                <p>{repartidorData.nombre}</p>
+                <p>{showDetailsModal.repartidor.nombre}</p>
               </div>
               <div>
                 <p className="font-semibold">Teléfono</p>
-                <p>{repartidorData.telefono}</p>
-              </div>
-              <div>
-                <p className="font-semibold">Correo</p>
-                <p>{repartidorData.correo}</p>
+                <p>{showDetailsModal.repartidor.telefono}</p>
               </div>
             </div>
           ) : (
-            <p className="text-sm text-purple-700 dark:text-purple-400 italic">
+            <p className="text-sm text-gray-500 dark:text-gray-400 italic">
               No hay repartidor asignado.
             </p>
           )}
         </div>
 
         {/* Sección Información del Cliente */}
-        <div className="bg-gray-100 rounded-lg p-4 space-y-3 dark:bg-gray-800/50 dark:border dark:border-gray-700">
-          <h3 className="text-lg font-bold text-gray-800 flex items-center space-x-2 dark:text-gray-100">
-            <FontAwesomeIcon icon={faUser} className="text-purple-600" />
+        <div className="bg-gray-50 rounded-lg p-4 space-y-3 dark:bg-gray-700">
+          <h3 className="text-lg font-bold text-gray-900 flex items-center space-x-2 dark:text-gray-100">
+            <FontAwesomeIcon icon={faUser} className="text-[#fcb900]" />
             <span>Información del Cliente</span>
           </h3>
-          <div className="grid grid-cols-3 gap-4 text-sm text-gray-700 dark:text-gray-300">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm text-gray-700 dark:text-gray-300">
             <div>
               <p className="font-semibold">Nombre</p>
               <p>{showDetailsModal.cliente.nombre}</p>
@@ -656,14 +767,16 @@ const GestionPedidosIncidentes = ({ onNavigate }) => {
         </div>
 
         {/* Sección Programación del Alquiler */}
-        <div className="bg-indigo-100 rounded-lg p-4 space-y-3 dark:bg-indigo-900/30 dark:border dark:border-indigo-700">
-          <h3 className="text-lg font-bold text-indigo-900 flex items-center space-x-2 dark:text-indigo-200">
-            <FontAwesomeIcon icon={faCalendarAlt} className="text-indigo-600" />
+        <div className="bg-gray-50 rounded-lg p-4 space-y-3 dark:bg-gray-700">
+          <h3 className="text-lg font-bold text-gray-900 flex items-center space-x-2 dark:text-gray-100">
+            <FontAwesomeIcon icon={faCalendarAlt} className="text-[#fcb900]" />
             <span>Programación del Alquiler</span>
           </h3>
-          <div className="grid grid-cols-4 gap-4 text-center text-sm text-indigo-900 dark:text-indigo-300">
-            <div className="bg-white rounded-lg p-3 shadow-sm dark:bg-gray-800 dark:border dark:border-gray-700">
-              <p className="font-semibold mb-1">Fecha Inicio</p>
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 text-center text-sm text-gray-700 dark:text-gray-300">
+            <div className="bg-white rounded-lg p-3 shadow-sm dark:bg-gray-800">
+              <p className="font-semibold mb-1 text-gray-600 dark:text-gray-400">
+                Fecha Inicio
+              </p>
               <p>
                 {new Date(showDetailsModal.fechas.inicio).toLocaleDateString(
                   "es-ES",
@@ -676,8 +789,10 @@ const GestionPedidosIncidentes = ({ onNavigate }) => {
                 )}
               </p>
             </div>
-            <div className="bg-white rounded-lg p-3 shadow-sm dark:bg-gray-800 dark:border dark:border-gray-700">
-              <p className="font-semibold mb-1">Fecha Entrega</p>
+            <div className="bg-white rounded-lg p-3 shadow-sm dark:bg-gray-800">
+              <p className="font-semibold mb-1 text-gray-600 dark:text-gray-400">
+                Fecha Entrega
+              </p>
               <p>
                 {new Date(showDetailsModal.fechas.entrega).toLocaleDateString(
                   "es-ES",
@@ -690,148 +805,174 @@ const GestionPedidosIncidentes = ({ onNavigate }) => {
                 )}
               </p>
             </div>
-            <div className="bg-white rounded-lg p-3 shadow-sm dark:bg-gray-800 dark:border dark:border-gray-700">
-              <p className="font-semibold mb-1 flex items-center justify-center space-x-1">
+            <div className="bg-white rounded-lg p-3 shadow-sm dark:bg-gray-800">
+              <p className="font-semibold mb-1 flex items-center justify-center space-x-1 text-gray-600 dark:text-gray-400">
                 <FontAwesomeIcon icon={faClock} />
                 <span>Hora</span>
               </p>
               <p>{showDetailsModal.fechas.horaAlquiler}</p>
             </div>
-            <div className="bg-white rounded-lg p-3 shadow-sm dark:bg-gray-800 dark:border dark:border-gray-700">
-              <p className="font-semibold mb-1">Días Totales</p>
+            <div className="bg-white rounded-lg p-3 shadow-sm dark:bg-gray-800">
+              <p className="font-semibold mb-1 text-gray-600 dark:text-gray-400">
+                Días Totales
+              </p>
               <p>{showDetailsModal.fechas.diasAlquiler} días</p>
             </div>
           </div>
         </div>
 
         {/* Sección Productos del Pedido */}
-        <div className="bg-yellow-100 rounded-lg p-4 dark:bg-yellow-900/20 border border-yellow-300 dark:border-yellow-700">
-          <h3 className="text-lg font-bold text-yellow-800 flex items-center space-x-2 mb-3 dark:text-yellow-300">
-            <FontAwesomeIcon icon={faBox} />
+        <div className="bg-gray-50 rounded-lg p-4 space-y-4 dark:bg-gray-700 shadow-lg">
+          <h3 className="text-lg font-bold text-gray-900 flex items-center space-x-2 mb-4 dark:text-gray-100">
+            <FontAwesomeIcon icon={faBox} className="text-[#fcb900]" />
             <span>Productos del Pedido</span>
           </h3>
-          <div className="overflow-x-auto rounded-md border border-yellow-300 dark:border-yellow-700">
-            <table className="min-w-full text-sm text-left text-yellow-900 dark:text-yellow-300">
-              <thead className="bg-yellow-200 sticky top-0 dark:bg-yellow-700">
+          <div className="overflow-x-auto rounded-lg border border-gray-200 dark:border-gray-600">
+            <table className="min-w-full text-sm text-left text-gray-700 dark:text-gray-300">
+              <thead className="bg-gradient-to-r from-[#fcb900] to-gray-200 dark:from-gray-800 dark:to-gray-900 sticky top-0">
                 <tr>
-                  <th className="px-4 py-2 font-semibold border border-yellow-300 dark:border-yellow-700">
+                  <th className="px-2 sm:px-4 py-2 font-semibold border-b border-gray-200 dark:border-gray-600">
+                    <FontAwesomeIcon icon={faImage} className="mr-1" /> Imagen
+                  </th>
+                  <th className="px-2 sm:px-4 py-2 font-semibold border-b border-gray-200 dark:border-gray-600">
+                    Producto
+                  </th>
+                  <th className="px-2 sm:px-4 py-2 font-semibold border-b border-gray-200 dark:border-gray-600">
+                    Precio
+                  </th>
+                  <th className="px-2 sm:px-4 py-2 font-semibold border-b border-gray-200 dark:border-gray-600">
                     Cantidad
                   </th>
-                  <th className="px-4 py-2 font-semibold border border-yellow-300 dark:border-yellow-700">
-                    Nombre
-                  </th>
-                  <th className="px-4 py-2 font-semibold border border-yellow-300 dark:border-yellow-700">
-                    Color
-                  </th>
-                  <th className="px-4 py-2 font-semibold border border-yellow-300 dark:border-yellow-700">
-                    Precio Unitario
-                  </th>
-                  <th className="px-4 py-2 font-semibold border border-yellow-300 dark:border-yellow-700">
+                  <th className="px-2 sm:px-4 py-2 font-semibold border-b border-gray-200 dark:border-gray-600">
                     Subtotal
                   </th>
-                  <th className="px-4 py-2 font-semibold border border-yellow-300 dark:border-yellow-700">
+                  <th className="px-2 sm:px-4 py-2 font-semibold border-b border-gray-200 dark:border-gray-600">
                     Estado
                   </th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-yellow-300 dark:divide-yellow-700">
+              <tbody className="divide-y divide-gray-200 dark:divide-gray-600">
                 {showDetailsModal.productos.map((producto, i) => (
-                  <tr
-                    key={i}
-                    className={`${
-                      i % 2 === 0
-                        ? "bg-yellow-50 dark:bg-yellow-900/30"
-                        : "bg-yellow-100 dark:bg-yellow-900/20"
-                    }`}
-                  >
-                    <td className="px-4 py-2 border border-yellow-300 dark:border-yellow-700">
-                      {producto.cantidad}
-                    </td>
-                    <td className="px-4 py-2 border border-yellow-300 dark:border-yellow-700">
-                      {producto.nombre}
-                    </td>
-                    <td className="px-4 py-2 border border-yellow-300 dark:border-yellow-700">
-                      {producto.color}
-                    </td>
-                    <td className="px-4 py-2 border border-yellow-300 dark:border-yellow-700">
-                      ${producto.precioUnitario}
-                    </td>
-                    <td className="px-4 py-2 border border-yellow-300 dark:border-yellow-700">
-                      ${producto.subtotal}
-                    </td>
-                    <td className="px-4 py-2 border border-yellow-300 dark:border-yellow-700">
-                      <span
-                        className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-semibold shadow-sm ${
-                          producto.estado === "Completado"
-                            ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300"
-                            : producto.estado === "Incidente"
-                            ? "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300"
-                            : producto.estado === "Faltante"
-                            ? "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300"
-                            : "bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-300"
-                        }`}
-                      >
-                        {producto.estado}
-                      </span>
-                    </td>
-                  </tr>
+                  <>
+                    <tr
+                      key={i}
+                      className={
+                        i % 2 === 0
+                          ? "bg-white dark:bg-gray-800"
+                          : "bg-gray-50 dark:bg-gray-900"
+                      }
+                    >
+                      <td className="px-2 sm:px-4 py-2 border-b border-gray-200 dark:border-gray-600">
+                        {producto.imagen ? (
+                          <img
+                            src={producto.imagen}
+                            alt={producto.nombre}
+                            className="w-12 h-12 object-cover rounded-md"
+                          />
+                        ) : (
+                          <span className="text-gray-400 dark:text-gray-500">
+                            Sin imagen
+                          </span>
+                        )}
+                      </td>
+                      <td className="px-2 sm:px-4 py-2 border-b border-gray-200 dark:border-gray-600">
+                        {producto.nombre} (ID: {i + 244})
+                      </td>
+                      <td className="px-2 sm:px-4 py-2 border-b border-gray-200 dark:border-gray-600">
+                        ${producto.precioUnitario}
+                      </td>
+                      <td className="px-2 sm:px-4 py-2 border-b border-gray-200 dark:border-gray-600">
+                        {producto.cantidad}
+                      </td>
+                      <td className="px-2 sm:px-4 py-2 border-b border-gray-200 dark:border-gray-600">
+                        ${producto.subtotal}
+                      </td>
+                      <td className="px-2 sm:px-4 py-2 border-b border-gray-200 dark:border-gray-600">
+                        <span
+                          className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-semibold ${
+                            producto.estadoProducto === "Incidente"
+                              ? "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300"
+                              : producto.estadoProducto === "Incompleto"
+                              ? "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300"
+                              : "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300"
+                          }`}
+                        >
+                          {producto.estadoProducto === "Sin estado" ||
+                          producto.estadoProducto === ""
+                            ? "Disponible"
+                            : producto.estadoProducto}
+                        </span>
+                      </td>
+                    </tr>
+                    {producto.observaciones && (
+                      <tr className="bg-gray-50 dark:bg-gray-900">
+                        <td
+                          colSpan="6"
+                          className="px-4 py-1 text-sm text-gray-600 dark:text-gray-300 italic"
+                        >
+                          Observaciones: {producto.observaciones}
+                        </td>
+                      </tr>
+                    )}
+                  </>
                 ))}
               </tbody>
             </table>
           </div>
+          <div className="mt-4 text-right">
+            <p className="text-lg font-bold text-gray-900 dark:text-gray-100">
+              Total: ${showDetailsModal.totalPagar || 0}
+            </p>
+          </div>
         </div>
 
         {/* Sección Información de Pago */}
-        <div className="bg-green-100 rounded-lg p-4 space-y-6 dark:bg-green-900/20 dark:border dark:border-green-700">
-          <div>
-            <h3 className="text-lg font-bold text-green-800 flex items-center space-x-2 mb-3 dark:text-green-300">
-              <FontAwesomeIcon icon={faCreditCard} />
-              <span>Información de Pago</span>
-            </h3>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div>
-                <p className="text-sm font-semibold text-green-700 dark:text-green-400">
-                  Forma de Pago
-                </p>
-                <p className="text-base font-bold text-green-900 dark:text-green-100">
-                  {showDetailsModal.pago.formaPago || "No especificado"}
-                </p>
-              </div>
-              <div>
-                <p className="text-sm font-semibold text-green-700 dark:text-green-400">
-                  Detalles
-                </p>
-                <p className="text-base text-green-900 dark:text-green-100">
-                  {showDetailsModal.pago.detalles || "Sin detalles"}
-                </p>
-              </div>
-              <div>
-                <p className="text-sm font-semibold text-green-700 dark:text-green-400">
-                  Total a Pagar
-                </p>
-                <p className="text-xl font-extrabold text-green-900 dark:text-green-100">
-                  ${showDetailsModal.pago.total}
-                </p>
-              </div>
+        <div className="bg-gray-50 rounded-lg p-4 space-y-6 dark:bg-gray-700">
+          <h3 className="text-lg font-bold text-gray-900 flex items-center space-x-2 dark:text-gray-100">
+            <FontAwesomeIcon icon={faCreditCard} className="text-[#fcb900]" />
+            <span>Información de Pago</span>
+          </h3>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+              <p className="text-sm font-semibold text-gray-600 dark:text-gray-300">
+                Forma de Pago
+              </p>
+              <p className="text-base font-bold text-gray-900 dark:text-gray-100">
+                {showDetailsModal.pago.formaPago || "No especificado"}
+              </p>
+            </div>
+            <div>
+              <p className="text-sm font-semibold text-gray-600 dark:text-gray-300">
+                Total Pagado
+              </p>
+              <p className="text-base font-bold text-gray-900 dark:text-gray-100">
+                ${showDetailsModal.pago.totalPagado || 0}
+              </p>
+            </div>
+            <div>
+              <p className="text-sm font-semibold text-gray-600 dark:text-gray-300">
+                Estado de Pago
+              </p>
+              <p
+                className={`text-base font-bold ${
+                  showDetailsModal.pago.estadoPago === "completado"
+                    ? "text-green-600 dark:text-green-400"
+                    : showDetailsModal.pago.estadoPago === "parcial"
+                    ? "text-yellow-600 dark:text-yellow-400"
+                    : "text-red-600 dark:text-red-400"
+                }`}
+              >
+                {showDetailsModal.pago.estadoPago || "Pendiente"}
+              </p>
             </div>
           </div>
-          <div>
-            <h4 className="text-md font-semibold text-green-800 mb-3 flex items-center space-x-2 dark:text-green-300">
-              <FontAwesomeIcon icon={faMoneyCheckAlt} />
-              <span>Historial de Pagos</span>
-            </h4>
-            {showDetailsModal.pago.pagosRealizados &&
-            showDetailsModal.pago.pagosRealizados.length > 0 ? (
-              <div className="space-y-3 max-h-52 overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-green-500 scrollbar-track-green-100 dark:scrollbar-thumb-green-600 dark:scrollbar-track-green-900 rounded-md border border-green-300 dark:border-green-700 p-4 bg-green-50 dark:bg-green-900/20">
+          {showDetailsModal.pago.pagosRealizados &&
+            showDetailsModal.pago.pagosRealizados.length > 0 && (
+              <div className="space-y-3 max-h-40 overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100 dark:scrollbar-thumb-gray-600 dark:scrollbar-track-gray-800 rounded-md border border-gray-200 dark:border-gray-600 p-4 bg-gray-50 dark:bg-gray-900">
                 {showDetailsModal.pago.pagosRealizados.map((pago, idx) => (
                   <div
                     key={idx}
-                    className="bg-green-100 dark:bg-green-900/50 rounded-lg p-3 text-sm border border-green-200 dark:border-green-700 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between"
-                    title={`${pago.formaPago} / ${pago.metodoPago} - $${
-                      pago.monto ?? "Pendiente"
-                    } (${pago.estadoPago}) - ${new Date(
-                      pago.fechaPago
-                    ).toLocaleString()}`}
+                    className="bg-white dark:bg-gray-800 rounded-lg p-3 text-sm border border-gray-200 dark:border-gray-700 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between"
                   >
                     <div className="flex items-center space-x-2 mb-1 sm:mb-0">
                       <FontAwesomeIcon
@@ -852,12 +993,7 @@ const GestionPedidosIncidentes = ({ onNavigate }) => {
                       {pago.metodoPago && <span>- {pago.metodoPago}</span>}
                     </div>
                     <div className="text-right text-gray-700 dark:text-gray-300 font-mono">
-                      <span>
-                        $
-                        {pago.monto !== null
-                          ? pago.monto.toFixed(2)
-                          : "Pendiente"}
-                      </span>
+                      <span>${pago.monto || "0.00"}</span>
                       <br />
                       <span className="text-xs italic">
                         {new Date(pago.fechaPago).toLocaleString()}
@@ -866,35 +1002,19 @@ const GestionPedidosIncidentes = ({ onNavigate }) => {
                   </div>
                 ))}
               </div>
-            ) : (
-              <p className="text-sm text-green-700 dark:text-green-400 italic p-3 bg-green-100 dark:bg-green-900/20 rounded-lg text-center">
-                No hay pagos registrados aún.
-              </p>
             )}
-            <div className="mt-4 text-center">
-              {Number(showDetailsModal.pago.total) -
-                showDetailsModal.pago.pagosRealizados.reduce(
-                  (acc, pago) => acc + (pago.monto ?? 0),
-                  0
-                ) >
-              0 ? (
-                <p className="text-yellow-700 dark:text-yellow-400 font-semibold">
-                  ⚠️ El cliente aún tiene un saldo pendiente por pagar.
-                </p>
-              ) : (
-                <p className="text-green-700 dark:text-green-400 font-semibold">
-                  ✅ El cliente ha pagado la totalidad del pedido.
-                </p>
-              )}
-            </div>
-          </div>
+          {showDetailsModal.pago.estadoPago === "pendiente" && (
+            <p className="text-yellow-600 dark:text-yellow-400 font-semibold text-center">
+              ⚠️ El cliente aún tiene un saldo pendiente por pagar.
+            </p>
+          )}
         </div>
 
         {/* Botón para Cambiar Estado */}
         <div className="flex justify-end">
           <button
             onClick={() => handleShowUpdateStatusModal(showDetailsModal)}
-            className="flex items-center px-4 py-2 bg-gradient-to-r from-yellow-500 to-yellow-600 text-white rounded-md hover:from-yellow-600 hover:to-yellow-700 transition-all duration-200"
+            className="flex items-center px-4 py-2 bg-[#fcb900] text-white rounded-md hover:bg-[#e0a900] transition-all duration-200"
           >
             <FontAwesomeIcon icon={faTasks} className="mr-2" />
             Cambiar Estado
@@ -905,120 +1025,135 @@ const GestionPedidosIncidentes = ({ onNavigate }) => {
   );
 
   return (
-    <div className="min-h-screen dark:from-gray-900 dark:to-gray-800 p-6 lg:p-8">
+    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white dark:from-gray-900 dark:to-gray-800 p-4 sm:p-6 lg:p-8">
       <div className="max-w-7xl mx-auto">
-        
-
-        <h2 className="text-3xl font-extrabold text-gray-800 dark:text-gray-100 mb-8 flex items-center justify-center">
+        <h2 className="text-2xl sm:text-3xl font-extrabold text-gray-800 dark:text-gray-100 mb-6 sm:mb-8 flex items-center justify-center">
           <FontAwesomeIcon
             icon={faExclamationTriangle}
-            className="mr-3 text-red-500"
+            className="mr-2 sm:mr-3 text-red-500"
           />
-          Gestión de Pedidos con Incidencias
+          <span>Gestión de Pedidos con Incidencias</span>
         </h2>
 
         {loading ? (
           <CustomLoading />
+        ): currentPedidos.length === 0 ? (
+          <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-6 text-center border border-gray-300 dark:border-gray-700">
+            <FontAwesomeIcon
+              icon={faFrown}
+              className="text-4xl text-yellow-500 dark:text-yellow-400 mb-4"
+            />
+            <p className="text-lg font-semibold text-gray-700 dark:text-gray-200">
+              No hay pedidos con incidentes
+            </p>
+            <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">
+              ¡Crea un nuevo pedido usando el botón "Realizar un Pedido"!
+            </p>
+          </div>
         ) : (
           <>
-            <div className="bg-white dark:bg-gray-800 p-6 rounded-xl">
-              <div className="flex flex-col sm:flex-row gap-4 items-center justify-between">
-                <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
-                  <div className="flex items-center space-x-3 w-full sm:w-auto">
-                    <FontAwesomeIcon
-                      icon={faFilter}
-                      className="text-yellow-500"
-                    />
-                    <select
-                      value={filterEstado}
-                      onChange={(e) => {
-                        setFilterEstado(e.target.value);
-                        setCurrentPage(1);
-                      }}
-                      className="p-2 border rounded-lg bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200 w-full sm:w-40 focus:outline-none focus:ring-2 focus:ring-yellow-500 transition-all duration-200"
-                    >
-                      {estadosDisponibles.map((estado) => (
-                        <option key={estado} value={estado}>
-                          {estado}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                  <div className="flex items-center space-x-3 w-full sm:w-auto">
-                    <FontAwesomeIcon
-                      icon={faSearch}
-                      className="text-yellow-500"
-                    />
-                    <input
-                      type="text"
-                      placeholder="Buscar por ID, cliente o dirección..."
-                      value={searchTerm}
-                      onChange={(e) => {
-                        setSearchTerm(e.target.value);
-                        setCurrentPage(1);
-                      }}
-                      className="p-2 border rounded-lg bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200 w-full sm:w-64 focus:outline-none focus:ring-2 focus:ring-yellow-500 transition-all duration-200"
-                    />
-                  </div>
-                  <div className="flex items-center space-x-3 w-full sm:w-auto">
-                    <FontAwesomeIcon
-                      icon={faCalendarAlt}
-                      className="text-yellow-500"
-                    />
-                    <input
-                      type="date"
-                      value={dateRange.start}
-                      onChange={(e) =>
-                        setDateRange({ ...dateRange, start: e.target.value })
-                      }
-                      className="p-2 border rounded-lg bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200 w-full sm:w-36 focus:outline-none focus:ring-2 focus:ring-yellow-500 transition-all duration-200"
-                    />
-                    <span className="text-gray-500 dark:text-gray-400">-</span>
-                    <input
-                      type="date"
-                      value={dateRange.end}
-                      onChange={(e) =>
-                        setDateRange({ ...dateRange, end: e.target.value })
-                      }
-                      className="p-2 border rounded-lg bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200 w-full sm:w-36 focus:outline-none focus:ring-2 focus:ring-yellow-500 transition-all duration-200"
-                    />
+            <div className="bg-white dark:bg-gray-800 p-4 sm:p-6 rounded-xl shadow-md">
+              <div className="overflow-x-auto">
+                <div className="flex flex-col sm:flex-row gap-3 items-center w-full min-w-[600px] sm:min-w-0">
+                  <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
+                    <div className="flex items-center space-x-2 w-full sm:w-auto min-w-[180px]">
+                      <FontAwesomeIcon
+                        icon={faFilter}
+                        className="text-[#fcb900]"
+                      />
+                      <select
+                        value={filterEstado}
+                        onChange={(e) => {
+                          setFilterEstado(e.target.value);
+                          setCurrentPage(1);
+                        }}
+                        className="p-2 border rounded-lg bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200 w-full sm:w-40 focus:outline-none focus:ring-2 focus:ring-[#fcb900] transition-all duration-200"
+                      >
+                        {estadosDisponibles.map((estado) => (
+                          <option key={estado} value={estado}>
+                            {estado}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                    <div className="flex items-center space-x-2 w-full sm:w-auto min-w-[220px]">
+                      <FontAwesomeIcon
+                        icon={faSearch}
+                        className="text-[#fcb900]"
+                      />
+                      <input
+                        type="text"
+                        placeholder="Buscar por ID, cliente o dirección..."
+                        value={searchTerm}
+                        onChange={(e) => {
+                          setSearchTerm(e.target.value);
+                          setCurrentPage(1);
+                        }}
+                        className="p-2 border rounded-lg bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200 w-full sm:w-64 focus:outline-none focus:ring-2 focus:ring-[#fcb900] transition-all duration-200"
+                      />
+                    </div>
+                    <div className="flex items-center space-x-2 w-full sm:w-auto min-w-[260px]">
+                      <FontAwesomeIcon
+                        icon={faCalendarAlt}
+                        className="text-[#fcb900]"
+                      />
+                      <input
+                        type="date"
+                        value={dateRange.start}
+                        onChange={(e) =>
+                          setDateRange({ ...dateRange, start: e.target.value })
+                        }
+                        className="p-2 border rounded-lg bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200 w-full sm:w-36 focus:outline-none focus:ring-2 focus:ring-[#fcb900] transition-all duration-200"
+                      />
+                      <span className="text-gray-500 dark:text-gray-400 hidden sm:inline mx-1">
+                        -
+                      </span>
+                      <input
+                        type="date"
+                        value={dateRange.end}
+                        onChange={(e) =>
+                          setDateRange({ ...dateRange, end: e.target.value })
+                        }
+                        className="p-2 border rounded-lg bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200 w-full sm:w-36 focus:outline-none focus:ring-2 focus:ring-[#fcb900] transition-all duration-200"
+                      />
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
 
-            <div className="overflow-x-auto rounded-xl shadow-lg">
+            <div className="overflow-x-auto mt-6 rounded-xl shadow-lg">
               <table className="min-w-full bg-white dark:bg-gray-800">
-                <thead className="bg-gradient-to-r from-red-500 to-yellow-600">
+                <thead className="bg-[#fcb900]">
                   <tr>
-                    <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-tight text-white">
+                    <th className="px-2 sm:px-4 py-2 text-left text-xs sm:text-sm font-semibold uppercase tracking-tight text-white">
                       <FontAwesomeIcon icon={faTruck} className="mr-1" />
                       <span className="hidden sm:inline">ID Rastreo</span>
                       <span className="sm:hidden">ID</span>
                     </th>
-                    <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-tight text-white">
+                    <th className="px-2 sm:px-4 py-2 text-left text-xs sm:text-sm font-semibold uppercase tracking-tight text-white">
                       <FontAwesomeIcon icon={faUser} className="mr-1" /> Cliente
                     </th>
-                    <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-tight text-white hidden sm:table-cell">
+                    <th className="px-2 sm:px-4 py-2 text-left text-xs sm:text-sm font-semibold uppercase tracking-tight text-white hidden sm:table-cell">
                       <FontAwesomeIcon icon={faPhone} className="mr-1" />
                       Teléfono
                     </th>
-                    <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-tight text-white hidden md:table-cell">
+                    <th className="px-2 sm:px-4 py-2 text-left text-xs sm:text-sm font-semibold uppercase tracking-tight text-white hidden md:table-cell">
                       <FontAwesomeIcon icon={faMapMarkerAlt} className="mr-1" />
                       Dirección
                     </th>
-                    <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-tight text-white hidden sm:table-cell">
+                    <th className="px-2 sm:px-4 py-2 text-left text-xs sm:text-sm font-semibold uppercase tracking-tight text-white hidden sm:table-cell">
                       <FontAwesomeIcon icon={faClock} className="mr-1" /> Días
                     </th>
-                    <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-tight text-white">
+                    <th className="px-2 sm:px-4 py-2 text-left text-xs sm:text-sm font-semibold uppercase tracking-tight text-white">
                       <FontAwesomeIcon icon={faDollarSign} className="mr-1" />
                       Total
                     </th>
-                    <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-tight text-white">
+                    <th className="px-2 sm:px-4 py-2 text-left text-xs sm:text-sm font-semibold uppercase tracking-tight text-white">
                       <FontAwesomeIcon icon={faCheckCircle} className="mr-1" />
                       Estado
                     </th>
-                    <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-tight text-white">
+                    <th className="px-2 sm:px-4 py-2 text-left text-xs sm:text-sm font-semibold uppercase tracking-tight text-white">
                       Acciones
                     </th>
                   </tr>
@@ -1033,27 +1168,27 @@ const GestionPedidosIncidentes = ({ onNavigate }) => {
                           : "bg-white dark:bg-gray-800"
                       } hover:bg-gray-100 dark:hover:bg-gray-700`}
                     >
-                      <td className="px-4 py-3 text-sm font-medium text-gray-800 dark:text-gray-200">
+                      <td className="px-2 sm:px-4 py-2 text-sm font-medium text-gray-800 dark:text-gray-200 truncate">
                         {pedido.idRastreo}
                       </td>
-                      <td className="px-4 py-3 text-sm font-medium text-gray-800 dark:text-gray-200">
+                      <td className="px-2 sm:px-4 py-2 text-sm font-medium text-gray-800 dark:text-gray-200 truncate">
                         {pedido.cliente.nombre || "No especificado"}
                       </td>
-                      <td className="px-4 py-3 text-sm font-medium text-gray-800 dark:text-gray-200 hidden sm:table-cell">
+                      <td className="px-2 sm:px-4 py-2 text-sm font-medium text-gray-800 dark:text-gray-200 truncate hidden sm:table-cell">
                         {pedido.cliente.telefono || "N/A"}
                       </td>
-                      <td className="px-4 py-3 text-sm font-medium text-gray-800 dark:text-gray-200 hidden md:table-cell">
+                      <td className="px-2 sm:px-4 py-2 text-sm font-medium text-gray-800 dark:text-gray-200 truncate hidden md:table-cell">
                         {pedido.cliente.direccion?.slice(0, 20) || "N/A"}...
                       </td>
-                      <td className="px-4 py-3 text-sm font-medium text-gray-800 dark:text-gray-200 hidden sm:table-cell">
+                      <td className="px-2 sm:px-4 py-2 text-sm font-medium text-gray-800 dark:text-gray-200 truncate hidden sm:table-cell">
                         {pedido.fechas.diasAlquiler}
                       </td>
-                      <td className="px-4 py-3 text-sm font-medium text-gray-800 dark:text-gray-200">
+                      <td className="px-2 sm:px-4 py-2 text-sm font-medium text-gray-800 dark:text-gray-200">
                         <span className="text-green-600 dark:text-green-400">
-                          ${pedido.pago.total}
+                          ${pedido.totalPagar}
                         </span>
                       </td>
-                      <td className="px-4 py-3 text-sm text-gray-800 dark:text-gray-200">
+                      <td className="px-2 sm:px-4 py-2 text-sm text-gray-800 dark:text-gray-200">
                         <span
                           className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-semibold shadow-sm select-none ${
                             pedido.estado === "Incidente"
@@ -1076,7 +1211,7 @@ const GestionPedidosIncidentes = ({ onNavigate }) => {
                           {pedido.estado}
                         </span>
                       </td>
-                      <td className="px-4 py-3 text-sm flex space-x-3">
+                      <td className="px-2 sm:px-4 py-2 text-sm flex space-x-2">
                         <button
                           onClick={() => handleShowDetails(pedido)}
                           className="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 transition-all duration-200 p-2 rounded-full hover:bg-blue-100 dark:hover:bg-blue-900"
@@ -1091,20 +1226,6 @@ const GestionPedidosIncidentes = ({ onNavigate }) => {
                         >
                           <FontAwesomeIcon icon={faMapMarkerAlt} size="lg" />
                         </button>
-                        <button
-                          onClick={() => handleShowTicketModal(pedido)}
-                          className="text-orange-600 hover:text-orange-800 dark:text-orange-400 dark:hover:text-orange-300 transition-all duration-200 p-2 rounded-full hover:bg-orange-100 dark:hover:bg-orange-900"
-                          title="Generar Ticket"
-                        >
-                          <FontAwesomeIcon icon={faTicketAlt} size="lg" />
-                        </button>
-                        <button
-                          onClick={() => handleShowUpdateStatusModal(pedido)}
-                          className="text-yellow-600 hover:text-yellow-800 dark:text-yellow-400 dark:hover:text-yellow-300 transition-all duration-200 p-2 rounded-full hover:bg-yellow-100 dark:hover:bg-yellow-900"
-                          title="Cambiar Estado"
-                        >
-                          <FontAwesomeIcon icon={faTasks} size="lg" />
-                        </button>
                       </td>
                     </tr>
                   ))}
@@ -1112,20 +1233,20 @@ const GestionPedidosIncidentes = ({ onNavigate }) => {
               </table>
             </div>
 
-            <div className="flex flex-col sm:flex-row justify-between items-center mt-6 gap-4">
+            <div className="flex flex-col sm:flex-row justify-between items-center mt-4 sm:mt-6 gap-4">
               <p className="text-sm text-gray-600 dark:text-gray-300">
                 Mostrando {indexOfFirstOrder + 1} -{" "}
                 {Math.min(indexOfLastOrder, filteredPedidos.length)} de{" "}
                 {filteredPedidos.length} pedidos
               </p>
-              <div className="flex space-x-2">
+              <div className="flex space-x-2 flex-wrap justify-center">
                 <button
                   onClick={() => handlePageChange(currentPage - 1)}
                   disabled={currentPage === 1}
-                  className={`px-3 py-1 rounded-lg ${
+                  className={`px-2 sm:px-3 py-1 rounded-lg ${
                     currentPage === 1
                       ? "bg-gray-300 text-gray-500 cursor-not-allowed dark:bg-gray-600"
-                      : "bg-yellow-500 text-white hover:bg-yellow-600 dark:hover:bg-yellow-600 transition-all duration-200"
+                      : "bg-[#fcb900] text-white hover:bg-[#e0a900] dark:hover:bg-[#e0a900] transition-all duration-200"
                   }`}
                 >
                   <FontAwesomeIcon icon={faChevronLeft} />
@@ -1135,9 +1256,9 @@ const GestionPedidosIncidentes = ({ onNavigate }) => {
                     <button
                       key={page}
                       onClick={() => handlePageChange(page)}
-                      className={`px-3 py-1 rounded-lg ${
+                      className={`px-2 sm:px-3 py-1 rounded-lg ${
                         currentPage === page
-                          ? "bg-yellow-600 text-white dark:bg-yellow-600"
+                          ? "bg-[#fcb900] text-white dark:bg-[#fcb900]"
                           : "bg-gray-200 text-gray-700 hover:bg-gray-300 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600 transition-all duration-200"
                       }`}
                     >
@@ -1148,26 +1269,15 @@ const GestionPedidosIncidentes = ({ onNavigate }) => {
                 <button
                   onClick={() => handlePageChange(currentPage + 1)}
                   disabled={currentPage === totalPages}
-                  className={`px-3 py-1 rounded-lg ${
+                  className={`px-2 sm:px-3 py-1 rounded-lg ${
                     currentPage === totalPages
                       ? "bg-gray-300 text-gray-500 cursor-not-allowed dark:bg-gray-600"
-                      : "bg-yellow-500 text-white hover:bg-yellow-600 dark:hover:bg-yellow-600 transition-all duration-200"
+                      : "bg-[#fcb900] text-white hover:bg-[#e0a900] dark:hover:bg-[#e0a900] transition-all duration-200"
                   }`}
                 >
                   <FontAwesomeIcon icon={faChevronRight} />
                 </button>
               </div>
-            </div>
-
-            <div className="mt-6 flex flex-col sm:flex-row justify-center gap-3">
-              <button
-                onClick={() => onNavigate("Pedidos General Dashboard")}
-                className="flex items-center px-3 py-1.5 text-sm bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-md shadow-sm hover:from-blue-700 hover:to-blue-800 transition-all duration-200"
-              >
-                <FontAwesomeIcon icon={faChartBar} className="mr-1" />
-                <span className="hidden sm:inline">Dashboard</span>
-                <span className="sm:hidden">Pedidos</span>
-              </button>
             </div>
 
             {showTimelineModal && renderTimelineModal()}
