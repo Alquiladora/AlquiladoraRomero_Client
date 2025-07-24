@@ -23,11 +23,13 @@ import CustomLoading from "../../../components/spiner/SpinerGlobal";
 
 // Componente para la barra de probabilidad
 const ProbabilityBar = ({ probability }) => {
+
+    console.log("dATOS RECIBIDOS DE PROBABILIDAD", probability)
   const percentage = (probability * 100).toFixed(2);
   let barColor = "bg-green-500";
-  if (probability > 0.75) {
+  if (probability > 0.85) {
     barColor = "bg-red-500";
-  } else if (probability > 0.4) {
+  } else {
     barColor = "bg-yellow-500";
   }
 
@@ -62,6 +64,7 @@ const PedidosConPrediccion = () => {
           withCredentials: true,
         });
         const result = response.data;
+        console.log("rESULATFF", response)
 
         if (result.success) {
           setPedidos(result.data);

@@ -56,6 +56,7 @@ import {
   faHeadset,         // Para atención al cliente
   faClipboardCheck,  // Para auditoría de datos
 } from "@fortawesome/free-solid-svg-icons";
+import PagosGeneral from "../pagos/Pagos";
 
 
 import GestionPedidosDevueltos from "../gestion-pedidos/PedidosDevueltos";
@@ -318,7 +319,7 @@ const MenuHomeAdmin = () => {
         { icon: faTasks, label: "Gestion Pedidos" },
        { icon: faExclamationTriangle, label: "Gestion Pedidos Inicidentes" },
         { icon: faUndoAlt, label: "Pedidos devueltos" },
-          { icon: faUndoAlt, label: "Predecir cancelación"}
+          
 
 
 
@@ -336,15 +337,16 @@ const MenuHomeAdmin = () => {
       items: [
         { icon: faMoneyCheckAlt, label: "Gestión de Pagos" },  // Gestión de pagos
         { icon: faDollarSign, label: "Actualizacion Precios" },
+        { icon: faDollarSign, label: "Pagos" },
       ],
     },
-     {
-    title: "Notificaciones y Soporte",
-    items: [
-      { icon: faBell, label: "Gestión de Notificaciones" },  // Notificaciones
-      { icon: faHeadset, label: "Atención al Cliente" },     // Atención al cliente
-    ],
-  },
+  //    {
+  //   title: "Notificaciones y Soporte",
+  //   items: [
+  //     // { icon: faBell, label: "Gestión de Notificaciones" },  // Notificaciones
+  //     // { icon: faHeadset, label: "Atención al Cliente" },     // Atención al cliente
+  //   ],
+  // },
 
     {
       title: "Horarios",
@@ -356,8 +358,8 @@ const MenuHomeAdmin = () => {
     {
       title: "Seguridad",
      items: [
-      { icon: faDatabase, label: "Resguardo de Datos" },   
-      { icon: faClipboardCheck, label: "Auditoría de Datos" },
+      // { icon: faDatabase, label: "Resguardo de Datos" },   
+      // { icon: faClipboardCheck, label: "Auditoría de Datos" },
       { icon: faUsers, label: "Dasboard Usuarios" },
     ],
   },
@@ -405,6 +407,8 @@ const MenuHomeAdmin = () => {
         return <AsignacionPedidosV2 />;
       case "Productos":
         return <ProductTable />;
+           case "Pagos":
+        return <PagosGeneral />;
       case "Pedidos Manuales":
         return (
           <PedidosManuales onNavigate={handleNavigate} setPedidos={setPedidos} />
@@ -632,7 +636,7 @@ const MenuHomeAdmin = () => {
             </div>
 
             {/* Botón de notificaciones */}
-            <button
+            {/* <button
               className="relative p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors flex-shrink-0"
               aria-label="Notifications"
             >
@@ -652,7 +656,7 @@ const MenuHomeAdmin = () => {
               <span className="absolute -top-1 -right-1 w-4 h-4 sm:w-5 sm:h-5 bg-red-500 text-white text-xs font-semibold rounded-full flex items-center justify-center">
                 3
               </span>
-            </button>
+            </button> */}
           </div>
         </header>
 

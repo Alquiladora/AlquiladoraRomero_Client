@@ -1233,52 +1233,63 @@ const handleUpdateStatus = async (idPedido, newStatus, productUpdates = []) => {
               </table>
             </div>
 
-            <div className="flex flex-col sm:flex-row justify-between items-center mt-4 sm:mt-6 gap-4">
-              <p className="text-sm text-gray-600 dark:text-gray-300">
-                Mostrando {indexOfFirstOrder + 1} -{" "}
-                {Math.min(indexOfLastOrder, filteredPedidos.length)} de{" "}
-                {filteredPedidos.length} pedidos
-              </p>
-              <div className="flex space-x-2 flex-wrap justify-center">
-                <button
-                  onClick={() => handlePageChange(currentPage - 1)}
-                  disabled={currentPage === 1}
-                  className={`px-2 sm:px-3 py-1 rounded-lg ${
-                    currentPage === 1
-                      ? "bg-gray-300 text-gray-500 cursor-not-allowed dark:bg-gray-600"
-                      : "bg-[#fcb900] text-white hover:bg-[#e0a900] dark:hover:bg-[#e0a900] transition-all duration-200"
-                  }`}
-                >
-                  <FontAwesomeIcon icon={faChevronLeft} />
-                </button>
-                {Array.from({ length: totalPages }, (_, i) => i + 1).map(
-                  (page) => (
-                    <button
-                      key={page}
-                      onClick={() => handlePageChange(page)}
-                      className={`px-2 sm:px-3 py-1 rounded-lg ${
-                        currentPage === page
-                          ? "bg-[#fcb900] text-white dark:bg-[#fcb900]"
-                          : "bg-gray-200 text-gray-700 hover:bg-gray-300 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600 transition-all duration-200"
-                      }`}
-                    >
-                      {page}
-                    </button>
-                  )
-                )}
-                <button
-                  onClick={() => handlePageChange(currentPage + 1)}
-                  disabled={currentPage === totalPages}
-                  className={`px-2 sm:px-3 py-1 rounded-lg ${
-                    currentPage === totalPages
-                      ? "bg-gray-300 text-gray-500 cursor-not-allowed dark:bg-gray-600"
-                      : "bg-[#fcb900] text-white hover:bg-[#e0a900] dark:hover:bg-[#e0a900] transition-all duration-200"
-                  }`}
-                >
-                  <FontAwesomeIcon icon={faChevronRight} />
-                </button>
-              </div>
-            </div>
+           <div className="flex flex-col sm:flex-row justify-between items-center mt-4 sm:mt-6 gap-4">
+    <p className="text-sm text-gray-600 dark:text-gray-300">
+      Mostrando {indexOfFirstOrder + 1} - {Math.min(indexOfLastOrder, filteredPedidos.length)} de {filteredPedidos.length} pedidos
+    </p>
+    <div className="flex space-x-2 flex-wrap justify-center">
+      <button
+        onClick={() => handlePageChange(currentPage - 1)}
+        disabled={currentPage === 1}
+        className={`px-2 sm:px-3 py-1 rounded-lg ${
+          currentPage === 1
+            ? "bg-gray-300 text-gray-500 cursor-not-allowed dark:bg-gray-600"
+            : "bg-[#fcb900] text-white hover:bg-[#e0a900] dark:hover:bg-[#e0a900] transition-all duration-200"
+        }`}
+      >
+        <FontAwesomeIcon icon={faChevronLeft} />
+      </button>
+      {(() => {
+        const maxVisiblePages = 5;
+        const halfVisible = Math.floor(maxVisiblePages / 2);
+        let startPage = Math.max(1, currentPage - halfVisible);
+        let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
+
+        if (endPage - startPage + 1 < maxVisiblePages) {
+          startPage = Math.max(1, endPage - maxVisiblePages + 1);
+        }
+
+        const pages = [];
+        for (let i = startPage; i <= endPage; i++) {
+          pages.push(
+            <button
+              key={i}
+              onClick={() => handlePageChange(i)}
+              className={`px-2 sm:px-3 py-1 rounded-lg ${
+                currentPage === i
+                  ? "bg-[#fcb900] text-white dark:bg-[#fcb900]"
+                  : "bg-gray-200 text-gray-700 hover:bg-gray-300 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600 transition-all duration-200"
+              }`}
+            >
+              {i}
+            </button>
+          );
+        }
+        return pages;
+      })()}
+      <button
+        onClick={() => handlePageChange(currentPage + 1)}
+        disabled={currentPage === totalPages}
+        className={`px-2 sm:px-3 py-1 rounded-lg ${
+          currentPage === totalPages
+            ? "bg-gray-300 text-gray-500 cursor-not-allowed dark:bg-gray-600"
+            : "bg-[#fcb900] text-white hover:bg-[#e0a900] dark:hover:bg-[#e0a900] transition-all duration-200"
+        }`}
+      >
+        <FontAwesomeIcon icon={faChevronRight} />
+      </button>
+    </div>
+  </div>
 
             {showTimelineModal && renderTimelineModal()}
             {showDetailsModal && renderDetailsModal()}

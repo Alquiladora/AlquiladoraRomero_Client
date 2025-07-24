@@ -184,9 +184,9 @@ const HeaderChil1 = () => {
         <div className="flex items-center space-x-3 lg:space-x-5">
           
           {/* Search Bar - Hidden on mobile */}
-          <div className="hidden lg:block">
+          {/* <div className="hidden lg:block">
             <SearchBar />
-          </div>
+          </div> */}
           
           {/* User Profile/Login */}
           <div className="hidden sm:block">
@@ -236,7 +236,7 @@ const HeaderChil1 = () => {
           </div>
 
           {/* Help Button */}
-          <button
+          {/* <button
             onClick={() => setIsChatboxOpen(!isChatboxOpen)}
             className="hidden lg:flex items-center group text-gray-900 dark:text-gray-100 hover:text-blue-500 transition-all duration-300"
           >
@@ -244,7 +244,7 @@ const HeaderChil1 = () => {
             <span className="absolute top-full mt-2 left-1/2 transform -translate-x-1/2 text-xs bg-white dark:bg-gray-800 px-2 py-1 rounded-md shadow-md border border-gray-200 dark:border-gray-700 opacity-0 group-hover:opacity-100 transition-opacity duration-300 whitespace-nowrap">
               Ayuda
             </span>
-          </button>
+          </button> */}
 
           {/* Theme Toggle */}
           <div className="hidden md:flex items-center">

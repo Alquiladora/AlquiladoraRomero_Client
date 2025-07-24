@@ -715,7 +715,7 @@ const GestionRepartidores = () => {
                 >
                   Historial
                 </button>
-                <button
+                {/* <button
                   onClick={() => setOpenDialog("reviews")}
                   className={`py-2 px-4 sm:px-6 text-sm font-semibold rounded-full transition-all ${
                     openDialog === "reviews"
@@ -724,7 +724,7 @@ const GestionRepartidores = () => {
                   }`}
                 >
                   Reseñas
-                </button>
+                </button> */}
               </div>
             </div>
 

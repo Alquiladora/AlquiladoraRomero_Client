@@ -182,7 +182,7 @@ const IconoPerfil = () => {
           </span>
         </MenuItem>
 
-        <MenuItem
+        {/* <MenuItem
           onClick={handleMenuClose}
           component={Link}
           to="/cliente/notificaciones"
@@ -192,8 +192,8 @@ const IconoPerfil = () => {
           <span className="text-gray-700 dark:text-gray-200 font-medium text-sm">
             Notificaciones
           </span>
-        </MenuItem>
-
+        </MenuItem> */}
+{/* 
         <MenuItem
           onClick={handleMenuClose}
           component={Link}
@@ -204,7 +204,7 @@ const IconoPerfil = () => {
           <span className="text-gray-700 dark:text-gray-200 font-medium text-sm">
             Gestión de Comentarios
           </span>
-        </MenuItem>
+        </MenuItem> */}
 
         <Divider className="my-2 border-gray-200 dark:border-gray-700" />
 

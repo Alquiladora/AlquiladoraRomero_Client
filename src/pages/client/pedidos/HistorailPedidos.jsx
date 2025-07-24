@@ -1,259 +1,354 @@
-import React, { useEffect, useState, useCallback, useRef } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import api from "../../../utils/AxiosConfig";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import { useAuth } from "../../../hooks/ContextAuth";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import {
+  faChevronDown,
+  faBoxOpen,
+  faChevronLeft,
+  faChevronRight,
+  faSpinner,
+  faExclamationTriangle,
+  faTruck,
+} from "@fortawesome/free-solid-svg-icons";
 
-// Order Card Component
-const OrderCard = ({ order, index, onTrackOrder }) => {
-  const [isOpen, setIsOpen] = useState(false);
-  const cardRef = useRef(null);
+// ===================================================================
+// SUBCOMPONENTE: Tarjeta de Pedido
+// ===================================================================
+const OrderCard = ({ order }) => {
+  const [isDetailsOpen, setIsDetailsOpen] = useState(false);
 
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            entry.target.classList.add("animate-in");
-            observer.unobserve(entry.target);
-          }
-        });
-      },
-      { threshold: 0.1 }
-    );
-
-    if (cardRef.current) observer.observe(cardRef.current);
-    return () => {
-      if (cardRef.current) observer.unobserve(cardRef.current);
-    };
-  }, []);
-
-  const statusStyles = {
-    Entregado: { icon: "fas fa-check", color: "text-green-600", bg: "bg-green-50" },
-    Pendiente: { icon: "fas fa-clock", color: "text-yellow-600", bg: "bg-yellow-50" },
-    Cancelado: { icon: "fas fa-ban", color: "text-red-600", bg: "bg-red-50" },
+  const statusConfig = {
+    Confirmado: { color: "blue-500", icon: faSpinner },
+    Pagado: { color: "blue-500", icon: faSpinner },
+    "En alquiler": { color: "green-500", icon: faBoxOpen },
+    Recogiendo: { color: "orange-500", icon: faTruck },
+    Devuelto: { color: "purple-500", icon: faBoxOpen },
+    Finalizado: { color: "gray-500", icon: faSpinner },
+    Cancelado: { color: "red-500", icon: faExclamationTriangle },
+    Incidente: { color: "yellow-500", icon: faExclamationTriangle },
+    Procesando: { color: "indigo-500", icon: faSpinner },
+    default: { color: "gray-400", icon: faSpinner },
   };
 
-  const status = statusStyles[order.estado] || {
-    icon: "fas fa-info",
-    color: "text-gray-500",
-    bg: "bg-gray-50",
-  };
-
-  // Convertir total a número si es necesario
-  const total = typeof order.pago.total === "string" ? parseFloat(order.pago.total) : order.pago.total;
+  const currentStatus = statusConfig[order.estado] || statusConfig.default;
 
   return (
-    <div
-      ref={cardRef}
-      className={`bg-white dark:bg-gray-800 rounded-lg shadow-md p-5 mb-6 transition-all duration-300 hover:shadow-lg order-card`}
-    >
-      <div className="flex items-center justify-between mb-4">
-        <div className="flex items-center space-x-3">
-          <div className={`w-10 h-10 rounded-full ${status.bg} flex items-center justify-center ${status.color}`}>
-            <i className={`${status.icon} text-lg`}></i>
+    <div className="bg-white dark:bg-gray-800 rounded-xl shadow-md border border-gray-200 dark:border-gray-700 overflow-hidden transition-all duration-300 hover:shadow-lg">
+      <div className="p-4 sm:p-5 border-b border-gray-200 dark:border-gray-700 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 items-center">
+        <div>
+          <p className="text-xs text-gray-500 dark:text-gray-400 font-semibold uppercase">Pedido</p>
+          <p className="text-sm font-bold text-gray-900 dark:text-white">{order.idRastreo}</p>
+        </div>
+        <div>
+          <p className="text-xs text-gray-500 dark:text-gray-400 font-semibold uppercase">Fecha</p>
+          <p className="text-sm text-gray-600 dark:text-gray-300">
+            {format(new Date(order.fechas.registro), "dd MMM yyyy", { locale: es })}
+          </p>
+        </div>
+        <div>
+          <p className="text-xs text-gray-500 dark:text-gray-400 font-semibold uppercase">Total</p>
+          <p className="text-sm font-bold text-gray-900 dark:text-white">${order.pago.total.toFixed(2)}</p>
+        </div>
+        <div>
+          <span
+            className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-${currentStatus.color}/10 text-${currentStatus.color} capitalize hover:bg-${currentStatus.color}/20 transition-colors duration-200`}
+          >
+            <FontAwesomeIcon icon={currentStatus.icon} className="mr-1.5 w-3.5 h-3.5" />
+            {order.estado}
+          </span>
+        </div>
+      </div>
+      <div className="p-4 sm:p-5">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
+          <div>
+            <p className="font-semibold text-gray-700 dark:text-gray-200">Periodo de Alquiler:</p>
+            <p className="text-gray-600 dark:text-gray-300">
+              {format(new Date(order.fechas.inicioAlquiler), "EEE, dd 'de' MMMM", { locale: es })} -{" "}
+              {format(new Date(order.fechas.entregaAlquiler), "EEE, dd 'de' MMMM, yyyy", { locale: es })}
+            </p>
           </div>
           <div>
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-              Pedido #{order.idPedido}
-            </h3>
-            <p className="text-sm text-gray-500 dark:text-gray-400">{order.idRastreo}</p>
+            <p className="font-semibold text-gray-700 dark:text-gray-200">Dirección:</p>
+            <p className="text-gray-600 dark:text-gray-300">{order.cliente.direccion}</p>
           </div>
         </div>
-        <span className={`px-3 py-1 text-sm font-medium rounded-full ${status.bg} ${status.color}`}>
-          {order.estado}
-        </span>
-      </div>
-
-      <div className="text-sm text-gray-600 dark:text-gray-300 space-y-2">
-        <p><strong>Fecha:</strong> {format(new Date(order.fechas.registro), "dd 'de' MMMM 'de' yyyy", { locale: es })}</p>
-        <p><strong>Periodo:</strong> {format(new Date(order.fechas.inicio), "dd/MM/yyyy")} - {format(new Date(order.fechas.entrega), "dd/MM/yyyy")}</p>
-        <p><strong>Total:</strong> ${isNaN(total) ? "0.00" : total.toFixed(2)} ({order.pago.formaPago || "N/A"})</p>
-      </div>
-
-      <div className="mt-4 flex space-x-4">
         <button
-          onClick={() => setIsOpen(!isOpen)}
-          className="text-indigo-600 dark:text-indigo-400 font-medium hover:underline flex items-center"
+          onClick={() => setIsDetailsOpen(!isDetailsOpen)}
+          className="mt-4 text-indigo-600 dark:text-indigo-400 font-medium text-sm flex items-center hover:text-indigo-700 dark:hover:text-indigo-300 transition-colors duration-200"
+          aria-expanded={isDetailsOpen}
         >
-          <i className={`fas fa-box mr-2 ${isOpen ? "rotate-180" : ""} transition-transform duration-200`}></i>
-          {isOpen ? "Ocultar" : "Productos"}
-        </button>
-        <button
-          onClick={() => onTrackOrder(order.idRastreo)}
-          className="text-teal-600 dark:text-teal-400 font-medium hover:underline flex items-center"
-        >
-          <i className="fas fa-truck mr-2"></i>Rastrear
+          <FontAwesomeIcon icon={faBoxOpen} className="mr-2 w-4 h-4" />
+          {isDetailsOpen ? "Ocultar Productos" : "Ver Productos"}
+          <FontAwesomeIcon
+            icon={faChevronDown}
+            className={`ml-2 w-3 h-3 transition-transform duration-300 ${isDetailsOpen ? "rotate-180" : ""}`}
+          />
         </button>
       </div>
-
-      {isOpen && (
-        <div className="mt-4 p-4 bg-gray-50 dark:bg-gray-700 rounded-md">
-          <h4 className="text-sm font-semibold text-gray-900 dark:text-white mb-2">Productos</h4>
-          <ul className="space-y-2 text-sm text-gray-600 dark:text-gray-300">
+      <div
+        className={`overflow-hidden transition-all duration-300 ease-in-out ${
+          isDetailsOpen ? "max-h-[500px] opacity-100" : "max-h-0 opacity-0"
+        }`}
+      >
+        <div className="p-4 sm:p-5 bg-gray-50 dark:bg-gray-900/50 border-t border-gray-200 dark:border-gray-700">
+          <h4 className="font-semibold text-gray-800 dark:text-white mb-3 text-sm">Productos Alquilados ({order.productos.length})</h4>
+          <ul className="space-y-2 text-sm">
             {order.productos.map((producto, idx) => (
-              <li key={idx} className="flex justify-between">
-                <span>{producto.cantidad}x {producto.nombre} ({producto.color})</span>
-                <span>${(typeof producto.subtotal === "string" ? parseFloat(producto.subtotal) : producto.subtotal).toFixed(2)}</span>
+              <li key={idx} className="flex justify-between items-center text-gray-600 dark:text-gray-300">
+                <span>
+                  {producto.cantidad}x {producto.nombre} ({producto.color})
+                </span>
+                <span className="font-medium text-gray-800 dark:text-white">${producto.subtotal.toFixed(2)}</span>
               </li>
             ))}
           </ul>
         </div>
-      )}
-    </div>
-  );
-};
-
-// Tracking Modal Component
-const TrackingModal = ({ orderId, onClose }) => {
-  const [trackingData, setTrackingData] = useState(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const fetchTracking = async () => {
-      try {
-        const response = await api.get(`/api/pedidos/rastreo/${orderId}`, { withCredentials: true });
-        setTrackingData(response.data.data || { steps: [] });
-      } catch (err) {
-        console.error("Error fetching tracking:", err);
-        setTrackingData(null);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchTracking();
-  }, [orderId]);
-
-  return (
-    <div className="fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center z-50">
-      <div className="bg-white dark:bg-gray-800 rounded-lg p-6 w-full max-w-md shadow-2xl">
-        <div className="flex justify-between items-center mb-4">
-          <h3 className="text-xl font-bold text-gray-900 dark:text-white">Rastreo #{orderId}</h3>
-          <button onClick={onClose} className="text-gray-500 hover:text-gray-700 dark:hover:text-white">
-            <i className="fas fa-times text-lg"></i>
-          </button>
-        </div>
-
-        {loading ? (
-          <div className="text-center py-4">
-            <i className="fas fa-spinner animate-spin text-3xl text-indigo-500"></i>
-          </div>
-        ) : (
-          <div className="space-y-4">
-            {trackingData && trackingData.steps.length > 0 ? (
-              <ul className="space-y-4">
-                {trackingData.steps.map((step, idx) => (
-                  <li key={idx} className="flex items-start space-x-3">
-                    <div className={`w-6 h-6 rounded-full flex items-center justify-center ${step.completed ? "bg-green-500" : "bg-gray-300"}`}>
-                      <i className={`fas fa-${step.completed ? "check" : "dot-circle"} text-white text-sm`}></i>
-                    </div>
-                    <div>
-                      <p className="text-sm font-medium text-gray-900 dark:text-white">{step.status}</p>
-                      <p className="text-xs text-gray-500 dark:text-gray-400">{step.date}</p>
-                      <p className="text-xs text-gray-600 dark:text-gray-300">{step.location}</p>
-                    </div>
-                  </li>
-                ))}
-              </ul>
-            ) : (
-              <p className="text-gray-600 dark:text-gray-300 text-center">Sin datos de rastreo.</p>
-            )}
-          </div>
-        )}
       </div>
     </div>
   );
 };
 
-// Main Component
+// ===================================================================
+// SUBCOMPONENTE: Skeleton Loader
+// ===================================================================
+const OrderCardSkeleton = () => (
+  <div className="bg-white dark:bg-gray-800 rounded-xl shadow-md border border-gray-200 dark:border-gray-700 p-4 sm:p-5 animate-pulse">
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div>
+        <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded w-16 mb-2"></div>
+        <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-28"></div>
+      </div>
+      <div>
+        <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded w-16 mb-2"></div>
+        <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-28"></div>
+      </div>
+      <div>
+        <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded w-16 mb-2"></div>
+        <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-28"></div>
+      </div>
+      <div>
+        <div className="h-5 bg-gray-200 dark:bg-gray-700 rounded w-20"></div>
+      </div>
+    </div>
+    <div className="mt-4">
+      <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-36"></div>
+    </div>
+  </div>
+);
+
+// ===================================================================
+// COMPONENTE PRINCIPAL: Historial de Pedidos
+// ===================================================================
 const HistorialPedidos = () => {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [selectedOrder, setSelectedOrder] = useState(null);
+  const [pagination, setPagination] = useState({
+    currentPage: 1,
+    totalPages: 1,
+    totalItems: 0,
+    itemsPerPage: 10,
+  });
+  const [pageInput, setPageInput] = useState("");
   const { user } = useAuth();
 
-  const fetchOrders = useCallback(async (signal) => {
-    setLoading(true);
-    setError(null);
-    const idUser = user?.id || user?.idUsuarios;
-    try {
-      const response = await api.get(`/api/pedidos/pedidos-cliente/${idUser}`, { withCredentials: true, signal });
-      if (response.data.success) setOrders(response.data.data);
-      else throw new Error(response.data.message || "Error al cargar pedidos.");
-    } catch (err) {
-      if (err.name !== "AbortError") setError("Error al cargar el historial.");
-    } finally {
-      setLoading(false);
-    }
-  }, [user]);
+  const fetchOrders = useCallback(
+    async (page, signal) => {
+      setLoading(true);
+      setError(null);
+      const idUser = user?.id || user?.idUsuarios;
+      if (!idUser) {
+        setError("No se pudo identificar al usuario.");
+        setLoading(false);
+        return;
+      }
+
+      try {
+        const response = await api.get(`/api/pedidos/pedidos-cliente/${idUser}`, {
+          params: { page, limit: 10 },
+          withCredentials: true,
+          signal,
+        });
+        if (response.data.success) {
+          const data = response.data.data || [];
+          // Ensure no more than 10 orders are displayed
+          if (data.length > 10) {
+            console.warn("API returned more than 10 orders, slicing to 10.");
+            setOrders(data.slice(0, 10));
+          } else {
+            setOrders(data);
+          }
+          setPagination({
+            currentPage: page,
+            totalPages: Math.max(1, Math.ceil((response.data.pagination?.totalItems || data.length) / 10)),
+            totalItems: response.data.pagination?.totalItems || data.length,
+            itemsPerPage: 10,
+          });
+        } else {
+          throw new Error(response.data.message || "Error al cargar pedidos.");
+        }
+      } catch (err) {
+        if (err.name !== "AbortError") {
+          setError("Error al cargar el historial de pedidos: " + (err.message || "Error desconocido."));
+        }
+      } finally {
+        setLoading(false);
+      }
+    },
+    [user]
+  );
 
   useEffect(() => {
     const controller = new AbortController();
-    fetchOrders(controller.signal);
+    fetchOrders(pagination.currentPage, controller.signal);
     return () => controller.abort();
-  }, [fetchOrders]);
+  }, [pagination.currentPage, fetchOrders]);
 
-  const handleTrackOrder = (orderId) => setSelectedOrder(orderId);
+  const handlePageChange = (newPage) => {
+    if (newPage > 0 && newPage <= pagination.totalPages) {
+      setPagination((prev) => ({ ...prev, currentPage: newPage }));
+      setPageInput("");
+    }
+  };
+
+  const handlePageInputChange = (e) => {
+    const value = e.target.value;
+    if (/^\d*$/.test(value) && (value === "" || (parseInt(value) >= 1 && parseInt(value) <= pagination.totalPages))) {
+      setPageInput(value);
+    }
+  };
+
+  const handlePageInputSubmit = (e) => {
+    if (e.key === "Enter" && pageInput) {
+      const newPage = parseInt(pageInput);
+      handlePageChange(newPage);
+    }
+  };
+
+  const renderPagination = () => {
+    const { currentPage, totalPages } = pagination;
+    const pageNumbers = [];
+    const maxPagesToShow = 5;
+    const startPage = Math.max(1, currentPage - Math.floor(maxPagesToShow / 2));
+    const endPage = Math.min(totalPages, startPage + maxPagesToShow - 1);
+
+    for (let i = startPage; i <= endPage; i++) {
+      pageNumbers.push(i);
+    }
+
+    return (
+      <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mt-6 p-4 bg-white dark:bg-gray-800 rounded-xl shadow-md border border-gray-200 dark:border-gray-700">
+        <div className="flex items-center space-x-2">
+          <button
+            onClick={() => handlePageChange(currentPage - 1)}
+            disabled={currentPage === 1}
+            className="px-3 py-1.5 text-sm font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-700 disabled:bg-gray-300 dark:disabled:bg-gray-600 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-colors duration-200"
+            aria-label="Página anterior"
+          >
+            <FontAwesomeIcon icon={faChevronLeft} className="w-4 h-4" />
+          </button>
+          {startPage > 1 && (
+            <>
+              <button
+                onClick={() => handlePageChange(1)}
+                className="px-3 py-1.5 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 rounded-md hover:bg-indigo-100 dark:hover:bg-indigo-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-colors duration-200"
+              >
+                1
+              </button>
+              {startPage > 2 && <span className="text-gray-500 dark:text-gray-400">...</span>}
+            </>
+          )}
+          {pageNumbers.map((page) => (
+            <button
+              key={page}
+              onClick={() => handlePageChange(page)}
+              className={`px-3 py-1.5 text-sm font-medium rounded-md ${
+                page === currentPage
+                  ? "bg-indigo-600 text-white"
+                  : "text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 hover:bg-indigo-100 dark:hover:bg-indigo-900"
+              } focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-colors duration-200`}
+              aria-current={page === currentPage ? "page" : undefined}
+            >
+              {page}
+            </button>
+          ))}
+          {endPage < totalPages && (
+            <>
+              {endPage < totalPages - 1 && <span className="text-gray-500 dark:text-gray-400">...</span>}
+              <button
+                onClick={() => handlePageChange(totalPages)}
+                className="px-3 py-1.5 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 rounded-md hover:bg-indigo-100 dark:hover:bg-indigo-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-colors duration-200"
+              >
+                {totalPages}
+              </button>
+            </>
+          )}
+          <button
+            onClick={() => handlePageChange(currentPage + 1)}
+            disabled={currentPage === totalPages}
+            className="px-3 py-1.5 text-sm font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-700 disabled:bg-gray-300 dark:disabled:bg-gray-600 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-colors duration-200"
+            aria-label="Página siguiente"
+          >
+            <FontAwesomeIcon icon={faChevronRight} className="w-4 h-4" />
+          </button>
+        </div>
+        <div className="flex items-center space-x-2">
+          <span className="text-sm text-gray-600 dark:text-gray-400">Ir a página:</span>
+          <input
+            type="text"
+            value={pageInput}
+            onChange={handlePageInputChange}
+            onKeyDown={handlePageInputSubmit}
+            className="w-16 px-2 py-1 text-sm text-gray-900 dark:text-white bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            placeholder={currentPage.toString()}
+            aria-label="Ir a página específica"
+          />
+        </div>
+      </div>
+    );
+  };
 
   return (
-    <section className="py-12 bg-gradient-to-b from-gray-100 to-white dark:from-gray-900 dark:to-gray-800 min-h-screen">
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-10">
-          <h2 className="text-3xl font-bold text-gray-900 dark:text-white tracking-tight">Mis Pedidos</h2>
-          <p className="mt-2 text-gray-600 dark:text-gray-400">Consulta el estado y detalles de tus pedidos</p>
-          <div className="mt-3 w-20 h-1 bg-indigo-500 mx-auto rounded-full"></div>
-        </div>
+    <section className="py-12 bg-gray-100 dark:bg-gray-900 min-h-screen">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+        <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">Historial de Pedidos</h2>
 
         {loading && (
-          <div className="text-center py-10">
-            <i className="fas fa-spinner animate-spin text-4xl text-indigo-500"></i>
-            <p className="mt-2 text-gray-600 dark:text-gray-400">Cargando...</p>
+          <div className="space-y-4">
+            {[...Array(10)].map((_, idx) => (
+              <OrderCardSkeleton key={idx} />
+            ))}
           </div>
         )}
 
-        {error && !loading && (
-          <div className="text-center py-10">
-            <p className="text-red-500 mb-4">{error}</p>
-            <button
-              onClick={() => fetchOrders(new AbortController().signal)}
-              className="px-6 py-2 bg-indigo-500 text-white rounded-full hover:bg-indigo-600 transition-all"
-            >
-              Reintentar
-            </button>
+        {error && (
+          <div className="text-center text-red-600 dark:text-red-400 py-10">
+            <FontAwesomeIcon icon={faExclamationTriangle} className="mr-2" />
+            {error}
           </div>
         )}
 
         {!loading && !error && (
-          <div className="space-y-6">
-            {orders.length === 0 ? (
-              <p className="text-center text-gray-600 dark:text-gray-400 py-10">No hay pedidos registrados.</p>
-            ) : (
-              orders.map((order, index) => (
-                <OrderCard key={order.idPedido} order={order} index={index} onTrackOrder={handleTrackOrder} />
-              ))
+          <>
+            <div className="space-y-4">
+              {orders.length === 0 ? (
+                <p className="text-center text-gray-600 dark:text-gray-400 py-10">No tienes pedidos registrados.</p>
+              ) : (
+                orders.slice(0, 10).map((order) => <OrderCard key={order.idPedido} order={order} />)
+              )}
+            </div>
+            {pagination.totalItems > 0 && (
+              <div className="mt-6 text-center text-sm text-gray-600 dark:text-gray-400">
+                Mostrando {Math.min(orders.length, 10)} de {pagination.totalItems} pedidos
+              </div>
             )}
-          </div>
+            {pagination.totalPages > 1 && renderPagination()}
+          </>
         )}
-
-        {selectedOrder && <TrackingModal orderId={selectedOrder} onClose={() => setSelectedOrder(null)} />}
       </div>
-
-      <style jsx>{`
-        .order-card {
-          opacity: 0;
-          transform: translateY(20px);
-        }
-        .animate-in {
-          animation: slideIn 0.5s ease-out forwards;
-        }
-        @keyframes slideIn {
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-      `}</style>
     </section>
   );
 };
