@@ -15,7 +15,7 @@ import {
   faUser,
   faCalendarAlt,
   faDollarSign,
-  faCheck
+  faCheck,
 } from "@fortawesome/free-solid-svg-icons";
 import { toast } from "react-toastify";
 import DatePicker from "react-datepicker";
@@ -160,7 +160,7 @@ const GestionRepartidores = () => {
         reviews: staticResenas[repartidorId] || [],
       });
 
-      console.log("repartido---0 ",historial)
+      console.log("repartido---0 ", historial);
     } catch (error) {
       toast.error("Error al cargar los detalles del repartidor");
       setRepartidorData({
@@ -173,42 +173,41 @@ const GestionRepartidores = () => {
     }
   };
 
-const handleToggleStatus = async (repartidorId, currentStatus) => {
-  setUpdatingStatusId(repartidorId);
-  const newActivo = currentStatus === "activo" ? 0 : 1;
-  try {
-    const response = await api.patch(
-      `api/repartidor/administrar/repartidores/${repartidorId}/estado`,
-      { activo: newActivo },
-      { withCredentials: true, headers: { "X-CSRF-Token": csrfToken } }
-    );
-    setRepartidores((prev) =>
-      prev.map((r) =>
-        r.idRepartidor === repartidorId
-          ? {
-              ...r,
-              estado: response.data.estado,
-              fechaBaja: response.data.fechaBaja,
-            }
-          : r
-      )
-    );
-    toast.success(
-      `Repartidor ${
-        response.data.estado === "activo" ? "activado" : "desactivado"
-      } correctamente`
-    );
-  } catch (error) {
-    
-    const errorMessage =
-      error.response?.data?.message ||
-      "Error al cambiar el estado del repartidor";
-    toast.error(errorMessage);
-    console.error(error);
-  } finally {
-    setUpdatingStatusId(null);
-  }
-};
+  const handleToggleStatus = async (repartidorId, currentStatus) => {
+    setUpdatingStatusId(repartidorId);
+    const newActivo = currentStatus === "activo" ? 0 : 1;
+    try {
+      const response = await api.patch(
+        `api/repartidor/administrar/repartidores/${repartidorId}/estado`,
+        { activo: newActivo },
+        { withCredentials: true, headers: { "X-CSRF-Token": csrfToken } }
+      );
+      setRepartidores((prev) =>
+        prev.map((r) =>
+          r.idRepartidor === repartidorId
+            ? {
+                ...r,
+                estado: response.data.estado,
+                fechaBaja: response.data.fechaBaja,
+              }
+            : r
+        )
+      );
+      toast.success(
+        `Repartidor ${
+          response.data.estado === "activo" ? "activado" : "desactivado"
+        } correctamente`
+      );
+    } catch (error) {
+      const errorMessage =
+        error.response?.data?.message ||
+        "Error al cambiar el estado del repartidor";
+      toast.error(errorMessage);
+      console.error(error);
+    } finally {
+      setUpdatingStatusId(null);
+    }
+  };
 
   const handleOpenDialog = (repartidor, dialogType) => {
     setSelectedRepartidor(repartidor);
@@ -488,174 +487,160 @@ const handleToggleStatus = async (repartidorId, currentStatus) => {
       </div>
 
       {/* Repartidores Table */}
-      <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-6 sm:p-8 fadeIn border border-gray-200 dark:border-gray-700">
-        <h2 className="text-2xl sm:text-3xl font-semibold mb-6 text-gray-700 dark:text-gray-200">
-          Lista de Repartidores
-        </h2>
-        {filteredRepartidores.length === 0 ? (
-          <div className="text-center py-12">
-            <p className="text-xl font-medium text-gray-600 dark:text-gray-400">
-              No se encontraron repartidores
-            </p>
-            <p className="text-sm text-gray-500 dark:text-gray-500 mt-2">
-              Intenta ajustar la búsqueda.
-            </p>
-          </div>
-        ) : (
-          <>
-            <div className="overflow-x-auto rounded-lg">
-              <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                <thead className="bg-gray-100 dark:bg-gray-700">
-                  <tr>
-                    <th className="px-6 py-4 text-left text-xs font-medium text-gray-600 dark:text-gray-300 uppercase tracking-wider">
-                      Nombre
-                    </th>
-                    <th className="px-6 py-4 text-left text-xs font-medium text-gray-600 dark:text-gray-300 uppercase tracking-wider">
-                      Pedidos Completados
-                    </th>
-                    <th className="px-6 py-4 text-left text-xs font-medium text-gray-600 dark:text-gray-300 uppercase tracking-wider">
-                      Calificación
-                    </th>
-                    <th className="px-6 py-4 text-left text-xs font-medium text-gray-600 dark:text-gray-300 uppercase tracking-wider">
-                      Estado
-                    </th>
-                    <th className="px-6 py-4 text-left text-xs font-medium text-gray-600 dark:text-gray-300 uppercase tracking-wider">
-                      Acciones
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
-                  {paginatedRepartidores.map((repartidor, index) => (
-                    <tr
-                      key={repartidor.idRepartidor}
-                      className="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors slideIn"
-                      style={{ animationDelay: `${index * 100}ms` }}
-                    >
-                      <td className="px-6 py-4">
-                        <div className="flex flex-col">
-                          <span className="font-bold text-gray-800 dark:text-gray-100 text-sm">
-                            {repartidor.correo || "Sin correo"}
-                          </span>
-                          <span className="text-xs text-gray-600 dark:text-gray-400">
-                            {repartidor.nombre || "Sin nombre"}
-                          </span>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 text-sm text-gray-700 dark:text-gray-200">
-                        {repartidor.pedidosFinalizados || 0}
-                      </td>
-                      <td className="px-6 py-4 text-sm text-gray-700 dark:text-gray-200">
-                        <div className="flex items-center gap-1">
-                          {repartidor.calificacionPromedio || "N/A"}
+  <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-6 sm:p-8 fadeIn border border-gray-200 dark:border-gray-700">
+  <h2 className="text-2xl sm:text-3xl font-semibold mb-6 text-gray-700 dark:text-gray-200">
+    Lista de Repartidores
+  </h2>
+  {filteredRepartidores.length === 0 ? (
+    <div className="text-center py-12">
+      <p className="text-xl font-medium text-gray-600 dark:text-gray-400">
+        No se encontraron repartidores
+      </p>
+      <p className="text-sm text-gray-500 dark:text-gray-500 mt-2">
+        Intenta ajustar la búsqueda.
+      </p>
+    </div>
+  ) : (
+    <>
+      <div className="overflow-x-auto rounded-lg">
+        <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+          <thead className="bg-gray-100 dark:bg-gray-700">
+            <tr>
+              <th className="px-6 py-4 text-left text-xs font-medium text-gray-600 dark:text-gray-300 uppercase tracking-wider">
+                Nombre
+              </th>
+              <th className="px-6 py-4 text-left text-xs font-medium text-gray-600 dark:text-gray-300 uppercase tracking-wider">
+                Pedidos Completados
+              </th>
+              <th className="px-6 py-4 text-left text-xs font-medium text-gray-600 dark:text-gray-300 uppercase tracking-wider">
+                Calificación
+              </th>
+              <th className="px-6 py-4 text-left text-xs font-medium text-gray-600 dark:text-gray-300 uppercase tracking-wider">
+                Estado
+              </th>
+              <th className="px-6 py-4 text-left text-xs font-medium text-gray-600 dark:text-gray-300 uppercase tracking-wider">
+                Acciones
+              </th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
+            {paginatedRepartidores.map((repartidor, index) => (
+              <tr
+                key={repartidor.idRepartidor}
+                className="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors slideIn"
+                style={{ animationDelay: `${index * 100}ms` }}
+              >
+                <td className="px-6 py-4">
+                  <div className="flex flex-col">
+                    <span className="font-bold text-gray-800 dark:text-gray-100 text-sm">
+                      {repartidor.correo || "Sin correo"}
+                    </span>
+                    <span className="text-xs text-gray-600 dark:text-gray-400">
+                      {repartidor.nombre || "Sin nombre"}
+                    </span>
+                  </div>
+                </td>
+                <td className="px-6 py-4 text-sm text-gray-700 dark:text-gray-200">
+                  {repartidor.pedidosFinalizados || 0}
+                </td>
+                <td className="px-6 py-4 text-sm text-gray-700 dark:text-gray-200">
+                  <div className="flex items-center gap-1">
+                    {repartidor.calificacionPromedio || "N/A"}
+                    <FontAwesomeIcon icon={faStar} className="text-yellow-500" />
+                  </div>
+                </td>
+                <td className="px-6 py-4">
+                  <div className="relative">
+                    {repartidor.rol === "repartidor" ? (
+                      <button
+                        disabled={updatingStatusId === repartidor.idRepartidor}
+                        onClick={() =>
+                          handleToggleStatus(
+                            repartidor.idRepartidor,
+                            repartidor.estado
+                          )
+                        }
+                        className={`flex items-center gap-2 px-3 py-1 rounded-full text-sm font-medium transition-colors ${
+                          repartidor.estado === "activo"
+                            ? "bg-green-100 text-green-600 dark:bg-green-900 dark:text-green-400 hover:bg-green-200"
+                            : "bg-red-100 text-red-600 dark:bg-red-900 dark:text-red-400 hover:bg-red-200"
+                        }`}
+                      >
+                        {repartidor.estado === "activo" ? (
+                          <>
+                            <FontAwesomeIcon icon={faToggleOn} />
+                            Activo
+                          </>
+                        ) : (
+                          <>
+                            <FontAwesomeIcon icon={faToggleOff} />
+                            Inactivo
+                          </>
+                        )}
+                        {updatingStatusId === repartidor.idRepartidor && (
                           <FontAwesomeIcon
-                            icon={faStar}
-                            className="text-yellow-500"
+                            icon={faSpinner}
+                            className="absolute right-2 top-1/2 transform -translate-y-1/2 text-yellow-500 animate-spin"
                           />
-                        </div>
-                      </td>
-                      <td className="px-6 py-4">
-                        <div className="relative">
-                          <button
-                            disabled={
-                              updatingStatusId === repartidor.idRepartidor
-                            }
-                            onClick={() =>
-                              handleToggleStatus(
-                                repartidor.idRepartidor,
-                                repartidor.estado
-                              )
-                            }
-                            className={`flex items-center gap-2 px-3 py-1 rounded-full text-sm font-medium transition-colors ${
-                              repartidor.estado === "activo"
-                                ? "bg-green-100 text-green-600 dark:bg-green-900 dark:text-green-400 hover:bg-green-200"
-                                : "bg-red-100 text-red-600 dark:bg-red-900 dark:text-red-400 hover:bg-red-200"
-                            }`}
-                          >
-                            {repartidor.estado === "activo" ? (
-                              <>
-                                <FontAwesomeIcon icon={faToggleOn} />
-                                Activo
-                              </>
-                            ) : (
-                              <>
-                                <FontAwesomeIcon icon={faToggleOff} />
-                                Inactivo
-                              </>
-                            )}
-                            {updatingStatusId === repartidor.idRepartidor && (
-                              <FontAwesomeIcon
-                                icon={faSpinner}
-                                className="absolute right-2 top-1/2 transform -translate-y-1/2 text-yellow-500 animate-spin"
-                              />
-                            )}
-                          </button>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 text-sm text-gray-700 dark:text-gray-200">
-                        <div className="flex gap-3">
-                          <button
-                            onClick={() =>
-                              handleOpenDialog(repartidor, "details")
-                            }
-                            className="text-yellow-600 dark:text-yellow-400 hover:text-yellow-800 dark:hover:text-yellow-300 transition-colors"
-                            title="Detalles"
-                          >
-                            <FontAwesomeIcon
-                              icon={faInfoCircle}
-                              className="text-lg"
-                            />
-                          </button>
-                          <button
-                            onClick={() =>
-                              handleOpenDialog(repartidor, "history")
-                            }
-                            className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 transition-colors"
-                            title="Historial de Pedidos"
-                          >
-                            <FontAwesomeIcon
-                              icon={faHistory}
-                              className="text-lg"
-                            />
-                          </button>
-                          <button
-                            onClick={() =>
-                              handleOpenDialog(repartidor, "reviews")
-                            }
-                            className="text-purple-600 dark:text-purple-400 hover:text-purple-800 dark:hover:text-purple-300 transition-colors"
-                            title="Reseñas"
-                          >
-                            <FontAwesomeIcon
-                              icon={faStar}
-                              className="text-lg"
-                            />
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-            {totalPages > 1 && (
-              <div className="mt-6 flex justify-center gap-2">
-                {Array.from({ length: totalPages }, (_, i) => (
-                  <button
-                    key={i + 1}
-                    onClick={() => setCurrentPage(i + 1)}
-                    className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
-                      currentPage === i + 1
-                        ? "bg-blue-500 text-white shadow-md"
-                        : "bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 hover:bg-gray-300 dark:hover:bg-gray-600"
-                    }`}
-                  >
-                    {i + 1}
-                  </button>
-                ))}
-              </div>
-            )}
-          </>
-        )}
+                        )}
+                      </button>
+                    ) : (
+                      <span className="px-3 py-1 rounded-full text-sm font-medium bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200">
+                        Dejó de ser repartidor
+                      </span>
+                    )}
+                  </div>
+                </td>
+                <td className="px-6 py-4 text-sm text-gray-700 dark:text-gray-200">
+                  <div className="flex gap-3">
+                    <button
+                      onClick={() => handleOpenDialog(repartidor, "details")}
+                      className="text-yellow-600 dark:text-yellow-400 hover:text-yellow-800 dark:hover:text-yellow-300 transition-colors"
+                      title="Detalles"
+                    >
+                      <FontAwesomeIcon icon={faInfoCircle} className="text-lg" />
+                    </button>
+                    <button
+                      onClick={() => handleOpenDialog(repartidor, "history")}
+                      className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 transition-colors"
+                      title="Historial de Pedidos"
+                    >
+                      <FontAwesomeIcon icon={faHistory} className="text-lg" />
+                    </button>
+                    <button
+                      onClick={() => handleOpenDialog(repartidor, "reviews")}
+                      className="text-purple-600 dark:text-purple-400 hover:text-purple-800 dark:hover:text-purple-300 transition-colors"
+                      title="Reseñas"
+                    >
+                      <FontAwesomeIcon icon={faStar} className="text-lg" />
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       </div>
+      {totalPages > 1 && (
+        <div className="mt-6 flex justify-center gap-2">
+          {Array.from({ length: totalPages }, (_, i) => (
+            <button
+              key={i + 1}
+              onClick={() => setCurrentPage(i + 1)}
+              className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
+                currentPage === i + 1
+                  ? "bg-blue-500 text-white shadow-md"
+                  : "bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 hover:bg-gray-300 dark:hover:bg-gray-600"
+              }`}
+            >
+              {i + 1}
+            </button>
+          ))}
+        </div>
+      )}
+    </>
+  )}
+</div>
 
       {/* Modal for Details, History, Reviews */}
       {openDialog && selectedRepartidor && (
@@ -746,7 +731,7 @@ const handleToggleStatus = async (repartidorId, currentStatus) => {
             {/* Modal Content */}
             <div className="flex-1 overflow-y-auto max-h-[calc(92vh-180px)] scrollbar-thin p-4 sm:p-6">
               {detailsLoading ? (
-                < CustomLoading/>
+                <CustomLoading />
               ) : (
                 <>
                   {openDialog === "details" && repartidorData.details && (
@@ -1062,148 +1047,210 @@ const handleToggleStatus = async (repartidorId, currentStatus) => {
                                       </div>
 
                                       {expandedOrders[pedido.idAsignacion] && (
-  <div className="border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50">
-    <div className="p-6 space-y-6">
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div className="bg-white dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700">
-          <h6 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3 flex items-center gap-2">
-            <FontAwesomeIcon icon={faUser} className="text-[#fcb900]" />
-            Información del Cliente
-          </h6>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
-            <div>
-              <p className="text-gray-600 dark:text-gray-400">Cliente:</p>
-              <p className="font-medium text-gray-800 dark:text-gray-100">
-                {pedido.cliente?.nombre || "Sin cliente"}
-              </p>
-            </div>
-            <div>
-              <p className="text-gray-600 dark:text-gray-400">Correo:</p>
-              <p className="font-medium text-gray-800 dark:text-gray-100">
-                {pedido.cliente?.correo || "Sin correo"}
-              </p>
-            </div>
-            <div>
-              <p className="text-gray-600 dark:text-gray-400">Tipo de Pedido:</p>
-              <p className="font-medium text-gray-800 dark:text-gray-100">
-                {pedido.tipoPedido || "N/A"}
-              </p>
-            </div>
-          </div>
-          {/* Sección mejorada para Total a Pagar y Total a Pagado */}
-          <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="bg-[#fff3e0] dark:bg-gray-700 p-3 rounded-lg border border-[#fcb900]/20 shadow-sm">
-              <div className="flex items-center gap-2">
-                <FontAwesomeIcon icon={faDollarSign} className="text-[#fcb900]" />
-                <h6 className="text-sm font-semibold text-gray-700 dark:text-gray-300">
-                  Total a Pagar
-                </h6>
-              </div>
-              <p className="text-xl font-bold text-gray-800 dark:text-gray-100 mt-1">
-                ${parseFloat(pedido.totalPagar || 0).toFixed(2)}
-              </p>
-            </div>
-            <div className="bg-[#e6f3ff] dark:bg-gray-600 p-3 rounded-lg border border-[#fcb900]/20 shadow-sm">
-              <div className="flex items-center gap-2">
-                <FontAwesomeIcon icon={faCheck} className="text-[#fcb900]" />
-                <h6 className="text-sm font-semibold text-gray-700 dark:text-gray-300">
-                  Total a Pagado
-                </h6>
-              </div>
-              <p className="text-xl font-bold text-gray-800 dark:text-gray-100 mt-1">
-                ${parseFloat(pedido.totalPagado || 0).toFixed(2)}
-              </p>
-            </div>
-          </div>
-        </div>
-        <div className="bg-white dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700">
-          <h6 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3 flex items-center gap-2">
-            <FontAwesomeIcon icon={faBoxes} className="text-[#fcb900]" />
-            Productos del Pedido
-            <span className="bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 px-2 py-1 rounded-full text-xs">
-              {pedido.productos?.length || 0}
-            </span>
-          </h6>
-          {pedido.productos && pedido.productos.length > 0 ? (
-            <div className="space-y-3 max-h-64 overflow-y-auto scrollbar-thin">
-              {pedido.productos.map((product, pIndex) => (
-                <div
-                  key={pIndex}
-                  className="bg-gray-50 dark:bg-gray-700 p-3 rounded-lg border border-gray-100 dark:border-gray-600"
-                >
-                  <div className="flex justify-between items-start">
-                    <div className="flex-1">
-                      <h6 className="text-sm font-medium text-gray-800 dark:text-gray-100 mb-1">
-                        {product.nombreProducto || "Sin nombre"}
-                      </h6>
-                      <div className="space-y-1 text-xs text-gray-600 dark:text-gray-400">
-                        {product.colorProducto && (
-                          <p>
-                            <span className="font-medium">Color:</span>{" "}
-                            {product.colorProducto}
-                          </p>
-                        )}
-                        {product.detallesProducto && (
-                          <p>
-                            <span className="font-medium">Detalles:</span>{" "}
-                            {product.detallesProducto}
-                          </p>
-                        )}
-                        <p>
-                          <span className="font-medium">Estado Producto:</span>{" "}
-                          {product.estadoProducto === "N/A"
-                            ? "Aun no calificado"
-                            : product.estadoProducto}
-                        </p>
-                        {product.diasAlquiler > 0 && (
-                          <p>
-                            <span className="font-medium">Días de alquiler:</span>{" "}
-                            {product.diasAlquiler}
-                          </p>
-                        )}
-                        {product.observaciones && (
-                          <p>
-                            <span className="font-medium">Observaciones:</span>{" "}
-                            {product.observaciones}
-                          </p>
-                        )}
-                      </div>
-                    </div>
-                    <div className="text-right ml-4 text-xs text-gray-600 dark:text-gray-300">
-                      <p>Cant: {product.cantidad || 0}</p>
-                      <p>
-                        Precio: ${parseFloat(product.precioUnitario || 0).toFixed(2)}
-                      </p>
-                      <p className="text-sm font-medium text-gray-800 dark:text-gray-100">
-                        ${parseFloat(product.subtotal || 0).toFixed(2)}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div className="text-center py-8">
-              <FontAwesomeIcon icon={faBoxes} className="text-2xl text-gray-400 mb-2" />
-              <p className="text-gray-600 dark:text-gray-400 text-sm">
-                No hay productos registrados para este pedido.
-              </p>
-            </div>
-          )}
-        </div>
-      </div>
-    </div>
-  </div>
-)}
-
-                                      
-                                     
-
-
-
-
-
-                                      
+                                        <div className="border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50">
+                                          <div className="p-6 space-y-6">
+                                            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                                              <div className="bg-white dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700">
+                                                <h6 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3 flex items-center gap-2">
+                                                  <FontAwesomeIcon
+                                                    icon={faUser}
+                                                    className="text-[#fcb900]"
+                                                  />
+                                                  Información del Cliente
+                                                </h6>
+                                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
+                                                  <div>
+                                                    <p className="text-gray-600 dark:text-gray-400">
+                                                      Cliente:
+                                                    </p>
+                                                    <p className="font-medium text-gray-800 dark:text-gray-100">
+                                                      {pedido.cliente?.nombre ||
+                                                        "Sin cliente"}
+                                                    </p>
+                                                  </div>
+                                                  <div>
+                                                    <p className="text-gray-600 dark:text-gray-400">
+                                                      Correo:
+                                                    </p>
+                                                    <p className="font-medium text-gray-800 dark:text-gray-100">
+                                                      {pedido.cliente?.correo ||
+                                                        "Sin correo"}
+                                                    </p>
+                                                  </div>
+                                                  <div>
+                                                    <p className="text-gray-600 dark:text-gray-400">
+                                                      Tipo de Pedido:
+                                                    </p>
+                                                    <p className="font-medium text-gray-800 dark:text-gray-100">
+                                                      {pedido.tipoPedido ||
+                                                        "N/A"}
+                                                    </p>
+                                                  </div>
+                                                </div>
+                                                {/* Sección mejorada para Total a Pagar y Total a Pagado */}
+                                                <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                  <div className="bg-[#fff3e0] dark:bg-gray-700 p-3 rounded-lg border border-[#fcb900]/20 shadow-sm">
+                                                    <div className="flex items-center gap-2">
+                                                      <FontAwesomeIcon
+                                                        icon={faDollarSign}
+                                                        className="text-[#fcb900]"
+                                                      />
+                                                      <h6 className="text-sm font-semibold text-gray-700 dark:text-gray-300">
+                                                        Total a Pagar
+                                                      </h6>
+                                                    </div>
+                                                    <p className="text-xl font-bold text-gray-800 dark:text-gray-100 mt-1">
+                                                      $
+                                                      {parseFloat(
+                                                        pedido.totalPagar || 0
+                                                      ).toFixed(2)}
+                                                    </p>
+                                                  </div>
+                                                  <div className="bg-[#e6f3ff] dark:bg-gray-600 p-3 rounded-lg border border-[#fcb900]/20 shadow-sm">
+                                                    <div className="flex items-center gap-2">
+                                                      <FontAwesomeIcon
+                                                        icon={faCheck}
+                                                        className="text-[#fcb900]"
+                                                      />
+                                                      <h6 className="text-sm font-semibold text-gray-700 dark:text-gray-300">
+                                                        Total a Pagado
+                                                      </h6>
+                                                    </div>
+                                                    <p className="text-xl font-bold text-gray-800 dark:text-gray-100 mt-1">
+                                                      $
+                                                      {parseFloat(
+                                                        pedido.totalPagado || 0
+                                                      ).toFixed(2)}
+                                                    </p>
+                                                  </div>
+                                                </div>
+                                              </div>
+                                              <div className="bg-white dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700">
+                                                <h6 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3 flex items-center gap-2">
+                                                  <FontAwesomeIcon
+                                                    icon={faBoxes}
+                                                    className="text-[#fcb900]"
+                                                  />
+                                                  Productos del Pedido
+                                                  <span className="bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 px-2 py-1 rounded-full text-xs">
+                                                    {pedido.productos?.length ||
+                                                      0}
+                                                  </span>
+                                                </h6>
+                                                {pedido.productos &&
+                                                pedido.productos.length > 0 ? (
+                                                  <div className="space-y-3 max-h-64 overflow-y-auto scrollbar-thin">
+                                                    {pedido.productos.map(
+                                                      (product, pIndex) => (
+                                                        <div
+                                                          key={pIndex}
+                                                          className="bg-gray-50 dark:bg-gray-700 p-3 rounded-lg border border-gray-100 dark:border-gray-600"
+                                                        >
+                                                          <div className="flex justify-between items-start">
+                                                            <div className="flex-1">
+                                                              <h6 className="text-sm font-medium text-gray-800 dark:text-gray-100 mb-1">
+                                                                {product.nombreProducto ||
+                                                                  "Sin nombre"}
+                                                              </h6>
+                                                              <div className="space-y-1 text-xs text-gray-600 dark:text-gray-400">
+                                                                {product.colorProducto && (
+                                                                  <p>
+                                                                    <span className="font-medium">
+                                                                      Color:
+                                                                    </span>{" "}
+                                                                    {
+                                                                      product.colorProducto
+                                                                    }
+                                                                  </p>
+                                                                )}
+                                                                {product.detallesProducto && (
+                                                                  <p>
+                                                                    <span className="font-medium">
+                                                                      Detalles:
+                                                                    </span>{" "}
+                                                                    {
+                                                                      product.detallesProducto
+                                                                    }
+                                                                  </p>
+                                                                )}
+                                                                <p>
+                                                                  <span className="font-medium">
+                                                                    Estado
+                                                                    Producto:
+                                                                  </span>{" "}
+                                                                  {product.estadoProducto ===
+                                                                  "N/A"
+                                                                    ? "Aun no calificado"
+                                                                    : product.estadoProducto}
+                                                                </p>
+                                                                {product.diasAlquiler >
+                                                                  0 && (
+                                                                  <p>
+                                                                    <span className="font-medium">
+                                                                      Días de
+                                                                      alquiler:
+                                                                    </span>{" "}
+                                                                    {
+                                                                      product.diasAlquiler
+                                                                    }
+                                                                  </p>
+                                                                )}
+                                                                {product.observaciones && (
+                                                                  <p>
+                                                                    <span className="font-medium">
+                                                                      Observaciones:
+                                                                    </span>{" "}
+                                                                    {
+                                                                      product.observaciones
+                                                                    }
+                                                                  </p>
+                                                                )}
+                                                              </div>
+                                                            </div>
+                                                            <div className="text-right ml-4 text-xs text-gray-600 dark:text-gray-300">
+                                                              <p>
+                                                                Cant:{" "}
+                                                                {product.cantidad ||
+                                                                  0}
+                                                              </p>
+                                                              <p>
+                                                                Precio: $
+                                                                {parseFloat(
+                                                                  product.precioUnitario ||
+                                                                    0
+                                                                ).toFixed(2)}
+                                                              </p>
+                                                              <p className="text-sm font-medium text-gray-800 dark:text-gray-100">
+                                                                $
+                                                                {parseFloat(
+                                                                  product.subtotal ||
+                                                                    0
+                                                                ).toFixed(2)}
+                                                              </p>
+                                                            </div>
+                                                          </div>
+                                                        </div>
+                                                      )
+                                                    )}
+                                                  </div>
+                                                ) : (
+                                                  <div className="text-center py-8">
+                                                    <FontAwesomeIcon
+                                                      icon={faBoxes}
+                                                      className="text-2xl text-gray-400 mb-2"
+                                                    />
+                                                    <p className="text-gray-600 dark:text-gray-400 text-sm">
+                                                      No hay productos
+                                                      registrados para este
+                                                      pedido.
+                                                    </p>
+                                                  </div>
+                                                )}
+                                              </div>
+                                            </div>
+                                          </div>
+                                        </div>
+                                      )}
                                     </div>
                                   ))}
                                 </div>

@@ -1,0 +1,8 @@
+/* Oculta scroll horizontal visible pero mantiene el scroll funcional */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}

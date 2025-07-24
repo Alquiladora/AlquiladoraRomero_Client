@@ -74,6 +74,7 @@ import GestionRepartidores from "../repartidores/gestionRepartidor";
 import WearOsLogin from "../../../components/wearOs/WearOsLogin";
 import GestionPagos from "../pagos/GestionPagos";
 import GestionPedidosIncidentes from "../gestion-pedidos/PedidosIncidentes";
+import PedidosConPrediccion from "../gestion-pedidos/PedidosModeloPrevenir";
 
 const Breadcrumbs = ({ activeTab, onNavigate }) => {
   const pageHierarchy = {
@@ -316,7 +317,8 @@ const MenuHomeAdmin = () => {
         { icon: faShoppingCart, label: "Pedidos Manuales" },
         { icon: faTasks, label: "Gestion Pedidos" },
        { icon: faExclamationTriangle, label: "Gestion Pedidos Inicidentes" },
-        { icon: faUndoAlt, label: "Pedidos devueltos" }
+        { icon: faUndoAlt, label: "Pedidos devueltos" },
+          { icon: faUndoAlt, label: "Predecir cancelación"}
 
 
 
@@ -432,6 +434,10 @@ const MenuHomeAdmin = () => {
         return <DashboardPedidos orders={pedidos} />;
       case "pedidos-calendario":
         return <PedidosCalendario />;
+          case "Predecir cancelación":
+        return <PedidosConPrediccion />;
+
+        
         
         //Daboar de PEDIDOS GENERAL
       case "Pedidos General Dashboard":

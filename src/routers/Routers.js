@@ -10,8 +10,8 @@ import ErrorBoundary from './Errors/ErrorBoundary';
 import ServerErrorModal from './Errors/ErrorTime';
 import AuthRedirector from '../components/layout/UrlDirrecion';
 import CarritoCompras from '../components/carrito/CarritoCompras';
-
-
+import {RecomendacionesProvider} from '../components/carrito/ContextRecomendaciones'
+ 
 
 import Error404 from './Errors/Error404';
 import Error500 from './Errors/Error500';
@@ -68,6 +68,7 @@ const Routerss = () => {
       <ServerErrorModal />
       
       <CartProvider>
+          <RecomendacionesProvider>
 
         <Routes>      
         <Route path="/" element={<RoutePublic><LayoutHeader> <Home /></LayoutHeader> </RoutePublic>} />
@@ -113,7 +114,7 @@ const Routerss = () => {
           <Route path="/error500" element={<LayoutHeader><Error500 /></LayoutHeader>} />
         
         </Routes>
-       
+       </RecomendacionesProvider>
       </CartProvider>
 
       </div>

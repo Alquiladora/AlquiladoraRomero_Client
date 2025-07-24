@@ -828,53 +828,95 @@ return (
                   </tbody>
                 </table>
               </div>
-
-              <div className="flex flex-col sm:flex-row justify-between items-center mt-4 sm:mt-6 gap-4">
-                <p className="text-sm text-gray-600 dark:text-gray-300">
-                  Mostrando {indexOfFirstOrder + 1} -{" "}
-                  {Math.min(indexOfLastOrder, filteredPedidos.length)} de{" "}
-                  {filteredPedidos.length} pedidos
-                </p>
-                <div className="flex space-x-2 flex-wrap justify-center">
-                  <button
-                    onClick={() => handlePageChange(currentPage - 1)}
-                    disabled={currentPage === 1}
-                    className={`px-2 sm:px-3 py-1 rounded-lg ${
-                      currentPage === 1
-                        ? "bg-gray-300 text-gray-500 cursor-not-allowed dark:bg-gray-600"
-                        : "bg-[#fcb900] text-white hover:bg-[#e0a900] dark:hover:bg-[#e0a900] transition-all duration-200"
-                    }`}
-                  >
-                    <FontAwesomeIcon icon={faChevronLeft} />
-                  </button>
-                  {Array.from({ length: totalPages }, (_, i) => i + 1).map(
-                    (page) => (
-                      <button
-                        key={page}
-                        onClick={() => handlePageChange(page)}
-                        className={`px-2 sm:px-3 py-1 rounded-lg ${
-                          currentPage === page
-                            ? "bg-[#fcb900] text-white dark:bg-[#fcb900]"
-                            : "bg-gray-200 text-gray-700 hover:bg-gray-300 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600 transition-all duration-200"
-                        }`}
-                      >
-                        {page}
-                      </button>
-                    )
-                  )}
-                  <button
-                    onClick={() => handlePageChange(currentPage + 1)}
-                    disabled={currentPage === totalPages}
-                    className={`px-2 sm:px-3 py-1 rounded-lg ${
-                      currentPage === totalPages
-                        ? "bg-gray-300 text-gray-500 cursor-not-allowed dark:bg-gray-600"
-                        : "bg-[#fcb900] text-white hover:bg-[#e0a900] dark:hover:bg-[#e0a900] transition-all duration-200"
-                    }`}
-                  >
-                    <FontAwesomeIcon icon={faChevronRight} />
-                  </button>
-                </div>
-              </div>
+<div className="flex flex-col sm:flex-row justify-between items-center mt-4 sm:mt-6 gap-4">
+  <p className="text-sm text-gray-600 dark:text-gray-300">
+    Mostrando {indexOfFirstOrder + 1} - {Math.min(indexOfLastOrder, filteredPedidos.length)} de {filteredPedidos.length} pedidos
+  </p>
+  <div className="flex items-center space-x-2 flex-wrap justify-center">
+    <button
+      onClick={() => handlePageChange(currentPage - 1)}
+      disabled={currentPage === 1}
+      className={`px-2 sm:px-3 py-1 rounded-l-lg ${
+        currentPage === 1
+          ? "bg-gray-300 text-gray-500 cursor-not-allowed dark:bg-gray-600"
+          : "bg-[#fcb900] text-white hover:bg-[#e0a900] dark:hover:bg-[#e0a900] transition-all duration-200"
+      }`}
+      aria-label="Página anterior"
+    >
+      <FontAwesomeIcon icon={faChevronLeft} />
+    </button>
+    {totalPages <= 7 ? (
+      Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+        <button
+          key={page}
+          onClick={() => handlePageChange(page)}
+          className={`px-2 sm:px-3 py-1 rounded-lg ${
+            currentPage === page
+              ? "bg-[#fcb900] text-white dark:bg-[#fcb900]"
+              : "bg-gray-200 text-gray-700 hover:bg-gray-300 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600 transition-all duration-200"
+          }`}
+          aria-label={`Ir a página ${page}`}
+        >
+          {page}
+        </button>
+      ))
+    ) : (
+      <>
+        {Array.from({ length: 3 }, (_, i) => i + 1).map((page) => (
+          <button
+            key={page}
+            onClick={() => handlePageChange(page)}
+            className={`px-2 sm:px-3 py-1 rounded-lg ${
+              currentPage === page
+                ? "bg-[#fcb900] text-white dark:bg-[#fcb900]"
+                : "bg-gray-200 text-gray-700 hover:bg-gray-300 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600 transition-all duration-200"
+            }`}
+            aria-label={`Ir a página ${page}`}
+          >
+            {page}
+          </button>
+        ))}
+        {currentPage > 4 && <span className="px-2 sm:px-3 py-1 text-gray-600 dark:text-gray-300">...</span>}
+        {currentPage > 3 && currentPage < totalPages - 2 && (
+          <button
+            onClick={() => handlePageChange(currentPage)}
+            className="px-2 sm:px-3 py-1 rounded-lg bg-[#fcb900] text-white dark:bg-[#fcb900]"
+            aria-label={`Página actual ${currentPage}`}
+          >
+            {currentPage}
+          </button>
+        )}
+        {currentPage < totalPages - 2 && <span className="px-2 sm:px-3 py-1 text-gray-600 dark:text-gray-300">...</span>}
+        {Array.from({ length: 3 }, (_, i) => totalPages - 2 + i).map((page) => (
+          <button
+            key={page}
+            onClick={() => handlePageChange(page)}
+            className={`px-2 sm:px-3 py-1 rounded-lg ${
+              currentPage === page
+                ? "bg-[#fcb900] text-white dark:bg-[#fcb900]"
+                : "bg-gray-200 text-gray-700 hover:bg-gray-300 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600 transition-all duration-200"
+            }`}
+            aria-label={`Ir a página ${page}`}
+          >
+            {page}
+          </button>
+        ))}
+      </>
+    )}
+    <button
+      onClick={() => handlePageChange(currentPage + 1)}
+      disabled={currentPage === totalPages}
+      className={`px-2 sm:px-3 py-1 rounded-r-lg ${
+        currentPage === totalPages
+          ? "bg-gray-300 text-gray-500 cursor-not-allowed dark:bg-gray-600"
+          : "bg-[#fcb900] text-white hover:bg-[#e0a900] dark:hover:bg-[#e0a900] transition-all duration-200"
+      }`}
+      aria-label="Página siguiente"
+    >
+      <FontAwesomeIcon icon={faChevronRight} />
+    </button>
+  </div>
+</div>
 
               {showTimelineModal && renderTimelineModal()}
               {showDetailsModal && renderDetailsModal()}

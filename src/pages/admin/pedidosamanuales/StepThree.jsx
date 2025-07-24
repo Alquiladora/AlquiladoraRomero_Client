@@ -458,7 +458,6 @@ const StepThree = ({
             >
               <option value="">-- Selecciona una forma de pago --</option>
               <option value="efectivo">Efectivo</option>
-              <option value="tarjeta">Tarjeta</option>
               <option value="transferencia">Transferencia</option>
             </select>
             <label className="block mb-1 font-semibold">Detalles de Pago:</label>

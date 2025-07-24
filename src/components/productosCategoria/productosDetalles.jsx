@@ -8,6 +8,7 @@ import colorMap from "./Colors";
 import { useCart } from "../carrito/ContextCarrito";
 import { FaMoneyBillWave, FaTimes } from "react-icons/fa";
 import { GiMaterialsScience } from "react-icons/gi";
+import { useRecomendaciones } from "../carrito/ContextRecomendaciones";
 
 
 function DetalleProducto() {
@@ -23,6 +24,7 @@ function DetalleProducto() {
   const [quantity, setQuantity] = useState(1);
   const [isAddingToCart, setIsAddingToCart] = useState(false); 
   const navigate = useNavigate();
+   const { actualizarRecomendaciones } = useRecomendaciones();
 
   useEffect(() => {
     const fetchProductoDetalle = async () => {
@@ -151,6 +153,7 @@ function DetalleProducto() {
 
       if (response.data.success) {
         toast.success(`${producto.nombreProducto} (${selectedVariant.nombreColor}) añadido al carrito!`);
+          actualizarRecomendaciones(response.data.recomendaciones);
         await addToCart()
         setQuantity(1);
       } else {

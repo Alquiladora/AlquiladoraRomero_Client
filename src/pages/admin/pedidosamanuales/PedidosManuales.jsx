@@ -60,7 +60,7 @@ function WizardAlquiler({ onNavigate, setPedidos }) {
   const [orders, setOrders] = useState([]);
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [showTicketModal, setShowTicketModal] = useState(false);
- 
+
   const [nombre, setNombre] = useState("");
   const [apellido, setApellido] = useState("");
   const [telefono, setTelefono] = useState("");
@@ -378,17 +378,17 @@ function WizardAlquiler({ onNavigate, setPedidos }) {
           const dateB = new Date(b.fechas.inicio);
           return dateB - dateA; // Orden descendente (mayor a menor)
         });
-    
+
         setOrders(sortedOrders);
         setPedidos(sortedOrders);
       }
     } catch (error) {
       console.error("Error fetching orders:", error);
       toast.error("Error al cargar los pedidos");
-   } finally {
-    setIsLoadingOrders(false);
-  }
-};
+    } finally {
+      setIsLoadingOrders(false);
+    }
+  };
 
   const handleViewTicket = (order) => {
     setSelectedOrder(order);
@@ -396,10 +396,10 @@ function WizardAlquiler({ onNavigate, setPedidos }) {
   };
 
   const handleShowTicketModal = (pedido) => setShowDetailsModal(pedido);
-    const handleSendTicket = (email, pdfBlob) => {
-      toast.success(`Ticket enviado al correo ${email} en formato PDF.`);
-      setShowDetailsModal(null);
-    };
+  const handleSendTicket = (email, pdfBlob) => {
+    toast.success(`Ticket enviado al correo ${email} en formato PDF.`);
+    setShowDetailsModal(null);
+  };
 
   const handleSubmitWizard = async (e) => {
     e.preventDefault();
@@ -657,154 +657,153 @@ function WizardAlquiler({ onNavigate, setPedidos }) {
         Pedidos Activos Realizados
       </h2>
       {isLoadingOrders ? (
-      <CustomLoading/>
-      ): filteredOrders.length === 0 ? (
-  <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-6 text-center border border-gray-300 dark:border-gray-700">
-    <FontAwesomeIcon
-      icon={faFrown}
-      className="text-4xl text-yellow-500 dark:text-yellow-400 mb-4"
-    />
-    <p className="text-lg font-semibold text-gray-700 dark:text-gray-200">
-      No hay pedidos 
-    </p>
-    <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">
-      ¡Crea un nuevo pedido usando el botón "Realizar un Pedido"!
-    </p>
-  </div>
-) : (
-
-      <div className="overflow-x-auto rounded-lg shadow-md">
-        <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-          <thead className="bg-yellow-500 dark:bg-yellow-600 sticky top-0 z-10">
-            <tr>
-              {[
-                "ID Rastreo",
-                "Cliente",
-                "Teléfono",
-                "Dirección",
-                "Días",
-                "Pago",
-                "Total",
-                "Estado",
-                "Acción",
-              ].map((title, idx) => (
-                <th
-                  key={idx}
-                  className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-white select-none"
-                >
-                  {title}
-                </th>
-              ))}
-            </tr>
-          </thead>
-          <tbody className="bg-white dark:bg-gray-900 divide-y divide-gray-200 dark:divide-gray-700">
-            {currentOrders.map((order, index) => (
-              <tr
-                key={order.idPedido}
-                className={`transition-colors duration-200 ${
-                  index % 2 === 0
-                    ? "bg-white dark:bg-gray-800"
-                    : "bg-gray-50 dark:bg-gray-900"
-                } hover:bg-yellow-100 dark:hover:bg-yellow-900`}
-              >
-                <td
-                  className="px-4 py-3 text-sm dark:text-white whitespace-nowrap max-w-[120px] truncate"
-                  title={order.idRastreo}
-                >
-                  {order.idRastreo}
-                </td>
-                <td
-                  className="px-4 py-3 text-sm dark:text-white whitespace-nowrap max-w-[150px] truncate"
-                  title={order.cliente.nombre}
-                >
-                  {order.cliente.nombre}
-                </td>
-                <td className="px-4 py-3 text-sm dark:text-white whitespace-nowrap">
-                  {order.cliente.telefono}
-                </td>
-                <td
-                  className="px-4 py-3 text-sm dark:text-white max-w-[200px] truncate"
-                  title={order.cliente.direccion || "Sin dirección"}
-                >
-                  {order.cliente.direccion
-                    ? order.cliente.direccion
-                    : "Sin dirección"}
-                </td>
-                <td className="px-4 py-3 text-sm dark:text-white text-center">
-                  {order.fechas.diasAlquiler}
-                </td>
-                <td
-                  className="px-4 py-3 text-sm dark:text-white whitespace-nowrap max-w-[120px] truncate"
-                  title={order.pago.estadoPago}
-                >
-                  {order.pago.estadoPago}
-                </td>
-                <td className="px-4 py-3 text-sm font-semibold text-green-700 dark:text-green-400 whitespace-nowrap">
-                  ${order.totalPagar}
-                </td>
-                <td className="px-4 py-3 text-sm whitespace-nowrap">
-                  <span
-                    className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold select-none ${
-                      order.estado === "Procesando"
-                        ? "bg-orange-200 text-orange-800"
-                        : order.estado === "Confirmado"
-                        ? "bg-green-200 text-green-800"
-                        : order.estado === "Enviando"
-                        ? "bg-blue-200 text-blue-800"
-                        : order.estado === "En alquiler"
-                        ? "bg-purple-200 text-purple-800"
-                        : order.estado === "Devuelto"
-                        ? "bg-gray-200 text-gray-800"
-                        : order.estado === "Incompleto"
-                        ? "bg-yellow-200 text-yellow-800"
-                        : order.estado === "Incidente"
-                        ? "bg-red-200 text-red-800"
-                        : order.estado === "Cancelado"
-                        ? "bg-black text-white"
-                        : order.estado === "Finalizado"
-                        ? "bg-green-800 text-green-100"
-                        : "bg-gray-100 text-gray-800"
-                    }`}
+        <CustomLoading />
+      ) : filteredOrders.length === 0 ? (
+        <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-6 text-center border border-gray-300 dark:border-gray-700">
+          <FontAwesomeIcon
+            icon={faFrown}
+            className="text-4xl text-yellow-500 dark:text-yellow-400 mb-4"
+          />
+          <p className="text-lg font-semibold text-gray-700 dark:text-gray-200">
+            No hay pedidos
+          </p>
+          <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">
+            ¡Crea un nuevo pedido usando el botón "Realizar un Pedido"!
+          </p>
+        </div>
+      ) : (
+        <div className="overflow-x-auto rounded-lg shadow-md">
+          <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+            <thead className="bg-yellow-500 dark:bg-yellow-600 sticky top-0 z-10">
+              <tr>
+                {[
+                  "ID Rastreo",
+                  "Cliente",
+                  "Teléfono",
+                  "Dirección",
+                  "Días",
+                  "Pago",
+                  "Total",
+                  "Estado",
+                  "Acción",
+                ].map((title, idx) => (
+                  <th
+                    key={idx}
+                    className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-white select-none"
                   >
-                    <FontAwesomeIcon icon={faCheckCircle} className="mr-1" />
-                    {order.estado}
-                  </span>
-                </td>
-                <td className="px-4 py-3 text-sm flex space-x-2 justify-center text-blue-600 dark:text-blue-400">
-                  <button
-                    onClick={() => handleViewTicket(order)}
-                    className="p-2 rounded-full hover:bg-blue-100 dark:hover:bg-blue-900 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-400"
-                    aria-label="Ver ticket"
-                  >
-                    <FontAwesomeIcon icon={faEye} size="lg" />
-                  </button>
-                  <button
-                    onClick={() => handleViewPayments(order)}
-                    className="p-2 rounded-full hover:bg-green-100 dark:hover:bg-green-900 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-green-400"
-                    title="Ver pagos"
-                    aria-label="Ver pagos"
-                  >
-                    <FontAwesomeIcon
-                      icon={faDollarSign}
-                      size="lg"
-                      className="text-green-600 dark:text-green-400"
-                    />
-                  </button>
-
-                   <button
-                                            onClick={() => handleShowTicketModal(order)}
-                                            className="text-orange-600 hover:text-orange-800 dark:text-orange-400 dark:hover:text-orange-300 transition-all duration-200 p-2 rounded-full hover:bg-orange-100 dark:hover:bg-orange-900"
-                                            title="Generar Ticket"
-                                          >
-                                            <FontAwesomeIcon icon={faTicketAlt} size="lg" />
-                                          </button>
-                </td>
+                    {title}
+                  </th>
+                ))}
               </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-    )}
+            </thead>
+            <tbody className="bg-white dark:bg-gray-900 divide-y divide-gray-200 dark:divide-gray-700">
+              {currentOrders.map((order, index) => (
+                <tr
+                  key={order.idPedido}
+                  className={`transition-colors duration-200 ${
+                    index % 2 === 0
+                      ? "bg-white dark:bg-gray-800"
+                      : "bg-gray-50 dark:bg-gray-900"
+                  } hover:bg-yellow-100 dark:hover:bg-yellow-900`}
+                >
+                  <td
+                    className="px-4 py-3 text-sm dark:text-white whitespace-nowrap max-w-[120px] truncate"
+                    title={order.idRastreo}
+                  >
+                    {order.idRastreo}
+                  </td>
+                  <td
+                    className="px-4 py-3 text-sm dark:text-white whitespace-nowrap max-w-[150px] truncate"
+                    title={order.cliente.nombre}
+                  >
+                    {order.cliente.nombre}
+                  </td>
+                  <td className="px-4 py-3 text-sm dark:text-white whitespace-nowrap">
+                    {order.cliente.telefono}
+                  </td>
+                  <td
+                    className="px-4 py-3 text-sm dark:text-white max-w-[200px] truncate"
+                    title={order.cliente.direccion || "Sin dirección"}
+                  >
+                    {order.cliente.direccion
+                      ? order.cliente.direccion
+                      : "Sin dirección"}
+                  </td>
+                  <td className="px-4 py-3 text-sm dark:text-white text-center">
+                    {order.fechas.diasAlquiler}
+                  </td>
+                  <td
+                    className="px-4 py-3 text-sm dark:text-white whitespace-nowrap max-w-[120px] truncate"
+                    title={order.pago.estadoPago}
+                  >
+                    {order.pago.estadoPago}
+                  </td>
+                  <td className="px-4 py-3 text-sm font-semibold text-green-700 dark:text-green-400 whitespace-nowrap">
+                    ${order.totalPagar}
+                  </td>
+                  <td className="px-4 py-3 text-sm whitespace-nowrap">
+                    <span
+                      className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold select-none ${
+                        order.estado === "Procesando"
+                          ? "bg-orange-200 text-orange-800"
+                          : order.estado === "Confirmado"
+                          ? "bg-green-200 text-green-800"
+                          : order.estado === "Enviando"
+                          ? "bg-blue-200 text-blue-800"
+                          : order.estado === "En alquiler"
+                          ? "bg-purple-200 text-purple-800"
+                          : order.estado === "Devuelto"
+                          ? "bg-gray-200 text-gray-800"
+                          : order.estado === "Incompleto"
+                          ? "bg-yellow-200 text-yellow-800"
+                          : order.estado === "Incidente"
+                          ? "bg-red-200 text-red-800"
+                          : order.estado === "Cancelado"
+                          ? "bg-black text-white"
+                          : order.estado === "Finalizado"
+                          ? "bg-green-800 text-green-100"
+                          : "bg-gray-100 text-gray-800"
+                      }`}
+                    >
+                      <FontAwesomeIcon icon={faCheckCircle} className="mr-1" />
+                      {order.estado}
+                    </span>
+                  </td>
+                  <td className="px-4 py-3 text-sm flex space-x-2 justify-center text-blue-600 dark:text-blue-400">
+                    <button
+                      onClick={() => handleViewTicket(order)}
+                      className="p-2 rounded-full hover:bg-blue-100 dark:hover:bg-blue-900 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-400"
+                      aria-label="Ver ticket"
+                    >
+                      <FontAwesomeIcon icon={faEye} size="lg" />
+                    </button>
+                    <button
+                      onClick={() => handleViewPayments(order)}
+                      className="p-2 rounded-full hover:bg-green-100 dark:hover:bg-green-900 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-green-400"
+                      title="Ver pagos"
+                      aria-label="Ver pagos"
+                    >
+                      <FontAwesomeIcon
+                        icon={faDollarSign}
+                        size="lg"
+                        className="text-green-600 dark:text-green-400"
+                      />
+                    </button>
+
+                    <button
+                      onClick={() => handleShowTicketModal(order)}
+                      className="text-orange-600 hover:text-orange-800 dark:text-orange-400 dark:hover:text-orange-300 transition-all duration-200 p-2 rounded-full hover:bg-orange-100 dark:hover:bg-orange-900"
+                      title="Generar Ticket"
+                    >
+                      <FontAwesomeIcon icon={faTicketAlt} size="lg" />
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
 
       {showPaymentsModal && selectedOrder && (
         <PaymentModal
@@ -814,53 +813,95 @@ function WizardAlquiler({ onNavigate, setPedidos }) {
         />
       )}
 
-      <div className="flex flex-col md:flex-row justify-between items-center mt-6 space-y-2 md:space-y-0">
-        <p className="text-sm text-gray-700 dark:text-gray-300">
-          Mostrando {indexOfFirstOrder + 1} -{" "}
-          {Math.min(indexOfLastOrder, filteredOrders.length)} de{" "}
-          {filteredOrders.length} pedidos
-        </p>
-        <div className="flex space-x-2">
+   <div className="flex flex-col md:flex-row justify-between items-center mt-6 space-y-2 md:space-y-0">
+  <p className="text-sm text-gray-700 dark:text-gray-300">
+    Mostrando {indexOfFirstOrder + 1} - {Math.min(indexOfLastOrder, filteredOrders.length)} de {filteredOrders.length} pedidos
+  </p>
+  <div className="flex items-center space-x-2">
+    <button
+      onClick={() => handlePageChange(currentPage - 1)}
+      disabled={currentPage === 1}
+      className={`px-3 py-1 rounded-l-md transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-yellow-400 ${
+        currentPage === 1
+          ? "bg-gray-300 text-gray-500 cursor-not-allowed dark:bg-gray-600"
+          : "bg-yellow-500 text-white hover:bg-yellow-600"
+      }`}
+      aria-label="Página anterior"
+    >
+      <FontAwesomeIcon icon={faChevronLeft} />
+    </button>
+    {totalPages <= 7 ? (
+      Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+        <button
+          key={page}
+          onClick={() => handlePageChange(page)}
+          className={`px-3 py-1 rounded-md transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-yellow-400 ${
+            currentPage === page
+              ? "bg-yellow-600 text-white"
+              : "bg-gray-200 text-gray-700 hover:bg-gray-300 dark:bg-gray-700 dark:text-gray-200 hover:dark:bg-gray-600"
+          }`}
+          aria-label={`Página ${page}`}
+        >
+          {page}
+        </button>
+      ))
+    ) : (
+      <>
+        {Array.from({ length: 3 }, (_, i) => i + 1).map((page) => (
           <button
-            onClick={() => handlePageChange(currentPage - 1)}
-            disabled={currentPage === 1}
+            key={page}
+            onClick={() => handlePageChange(page)}
             className={`px-3 py-1 rounded-md transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-yellow-400 ${
-              currentPage === 1
-                ? "bg-gray-300 text-gray-500 cursor-not-allowed dark:bg-gray-600"
-                : "bg-yellow-500 text-white hover:bg-yellow-600"
+              currentPage === page
+                ? "bg-yellow-600 text-white"
+                : "bg-gray-200 text-gray-700 hover:bg-gray-300 dark:bg-gray-700 dark:text-gray-200 hover:dark:bg-gray-600"
             }`}
-            aria-label="Página anterior"
+            aria-label={`Página ${page}`}
           >
-            <FontAwesomeIcon icon={faChevronLeft} />
+            {page}
           </button>
-          {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-            <button
-              key={page}
-              onClick={() => handlePageChange(page)}
-              className={`px-3 py-1 rounded-md transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-yellow-400 ${
-                currentPage === page
-                  ? "bg-yellow-600 text-white"
-                  : "bg-gray-200 text-gray-700 hover:bg-gray-300 dark:bg-gray-700 dark:text-gray-200"
-              }`}
-              aria-label={`Página ${page}`}
-            >
-              {page}
-            </button>
-          ))}
+        ))}
+        {currentPage > 4 && <span className="px-3 py-1 text-gray-700 dark:text-gray-300">...</span>}
+        {currentPage > 3 && currentPage < totalPages - 2 && (
           <button
-            onClick={() => handlePageChange(currentPage + 1)}
-            disabled={currentPage === totalPages}
-            className={`px-3 py-1 rounded-md transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-yellow-400 ${
-              currentPage === totalPages
-                ? "bg-gray-300 text-gray-500 cursor-not-allowed dark:bg-gray-600"
-                : "bg-yellow-500 text-white hover:bg-yellow-600"
-            }`}
-            aria-label="Página siguiente"
+            onClick={() => handlePageChange(currentPage)}
+            className="px-3 py-1 rounded-md bg-yellow-600 text-white"
+            aria-label={`Página ${currentPage}`}
           >
-            <FontAwesomeIcon icon={faChevronRight} />
+            {currentPage}
           </button>
-        </div>
-      </div>
+        )}
+        {currentPage < totalPages - 2 && <span className="px-3 py-1 text-gray-700 dark:text-gray-300">...</span>}
+        {Array.from({ length: 3 }, (_, i) => totalPages - 2 + i).map((page) => (
+          <button
+            key={page}
+            onClick={() => handlePageChange(page)}
+            className={`px-3 py-1 rounded-md transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-yellow-400 ${
+              currentPage === page
+                ? "bg-yellow-600 text-white"
+                : "bg-gray-200 text-gray-700 hover:bg-gray-300 dark:bg-gray-700 dark:text-gray-200 hover:dark:bg-gray-600"
+            }`}
+            aria-label={`Página ${page}`}
+          >
+            {page}
+          </button>
+        ))}
+      </>
+    )}
+    <button
+      onClick={() => handlePageChange(currentPage + 1)}
+      disabled={currentPage === totalPages}
+      className={`px-3 py-1 rounded-r-md transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-yellow-400 ${
+        currentPage === totalPages
+          ? "bg-gray-300 text-gray-500 cursor-not-allowed dark:bg-gray-600"
+          : "bg-yellow-500 text-white hover:bg-yellow-600"
+      }`}
+      aria-label="Página siguiente"
+    >
+      <FontAwesomeIcon icon={faChevronRight} />
+    </button>
+  </div>
+</div>
 
       <div className="flex justify-center mt-6">
         <button
@@ -875,34 +916,28 @@ function WizardAlquiler({ onNavigate, setPedidos }) {
   );
 
   const renderTicketModal = () => (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-2 sm:p-4 animate-fade-in">
-      <div className="bg-white dark:bg-gray-900 w-full max-w-4xl rounded-2xl shadow-2xl max-h-[95vh] overflow-hidden relative border border-gray-200 dark:border-gray-700">
+   <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-2">
+    <div className="bg-white dark:bg-gray-900 w-full max-w-3xl rounded-xl shadow-lg max-h-[90vh] overflow-hidden relative border border-gray-300 dark:border-gray-700 text-sm">
         {/* Header */}
-        <div className="bg-gradient-to-r from-amber-400 to-orange-500 dark:from-amber-600 dark:via-yellow-600 dark:to-orange-600 p-4 flex justify-between items-center sticky top-0 z-10 rounded-t-2xl">
-          <div className="flex items-center space-x-3">
-            <div className="bg-white/20 rounded-full p-2 sm:p-3">
-              <FontAwesomeIcon
-                icon={faClipboardCheck}
-                className="text-white text-base sm:text-lg"
-              />
-            </div>
-            <h2 className="text-xl sm:text-2xl font-bold text-white select-none">
-              Ticket del Pedido
-            </h2>
+        <div className="bg-gradient-to-r from-amber-400 to-orange-500 dark:from-amber-600 dark:to-orange-600 px-3 py-2 flex justify-between items-center sticky top-0 z-10 rounded-t-xl">
+        <div className="flex items-center space-x-2">
+          <div className="bg-white/20 rounded-full p-1.5">
+            <FontAwesomeIcon icon={faClipboardCheck} className="text-white text-sm" />
           </div>
-          
-          <button
-            onClick={() => setShowTicketModal(false)}
-            className="bg-white/20 hover:bg-white/30 rounded-full p-2 text-white transition-all duration-200 hover:scale-110"
-            aria-label="Cerrar modal ticket"
-          >
-            <FontAwesomeIcon icon={faTimes} size="lg" />
-          </button>
+          <h2 className="text-lg font-bold text-white">Ticket del Pedido</h2>
         </div>
+        <button
+          onClick={() => setShowTicketModal(false)}
+          className="bg-white/20 hover:bg-white/30 rounded-full p-1.5 text-white"
+          aria-label="Cerrar modal ticket"
+        >
+          <FontAwesomeIcon icon={faTimes} />
+        </button>
+      </div>
 
         {/* Contenido con scroll */}
-        <div className="overflow-y-auto max-h-[calc(95vh-72px)] scrollbar-thin scrollbar-thumb-yellow-500 scrollbar-track-gray-100 dark:scrollbar-thumb-yellow-600 dark:scrollbar-track-gray-800">
-          <div className="p-5 space-y-6">
+        <div className="overflow-y-auto max-h-[calc(90vh-48px)] p-4 space-y-4 scrollbar-thin scrollbar-thumb-yellow-500 dark:scrollbar-thumb-yellow-600">
+             <div className="p-5 space-y-6">
             {selectedOrder && (
               <>
                 {/* Status Cards */}
@@ -1278,6 +1313,7 @@ function WizardAlquiler({ onNavigate, setPedidos }) {
             )}
           </div>
         </div>
+        
       </div>
     </div>
   );
@@ -1486,13 +1522,13 @@ function WizardAlquiler({ onNavigate, setPedidos }) {
       )}
 
       {showTicketModal && renderTicketModal()}
-       {showDetailsModal && (
-                    <TicketCompra
-                      pedido={showDetailsModal}
-                      onClose={() => setShowTicketModal(null)}
-                      onSend={handleSendTicket}
-                    />
-                  )}
+      {showDetailsModal && (
+        <TicketCompra
+          pedido={showDetailsModal}
+          onClose={() => setShowTicketModal(null)}
+          onSend={handleSendTicket}
+        />
+      )}
     </div>
   );
 }

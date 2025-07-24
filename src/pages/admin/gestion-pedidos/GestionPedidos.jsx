@@ -4,6 +4,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faTasks,
   faFilter,
+  faBrain,
   faSearch,
   faFileExport,
   faFileInvoice,
@@ -41,6 +42,9 @@ import TicketCompra from "./Ticket";
 import api from "../../../utils/AxiosConfig";
 import { useAuth } from "../../../hooks/ContextAuth";
 import CustomLoading from "../../../components/spiner/SpinerGlobal";
+import PredictCancelModal from "./PedidosPredicion";
+import PedidosConPrediccion from "./PedidosModeloPrevenir";
+
 
 
 // Función para capitalizar estados
@@ -65,6 +69,7 @@ const GestionPedidos = ({ onNavigate }) => {
   const [timelineError, setTimelineError] = useState(null);
   const { csrfToken } = useAuth();
   const ordersPerPage = 10;
+    const [pedidoParaPredecir, setPedidoParaPredecir] = useState(null);
 
   const estadosDisponibles = [
     "Todos",
@@ -96,6 +101,8 @@ const GestionPedidos = ({ onNavigate }) => {
             historialEstados: [], 
           }));
           setPedidos(transformedPedidos);
+
+          console.log("Datos de peidso genaral", transformedPedidos)
         } else {
           toast.error("Error al cargar los pedidos");
         }
@@ -550,7 +557,7 @@ const GestionPedidos = ({ onNavigate }) => {
                   Forma de Pago
                 </p>
                 <p className="text-base font-bold text-green-900 dark:text-green-100">
-                  {showDetailsModal.pago.formaPago || "No especificado"}
+                  {showDetailsModal.pago.formaPago ? showDetailsModal.pago.formaPago  : "No especificado"}
                 </p>
               </div>
               <div>
@@ -657,137 +664,124 @@ const GestionPedidos = ({ onNavigate }) => {
 
   
 
-  return (
-    <div className="min-h-screen dark:from-gray-900 dark:to-gray-800 p-6 lg:p-8">
-      <div className="max-w-7xl mx-auto">
-        <div className="flex justify-end space-x-2 mb-4">
-          <button
-            onClick={() => onNavigate("Pedidos General Calendario")}
-            className="flex items-center px-3 py-1.5 text-sm bg-teal-500 text-white rounded-md hover:bg-teal-600 transition-all duration-200 dark:bg-teal-600 dark:hover:bg-teal-700"
-          >
-            <FontAwesomeIcon icon={faCalendar} className="mr-1" />
-            <span className="hidden sm:inline">Pedidos Organizado</span>
-          </button>
+ return (
+  <div className="min-h-screen dark:from-gray-900 dark:to-gray-800 p-6 lg:p-8">
+    <div className="max-w-7xl mx-auto">
+      <div className="flex justify-end space-x-2 mb-4">
+        <button
+          onClick={() => onNavigate("Pedidos General Calendario")}
+          className="flex items-center px-3 py-1.5 text-sm bg-teal-500 text-white rounded-md hover:bg-teal-600 transition-all duration-200 dark:bg-teal-600 dark:hover:bg-teal-700"
+        >
+          <FontAwesomeIcon icon={faCalendar} className="mr-1" />
+          <span className="hidden sm:inline">Pedidos Organizado</span>
+        </button>
+        {/* Botón para Generar Reporte */}
+      </div>
 
-          {/* Botón para Generar Reporte */}
-        
+      <h2 className="text-3xl font-extrabold text-gray-800 dark:text-gray-100 mb-8 flex items-center justify-center">
+        <FontAwesomeIcon icon={faTasks} className="mr-3 text-yellow-500" />
+        Gestión de Pedidos
+      </h2>
 
-       
-        </div>
-
-        <h2 className="text-3xl font-extrabold text-gray-800 dark:text-gray-100 mb-8 flex items-center justify-center">
-          <FontAwesomeIcon icon={faTasks} className="mr-3 text-yellow-500" />
-          Gestión de Pedidos
-        </h2>
-
-        {loading ? (
-        <CustomLoading/>
-        ) : (
-          <>
-            <div className="bg-white dark:bg-gray-800 p-6 rounded-xl">
-              <div className="flex flex-col sm:flex-row gap-4 items-center justify-between">
-                <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
-                  <div className="flex items-center space-x-3 w-full sm:w-auto">
-                    <FontAwesomeIcon
-                      icon={faFilter}
-                      className="text-yellow-500"
-                    />
-                    <select
-                      value={filterEstado}
-                      onChange={(e) => {
-                        setFilterEstado(e.target.value);
-                        setCurrentPage(1);
-                      }}
-                      className="p-2 border rounded-lg bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200 w-full sm:w-40 focus:outline-none focus:ring-2 focus:ring-yellow-500 transition-all duration-200"
-                    >
-                      {estadosDisponibles.map((estado) => (
-                        <option key={estado} value={estado}>
-                          {estado}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                  <div className="flex items-center space-x-3 w-full sm:w-auto">
-                    <FontAwesomeIcon
-                      icon={faSearch}
-                      className="text-yellow-500"
-                    />
-                    <input
-                      type="text"
-                      placeholder="Buscar por ID, cliente o dirección..."
-                      value={searchTerm}
-                      onChange={(e) => {
-                        setSearchTerm(e.target.value);
-                        setCurrentPage(1);
-                      }}
-                      className="p-2 border rounded-lg bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200 w-full sm:w-64 focus:outline-none focus:ring-2 focus:ring-yellow-500 transition-all duration-200"
-                    />
-                  </div>
-                  <div className="flex items-center space-x-3 w-full sm:w-auto">
-                    <FontAwesomeIcon
-                      icon={faCalendarAlt}
-                      className="text-yellow-500"
-                    />
-                    <input
-                      type="date"
-                      value={dateRange.start}
-                      onChange={(e) =>
-                        setDateRange({ ...dateRange, start: e.target.value })
-                      }
-                      className="p-2 border rounded-lg bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200 w-full sm:w-36 focus:outline-none focus:ring-2 focus:ring-yellow-500 transition-all duration-200"
-                    />
-                    <span className="text-gray-500 dark:text-gray-400">-</span>
-                    <input
-                      type="date"
-                      value={dateRange.end}
-                      onChange={(e) =>
-                        setDateRange({ ...dateRange, end: e.target.value })
-                      }
-                      className="p-2 border rounded-lg bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200 w-full sm:w-36 focus:outline-none focus:ring-2 focus:ring-yellow-500 transition-all duration-200"
-                    />
-                  </div>
+      {loading ? (
+        <CustomLoading />
+      ) : (
+        <>
+          <div className="bg-white dark:bg-gray-800 p-6 rounded-xl">
+            <div className="flex flex-col sm:flex-row gap-4 items-center justify-between">
+              <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
+                <div className="flex items-center space-x-3 w-full sm:w-auto">
+                  <FontAwesomeIcon icon={faFilter} className="text-yellow-500" />
+                  <select
+                    value={filterEstado}
+                    onChange={(e) => {
+                      setFilterEstado(e.target.value);
+                      setCurrentPage(1);
+                    }}
+                    className="p-2 border rounded-lg bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200 w-full sm:w-40 focus:outline-none focus:ring-2 focus:ring-yellow-500 transition-all duration-200"
+                  >
+                    {estadosDisponibles.map((estado) => (
+                      <option key={estado} value={estado}>
+                        {estado}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div className="flex items-center space-x-3 w-full sm:w-auto">
+                  <FontAwesomeIcon icon={faSearch} className="text-yellow-500" />
+                  <input
+                    type="text"
+                    placeholder="Buscar por ID, cliente o dirección..."
+                    value={searchTerm}
+                    onChange={(e) => {
+                      setSearchTerm(e.target.value);
+                      setCurrentPage(1);
+                    }}
+                    className="p-2 border rounded-lg bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200 w-full sm:w-64 focus:outline-none focus:ring-2 focus:ring-yellow-500 transition-all duration-200"
+                  />
+                </div>
+                <div className="flex items-center space-x-3 w-full sm:w-auto">
+                  <FontAwesomeIcon icon={faCalendarAlt} className="text-yellow-500" />
+                  <input
+                    type="date"
+                    value={dateRange.start}
+                    onChange={(e) =>
+                      setDateRange({ ...dateRange, start: e.target.value })
+                    }
+                    className="p-2 border rounded-lg bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200 w-full sm:w-36 focus:outline-none focus:ring-2 focus:ring-yellow-500 transition-all duration-200"
+                  />
+                  <span className="text-gray-500 dark:text-gray-400">-</span>
+                  <input
+                    type="date"
+                    value={dateRange.end}
+                    onChange={(e) =>
+                      setDateRange({ ...dateRange, end: e.target.value })
+                    }
+                    className="p-2 border rounded-lg bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200 w-full sm:w-36 focus:outline-none focus:ring-2 focus:ring-yellow-500 transition-all duration-200"
+                  />
                 </div>
               </div>
             </div>
+          </div>
 
-            <div className="overflow-x-auto rounded-xl shadow-lg">
-              <table className="min-w-full bg-white dark:bg-gray-800">
-                <thead className="bg-gradient-to-r from-yellow-500 to-yellow-600">
-                  <tr>
-                    <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-tight text-white">
-                      <FontAwesomeIcon icon={faTruck} className="mr-1" />{" "}
-                      <span className="hidden sm:inline">ID Rastreo</span>
-                      <span className="sm:hidden">ID</span>
-                    </th>
-                    <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-tight text-white">
-                      <FontAwesomeIcon icon={faUser} className="mr-1" /> Cliente
-                    </th>
-                    <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-tight text-white hidden sm:table-cell">
-                      <FontAwesomeIcon icon={faPhone} className="mr-1" />{" "}
-                      Teléfono
-                    </th>
-                    <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-tight text-white hidden md:table-cell">
-                      <FontAwesomeIcon icon={faMapMarkerAlt} className="mr-1" />{" "}
-                      Dirección
-                    </th>
-                    <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-tight text-white hidden sm:table-cell">
-                      <FontAwesomeIcon icon={faClock} className="mr-1" /> Días
-                    </th>
-                    <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-tight text-white">
-                      <FontAwesomeIcon icon={faDollarSign} className="mr-1" />{" "}
-                      Total
-                    </th>
-                    <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-tight text-white">
-                      <FontAwesomeIcon icon={faCheckCircle} className="mr-1" />{" "}
-                      Estado
-                    </th>
-                    <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-tight text-white">
-                      Acciones
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {currentPedidos.map((pedido, index) => (
+          <div className="overflow-x-auto rounded-xl shadow-lg">
+            <table className="min-w-full bg-white dark:bg-gray-800">
+              <thead className="bg-gradient-to-r from-yellow-500 to-yellow-600">
+                <tr>
+                  <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-tight text-white">
+                    <FontAwesomeIcon icon={faTruck} className="mr-1" />
+                    <span className="hidden sm:inline">ID Rastreo</span>
+                    <span className="sm:hidden">ID</span>
+                  </th>
+                  <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-tight text-white">
+                    <FontAwesomeIcon icon={faUser} className="mr-1" /> Cliente
+                  </th>
+                  <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-tight text-white hidden sm:table-cell">
+                    <FontAwesomeIcon icon={faPhone} className="mr-1" /> Teléfono
+                  </th>
+                  <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-tight text-white hidden md:table-cell">
+                    <FontAwesomeIcon icon={faMapMarkerAlt} className="mr-1" /> Dirección
+                  </th>
+                  <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-tight text-white hidden sm:table-cell">
+                    <FontAwesomeIcon icon={faClock} className="mr-1" /> Días
+                  </th>
+                  <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-tight text-white">
+                    <FontAwesomeIcon icon={faDollarSign} className="mr-1" /> Total
+                  </th>
+                  <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-tight text-white">
+                    <FontAwesomeIcon icon={faCheckCircle} className="mr-1" /> Estado
+                  </th>
+                  <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-tight text-white">
+                    Acciones
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {currentPedidos.map((pedido, index) => {
+                  const estadosParaPredecir = ['Procesando', 'Enviando', 'Confirmado'];
+                  const puedePredecir = estadosParaPredecir.includes(pedido.estado);
+
+                  return (
                     <tr
                       key={pedido.idPedido}
                       className={`border-b dark:border-gray-700 transition-all duration-200 ${
@@ -889,33 +883,58 @@ const GestionPedidos = ({ onNavigate }) => {
                         >
                           <FontAwesomeIcon icon={faTicketAlt} size="lg" />
                         </button>
+                        {puedePredecir && (
+                          <button
+                            onClick={() => setPedidoParaPredecir(pedido)}
+                            className="text-purple-600 hover:text-purple-800 p-2 rounded-full hover:bg-purple-100 dark:text-purple-400 dark:hover:text-purple-300 dark:hover:bg-purple-900"
+                            title="Predecir Cancelación"
+                          >
+                            <FontAwesomeIcon icon={faBrain} />
+                          </button>
+                        )}
                       </td>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
 
-            <div className="flex flex-col sm:flex-row justify-between items-center mt-6 gap-4">
-              <p className="text-sm text-gray-600 dark:text-gray-300">
-                Mostrando {indexOfFirstOrder + 1} -{" "}
-                {Math.min(indexOfLastOrder, filteredPedidos.length)} de{" "}
-                {filteredPedidos.length} pedidos
-              </p>
-              <div className="flex space-x-2">
-                <button
-                  onClick={() => handlePageChange(currentPage - 1)}
-                  disabled={currentPage === 1}
-                  className={`px-3 py-1 rounded-lg ${
-                    currentPage === 1
-                      ? "bg-gray-300 text-gray-500 cursor-not-allowed dark:bg-gray-600"
-                      : "bg-yellow-500 text-white hover:bg-yellow-600 dark:hover:bg-yellow-600 transition-all duration-200"
-                  }`}
-                >
-                  <FontAwesomeIcon icon={faChevronLeft} />
-                </button>
-                {Array.from({ length: totalPages }, (_, i) => i + 1).map(
-                  (page) => (
+          <div className="flex flex-col sm:flex-row justify-between items-center mt-6 gap-4">
+            <p className="text-sm text-gray-600 dark:text-gray-300">
+              Mostrando {indexOfFirstOrder + 1} - {Math.min(indexOfLastOrder, filteredPedidos.length)} de {filteredPedidos.length} pedidos
+            </p>
+            <div className="flex items-center space-x-2">
+              <button
+                onClick={() => handlePageChange(currentPage - 1)}
+                disabled={currentPage === 1}
+                className={`px-3 py-1 rounded-l-lg ${
+                  currentPage === 1
+                    ? "bg-gray-300 text-gray-500 cursor-not-allowed dark:bg-gray-600"
+                    : "bg-yellow-500 text-white hover:bg-yellow-600 dark:hover:bg-yellow-600 transition-all duration-200"
+                }`}
+                aria-label="Página anterior"
+              >
+                <FontAwesomeIcon icon={faChevronLeft} />
+              </button>
+              {totalPages <= 7 ? (
+                Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                  <button
+                    key={page}
+                    onClick={() => handlePageChange(page)}
+                    className={`px-3 py-1 rounded-lg ${
+                      currentPage === page
+                        ? "bg-yellow-600 text-white dark:bg-yellow-600"
+                        : "bg-gray-200 text-gray-700 hover:bg-gray-300 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600 transition-all duration-200"
+                    }`}
+                    aria-label={`Ir a página ${page}`}
+                  >
+                    {page}
+                  </button>
+                ))
+              ) : (
+                <>
+                  {Array.from({ length: 3 }, (_, i) => i + 1).map((page) => (
                     <button
                       key={page}
                       onClick={() => handlePageChange(page)}
@@ -924,50 +943,87 @@ const GestionPedidos = ({ onNavigate }) => {
                           ? "bg-yellow-600 text-white dark:bg-yellow-600"
                           : "bg-gray-200 text-gray-700 hover:bg-gray-300 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600 transition-all duration-200"
                       }`}
+                      aria-label={`Ir a página ${page}`}
                     >
                       {page}
                     </button>
-                  )
-                )}
-                <button
-                  onClick={() => handlePageChange(currentPage + 1)}
-                  disabled={currentPage === totalPages}
-                  className={`px-3 py-1 rounded-lg ${
-                    currentPage === totalPages
-                      ? "bg-gray-300 text-gray-500 cursor-not-allowed dark:bg-gray-600"
-                      : "bg-yellow-500 text-white hover:bg-yellow-600 dark:hover:bg-yellow-600 transition-all duration-200"
-                  }`}
-                >
-                  <FontAwesomeIcon icon={faChevronRight} />
-                </button>
-              </div>
-            </div>
-
-            <div className="mt-6 flex flex-col sm:flex-row justify-center gap-3">
+                  ))}
+                  {currentPage > 4 && <span className="px-3 py-1 text-gray-600 dark:text-gray-300">...</span>}
+                  {currentPage > 3 && currentPage < totalPages - 2 && (
+                    <button
+                      onClick={() => handlePageChange(currentPage)}
+                      className="px-3 py-1 rounded-lg bg-yellow-600 text-white dark:bg-yellow-600"
+                      aria-label={`Página actual ${currentPage}`}
+                    >
+                      {currentPage}
+                    </button>
+                  )}
+                  {currentPage < totalPages - 2 && <span className="px-3 py-1 text-gray-600 dark:text-gray-300">...</span>}
+                  {Array.from({ length: 3 }, (_, i) => totalPages - 2 + i).map((page) => (
+                    <button
+                      key={page}
+                      onClick={() => handlePageChange(page)}
+                      className={`px-3 py-1 rounded-lg ${
+                        currentPage === page
+                          ? "bg-yellow-600 text-white dark:bg-yellow-600"
+                          : "bg-gray-200 text-gray-700 hover:bg-gray-300 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600 transition-all duration-200"
+                      }`}
+                      aria-label={`Ir a página ${page}`}
+                    >
+                      {page}
+                    </button>
+                  ))}
+                </>
+              )}
               <button
-                onClick={() => onNavigate("Pedidos General Dashboard")}
-                className="flex items-center px-3 py-1.5 text-sm bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-md shadow-sm hover:from-blue-700 hover:to-blue-800 transition-all duration-200"
+                onClick={() => handlePageChange(currentPage + 1)}
+                disabled={currentPage === totalPages}
+                className={`px-3 py-1 rounded-r-lg ${
+                  currentPage === totalPages
+                    ? "bg-gray-300 text-gray-500 cursor-not-allowed dark:bg-gray-600"
+                    : "bg-yellow-500 text-white hover:bg-yellow-600 dark:hover:bg-yellow-600 transition-all duration-200"
+                }`}
+                aria-label="Página siguiente"
               >
-                <FontAwesomeIcon icon={faChartBar} className="mr-1" />
-                <span className="hidden sm:inline">Dashboard</span>
-                <span className="sm:hidden">Pedidos</span>
+                <FontAwesomeIcon icon={faChevronRight} />
               </button>
             </div>
+          </div>
 
-            {showTimelineModal && renderTimelineModal()}
-            {showDetailsModal && renderDetailsModal()}
-            {showTicketModal && (
-              <TicketCompra
-                pedido={showTicketModal}
-                onClose={() => setShowTicketModal(null)}
-                onSend={handleSendTicket}
-              />
-            )}
-          </>
-        )}
-      </div>
+          <div className="mt-6 flex flex-col sm:flex-row justify-center gap-3">
+            <button
+              onClick={() => onNavigate("Pedidos General Dashboard")}
+              className="flex items-center px-3 py-1.5 text-sm bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-md shadow-sm hover:from-blue-700 hover:to-blue-800 transition-all duration-200"
+            >
+              <FontAwesomeIcon icon={faChartBar} className="mr-1" />
+              <span className="hidden sm:inline">Dashboard</span>
+              <span className="sm:hidden">Pedidos</span>
+            </button>
+          </div>
+
+          {showTimelineModal && renderTimelineModal()}
+          {showDetailsModal && renderDetailsModal()}
+          {showTicketModal && (
+            <TicketCompra
+              pedido={showTicketModal}
+              onClose={() => setShowTicketModal(null)}
+              onSend={handleSendTicket}
+            />
+          )}
+
+          {pedidoParaPredecir && (
+            <PredictCancelModal
+              pedido={pedidoParaPredecir}
+              onClose={() => setPedidoParaPredecir(null)}
+            />
+          )}
+        </>
+      )}
     </div>
-  );
+  </div>
+);
+
+
 };
 
 export default GestionPedidos;
