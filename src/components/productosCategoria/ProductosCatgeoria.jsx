@@ -3,6 +3,7 @@ import { useParams, Link } from "react-router-dom";
 import api from "../../utils/AxiosConfig";
 import { useAuth } from "../../hooks/ContextAuth";
 import { toast } from "react-toastify";
+import CustomLoading from "../spiner/SpinerGlobal";
 
 const ProductosCategoria = () => {
   const { categori } = useParams();
@@ -21,14 +22,14 @@ const ProductosCategoria = () => {
           withCredentials: true,
           headers: { "X-CSRF-Token": csrfToken },
         });
-        console.log("Subcategorias ", response.data);
+        
         if (response.data.subcategories && response.data.subcategories.length > 0) {
           setSubcategorias(response.data.subcategories[0].subcats);
         } else {
           setSubcategorias([]);
         }
       } catch (error) {
-        console.error("Error al obtener subcategorías:", error);
+       
         toast.error("Error al cargar subcategorías");
       }
     };
@@ -43,7 +44,7 @@ const ProductosCategoria = () => {
           withCredentials: true,
           headers: { "X-CSRF-Token": csrfToken },
         });
-        console.log("Productos de categoría:", response.data);
+    
         setProducts(response.data.products);
       } catch (error) {
         console.error("Error al cargar productos:", error);
@@ -98,7 +99,7 @@ const ProductosCategoria = () => {
     const currentDate = new Date();
     const diffTime = Math.abs(currentDate - creationDate);
     const diffDays = diffTime / (1000 * 60 * 60 * 24);
-    return diffDays < 5;
+    return diffDays < 30;
   };
 
   return (
@@ -194,9 +195,7 @@ const ProductosCategoria = () => {
 
         
           {loading ? (
-            <p className="text-center text-gray-600 dark:text-gray-300 text-sm xs:text-base">
-              Cargando productos...
-            </p>
+            <CustomLoading/>
           ) : filteredProducts.length > 0 ? (
             <div className="grid gap-4 xs:gap-6 sm:gap-8 grid-cols-1 xs:grid-cols-2 sm:grid-cols-2 lg:grid-cols-3">
               {filteredProducts.map((product) => {

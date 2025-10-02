@@ -214,7 +214,7 @@ function WizardAlquiler({ onNavigate, setPedidos }) {
           toast.info("Este usuario es administrador.");
           return;
         } else {
-          console.log("Cliente encontrado", cliente);
+        
           setEsClienteExistente(true);
           setNombre(cliente.nombre);
           setApellido(`${cliente.apellidoP} ${cliente.apellidoM}`);
@@ -384,7 +384,7 @@ function WizardAlquiler({ onNavigate, setPedidos }) {
       }
     } catch (error) {
       console.error("Error fetching orders:", error);
-      toast.error("Error al cargar los pedidos");
+     
     } finally {
       setIsLoadingOrders(false);
     }

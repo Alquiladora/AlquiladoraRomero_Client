@@ -22,9 +22,6 @@ export const AuthProvider = ({ children }) => {
   const isMounted = useRef(true);
  
 
-
-
-
   const fetchCsrfToken = async () => {
     if (csrfToken) return;
     try {
@@ -34,7 +31,7 @@ export const AuthProvider = ({ children }) => {
       setCsrfToken(response.data.csrfToken);
     } catch (error) {
       console.error("⚠️ Error obteniendo el token CSRF:", error);
-      setError("Error en el servidor - 500.");
+     
     }
   };
 
@@ -48,38 +45,22 @@ export const AuthProvider = ({ children }) => {
         if (response.data?.user) {
           setUser(response.data.user);
         } else {
-          console.warn("⚠️ Respuesta sin usuario, redirigiendo a login.");
           setUser(null);
           navigate("/login");
         }
       }
     } catch (error) {
-      console.error("⚠️ Error verificando la autenticación:", error);
-      if (error.response) {
-        if (error.response.status === 500) {
-          navigate("/error500");
-        } else if (
-          error.response.status === 401 ||
-          error.response.status === 403
-        ) {
-          console.warn(
-            "⚠️ Usuario no autenticado (401/403). Sesión expirada o inválida, redirigiendo a login."
-          );
-          setUser(null);
-          navigate("/login");
-        } else {
-          setError(
-            error.response?.data?.message ||
-              "Error desconocido al verificar autenticación."
-          );
-        }
-      } else {
-        setError("No se pudo conectar con el servidor. Revisa tu conexión.");
-      }
+      console.error("⚠️ Error verificando autenticación:", error);
+      if (!error.response) {
+        setError("No se pudo conectar con el servidor."); 
+        } else if (error.response.data?.message) {
+      setError(error.response.data.message);
+    }
     } finally {
       if (isMounted.current) setIsLoading(false);
     }
   };
+
 
   const logout = async () => {
     const userId= user?.id || user?.idUsuarios
@@ -97,24 +78,18 @@ export const AuthProvider = ({ children }) => {
         }
       );
 
-      if (response.status === 200) {
-        console.log("✅ Sesión cerrada exitosamente o ya expirada.");
-        setUser(null);
-        navigate("/login");
-      } else {
-        console.warn("⚠️ No se pudo cerrar sesión correctamente, recargando...");
-        window.location.reload();
-      }
-    } catch (error) {
-      console.error("⚠️ Error al cerrar sesión:", error);
-      if (error.response?.status === 401 || error.response?.status === 403) {
-        console.warn("⚠️ La sesión ya estaba cerrada, recargando...");
-        window.location.reload();
-      } else {
-        setError(error.response?.data?.message || "Error al cerrar sesión.");
-      }
+    console.log("✅ Sesión cerrada exitosamente.");
+    setUser(null);
+    navigate("/login");
+    
+  } catch (error) {
+    console.error("⚠️ Error al cerrar sesión:", error);
+    if (error.response?.data?.message) {
+      setError(error.response.data.message);
     }
-  };
+   
+  }
+};
 
  
   useEffect(() => {
@@ -126,13 +101,6 @@ export const AuthProvider = ({ children }) => {
     };
 
   }, [csrfToken]);
-
-  
-
-
-
-  
-
 
   return (
     <AuthContext.Provider

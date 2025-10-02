@@ -13,6 +13,8 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import api from "../../../utils/AxiosConfig";
 import { useAuth } from "../../../hooks/ContextAuth";
+import { toast } from "react-toastify";
+import Swal from 'sweetalert2';
 
 const ColorManager = () => {
   const { user, csrfToken } = useAuth();
@@ -41,15 +43,15 @@ const ColorManager = () => {
         if (Array.isArray(response.data.data)) {
           setColors(response.data.data);
         } else {
-          setError("Los datos recibidos no son válidos.");
+          toast.error("Los datos recibidos no son válidos.");
           setColors([]);
         }
       } else {
-        setError(response.data.message || "Error al obtener los colores.");
+       
       }
     } catch (err) {
-      setError("Error al conectar con el servidor. Por favor, intenta de nuevo.");
-      console.error("Error fetching colors:", err);
+      toast.error("Error al conectar con el servidor. Por favor, intenta de nuevo.");
+      
     } finally {
       setLoading(false);
     }
@@ -67,7 +69,7 @@ const ColorManager = () => {
   const handleAddColor = async (e) => {
     e.preventDefault();
     if (!newColor.name || !newColor.hex) {
-      setError("Por favor, completa todos los campos.");
+      toast.error("Por favor, completa todos los campos.");
       return;
     }
 
@@ -90,11 +92,11 @@ const ColorManager = () => {
         // Reset to the last page if a new color is added
         setCurrentPage(Math.ceil((colors.length + 1) / colorsPerPage));
       } else {
-        setError(response.data.message || "Error al agregar el color.");
+          toast.error(response.data.message || "Error al agregar el color.");
       }
     } catch (err) {
-      setError("Error al agregar el color. Por favor, intenta de nuevo.");
-      console.error("Error adding color:", err);
+         toast.error("Error al agregar el color. Por favor, intenta de nuevo.");
+     
     } finally {
       setLoading(false);
     }
@@ -108,7 +110,7 @@ const ColorManager = () => {
   const handleSaveEdit = async (e) => {
     e.preventDefault();
     if (!editingColor.name || !editingColor.hex) {
-      setError("Por favor, completa todos los campos.");
+       toast.error("Por favor, completa todos los campos.");
       return;
     }
 
@@ -132,11 +134,11 @@ const ColorManager = () => {
         );
         setEditingColor(null);
       } else {
-        setError(response.data.message || "Error al actualizar el color.");
+           toast.error(response.data.message || "Error al actualizar el color.");
       }
     } catch (err) {
-      setError("Error al actualizar el color. Por favor, intenta de nuevo.");
-      console.error("Error updating color:", err);
+        toast.error("Error al actualizar el color. Por favor, intenta de nuevo.");
+     
     } finally {
       setLoading(false);
     }
@@ -147,13 +149,14 @@ const ColorManager = () => {
     setError(null);
   };
 
+
   const handleDeleteColor = async (id) => {
     if (!window.confirm("¿Estás seguro de que deseas eliminar este color?")) {
       return;
     }
 
     setLoading(true);
-    setError(null);
+   
     try {
       const response = await api.delete(`api/colores/colores/${id}`, {
         withCredentials: true,
@@ -161,6 +164,7 @@ const ColorManager = () => {
       });
 
       if (response.data.success) {
+         toast.success("Color eliminado exitosamente.");
         const updatedColors = colors.filter((color) => color.idColores !== id);
         setColors(updatedColors);
       
@@ -169,11 +173,11 @@ const ColorManager = () => {
           setCurrentPage(totalPages);
         }
       } else {
-        setError(response.data.message || "Error al eliminar el color.");
+          toast.error(response.data.message || "Error al eliminar el color.");
       }
     } catch (err) {
-      setError("Error al eliminar el color. Por favor, intenta de nuevo.");
-      console.error("Error deleting color:", err);
+         const errorMessage = err.response?.data?.message || "Ocurrió un error inesperado. Intenta de nuevo.";
+        toast.error(errorMessage);
     } finally {
       setLoading(false);
     }

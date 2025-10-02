@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
@@ -45,8 +44,6 @@ import CustomLoading from "../../../components/spiner/SpinerGlobal";
 import PredictCancelModal from "./PedidosPredicion";
 import PedidosConPrediccion from "./PedidosModeloPrevenir";
 
-
-
 // Función para capitalizar estados
 const capitalizeStatus = (status) => {
   if (!status || typeof status !== 'string') return 'Desconocido';
@@ -60,6 +57,8 @@ const GestionPedidos = ({ onNavigate }) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [dateRange, setDateRange] = useState({ start: "", end: "" });
   const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalPedidos, setTotalPedidos] = useState(0);
   const [showTimelineModal, setShowTimelineModal] = useState(null);
   const [showDetailsModal, setShowDetailsModal] = useState(null);
   const [showTicketModal, setShowTicketModal] = useState(null);
@@ -68,8 +67,8 @@ const GestionPedidos = ({ onNavigate }) => {
   const [timelineLoading, setTimelineLoading] = useState(false);
   const [timelineError, setTimelineError] = useState(null);
   const { csrfToken } = useAuth();
-  const ordersPerPage = 10;
-    const [pedidoParaPredecir, setPedidoParaPredecir] = useState(null);
+  const ordersPerPage = 10; 
+  const [pedidoParaPredecir, setPedidoParaPredecir] = useState(null);
 
   const estadosDisponibles = [
     "Todos",
@@ -84,37 +83,58 @@ const GestionPedidos = ({ onNavigate }) => {
     "Finalizado",
   ];
 
-  useEffect(() => {
-    const fetchPedidos = async () => {
-      try {
-        setLoading(true);
-        const response = await api.get("/api/pedidos/pedidos-general", {
-          headers: { "X-CSRF-Token": csrfToken },
-          withCredentials: true,
-        });
-        const result = response.data;
+  const fetchPedidos = async () => {
+    try {
+      setLoading(true);
+      const params = new URLSearchParams({
+        page: currentPage,
+        limit: ordersPerPage,
+      });
 
-        if (result.success) {
-          const transformedPedidos = result.data.map((pedido) => ({
-            ...pedido,
-            estado: capitalizeStatus(pedido.estado),
-            historialEstados: [], 
-          }));
-          setPedidos(transformedPedidos);
-
-          console.log("Datos de peidso genaral", transformedPedidos)
-        } else {
-          toast.error("Error al cargar los pedidos");
-        }
-      } catch (error) {
-        toast.error("Error de conexión al servidor");
-        console.error(error);
-      } finally {
-        setLoading(false);
+      if (filterEstado !== "Todos") {
+        params.append("estado", filterEstado.toLowerCase()); 
       }
-    };
+      if (searchTerm) {
+        params.append("search", searchTerm);
+      }
+      if (dateRange.start) {
+        params.append("startDate", dateRange.start);
+      }
+      if (dateRange.end) {
+        params.append("endDate", dateRange.end);
+      }
+
+      const response = await api.get(`/api/pedidos/pedidos-general?${params.toString()}`, {
+        headers: { "X-CSRF-Token": csrfToken },
+        withCredentials: true,
+      });
+      const result = response.data;
+
+      if (result.success) {
+        const transformedPedidos = result.data.map((pedido) => ({
+          ...pedido,
+          estado: capitalizeStatus(pedido.estado),
+          historialEstados: [], 
+        }));
+        setPedidos(transformedPedidos);
+        setTotalPedidos(result.totalPedidos);
+        setTotalPages(result.totalPages);
+
+        console.log("Datos de pedidos general", transformedPedidos);
+      } else {
+       
+      }
+    } catch (error) {
+     
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
     fetchPedidos();
-  }, [csrfToken]);
+  }, [currentPage, filterEstado, searchTerm, dateRange.start, dateRange.end, csrfToken]);
 
   useEffect(() => {
     const fetchTimelineData = async () => {
@@ -154,35 +174,6 @@ const GestionPedidos = ({ onNavigate }) => {
 
     fetchTimelineData();
   }, [showTimelineModal, csrfToken]);
-
-  const filteredPedidos = pedidos
-    .filter(
-      (pedido) => filterEstado === "Todos" || pedido.estado === filterEstado
-    )
-    .filter((pedido) => {
-      const search = searchTerm.toLowerCase();
-      return (
-        pedido.idRastreo.toLowerCase().includes(search) ||
-        pedido.cliente?.nombre?.toLowerCase().includes(search) ||
-        pedido.cliente?.direccion?.toLowerCase().includes(search) ||
-        ""
-      );
-    })
-    .filter((pedido) => {
-      if (!dateRange.start || !dateRange.end) return true;
-      const startDate = new Date(dateRange.start);
-      const endDate = new Date(dateRange.end);
-      const pedidoDate = new Date(pedido.fechas.inicio);
-      return pedidoDate >= startDate && pedidoDate <= endDate;
-    });
-
-  const indexOfLastOrder = currentPage * ordersPerPage;
-  const indexOfFirstOrder = indexOfLastOrder - ordersPerPage;
-  const currentPedidos = filteredPedidos.slice(
-    indexOfFirstOrder,
-    indexOfLastOrder
-  );
-  const totalPages = Math.ceil(filteredPedidos.length / ordersPerPage);
 
   const handlePageChange = (page) => {
     if (page >= 1 && page <= totalPages) setCurrentPage(page);
@@ -726,7 +717,7 @@ const GestionPedidos = ({ onNavigate }) => {
                     type="date"
                     value={dateRange.start}
                     onChange={(e) =>
-                      setDateRange({ ...dateRange, start: e.target.value })
+                      { setDateRange({ ...dateRange, start: e.target.value }); setCurrentPage(1); }
                     }
                     className="p-2 border rounded-lg bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200 w-full sm:w-36 focus:outline-none focus:ring-2 focus:ring-yellow-500 transition-all duration-200"
                   />
@@ -735,7 +726,7 @@ const GestionPedidos = ({ onNavigate }) => {
                     type="date"
                     value={dateRange.end}
                     onChange={(e) =>
-                      setDateRange({ ...dateRange, end: e.target.value })
+                      { setDateRange({ ...dateRange, end: e.target.value }); setCurrentPage(1); }
                     }
                     className="p-2 border rounded-lg bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200 w-full sm:w-36 focus:outline-none focus:ring-2 focus:ring-yellow-500 transition-all duration-200"
                   />
@@ -777,7 +768,7 @@ const GestionPedidos = ({ onNavigate }) => {
                 </tr>
               </thead>
               <tbody>
-                {currentPedidos.map((pedido, index) => {
+                {pedidos.map((pedido, index) => {
                   const estadosParaPredecir = ['Procesando', 'Enviando', 'Confirmado'];
                   const puedePredecir = estadosParaPredecir.includes(pedido.estado);
 
@@ -902,7 +893,7 @@ const GestionPedidos = ({ onNavigate }) => {
 
           <div className="flex flex-col sm:flex-row justify-between items-center mt-6 gap-4">
             <p className="text-sm text-gray-600 dark:text-gray-300">
-              Mostrando {indexOfFirstOrder + 1} - {Math.min(indexOfLastOrder, filteredPedidos.length)} de {filteredPedidos.length} pedidos
+              Mostrando {(currentPage - 1) * ordersPerPage + 1} - {Math.min(currentPage * ordersPerPage, totalPedidos)} de {totalPedidos} pedidos
             </p>
             <div className="flex items-center space-x-2">
               <button

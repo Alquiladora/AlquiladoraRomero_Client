@@ -1,5 +1,6 @@
 import { BrowserRouter as Router, Routes, Route,useNavigate } from 'react-router-dom';
 import { useContext, useEffect } from "react";
+
 //----------------------LAYOUTS--------------------------------------------
 import LayoutHeader from "../components/layout/LayHeader";
 import RoutePrivate from './RoutePrivate';
@@ -15,6 +16,8 @@ import {RecomendacionesProvider} from '../components/carrito/ContextRecomendacio
 
 import Error404 from './Errors/Error404';
 import Error500 from './Errors/Error500';
+
+import GlobalErrores from './Errors/GlobalErrores';
 
 
 
@@ -65,6 +68,7 @@ const Routerss = () => {
    
 
       <div className="dark:bg-gray-950 dark:text-white">
+    <GlobalErrores />
       <ServerErrorModal />
       
       <CartProvider>
@@ -112,6 +116,9 @@ const Routerss = () => {
           <Route path="*" element={<LayoutHeader><Error404 /></LayoutHeader>} />
 
           <Route path="/error500" element={<LayoutHeader><Error500 /></LayoutHeader>} />
+          <Route path="/repartidor/error500" element={<RoutePrivate rolesPermitidos={['repartidor']}> <LayoutHeader><Error500 /></LayoutHeader></RoutePrivate>} />
+          <Route path="/administrador/error500" element={<RoutePrivate rolesPermitidos={['administrador']}> <LayoutHeader><Error500 /></LayoutHeader></RoutePrivate>} />
+       
         
         </Routes>
        </RecomendacionesProvider>

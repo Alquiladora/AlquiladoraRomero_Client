@@ -168,10 +168,10 @@ const GestionPedidosDevueltos = ({ onNavigate }) => {
             }));
           setPedidos(filteredPedidos);
         } else {
-          toast.error("Error al cargar los pedidos devueltos");
+          
         }
       } catch (error) {
-        toast.error("Error de conexión al servidor");
+     
         console.error(error);
       } finally {
         setLoading(false);

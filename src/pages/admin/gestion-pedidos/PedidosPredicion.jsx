@@ -7,24 +7,6 @@ import { useAuth } from "../../../hooks/ContextAuth";
 
 // Component for the probability bar, for better visualization
 const ProbabilityBar = ({ probability }) => {
-    const percentage = (probability * 100).toFixed(1);
-    let barColor = "bg-green-500";
-    let textColor = "text-white";
-    if (probability > 0.80) {
-        barColor = "bg-red-500";
-    }
-
-    return (
-        <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-6 relative my-2">
-            <div
-                className={`h-6 rounded-full transition-all duration-500 ${barColor}`}
-                style={{ width: `${percentage}%` }}
-            ></div>
-            <span className={`absolute inset-0 flex items-center justify-center text-sm font-bold ${textColor}`}>
-                {percentage}%
-            </span>
-        </div>
-    );
 };
 
 const PredictCancelModal = ({ pedido, onClose }) => {
@@ -34,16 +16,14 @@ const PredictCancelModal = ({ pedido, onClose }) => {
     const [error, setError] = useState(null);
     const { csrfToken } = useAuth();
 
-    // Function to fetch prediction for a single order
-    const handleFetchPrediction = async () => {
+
+   const handleFetchPrediction = async () => {
         if (!pedido || !pedido.idPedido) return;
 
         try {
             setLoading(true);
             setError(null);
-            setPrediction(null); // Clear previous prediction
-
-            // Call the new endpoint for a single order
+            setPrediction(null); 
             const response = await api.get(
                 `/api/pedidos/predecir-pedido/${pedido.idPedido}`,
                 {
@@ -150,3 +130,23 @@ const PredictCancelModal = ({ pedido, onClose }) => {
 };
 
 export default PredictCancelModal;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

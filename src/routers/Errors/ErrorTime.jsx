@@ -1,36 +1,56 @@
-import React, { useEffect, useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { X, AlertTriangle } from 'lucide-react';
+import React, { useEffect, useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { X, AlertTriangle } from "lucide-react";
 
 const ServerErrorModal = () => {
   const [visible, setVisible] = useState(false);
+  const [modalTitle, setModalTitle] = useState("");
   const [modalMessage, setModalMessage] = useState("");
 
   useEffect(() => {
-    const handleSlowConnectionError = () => {
-      setModalMessage("La red está muy lenta o no hay conexión a Internet.");
-      setVisible(true);
+    // Mapea eventos a mensajes y títulos
+    const errorMap = {
+      "offline-error": {
+        title: "Sin Conexión a Internet",
+        message:
+          "Parece que tu dispositivo no tiene conexión a Internet. Por favor, verifica tu red e inténtalo de nuevo.",
+      },
+      "timeout-error": {
+        title: "Conexión Lenta",
+        message:
+          "La solicitud tardó demasiado en responder. Tu conexión podría ser lenta o el servidor está tardando en responder.",
+      },
+      "server-unreachable": {
+        title: "Servidor No Disponible",
+        message:
+          "No se pudo conectar con el servidor. Intenta nuevamente más tarde.",
+      },
     };
 
-    const handleTimeoutError = () => {
-      setModalMessage("El servidor no respondió a tiempo.");
-      setVisible(true);
+    // Función genérica para mostrar modal según evento
+    const handleErrorEvent = (event) => {
+      const { title, message } = errorMap[event.type] || {};
+      if (title && message) {
+        setModalTitle(title);
+        setModalMessage(message);
+        setVisible(true);
+      }
     };
 
-    window.addEventListener("slow-connection-error", handleSlowConnectionError);
-    window.addEventListener("timeout-error", handleTimeoutError);
+    // Agrega listeners
+    Object.keys(errorMap).forEach((eventName) =>
+      window.addEventListener(eventName, handleErrorEvent)
+    );
 
-    // Limpiar los listeners al desmontar el componente.
+    // Limpia listeners al desmontar
     return () => {
-      window.removeEventListener("slow-connection-error", handleSlowConnectionError);
-      window.removeEventListener("timeout-error", handleTimeoutError);
+      Object.keys(errorMap).forEach((eventName) =>
+        window.removeEventListener(eventName, handleErrorEvent)
+      );
     };
   }, []);
 
-  // Cierra el modal.
-  const handleClose = () => {
-    setVisible(false);
-  };
+  const handleClose = () => setVisible(false);
 
   return (
     <AnimatePresence>
@@ -55,12 +75,13 @@ const ServerErrorModal = () => {
             >
               <X className="w-6 h-6" />
             </button>
+
             <div className="flex flex-col items-center">
               <div className="mb-4">
                 <AlertTriangle className="w-16 h-16 text-red-500" />
               </div>
               <h2 className="text-2xl font-bold text-gray-800 dark:text-white mb-2">
-                Problema de Conexión
+                {modalTitle}
               </h2>
               <p className="text-center text-gray-700 dark:text-gray-300 mb-4">
                 {modalMessage}

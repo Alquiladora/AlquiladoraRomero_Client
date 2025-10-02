@@ -34,6 +34,8 @@ import {
   Calendar,
   CreditCard,
   Key,
+  ServerCrash, 
+  RefreshCw,
   Shield,
   MapPin,
   Phone,
@@ -84,6 +86,7 @@ const PerfilRepartidor = ({ totalUsuarios, totalRentas, totalFinalizado }) => {
   const [cambiosContrasena, setCambiosContrasena] = useState(0);
   const [bloqueado, setBloqueado] = useState(false);
   const [ estadisticas, setEstadisticas]= useState([]);
+  const [error, setError] = useState(null); 
 
   useEffect(() => {
     isMounted.current = true;
@@ -102,6 +105,7 @@ const PerfilRepartidor = ({ totalUsuarios, totalRentas, totalFinalizado }) => {
 
     try {
       setLoading(true);
+       setError(null);
       const response = await api.get(`api/usuarios/perfil`, {
         withCredentials: true,
         headers: { "X-CSRF-Token": csrfToken },
@@ -119,6 +123,7 @@ const PerfilRepartidor = ({ totalUsuarios, totalRentas, totalFinalizado }) => {
     } catch (error) {
       if (isMounted.current) {
         setLoading(false);
+         setError("No pudimos cargar tu información. Por favor, intenta de nuevo.");
       }
       console.error("❌ Error al obtener los datos del perfil:", error);
     }
@@ -498,6 +503,27 @@ const PerfilRepartidor = ({ totalUsuarios, totalRentas, totalFinalizado }) => {
      <CustomSpinner/>
     );
   }
+
+  if (error) {
+      return (
+        <div className="flex flex-col items-center justify-center min-h-[60vh] text-center px-4">
+          <ServerCrash className="w-16 h-16 text-red-500 mb-4" />
+          <h2 className="text-2xl font-bold text-slate-800 dark:text-white mb-2">
+            Oops, algo salió mal
+          </h2>
+          <p className="text-slate-600 dark:text-slate-400 mb-6 max-w-md">
+            {error}
+          </p>
+          <button
+            onClick={fetchProfileData}
+            className="flex items-center gap-2 px-6 py-3 rounded-full bg-slate-800 text-white font-semibold hover:bg-slate-700 transition-colors"
+          >
+            <RefreshCw className="w-5 h-5" />
+            Reintentar
+          </button>
+        </div>
+      );
+    }
 
   if (!usuariosC) {
     return (

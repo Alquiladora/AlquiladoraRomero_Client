@@ -4,7 +4,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faInfoCircle, faSearch, faSpinner } from "@fortawesome/free-solid-svg-icons";
 import { useAuth } from "../../../hooks/ContextAuth";
 import { toast } from "react-toastify";
-
+import CustomLoading from "../../../components/spiner/SpinerGlobal";
 const roleOptions = [
   { value: "administrador", label: "Administrador" },
   { value: "cliente", label: "Cliente" },
@@ -184,9 +184,8 @@ const Usuarios = () => {
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-4 border-b-4 border-yellow-500"></div>
-      </div>
+       <CustomLoading/>
+
     );
   }
 

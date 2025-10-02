@@ -1,5 +1,5 @@
 import React, { createContext, useState, useEffect, useRef } from "react";
-import api from "./AxiosConfig";
+import api from "../utils/AxiosConfig";
 
 export const ServerStatusContext = createContext();
 

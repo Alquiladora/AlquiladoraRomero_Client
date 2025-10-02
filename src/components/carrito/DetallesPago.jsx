@@ -216,9 +216,12 @@ const DetallesPago = ({ cartItems, total, rentalDate, returnDate, onBack }) => {
   };
 
   useEffect(() => {
-    // Verificar si regresó de Stripe Checkout
+    
     const urlParams = new URLSearchParams(window.location.search);
+
+    console.log("Datoa en viados de stripe ". urlParams )
     const sessionId = urlParams.get("session_id");
+    console.log("Datoa en viados de stripe sesion id ". sessionId )
     if (sessionId) {
       handlePaymentSuccess(sessionId, "success");
     }

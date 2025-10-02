@@ -11,8 +11,6 @@ import {
 import ComputerIcon from "@mui/icons-material/Computer";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
-import { Toaster } from "react-hot-toast";
-import AddressBook from "../../client/perfil/componetsPerfil/ListaDirecciones";
 
 import "primereact/resources/themes/saga-blue/theme.css";
 import "primereact/resources/primereact.min.css";
@@ -31,6 +29,8 @@ import {
   User,
   FileText,
   Clock,
+  ServerCrash, 
+  RefreshCw,
   Calendar,
   CreditCard,
   Key,
@@ -57,14 +57,11 @@ import PhoneIphoneIcon from "@mui/icons-material/PhoneIphone";
 import TabletMacIcon from "@mui/icons-material/TabletMac";
 import { useAuth } from "../../../hooks/ContextAuth";
 import api from "../../../utils/AxiosConfig";
-import axios from "axios";
+import CustomLoading from "../../../components/spiner/SpinerGlobal";
 
 const PerfilAdmin = ( {totalUsuarios , totalRentas, totalFinalizado}) => {
 
   const fileInputRef = useRef(null);
-  const [uploading, setUploading] = useState(false);
-  const [isMfaEnabled, setIsMfaEnabled] = useState(false);
-  const [profileData, setProfileData] = useState([]);
 
   const [usuariosC, setUsuariosC] = useState([]);
   const [alert, setAlert] = useState(null);
@@ -83,6 +80,7 @@ const PerfilAdmin = ( {totalUsuarios , totalRentas, totalFinalizado}) => {
   const controls = useAnimation();
   const [cambiosContrasena, setCambiosContrasena] = useState(0);
   const [bloqueado, setBloqueado] = useState(false);
+  const [error, setError] = useState(null); 
 
   useEffect(() => {
     isMounted.current = true;
@@ -100,6 +98,7 @@ const PerfilAdmin = ( {totalUsuarios , totalRentas, totalFinalizado}) => {
 
     try {
       setLoading(true);
+       setError(null);
       const response = await api.get(`api/usuarios/perfil`, {
         withCredentials: true,
         headers: { "X-CSRF-Token": csrfToken },
@@ -117,6 +116,7 @@ const PerfilAdmin = ( {totalUsuarios , totalRentas, totalFinalizado}) => {
     } catch (error) {
       if (isMounted.current) {
         setLoading(false);
+        setError("No pudimos cargar tu información. Por favor, intenta de nuevo.");
       }
       console.error("❌ Error al obtener los datos del perfil:", error);
     }
@@ -216,7 +216,7 @@ const PerfilAdmin = ( {totalUsuarios , totalRentas, totalFinalizado}) => {
     const formData = new FormData();
     formData.append("imagen", file);
 
-    setUploading(true);
+  
     setIsBlocked(true);
     console.log("Subiendo imagen");
     showAlert(
@@ -271,7 +271,7 @@ const PerfilAdmin = ( {totalUsuarios , totalRentas, totalFinalizado}) => {
       console.error("Error al actualizar la foto de perfil:", error);
       showAlert("error", "Error", "Error al actualizar la foto de perfil.");
     } finally {
-      setUploading(false);
+      
       setIsBlocked(false);
       setUploadProgress(0);
     }
@@ -279,8 +279,6 @@ const PerfilAdmin = ( {totalUsuarios , totalRentas, totalFinalizado}) => {
 
   //===================GUARDAR EN LA BASE DE DATOS=======================================================================
   const saveField = async (field, value) => {
-    console.log("VALOR DE FILE, VALUE", field, value);
-
     try {
       // Asegúrate de que el valor se envíe correctamente en el cuerpo de la solicitud
       const response = await api.patch(
@@ -335,9 +333,9 @@ const PerfilAdmin = ( {totalUsuarios , totalRentas, totalFinalizado}) => {
         }
       );
       setSessions(response.data);
-      console.log("Sesiones abiertas edilberto:", response.data);
+      
     } catch (error) {
-      console.error("Error al obtener las sesiones activas:", error);
+  
     }
   };
 
@@ -384,7 +382,7 @@ const PerfilAdmin = ( {totalUsuarios , totalRentas, totalFinalizado}) => {
       fetchSessions();
       intervalId = setInterval(() => {
         fetchSessions();
-      }, 8000);
+      }, 2000);
     }
 
     return () => {
@@ -403,6 +401,7 @@ const PerfilAdmin = ( {totalUsuarios , totalRentas, totalFinalizado}) => {
     if (deviceType === "iPad") return <TabletMacIcon />;
     return <ComputerIcon />;
   };
+
   const formatDateForDisplay = (dateString, format = "dd-MM-yyyy") => {
     if (!dateString) return "";
 
@@ -485,18 +484,33 @@ const PerfilAdmin = ( {totalUsuarios , totalRentas, totalFinalizado}) => {
 
   if (loading) {
     return (
-      <Grid
-        container
-        justifyContent="center dark:bg-gray-950 dark:text-white"
-        sx={{ mt: 4, mb: 4 }}
-      >
-        <CircularProgress size={50} />
-        <Typography variant="h6" sx={{ mt: 2 }}>
-          Cargando datos del perfil...
-        </Typography>
-      </Grid>
+      <>
+     < CustomLoading/>
+      
+      </>
     );
   }
+
+    if (error) {
+        return (
+          <div className="flex flex-col items-center justify-center min-h-[60vh] text-center px-4">
+            <ServerCrash className="w-16 h-16 text-red-500 mb-4" />
+            <h2 className="text-2xl font-bold text-slate-800 dark:text-white mb-2">
+              Oops, algo salió mal
+            </h2>
+            <p className="text-slate-600 dark:text-slate-400 mb-6 max-w-md">
+              {error}
+            </p>
+            <button
+              onClick={fetchProfileData}
+              className="flex items-center gap-2 px-6 py-3 rounded-full bg-slate-800 text-white font-semibold hover:bg-slate-700 transition-colors"
+            >
+              <RefreshCw className="w-5 h-5" />
+              Reintentar
+            </button>
+          </div>
+        );
+      }
 
   if (!usuariosC) {
     return (

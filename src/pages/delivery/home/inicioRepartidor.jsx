@@ -20,8 +20,9 @@ import {
 import api from "../../../utils/AxiosConfig";
 import { useAuth } from "../../../hooks/ContextAuth";
 import CustomLoading from "../../../components/spiner/SpinerGlobal";
+import GraficasRepartidor from "./DraficasRepartidor";
 
-const InicioRepartidor = () => {
+const InicioRepartidor = ({ datosRepartidor }) => {
   const [loading, setLoading] = useState(true);
   const [repartidor, setRepartidor] = useState({
     nombre: "",
@@ -49,6 +50,7 @@ const InicioRepartidor = () => {
     { name: "Finalizado", value: estadisticas.totalFinalizado, color: "#065F46" },
   ];
 
+  console.log("Datos recibidos desde el enpoit de datos de repartidor ", datosRepartidor)
   // Datos para el gráfico radial de rendimiento mensual
   const radialData = pedidosFinalizadosPorMes.map((item, index) => ({
     name: item.mes,
@@ -97,10 +99,10 @@ const InicioRepartidor = () => {
 
           setPedidosFinalizadosPorMes(data.pedidosFinalizadosPorMes || []);
         } else {
-          console.log("Unexpected response:", response);
+
         }
       } catch (error) {
-        console.error("Error fetching repartidor data:", error.response?.data || error.message || error);
+
         setRepartidor({
           nombre: user?.nombre || "Sin nombre",
           apellidoP: "",
@@ -137,255 +139,86 @@ const InicioRepartidor = () => {
     return <CustomLoading />;
   }
 
+  if (!datosRepartidor) {
+    return <div>Cargando datos del repartidor...</div>;
+  }
+
   return (
     <div className="min-h-screen bg-gray-50 text-gray-900 dark:bg-gray-900 dark:text-gray-100 transition-colors duration-300">
       {/* Header */}
       <header className="bg-white shadow-xl border-b border-gray-200 dark:bg-gray-800 dark:border-gray-700 p-6 md:p-8">
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row md:items-center md:justify-between">
           <div className="flex items-center space-x-6">
+
             <div className="relative">
               <div className="w-20 h-20 bg-gradient-to-br from-blue-700 to-blue-900 rounded-full flex items-center justify-center text-white text-3xl font-bold shadow-lg">
-                {repartidor.nombre.charAt(0) || "R"}
+                <img
+                  src={
+                    datosRepartidor.fotoPerfil ||
+                    `https://ui-avatars.com/api/?name=${encodeURIComponent(
+                      datosRepartidor.nombre ? datosRepartidor.nombre.charAt(0) : "D"
+                    )}&background=0D6EFD&color=fff`
+                  }
+                  alt="Foto de Perfil"
+                  className="h-19 w-19 rounded-full object-cover border-2 border-white dark:border-gray-300 hover:scale-105 transition-transform duration-200"
+                />
               </div>
               <div
-                className={`absolute -bottom-2 -right-2 w-6 h-6 rounded-full border-2 border-white dark:border-gray-800 ${
-                  repartidor.cuentaActiva ? "bg-emerald-500" : "bg-red-500"
-                }`}
+                className={`absolute -bottom-2 -right-2 w-6 h-6 rounded-full border-2 border-white dark:border-gray-800 ${repartidor.cuentaActiva ? "bg-emerald-500" : "bg-red-500"
+                  }`}
               ></div>
             </div>
+
             <div>
+              {/* El nombre se mantiene como el título principal */}
               <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100 md:text-3xl">
                 {repartidor.nombre} {repartidor.apellidoP} {repartidor.apellidoM}
               </h1>
-              <p className="text-sm font-medium text-gray-600 dark:text-gray-400 md:text-base">
-                Estado: {repartidor.cuentaActiva ? "Activo" : "Desactivado"}
-              </p>
-              <p className="text-xs text-gray-500 dark:text-gray-400 md:text-sm">
-                {repartidor.cuentaActiva
-                  ? `Activado desde: ${new Date(repartidor.fechaAlta).toLocaleDateString()}`
-                  : repartidor.fechaBaja
-                  ? `Desactivado desde: ${new Date(repartidor.fechaBaja).toLocaleDateString()}`
-                  : "Sin fecha de baja"}
-              </p>
+
+              {/* Contenedor para la información secundaria con espaciado */}
+              <div className="mt-2 flex flex-col items-start space-y-2">
+
+                {/* 1. BADGE DE ESTADO CON INDICADOR DE COLOR (SIN ICONOS) */}
+                <div
+                  className={`inline-flex items-center rounded-full px-3 py-1 text-sm font-semibold
+        ${repartidor.cuentaActiva
+                      ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200"
+                      : "bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300"
+                    }`}
+                >
+                  {/* Pequeño círculo de color que sustituye al icono */}
+                  <span
+                    className={`w-2 h-2 mr-2 rounded-full
+          ${repartidor.cuentaActiva ? "bg-green-500" : "bg-gray-500"}`}
+                  ></span>
+
+                  {/* Texto del estado */}
+                  <span>
+                    {repartidor.cuentaActiva ? "Activo" : "Desactivado"}
+                  </span>
+                </div>
+
+                {/* 2. FECHA CON FORMATO MEJORADO */}
+                <p className="text-sm text-gray-500 dark:text-gray-400">
+                  {repartidor.cuentaActiva
+                    ? `Activado desde: ${new Date(repartidor.fechaAlta).toLocaleDateString('es-MX', { day: 'numeric', month: 'long', year: 'numeric' })}`
+                    : repartidor.fechaBaja
+                      ? `Desactivado desde: ${new Date(repartidor.fechaBaja).toLocaleDateString('es-MX', { day: 'numeric', month: 'long', year: 'numeric' })}`
+                      : "Sin fecha de baja"}
+                </p>
+
+              </div>
             </div>
+
           </div>
         </div>
       </header>
 
-      {/* Estadísticas */}
-      <section className="max-w-7xl mx-auto p-6 md:p-8">
-        <h2 className="text-xl font-semibold mb-6 text-gray-800 dark:text-gray-200 md:text-2xl">
-          Resumen de Desempeño
-        </h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          <div className="bg-white p-5 rounded-xl shadow-md border border-gray-100 hover:shadow-lg transition-shadow duration-300 dark:bg-gray-800 dark:border-gray-700">
-            <div className="flex flex-col items-center">
-              <div className="w-14 h-14 bg-blue-100 rounded-full flex items-center justify-center mb-4 dark:bg-blue-900/50">
-                <Clock className="w-6 h-6 text-blue-700 dark:text-blue-300" />
-              </div>
-              <span className="text-2xl font-bold text-gray-900 dark:text-gray-100">{estadisticas.totalRecogiendo}</span>
-              <span className="text-sm text-gray-600 dark:text-gray-400">Recogiendo</span>
-            </div>
-          </div>
-          <div className="bg-white p-5 rounded-xl shadow-md border border-gray-100 hover:shadow-lg transition-shadow duration-300 dark:bg-gray-800 dark:border-gray-700">
-            <div className="flex flex-col items-center">
-              <div className="w-14 h-14 bg-amber-100 rounded-full flex items-center justify-center mb-4 dark:bg-amber-900/50">
-                <Package className="w-6 h-6 text-amber-700 dark:text-amber-300" />
-              </div>
-              <span className="text-2xl font-bold text-gray-900 dark:text-gray-100">{estadisticas.totalEnAlquiler}</span>
-              <span className="text-sm text-gray-600 dark:text-gray-400">En Alquiler</span>
-            </div>
-          </div>
-          <div className="bg-white p-5 rounded-xl shadow-md border border-gray-100 hover:shadow-lg transition-shadow duration-300 dark:bg-gray-800 dark:border-gray-700">
-            <div className="flex flex-col items-center">
-              <div className="w-14 h-14 bg-red-100 rounded-full flex items-center justify-center mb-4 dark:bg-red-900/50">
-                <Truck className="w-6 h-6 text-red-700 dark:text-red-300" />
-              </div>
-              <span className="text-2xl font-bold text-gray-900 dark:text-gray-100">{estadisticas.totalEnviando}</span>
-              <span className="text-sm text-gray-600 dark:text-gray-400">Enviando</span>
-            </div>
-          </div>
-          <div className="bg-white p-5 rounded-xl shadow-md border border-gray-100 hover:shadow-lg transition-shadow duration-300 dark:bg-gray-800 dark:border-gray-700">
-            <div className="flex flex-col items-center">
-              <div className="w-14 h-14 bg-emerald-100 rounded-full flex items-center justify-center mb-4 dark:bg-emerald-900/50">
-                <CheckCircle className="w-6 h-6 text-emerald-700 dark:text-emerald-300" />
-              </div>
-              <span className="text-2xl font-bold text-gray-900 dark:text-gray-100">{estadisticas.totalFinalizado}</span>
-              <span className="text-sm text-gray-600 dark:text-gray-400">Finalizado</span>
-            </div>
-          </div>
-        </div>
-      </section>
+    
+       < GraficasRepartidor  estadisticas={estadisticas} />
 
-      {/* Gráficos */}
-      <section className="max-w-7xl mx-auto p-6 md:p-8">
-        <h2 className="text-xl font-semibold mb-6 text-gray-800 dark:text-gray-200 flex items-center md:text-2xl">
-          <BarChart2 className="w-6 h-6 mr-3" />
-          Análisis de Rendimiento
-        </h2>
-        {!hasDataForCharts && (
-          <div className="bg-white p-6 rounded-xl shadow-md border border-gray-100 dark:bg-gray-800 dark:border-gray-700 text-center">
-            <p className="text-gray-500 dark:text-gray-400 text-base md:text-lg">No hay datos disponibles para mostrar.</p>
-          </div>
-        )}
-        {hasDataForCharts && (
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {/* Gráfico circular - Distribución de pedidos */}
-            <div className="bg-white p-6 rounded-xl shadow-md border border-gray-100 dark:bg-gray-800 dark:border-gray-700">
-              <h3 className="text-lg font-medium mb-4 text-gray-700 dark:text-gray-300">Distribución de Pedidos</h3>
-              <div className="h-64">
-                <ResponsiveContainer width="100%" height="100%">
-                  <PieChart>
-                    <Pie
-                      data={pieData}
-                      cx="50%"
-                      cy="50%"
-                      innerRadius={40}
-                      outerRadius={80}
-                      paddingAngle={2}
-                      dataKey="value"
-                      labelLine={false}
-                      label={({ name, percent }) =>
-                        percent > 0.05 ? `${name}: ${(percent * 100).toFixed(1)}%` : null
-                      }
-                    >
-                      {pieData.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={entry.color} />
-                      ))}
-                    </Pie>
-                    <Tooltip
-                      contentStyle={{
-                        backgroundColor: "#fff",
-                        border: "1px solid #e5e7eb",
-                        borderRadius: "8px",
-                        fontSize: "14px",
-                        boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
-                      }}
-                      wrapperStyle={{ backgroundColor: "transparent" }}
-                      className="dark:bg-gray-800 dark:border-gray-600 dark:text-gray-100"
-                    />
-                    <Legend
-                      verticalAlign="bottom"
-                      height={48}
-                      iconType="circle"
-                      wrapperStyle={{ fontSize: "14px", color: "#374151" }}
-                      className="dark:text-gray-300"
-                    />
-                  </PieChart>
-                </ResponsiveContainer>
-              </div>
-            </div>
 
-            {/* Gráfico radial - Pedidos finalizados por mes */}
-            <div className="bg-white p-6 rounded-xl shadow-md border border-gray-100 dark:bg-gray-800 dark:border-gray-700">
-              <h3 className="text-lg font-medium mb-4 text-gray-700 dark:text-gray-300">Pedidos Finalizados por Mes</h3>
-              <div className="h-64">
-                <ResponsiveContainer width="100%" height="100%">
-                  <RadialBarChart
-                    cx="50%"
-                    cy="50%"
-                    innerRadius="20%"
-                    outerRadius="80%"
-                    data={radialData}
-                    startAngle={0}
-                    endAngle={360}
-                  >
-                    <RadialBar
-                      minAngle={15}
-                      label={{ position: "inside", fill: "#fff", fontSize: 12 }}
-                      background={{ fill: "#e5e7eb", dark: { fill: "#4b5563" } }}
-                      dataKey="value"
-                    />
-                    <Tooltip
-                      contentStyle={{
-                        backgroundColor: "#fff",
-                        border: "1px solid #e5e7eb",
-                        borderRadius: "8px",
-                        fontSize: "14px",
-                        boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
-                      }}
-                      wrapperStyle={{ backgroundColor: "transparent" }}
-                      className="dark:bg-gray-800 dark:border-gray-600 dark:text-gray-100"
-                    />
-                  </RadialBarChart>
-                </ResponsiveContainer>
-              </div>
-            </div>
 
-            {/* Gráfico radial - Valoración promedio */}
-            <div className="bg-white p-6 rounded-xl shadow-md border border-gray-100 dark:bg-gray-800 dark:border-gray-700">
-              <h3 className="text-lg font-medium mb-4 text-gray-700 dark:text-gray-300">Puntuación Promedio</h3>
-              {estadisticas.promedioValoracion > 0 ? (
-                <div className="h-64 flex items-center justify-center">
-                  <ResponsiveContainer width="80%" height="80%">
-                    <RadialBarChart
-                      cx="50%"
-                      cy="50%"
-                      innerRadius="30%"
-                      outerRadius="80%"
-                      data={valoracionData}
-                    >
-                      <RadialBar
-                        label={{ fill: "#fff", position: "inside", fontSize: 14 }}
-                        background={{ fill: "#e5e7eb", dark: { fill: "#4b5563" } }}
-                        dataKey="value"
-                        cornerRadius={15}
-                      />
-                      <Tooltip
-                        contentStyle={{
-                          backgroundColor: "#fff",
-                          border: "1px solid #e5e7eb",
-                          borderRadius: "8px",
-                          fontSize: "14px",
-                          boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
-                        }}
-                        wrapperStyle={{ backgroundColor: "transparent" }}
-                        className="dark:bg-gray-800 dark:border-gray-600 dark:text-gray-100"
-                      />
-                      <text
-                        x="50%"
-                        y="50%"
-                        textAnchor="middle"
-                        dominantBaseline="middle"
-                        className="text-gray-900 font-bold dark:text-gray-100"
-                        style={{ fontSize: "20px" }}
-                      >
-                        {estadisticas.promedioValoracion.toFixed(1)}
-                      </text>
-                    </RadialBarChart>
-                  </ResponsiveContainer>
-                </div>
-              ) : (
-                <p className="text-center text-gray-500 dark:text-gray-400 text-base md:text-lg">Sin datos</p>
-              )}
-            </div>
-          </div>
-        )}
-      </section>
-
-      {/* Métricas adicionales */}
-      <section className="max-w-7xl mx-auto p-6 md:p-8">
-        <h2 className="text-xl font-semibold mb-6 text-gray-800 dark:text-gray-200 flex items-center md:text-2xl">
-          <Target className="w-6 h-6 mr-3" />
-          Indicadores de Rendimiento
-        </h2>
-        <div className="grid grid-cols-1 gap-6">
-          <div className="bg-white p-6 rounded-xl shadow-md border border-gray-100 hover:shadow-lg transition-shadow duration-300 dark:bg-gray-800 dark:border-gray-700">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-base font-medium text-gray-600 dark:text-gray-400">Promedio Semanal</p>
-                <p className="text-3xl font-bold text-gray-900 dark:text-gray-100 mt-2">
-                  {(estadisticas.totalFinalizado / 7).toFixed(1)}
-                </p>
-                <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Entregas por día</p>
-              </div>
-              <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center dark:bg-blue-900/50">
-                <Target className="w-8 h-8 text-blue-700 dark:text-blue-300" />
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
     </div>
   );
 };

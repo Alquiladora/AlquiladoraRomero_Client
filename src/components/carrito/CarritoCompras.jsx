@@ -4,10 +4,10 @@ import {
   TrashIcon,
   PlusIcon,
   MinusIcon,
-  PaintBrushIcon,
-  WrenchScrewdriverIcon,
+  ColorSwatchIcon,
+  CogIcon,
   ClockIcon,
-} from "@heroicons/react/24/outline";
+} from "@heroicons/react/outline";
 import { useSocket } from "../../utils/Socket";
 import { useAuth } from "../../hooks/ContextAuth";
 import api from "../../utils/AxiosConfig";
@@ -949,7 +949,7 @@ function CarritoRentaSheinStyle() {
                                 : ""
                             }`}
                           >
-                            <PaintBrushIcon className="h-4 w-4 mr-1" />
+                            <ColorSwatchIcon className="h-4 w-4 mr-1" />
                             Color: {item.color}
                           </span>
                           <span
@@ -959,7 +959,7 @@ function CarritoRentaSheinStyle() {
                                 : ""
                             }`}
                           >
-                            <WrenchScrewdriverIcon className="h-4 w-4 mr-1" />
+                            <CogIcon className="h-4 w-4 mr-1" />
                             Material: {item.material}
                           </span>
                         </div>

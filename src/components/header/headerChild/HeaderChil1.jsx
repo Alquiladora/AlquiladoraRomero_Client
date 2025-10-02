@@ -7,6 +7,7 @@ import {
   XIcon,
   ShoppingCartIcon,
   TruckIcon,
+   ExclamationCircleIcon,
 } from "@heroicons/react/outline";
 import { LoginLink, IconoPerfil } from "../btnLogin/LoginClient";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -225,14 +226,24 @@ const HeaderChil1 = () => {
 
             {/* Cart Message */}
             {showMessage && (
-              <div className="absolute top-full mt-10 left-1/2 transform -translate-x-1/2 bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200 px-4 py-2 rounded-md shadow-lg border border-red-300 dark:border-red-700 animate-fade-in-out w-64 text-sm z-30">
-                Debes ser cliente para acceder al carrito.{" "}
-                <Link to="/registro" className="underline hover:text-red-600">
+        <div className="absolute top-full mt-4 -right-4 sm:left-1/2 sm:-translate-x-1/2 bg-white dark:bg-slate-800 p-4 rounded-lg shadow-2xl border dark:border-slate-700 animate-fade-in-down w-[calc(100vw-5rem)] max-w-xs sm:w-72 z-30">
+          <div className="absolute bottom-full right-6 sm:left-1/2 sm:-translate-x-1/2 w-4 h-4">
+            <div className="w-4 h-4 bg-white dark:bg-slate-800 transform rotate-45 border-l border-t border-transparent dark:border-l-slate-700 dark:border-t-slate-700"></div>
+          </div>
+          <div className="flex items-start space-x-3">
+            <ExclamationCircleIcon className="w-6 h-6 text-red-500 flex-shrink-0" />
+            <div>
+              <p className="font-semibold text-sm text-slate-800 dark:text-white">Acceso Restringido</p>
+              <p className="text-sm text-slate-600 dark:text-slate-300 mt-1">
+                Debes ser cliente para ver el carrito.{" "}
+                <Link to="/registro" className="text-blue-500 hover:underline">
                   Regístrate aquí
-                </Link>
-                .
-              </div>
-            )}
+                </Link>.
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
           </div>
 
           {/* Help Button */}
@@ -266,9 +277,9 @@ const HeaderChil1 = () => {
       </div>
 
       {/* Mobile Search Bar */}
-      <div className="lg:hidden pb-3">
+      {/* <div className="lg:hidden pb-3">
         <SearchBar />
-      </div>
+      </div> */}
     </div>
 
     {/* Mobile Menu */}
@@ -379,7 +390,7 @@ const HeaderChil1 = () => {
             </Link>
           )}
           
-          <button
+          {/* <button
             className="flex items-center space-x-3 text-base font-medium text-gray-900 dark:text-gray-100 hover:text-blue-500 transition-all duration-300 py-2"
             onClick={() => {
               setIsChatboxOpen(!isChatboxOpen);
@@ -388,7 +399,7 @@ const HeaderChil1 = () => {
           >
             <FontAwesomeIcon icon={faHeadset} className="w-5 h-5" />
             <span>Ayuda</span>
-          </button>
+          </button> */}
           
           <div className="flex items-center justify-between pt-4 border-t border-gray-200 dark:border-gray-700">
             <div className="flex items-center space-x-3">
@@ -403,7 +414,7 @@ const HeaderChil1 = () => {
     )}
 
     {/* Chatbox */}
-    {isChatboxOpen && <Chatbox onClose={() => setIsChatboxOpen(false)} />}
+    {/* {isChatboxOpen && <Chatbox onClose={() => setIsChatboxOpen(false)} />} */}
 
     {/* Custom Styles */}
     <style jsx>{`

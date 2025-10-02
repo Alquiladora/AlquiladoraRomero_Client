@@ -101,17 +101,26 @@ const MenuHomeDelivery = () => {
     }
   }, [location.search]);
 
-  const handleLogout = () => {
-    // Perform immediate state cleanup and navigation
-    setDeliveryData({});
-    setTotalDeliveries(0);
-    setFotoEmpresa("");
-    navigate("/login");
-    // Call logout in the background
-    logout().catch((error) => {
-      console.error("Error during logout:", error);
-    });
-  };
+
+
+  const handleLogout = async () => { 
+   try {
+     await logout(); 
+
+    
+     setDeliveryData({});
+     setTotalDeliveries(0);
+     setFotoEmpresa("");
+
+     navigate("/login"); 
+     
+   } catch (error) {
+     console.error("Error during logout:", error);
+
+   }
+ };
+
+
 
   useEffect(() => {
     if (activeTab === "Cerrar Sesión") {
@@ -151,7 +160,7 @@ const MenuHomeDelivery = () => {
     navigate(`?tab=${tabName}`);
   };
 
-  // Handle scroll to show/hide button
+  
   useEffect(() => {
     const handleScroll = () => {
       if (window.scrollY > 300) {
@@ -165,7 +174,7 @@ const MenuHomeDelivery = () => {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  // Scroll to top function
+
   const scrollToTop = () => {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
@@ -194,7 +203,8 @@ const MenuHomeDelivery = () => {
   const renderContent = () => {
     switch (activeTab) {
       case "Inicio":
-        return <InicioRepartidor />;
+        return <InicioRepartidor 
+        datosRepartidor = {deliveryData}/>;
       case "Perfil":
         return (
           <PerfilRepartidor
@@ -344,21 +354,23 @@ const MenuHomeDelivery = () => {
               </h1>
             </div>
           </div>
+
           <div className="flex items-center space-x-2 sm:space-x-3 flex-shrink-0 ml-2">
             <ToggleThemeButton />
             <button
               className="relative p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors flex-shrink-0"
               aria-label="Notifications"
             >
-              <FontAwesomeIcon
+              {/* <FontAwesomeIcon
                 icon={faBell}
                 className="w-5 h-5 sm:w-6 sm:h-6 text-gray-600 dark:text-gray-300"
               />
               <span className="absolute -top-1 -right-1 w-4 h-4 sm:w-5 sm:h-5 bg-red-500 text-white text-xs font-semibold rounded-full flex items-center justify-center">
-                {totalDeliveries}
-              </span>
+                {totalDeliveries} 1
+              </span> */}
             </button>
           </div>
+          
         </header>
 
         <main className="p-3 sm:p-4 lg:p-6 max-w-7xl w-full mx-auto flex-1">

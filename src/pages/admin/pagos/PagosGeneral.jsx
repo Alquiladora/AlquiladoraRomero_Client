@@ -47,8 +47,8 @@ const PaymentModal = ({ selectedOrder, onClose, onPaymentRegistered }) => {
         setPayments([]);
       }
     } catch (error) {
-      console.error("Error fetching payments:", error);
-      toast.error("Error al cargar los pagos.");
+    
+      
       setPayments([]);
     } finally {
       setIsLoadingPayments(false);
@@ -114,9 +114,16 @@ const PaymentModal = ({ selectedOrder, onClose, onPaymentRegistered }) => {
     }
   };
 
-  const totalPaid = payments.reduce((sum, payment) => sum + (parseFloat(payment.monto) || 0), 0);
-  const totalPagar = parseFloat(selectedOrder?.totalPagar) || 0;
-  const remainingBalance = totalPagar - totalPaid;
+
+
+const totalPagar = parseFloat(selectedOrder?.totalPagar || '0') || 0; 
+
+const totalPagado = parseFloat(selectedOrder?.pagos?.totalPagado || '0') || 0;
+
+
+const remainingBalance = totalPagar - totalPagado;
+
+
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60 p-4 dark:bg-black dark:bg-opacity-70 backdrop-blur-sm">
@@ -129,7 +136,7 @@ const PaymentModal = ({ selectedOrder, onClose, onPaymentRegistered }) => {
             <h2 className="text-xl font-bold text-white">
               Pagos del Pedido #{selectedOrder?.idRastreo || "N/A"}
             </h2>
-          </div>
+          </div>  
           <button
             onClick={onClose}
             className="bg-white/20 hover:bg-white/30 rounded-full p-2 text-white transition"
@@ -166,7 +173,7 @@ const PaymentModal = ({ selectedOrder, onClose, onPaymentRegistered }) => {
               <div>
                 <p className="text-sm text-gray-600 dark:text-gray-400">Total Pagado</p>
                 <p className="font-semibold text-green-600 dark:text-green-400">
-                  ${totalPaid.toFixed(2)}
+                  $ {Number(selectedOrder?.pagos?.totalPagado).toFixed(2) ?? '0.00'}
                 </p>
               </div>
               <div>
@@ -197,99 +204,105 @@ const PaymentModal = ({ selectedOrder, onClose, onPaymentRegistered }) => {
               </div>
             </div>
           </div>
-          <div className="mb-6">
-            <div className="flex justify-between items-center mb-4">
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center">
-                <FontAwesomeIcon icon={faMoneyCheckAlt} className="mr-2 text-green-500" />
-                Historial de Pagos
-              </h3>
-              
-            </div>
-            {isLoadingPayments ? (
-              <CustomLoading />
-            ) : payments.length === 0 ? (
-              <div className="bg-gray-100 dark:bg-gray-800 rounded-lg p-4 text-center border border-gray-200 dark:border-gray-600">
-                <FontAwesomeIcon
-                  icon={faExclamationCircle}
-                  className="text-4xl text-yellow-500 dark:text-yellow-400 mb-2"
-                />
-                <p className="text-gray-600 dark:text-gray-300">
-                  No hay pagos registrados para este pedido.
-                </p>
-              </div>
-            ) : (
-              <div className="overflow-x-auto rounded-lg border border-gray-200 dark:border-gray-600">
-                <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                  <thead className="bg-green-100 dark:bg-green-800">
-                    <tr>
-                      {[
-                        "Fecha",
-                        "Forma de Pago",
-                        "Método de Pago",
-                        "Monto",
-                        "Estado",
-                        "Detalles",
-                      ].map((header, idx) => (
-                        <th
-                          key={idx}
-                          className="px-4 py-3 text-left text-xs font-semibold text-gray-700 dark:text-gray-200 uppercase tracking-wide"
-                        >
-                          {header}
-                        </th>
-                      ))}
-                    </tr>
-                  </thead>
-                  <tbody className="bg-white dark:bg-gray-900 divide-y divide-gray-200 dark:divide-gray-700">
-                    {payments.map((payment) => (
-                      <tr
-                        key={payment.idPago}
-                        className="hover:bg-green-50 dark:hover:bg-green-900/20 transition"
-                      >
-                        <td className="px-4 py-3 text-sm text-gray-900 dark:text-white">
-                          {new Date(payment.fechaPago).toLocaleDateString("es-ES", {
-                            year: "numeric",
-                            month: "short",
-                            day: "numeric",
-                            hour: "2-digit",
-                            minute: "2-digit",
-                          }) || "N/A"}
-                        </td>
-                        <td className="px-4 py-3 text-sm text-gray-900 dark:text-white">
-                          {payment.formaPago || "N/A"}
-                        </td>
-                        <td className="px-4 py-3 text-sm text-gray-900 dark:text-white">
-                          {payment.metodoPago || "N/A"}
-                        </td>
-                        <td className="px-4 py-3 text-sm text-green-600 dark:text-green-400 font-semibold">
-                          ${parseFloat(payment.monto).toFixed(2) || "0.00"}
-                        </td>
-                        <td className="px-4 py-3 text-sm">
-                          <span
-                            className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold ${
-                              payment.estadoPago === "completado"
-                                ? "bg-green-200 text-green-800 dark:bg-green-700 dark:text-green-200"
-                                : payment.estadoPago === "parcial"
-                                ? "bg-yellow-200 text-yellow-800 dark:bg-yellow-700 dark:text-yellow-200"
-                                : "bg-red-200 text-red-800 dark:bg-red-700 dark:text-red-200"
-                            }`}
-                          >
-                            <FontAwesomeIcon icon={faCheckCircle} className="mr-1" />
-                            {payment.estadoPago || "pendiente"}
-                          </span>
-                        </td>
-                        <td
-                          className="px-4 py-3 text-sm text-gray-900 dark:text-white max-w-xs truncate"
-                          title={payment.detallesPago || "Sin detalles"}
-                        >
-                          {payment.detallesPago || "Sin detalles"}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            )}
-          </div>
+        
+        <div className="mb-6">
+  <div className="flex justify-between items-center mb-4">
+    <h3 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center">
+      <FontAwesomeIcon icon={faMoneyCheckAlt} className="mr-2 text-green-500" />
+      Historial de Pagos
+    </h3>
+  </div>
+
+  {/* Aseguramos que selectedOrder y listaPagos existan antes de intentar iterar */}
+  {isLoadingPayments ? (
+    <CustomLoading />
+  ) : selectedOrder?.pagos?.listaPagos?.length === 0 || !selectedOrder ? (
+    <div className="bg-gray-100 dark:bg-gray-800 rounded-lg p-4 text-center border border-gray-200 dark:border-gray-600">
+      <FontAwesomeIcon
+        icon={faExclamationCircle}
+        className="text-4xl text-yellow-500 dark:text-yellow-400 mb-2"
+      />
+      <p className="text-gray-600 dark:text-gray-300">
+        No hay pagos registrados para este pedido.
+      </p>
+    </div>
+  ) : (
+    <div className="overflow-x-auto rounded-lg border border-gray-200 dark:border-gray-600">
+      <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+        <thead className="bg-green-100 dark:bg-green-800">
+          <tr>
+            {[
+              "Fecha",
+              "Forma de Pago",
+              "Método de Pago",
+              "Monto",
+              "Estado",
+              // "Detalles", <-- Columna eliminada si no se usa
+            ].map((header, idx) => (
+              <th
+                key={idx}
+                className="px-4 py-3 text-left text-xs font-semibold text-gray-700 dark:text-gray-200 uppercase tracking-wide"
+              >
+                {header}
+              </th>
+            ))}
+          </tr>
+        </thead>
+        <tbody className="bg-white dark:bg-gray-900 divide-y divide-gray-200 dark:divide-gray-700">
+          {/* CORRECCIÓN CLAVE: Iterar sobre selectedOrder.pagos.listaPagos.
+            Cada 'payment' ahora es un objeto individual de la lista de pagos. 
+          */}
+          {selectedOrder.pagos.listaPagos.map((payment) => (
+            <tr
+              key={payment.idPago} // Usamos idPago como clave única
+              className="hover:bg-green-50 dark:hover:bg-green-900/20 transition"
+            >
+              <td className="px-4 py-3 text-sm text-gray-900 dark:text-white">
+                {/* Formateamos la fecha, usando encadenamiento opcional si es necesario, 
+                  aunque el error más común era el acceso incorrecto 
+                */}
+                {payment.fechaPago 
+                  ? new Date(payment.fechaPago).toLocaleDateString("es-ES", {
+                      year: "numeric",
+                      month: "short",
+                      day: "numeric",
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    }) 
+                  : "N/A"}
+              </td>
+              <td className="px-4 py-3 text-sm text-gray-900 dark:text-white">
+                {payment.formaPago || "N/A"}
+              </td>
+              <td className="px-4 py-3 text-sm text-gray-900 dark:text-white">
+                {payment.metodoPago || "N/A"}
+              </td>
+              <td className="px-4 py-3 text-sm text-green-600 dark:text-green-400 font-semibold">
+                {/* Convertimos a número y aplicamos toFixed(2) */}
+                ${Number(payment.monto || 0).toFixed(2)} 
+              </td>
+              <td className="px-4 py-3 text-sm">
+                <span
+                  className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold ${
+                    payment.estadoPago === "completado"
+                      ? "bg-green-200 text-green-800 dark:bg-green-700 dark:text-green-200"
+                      : payment.estadoPago === "parcial"
+                      ? "bg-yellow-200 text-yellow-800 dark:bg-yellow-700 dark:text-yellow-200"
+                      : "bg-red-200 text-red-800 dark:bg-red-700 dark:text-red-200"
+                  }`}
+                >
+                  <FontAwesomeIcon icon={faCheckCircle} className="mr-1" />
+                  {payment.estadoPago || "pendiente"}
+                </span>
+              </td>
+              {/* <td className="px-4 py-3 text-sm">... Detalles (si es necesario) ...</td> */}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  )}
+</div>
          
         </div>
       </div>

@@ -12,7 +12,7 @@ import {
 } from "lucide-react";
 import api from "../../../utils/AxiosConfig";
 import { useAuth } from "../../../hooks/ContextAuth";
-
+import CustomLoading from "../../../components/spiner/SpinerGlobal";
 import { toast } from "react-toastify";
 
 function ListaItems({ items, onDelete, onEdit }) {
@@ -214,35 +214,6 @@ function CrudSubcategorias() {
     }
   };
 
-  const handleDeleteCategoria = async (id) => {
-  
-    if (!window.confirm("¿Estás seguro de eliminar esta categoría? Se eliminarán todas las subcategorías asociadas.")) {
-      return; 
-    }
-    try {
-      await api.delete(`/api/productos/categoria/${id}`);
-      setCategorias(categorias.filter((cat) => cat.id !== id));
-      toast.success("Categoría eliminada correctamente.");
-      fetchData();
-    } catch (error) {
-      toast.error("Error al eliminar la categoría.");
-      console.error("Error al eliminar categoría:", error);
-    }
-  };
-  
-
-  const handleDeleteSubcategoria = async (id) => {
-    try {
-      await api.delete(`/api/productos/subcategoria/${id}`);
-      setSubcategorias(subcategorias.filter((sub) => sub.id !== id));
-      toast.success("Subcategoría eliminada correctamente.");
-      fetchData();
-    } catch (error) {
-      toast.error("Error al eliminar la subcategoría.");
-      console.error("Error al eliminar subcategoría:", error);
-    }
-  };
-
 
 
   const handleEditSubcategoria = (sub, categoryName) => {
@@ -313,13 +284,9 @@ function CrudSubcategorias() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 dark:bg-gray-900">
-        {/* Spinner simple con animación */}
-        <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
-        <p className="mt-4 text-gray-700 dark:text-gray-300">
-          Cargando datos...
-        </p>
-      </div>
+    
+     < CustomLoading/>
+     
     );
   }
 
