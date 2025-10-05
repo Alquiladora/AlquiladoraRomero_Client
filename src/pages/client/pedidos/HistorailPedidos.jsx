@@ -12,136 +12,51 @@ import {
   faSpinner,
   faExclamationTriangle,
   faTruck,
+  faSearch,
+  faCalendarAlt,
+  faDollarSign,
+  faMapMarkerAlt,
+  faEye,
+  faFileInvoice,
+  faEdit,
+  faQuestionCircle,
+  faStar,
+  faShoppingCart,
+  faShippingFast,
 } from "@fortawesome/free-solid-svg-icons";
 
-// ===================================================================
-// SUBCOMPONENTE: Tarjeta de Pedido
-// ===================================================================
-const OrderCard = ({ order }) => {
-  const [isDetailsOpen, setIsDetailsOpen] = useState(false);
-
-  const statusConfig = {
-    Confirmado: { color: "blue-500", icon: faSpinner },
-    Pagado: { color: "blue-500", icon: faSpinner },
-    "En alquiler": { color: "green-500", icon: faBoxOpen },
-    Recogiendo: { color: "orange-500", icon: faTruck },
-    Devuelto: { color: "purple-500", icon: faBoxOpen },
-    Finalizado: { color: "gray-500", icon: faSpinner },
-    Cancelado: { color: "red-500", icon: faExclamationTriangle },
-    Incidente: { color: "yellow-500", icon: faExclamationTriangle },
-    Procesando: { color: "indigo-500", icon: faSpinner },
-    default: { color: "gray-400", icon: faSpinner },
-  };
-
-  const currentStatus = statusConfig[order.estado] || statusConfig.default;
-
-  return (
-    <div className="bg-white dark:bg-gray-800 rounded-xl shadow-md border border-gray-200 dark:border-gray-700 overflow-hidden transition-all duration-300 hover:shadow-lg">
-      <div className="p-4 sm:p-5 border-b border-gray-200 dark:border-gray-700 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 items-center">
-        <div>
-          <p className="text-xs text-gray-500 dark:text-gray-400 font-semibold uppercase">Pedido</p>
-          <p className="text-sm font-bold text-gray-900 dark:text-white">{order.idRastreo}</p>
-        </div>
-        <div>
-          <p className="text-xs text-gray-500 dark:text-gray-400 font-semibold uppercase">Fecha</p>
-          <p className="text-sm text-gray-600 dark:text-gray-300">
-            {format(new Date(order.fechas.registro), "dd MMM yyyy", { locale: es })}
-          </p>
-        </div>
-        <div>
-          <p className="text-xs text-gray-500 dark:text-gray-400 font-semibold uppercase">Total</p>
-          <p className="text-sm font-bold text-gray-900 dark:text-white">${order.pago.total.toFixed(2)}</p>
-        </div>
-        <div>
-          <span
-            className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-${currentStatus.color}/10 text-${currentStatus.color} capitalize hover:bg-${currentStatus.color}/20 transition-colors duration-200`}
-          >
-            <FontAwesomeIcon icon={currentStatus.icon} className="mr-1.5 w-3.5 h-3.5" />
-            {order.estado}
-          </span>
-        </div>
-      </div>
-      <div className="p-4 sm:p-5">
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
-          <div>
-            <p className="font-semibold text-gray-700 dark:text-gray-200">Periodo de Alquiler:</p>
-            <p className="text-gray-600 dark:text-gray-300">
-              {format(new Date(order.fechas.inicioAlquiler), "EEE, dd 'de' MMMM", { locale: es })} -{" "}
-              {format(new Date(order.fechas.entregaAlquiler), "EEE, dd 'de' MMMM, yyyy", { locale: es })}
-            </p>
-          </div>
-          <div>
-            <p className="font-semibold text-gray-700 dark:text-gray-200">Dirección:</p>
-            <p className="text-gray-600 dark:text-gray-300">{order.cliente.direccion}</p>
-          </div>
-        </div>
-        <button
-          onClick={() => setIsDetailsOpen(!isDetailsOpen)}
-          className="mt-4 text-indigo-600 dark:text-indigo-400 font-medium text-sm flex items-center hover:text-indigo-700 dark:hover:text-indigo-300 transition-colors duration-200"
-          aria-expanded={isDetailsOpen}
-        >
-          <FontAwesomeIcon icon={faBoxOpen} className="mr-2 w-4 h-4" />
-          {isDetailsOpen ? "Ocultar Productos" : "Ver Productos"}
-          <FontAwesomeIcon
-            icon={faChevronDown}
-            className={`ml-2 w-3 h-3 transition-transform duration-300 ${isDetailsOpen ? "rotate-180" : ""}`}
-          />
-        </button>
-      </div>
-      <div
-        className={`overflow-hidden transition-all duration-300 ease-in-out ${
-          isDetailsOpen ? "max-h-[500px] opacity-100" : "max-h-0 opacity-0"
-        }`}
-      >
-        <div className="p-4 sm:p-5 bg-gray-50 dark:bg-gray-900/50 border-t border-gray-200 dark:border-gray-700">
-          <h4 className="font-semibold text-gray-800 dark:text-white mb-3 text-sm">Productos Alquilados ({order.productos.length})</h4>
-          <ul className="space-y-2 text-sm">
-            {order.productos.map((producto, idx) => (
-              <li key={idx} className="flex justify-between items-center text-gray-600 dark:text-gray-300">
-                <span>
-                  {producto.cantidad}x {producto.nombre} ({producto.color})
-                </span>
-                <span className="font-medium text-gray-800 dark:text-white">${producto.subtotal.toFixed(2)}</span>
-              </li>
-            ))}
-          </ul>
-        </div>
-      </div>
-    </div>
-  );
-};
-
-// ===================================================================
-// SUBCOMPONENTE: Skeleton Loader
-// ===================================================================
+// SUBCOMPONENTE: Skeleton Loader mejorado
 const OrderCardSkeleton = () => (
-  <div className="bg-white dark:bg-gray-800 rounded-xl shadow-md border border-gray-200 dark:border-gray-700 p-4 sm:p-5 animate-pulse">
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-      <div>
-        <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded w-16 mb-2"></div>
-        <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-28"></div>
-      </div>
-      <div>
-        <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded w-16 mb-2"></div>
-        <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-28"></div>
-      </div>
-      <div>
-        <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded w-16 mb-2"></div>
-        <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-28"></div>
-      </div>
-      <div>
-        <div className="h-5 bg-gray-200 dark:bg-gray-700 rounded w-20"></div>
+  <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700 p-6 mb-4 animate-pulse">
+    <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-4">
+      {[...Array(4)].map((_, idx) => (
+        <div key={idx} className="space-y-2">
+          <div className="h-4 bg-gray-300 dark:bg-gray-700 rounded w-20"></div>
+          <div className="h-5 bg-gray-300 dark:bg-gray-700 rounded w-28"></div>
+        </div>
+      ))}
+    </div>
+    <div className="flex items-center justify-between py-3 border-t border-gray-200 dark:border-gray-700">
+      <div className="flex items-center space-x-4">
+        <div className="h-10 bg-gray-300 dark:bg-gray-700 rounded w-32"></div>
+        <div className="flex space-x-2">
+          {[...Array(4)].map((_, idx) => (
+            <div key={idx} className="h-10 bg-gray-300 dark:bg-gray-700 rounded-full w-32"></div>
+          ))}
+        </div>
       </div>
     </div>
-    <div className="mt-4">
-      <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-36"></div>
+    <div className="flex items-center space-x-4 pt-4">
+      <div className="w-20 h-20 bg-gray-300 dark:bg-gray-700 rounded-lg"></div>
+      <div className="space-y-2">
+        <div className="h-5 bg-gray-300 dark:bg-gray-700 rounded w-48"></div>
+        <div className="h-4 bg-gray-300 dark:bg-gray-700 rounded w-32"></div>
+      </div>
     </div>
   </div>
 );
 
-// ===================================================================
-// COMPONENTE PRINCIPAL: Historial de Pedidos
-// ===================================================================
+// COMPONENTE PRINCIPAL: Historial de Pedidos mejorado
 const HistorialPedidos = () => {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -153,6 +68,8 @@ const HistorialPedidos = () => {
     itemsPerPage: 10,
   });
   const [pageInput, setPageInput] = useState("");
+  const [searchTerm, setSearchTerm] = useState("");
+  const [activeTab, setActiveTab] = useState("todos");
   const { user } = useAuth();
 
   const fetchOrders = useCallback(
@@ -174,7 +91,6 @@ const HistorialPedidos = () => {
         });
         if (response.data.success) {
           const data = response.data.data || [];
-          // Ensure no more than 10 orders are displayed
           if (data.length > 10) {
             console.warn("API returned more than 10 orders, slicing to 10.");
             setOrders(data.slice(0, 10));
@@ -207,6 +123,7 @@ const HistorialPedidos = () => {
     return () => controller.abort();
   }, [pagination.currentPage, fetchOrders]);
 
+  // Funciones de paginación
   const handlePageChange = (newPage) => {
     if (newPage > 0 && newPage <= pagination.totalPages) {
       setPagination((prev) => ({ ...prev, currentPage: newPage }));
@@ -228,6 +145,62 @@ const HistorialPedidos = () => {
     }
   };
 
+  // Funciones de acción
+  const handleTrackPackage = (orderId) => {
+    // Implementar seguimiento de paquete
+    console.log("Seguimiento del pedido:", orderId);
+    // window.location.href = `/seguimiento/${orderId}`;
+  };
+
+  const handleViewDetails = (orderId) => {
+    // Implementar vista de detalles
+    console.log("Ver detalles del pedido:", orderId);
+    // window.location.href = `/pedido/${orderId}`;
+  };
+
+  const handleViewInvoice = (orderId) => {
+    // Implementar vista de factura
+    console.log("Ver factura del pedido:", orderId);
+    // window.location.href = `/factura/${orderId}`;
+  };
+
+  const handleEditOrder = (orderId) => {
+    // Implementar edición de pedido
+    console.log("Editar pedido:", orderId);
+    // window.location.href = `/editar-pedido/${orderId}`;
+  };
+
+  const handleAskProduct = (productId) => {
+    // Implementar pregunta sobre producto
+    console.log("Preguntar sobre producto:", productId);
+    // window.location.href = `/pregunta-producto/${productId}`;
+  };
+
+  const handleWriteReview = (productId) => {
+    // Implementar escritura de reseña
+    console.log("Escribir reseña del producto:", productId);
+    // window.location.href = `/reseña/${productId}`;
+  };
+
+  const handleBuyAgain = (productId) => {
+    // Implementar comprar nuevamente
+    console.log("Comprar nuevamente producto:", productId);
+    // window.location.href = `/producto/${productId}`;
+  };
+
+  // Filtrado de pedidos
+  const filteredOrders = orders.filter(order => {
+    const matchesSearch = searchTerm === "" || 
+      order.idRastreo?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      order.productos?.[0]?.nombre?.toLowerCase().includes(searchTerm.toLowerCase());
+    
+    const matchesTab = activeTab === "todos" || 
+      (activeTab === "pendiente" && (order.estado === "Recogiendo" || order.estado === "Procesando")) ||
+      (activeTab === "entregados" && order.estado === "Finalizado");
+
+    return matchesSearch && matchesTab;
+  });
+
   const renderPagination = () => {
     const { currentPage, totalPages } = pagination;
     const pageNumbers = [];
@@ -240,111 +213,345 @@ const HistorialPedidos = () => {
     }
 
     return (
-      <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mt-6 p-4 bg-white dark:bg-gray-800 rounded-xl shadow-md border border-gray-200 dark:border-gray-700">
+      <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mt-6 p-6 bg-white dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700">
         <div className="flex items-center space-x-2">
           <button
             onClick={() => handlePageChange(currentPage - 1)}
             disabled={currentPage === 1}
-            className="px-3 py-1.5 text-sm font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-700 disabled:bg-gray-300 dark:disabled:bg-gray-600 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-colors duration-200"
+            className="p-2 text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 disabled:bg-gray-300 dark:disabled:bg-gray-600 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all duration-200 transform hover:scale-105"
             aria-label="Página anterior"
           >
             <FontAwesomeIcon icon={faChevronLeft} className="w-4 h-4" />
           </button>
+          
           {startPage > 1 && (
             <>
               <button
                 onClick={() => handlePageChange(1)}
-                className="px-3 py-1.5 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 rounded-md hover:bg-indigo-100 dark:hover:bg-indigo-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-colors duration-200"
+                className="px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-indigo-50 dark:hover:bg-indigo-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all duration-200"
               >
                 1
               </button>
-              {startPage > 2 && <span className="text-gray-500 dark:text-gray-400">...</span>}
+              {startPage > 2 && <span className="text-gray-500 dark:text-gray-400 px-2">...</span>}
             </>
           )}
+          
           {pageNumbers.map((page) => (
             <button
               key={page}
               onClick={() => handlePageChange(page)}
-              className={`px-3 py-1.5 text-sm font-medium rounded-md ${
+              className={`px-3 py-2 text-sm font-medium rounded-lg transition-all duration-200 ${
                 page === currentPage
-                  ? "bg-indigo-600 text-white"
-                  : "text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 hover:bg-indigo-100 dark:hover:bg-indigo-900"
-              } focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-colors duration-200`}
-              aria-current={page === currentPage ? "page" : undefined}
+                  ? "bg-indigo-600 text-white shadow-md"
+                  : "text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 hover:bg-indigo-50 dark:hover:bg-indigo-900"
+              } focus:outline-none focus:ring-2 focus:ring-indigo-500`}
             >
               {page}
             </button>
           ))}
+          
           {endPage < totalPages && (
             <>
-              {endPage < totalPages - 1 && <span className="text-gray-500 dark:text-gray-400">...</span>}
+              {endPage < totalPages - 1 && <span className="text-gray-500 dark:text-gray-400 px-2">...</span>}
               <button
                 onClick={() => handlePageChange(totalPages)}
-                className="px-3 py-1.5 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 rounded-md hover:bg-indigo-100 dark:hover:bg-indigo-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-colors duration-200"
+                className="px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-indigo-50 dark:hover:bg-indigo-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all duration-200"
               >
                 {totalPages}
               </button>
             </>
           )}
+          
           <button
             onClick={() => handlePageChange(currentPage + 1)}
             disabled={currentPage === totalPages}
-            className="px-3 py-1.5 text-sm font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-700 disabled:bg-gray-300 dark:disabled:bg-gray-600 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-colors duration-200"
+            className="p-2 text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 disabled:bg-gray-300 dark:disabled:bg-gray-600 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all duration-200 transform hover:scale-105"
             aria-label="Página siguiente"
           >
             <FontAwesomeIcon icon={faChevronRight} className="w-4 h-4" />
           </button>
         </div>
-        <div className="flex items-center space-x-2">
+        
+        <div className="flex items-center space-x-3">
           <span className="text-sm text-gray-600 dark:text-gray-400">Ir a página:</span>
           <input
             type="text"
             value={pageInput}
             onChange={handlePageInputChange}
             onKeyDown={handlePageInputSubmit}
-            className="w-16 px-2 py-1 text-sm text-gray-900 dark:text-white bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            className="w-16 px-3 py-2 text-sm text-gray-900 dark:text-white bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
             placeholder={currentPage.toString()}
-            aria-label="Ir a página específica"
           />
         </div>
       </div>
     );
   };
 
+  const getStatusColor = (status) => {
+    const colors = {
+      Confirmado: "bg-blue-100 text-blue-800 border-blue-200",
+      Pagado: "bg-green-100 text-green-800 border-green-200",
+      "En alquiler": "bg-purple-100 text-purple-800 border-purple-200",
+      Recogiendo: "bg-orange-100 text-orange-800 border-orange-200",
+      Devuelto: "bg-indigo-100 text-indigo-800 border-indigo-200",
+      Finalizado: "bg-gray-100 text-gray-800 border-gray-200",
+      Cancelado: "bg-red-100 text-red-800 border-red-200",
+      Incidente: "bg-yellow-100 text-yellow-800 border-yellow-200",
+      Procesando: "bg-cyan-100 text-cyan-800 border-cyan-200",
+    };
+    return colors[status] || "bg-gray-100 text-gray-800 border-gray-200";
+  };
+
   return (
-    <section className="py-12 bg-gray-100 dark:bg-gray-900 min-h-screen">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-        <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">Historial de Pedidos</h2>
+    <section className="py-8 bg-gray-50 dark:bg-gray-900 min-h-screen">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Header */}
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">Mis Pedidos</h1>
+          <p className="text-gray-600 dark:text-gray-400">Gestiona y revisa el historial de tus pedidos</p>
+        </div>
 
-        {loading && (
-          <div className="space-y-4">
-            {[...Array(10)].map((_, idx) => (
-              <OrderCardSkeleton key={idx} />
-            ))}
+        {/* Filtros y Búsqueda */}
+        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700 p-6 mb-6">
+          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+            {/* Tabs de navegación */}
+            <div className="flex flex-wrap gap-2">
+              {[
+                { id: "todos", label: "Todos los pedidos", count: orders.length },
+                { id: "pendiente", label: "Pendientes", count: orders.filter(o => o.estado === "Recogiendo" || o.estado === "Procesando").length },
+                { id: "entregados", label: "Entregados", count: orders.filter(o => o.estado === "Finalizado").length },
+              ].map((tab) => (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id)}
+                  className={`px-4 py-2 rounded-lg font-medium transition-all duration-200 ${
+                    activeTab === tab.id
+                      ? "bg-indigo-600 text-white shadow-md"
+                      : "text-gray-600 dark:text-gray-400 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600"
+                  }`}
+                >
+                  {tab.label}
+                  <span className="ml-2 px-2 py-1 text-xs bg-white dark:bg-gray-800 rounded-full">
+                    {tab.count}
+                  </span>
+                </button>
+              ))}
+            </div>
+
+            {/* Barra de búsqueda */}
+            <div className="relative flex-1 max-w-md">
+              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <FontAwesomeIcon icon={faSearch} className="text-gray-400" />
+              </div>
+              <input
+                type="text"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                placeholder="Buscar por número de pedido o producto..."
+                className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+              />
+            </div>
           </div>
-        )}
+        </div>
 
-        {error && (
-          <div className="text-center text-red-600 dark:text-red-400 py-10">
-            <FontAwesomeIcon icon={faExclamationTriangle} className="mr-2" />
-            {error}
-          </div>
-        )}
+        {/* Contenido principal */}
+        <div className="space-y-4">
+          {loading && [...Array(3)].map((_, idx) => <OrderCardSkeleton key={idx} />)}
+          
+          {error && (
+            <div className="text-center py-12">
+              <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-2xl p-8 max-w-md mx-auto">
+                <FontAwesomeIcon icon={faExclamationTriangle} className="text-red-500 text-4xl mb-4" />
+                <h3 className="text-lg font-semibold text-red-800 dark:text-red-200 mb-2">Error al cargar pedidos</h3>
+                <p className="text-red-600 dark:text-red-300 text-sm">{error}</p>
+                <button
+                  onClick={() => fetchOrders(pagination.currentPage)}
+                  className="mt-4 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors duration-200"
+                >
+                  Reintentar
+                </button>
+              </div>
+            </div>
+          )}
 
-        {!loading && !error && (
-          <>
+          {!loading && !error && filteredOrders.length > 0 && (
             <div className="space-y-4">
-              {orders.length === 0 ? (
-                <p className="text-center text-gray-600 dark:text-gray-400 py-10">No tienes pedidos registrados.</p>
-              ) : (
-                orders.slice(0, 10).map((order) => <OrderCard key={order.idPedido} order={order} />)
+              {filteredOrders.map((order) => {
+                const showTrackButton = order.estado === "Recogiendo" || order.estado === "Procesando";
+
+                return (
+                  <div key={order.idPedido} className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
+                    {/* Header del pedido */}
+                    <div className="bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-700 dark:to-gray-800 px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+                      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+                        <div className="flex items-center space-x-4">
+                          <span className={`px-3 py-1 rounded-full text-sm font-medium border ${getStatusColor(order.estado)}`}>
+                            {order.estado}
+                          </span>
+                          <span className="text-sm text-gray-600 dark:text-gray-400">
+                            Pedido #: <strong className="text-gray-900 dark:text-white">{order.idRastreo}</strong>
+                          </span>
+                        </div>
+                        <div className="text-sm text-gray-600 dark:text-gray-400">
+                          Realizado el {format(new Date(order.fechas.registro), "dd 'de' MMMM 'de' yyyy", { locale: es })}
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Información del pedido */}
+                    <div className="p-6">
+                      <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
+                        <div className="flex items-center space-x-3">
+                          <FontAwesomeIcon icon={faCalendarAlt} className="text-gray-400 text-lg" />
+                          <div>
+                            <p className="text-sm text-gray-600 dark:text-gray-400">Fecha</p>
+                            <p className="font-medium text-gray-900 dark:text-white">
+                              {format(new Date(order.fechas.registro), "dd/MM/yyyy")}
+                            </p>
+                          </div>
+                        </div>
+                        
+                        <div className="flex items-center space-x-3">
+                          <FontAwesomeIcon icon={faDollarSign} className="text-gray-400 text-lg" />
+                          <div>
+                            <p className="text-sm text-gray-600 dark:text-gray-400">Total</p>
+                            <p className="font-medium text-gray-900 dark:text-white">
+                              ${order.pago.total.toFixed(2)}
+                            </p>
+                          </div>
+                        </div>
+                        
+                        <div className="flex items-center space-x-3">
+                          <FontAwesomeIcon icon={faMapMarkerAlt} className="text-gray-400 text-lg" />
+                          <div>
+                            <p className="text-sm text-gray-600 dark:text-gray-400">Enviar a</p>
+                            <p className="font-medium text-gray-900 dark:text-white">
+                              {order.cliente.nombre}
+                            </p>
+                          </div>
+                        </div>
+                        
+                        <div className="flex items-center space-x-3">
+                          <FontAwesomeIcon icon={faBoxOpen} className="text-gray-400 text-lg" />
+                          <div>
+                            <p className="text-sm text-gray-600 dark:text-gray-400">Productos</p>
+                            <p className="font-medium text-gray-900 dark:text-white">
+                              {order.productos?.length || 0} items
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Acciones del pedido */}
+                      <div className="flex flex-wrap gap-3 mb-6">
+                        <button
+                          onClick={() => handleViewDetails(order.idPedido)}
+                          className="flex items-center space-x-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors duration-200"
+                        >
+                          <FontAwesomeIcon icon={faEye} className="w-4 h-4" />
+                          <span>Ver detalles</span>
+                        </button>
+                        
+                        <button
+                          onClick={() => handleViewInvoice(order.idPedido)}
+                          className="flex items-center space-x-2 px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors duration-200"
+                        >
+                          <FontAwesomeIcon icon={faFileInvoice} className="w-4 h-4" />
+                          <span>Factura</span>
+                        </button>
+                        
+                        {showTrackButton && (
+                          <button
+                            onClick={() => handleTrackPackage(order.idPedido)}
+                            className="flex items-center space-x-2 px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors duration-200"
+                          >
+                            <FontAwesomeIcon icon={faShippingFast} className="w-4 h-4" />
+                            <span>Seguimiento</span>
+                          </button>
+                        )}
+                      </div>
+
+                      {/* Productos del pedido */}
+                      <div className="border-t border-gray-200 dark:border-gray-700 pt-6">
+                        {order.productos?.map((producto, index) => (
+                          <div key={index} className="flex items-center space-x-4 p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                            <img 
+                              src={producto.imagen || "https://via.placeholder.com/80"} 
+                              alt={producto.nombre}
+                              className="w-16 h-16 object-cover rounded-lg"
+                            />
+                            <div className="flex-1">
+                              <h4 className="font-medium text-gray-900 dark:text-white">
+                                {producto.nombre}
+                              </h4>
+                              <p className="text-sm text-gray-600 dark:text-gray-400">
+                                Color: {producto.color} | Cantidad: {producto.cantidad || 1}
+                              </p>
+                            </div>
+                            <div className="flex items-center space-x-2">
+                              <button
+                                onClick={() => handleBuyAgain(producto.idProducto)}
+                                className="flex items-center space-x-2 px-3 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors duration-200 text-sm"
+                              >
+                                <FontAwesomeIcon icon={faShoppingCart} className="w-4 h-4" />
+                                <span>Comprar otra vez</span>
+                              </button>
+                              
+                              <button
+                                onClick={() => handleAskProduct(producto.idProducto)}
+                                className="flex items-center space-x-2 px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200 text-sm"
+                              >
+                                <FontAwesomeIcon icon={faQuestionCircle} className="w-4 h-4" />
+                                <span>Preguntar</span>
+                              </button>
+                              
+                              <button
+                                onClick={() => handleWriteReview(producto.idProducto)}
+                                className="flex items-center space-x-2 px-3 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors duration-200 text-sm"
+                              >
+                                <FontAwesomeIcon icon={faStar} className="w-4 h-4" />
+                                <span>Opinar</span>
+                              </button>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+
+          {!loading && !error && filteredOrders.length === 0 && (
+            <div className="text-center py-16">
+              <FontAwesomeIcon icon={faBoxOpen} className="text-gray-400 text-6xl mb-4" />
+              <h3 className="text-xl font-semibold text-gray-600 dark:text-gray-400 mb-2">
+                {searchTerm || activeTab !== "todos" ? "No se encontraron pedidos" : "No tienes pedidos registrados"}
+              </h3>
+              <p className="text-gray-500 dark:text-gray-500 mb-6">
+                {searchTerm || activeTab !== "todos" 
+                  ? "Intenta con otros términos de búsqueda o filtros" 
+                  : "Cuando realices tu primer pedido, aparecerá aquí"}
+              </p>
+              {searchTerm && (
+                <button
+                  onClick={() => setSearchTerm("")}
+                  className="px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors duration-200"
+                >
+                  Limpiar búsqueda
+                </button>
               )}
             </div>
-            {pagination.totalItems > 0 && (
-              <div className="mt-6 text-center text-sm text-gray-600 dark:text-gray-400">
-                Mostrando {Math.min(orders.length, 10)} de {pagination.totalItems} pedidos
-              </div>
-            )}
+          )}
+        </div>
+
+        {/* Paginación y estadísticas */}
+        {!loading && !error && filteredOrders.length > 0 && (
+          <>
+            <div className="mt-6 text-center text-sm text-gray-600 dark:text-gray-400">
+              Mostrando {filteredOrders.length} de {pagination.totalItems} pedidos
+            </div>
             {pagination.totalPages > 1 && renderPagination()}
           </>
         )}

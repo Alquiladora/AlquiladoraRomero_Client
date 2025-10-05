@@ -697,6 +697,7 @@ const GestionPedidos = ({ onNavigate }) => {
                       </option>
                     ))}
                   </select>
+                  
                 </div>
                 <div className="flex items-center space-x-3 w-full sm:w-auto">
                   <FontAwesomeIcon icon={faSearch} className="text-yellow-500" />
