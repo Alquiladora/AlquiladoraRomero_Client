@@ -40,6 +40,7 @@ import ChangePassword from '../pages/client/perfil/componetsPerfil/ChangePasswor
 import DetalleProducto from '../components/productosCategoria/productosDetalles';
 import HistorialPedidos from '../pages/client/pedidos/HistorailPedidos';
 import MensajeCompraExitosa from '../components/carrito/MensajeExitoso';
+import GamificacionPerfil from '../pages/client/Puntos/puntos';
 
 
 //-------------------ADMIN------------------------
@@ -102,6 +103,8 @@ const Routerss = () => {
           <Route path="/cliente/SobreNosotros" element={<RoutePrivate rolesPermitidos={['cliente']}> <LayoutHeader><MissionVision /></LayoutHeader></RoutePrivate>} />
           <Route path="/cliente/historial-pedidos" element={<RoutePrivate rolesPermitidos={['cliente']}> <LayoutHeader><HistorialPedidos /></LayoutHeader></RoutePrivate>} />
           <Route path="/cliente/compra-exitosa/:idPedido" element={<RoutePrivate rolesPermitidos={['cliente']}> <LayoutHeader><MensajeCompraExitosa   /></LayoutHeader></RoutePrivate>} />
+           <Route path="/cliente/nivel/logros" element={<RoutePrivate rolesPermitidos={['cliente']}> <LayoutHeader><GamificacionPerfil   /></LayoutHeader></RoutePrivate>} />
+
           {/**=====================ADMINISTRADOR============================= */}
           <Route path="/administrador" element={<RoutePrivate rolesPermitidos={['administrador']}> <LayoutHeader><MenuHomeAdmin  /></LayoutHeader></RoutePrivate>} />
           <Route path="/administrador/cambiarPassword" element={<RoutePrivate rolesPermitidos={['administrador']}> <LayoutHeader><TokenModal /></LayoutHeader></RoutePrivate>} />

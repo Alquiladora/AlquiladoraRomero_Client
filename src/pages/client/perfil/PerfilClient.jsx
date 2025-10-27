@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useContext } from "react";
+import React, { useState, useEffect, useRef, useContext,useMemo } from "react";
 import {
   Tabs,
   Tab,
@@ -45,6 +45,7 @@ import {
   LogOut,
   Edit3,
   ChartNoAxesColumnDecreasing,
+  Star,
 } from "lucide-react";
 
 import {
@@ -58,6 +59,8 @@ import PhoneIphoneIcon from "@mui/icons-material/PhoneIphone";
 import TabletMacIcon from "@mui/icons-material/TabletMac";
 import { useAuth } from "../../../hooks/ContextAuth";
 import api from "../../../utils/AxiosConfig";
+import CustomLoading from "../../../components/spiner/SpinerGlobal";
+
 
 
 const PerfilUsuarioPrime = () => {
@@ -83,6 +86,15 @@ const PerfilUsuarioPrime = () => {
   const [cambiosContrasena, setCambiosContrasena] = useState(0);
   const [bloqueado, setBloqueado] = useState(false);
   const [error, setError] = useState(null); 
+
+
+  const isProfileComplete = useMemo(() => {
+    if (!usuariosC) return false;
+    const { nombre, apellidoP, apellidoM, telefono, fechaNacimiento } = usuariosC;
+    
+    return Boolean(nombre && apellidoP && apellidoM && telefono && fechaNacimiento);
+  }, [usuariosC]);
+  
 
   useEffect(() => {
     isMounted.current = true;
@@ -285,9 +297,11 @@ const PerfilUsuarioPrime = () => {
       );
       fetchProfileData();
 
-      toast.success(
-        `El ${field} ha sido guardado correctamente.`
-      );
+     if (response.data && response.data.message) {
+        toast.success(response.data.message);
+        } else {
+        toast.success(`El ${field} ha sido guardado correctamente.`);
+      }
     } catch (error) {
       toast.error(
         `Hubo un error al guardar el ${field}.`
@@ -473,16 +487,7 @@ const PerfilUsuarioPrime = () => {
 
   if (loading) {
     return (
-      <Grid
-        container
-        justifyContent="center dark:bg-gray-950 dark:text-white"
-        sx={{ mt: 4, mb: 4 }}
-      >
-        <CircularProgress size={50} />
-        <Typography variant="h6" sx={{ mt: 2 }}>
-          Cargando datos del perfil...
-        </Typography>
-      </Grid>
+     <CustomLoading/>
     );
   }
 
@@ -522,14 +527,7 @@ const PerfilUsuarioPrime = () => {
   return (
     <div className="dark:bg-gray-950 dark:text-white">
       {loading && (
-        <div className="absolute inset-0 flex justify-center items-center bg-black bg-opacity-50">
-          <div className="flex flex-col items-center space-y-4">
-            <CircularProgress size={60} sx={{ color: "#1976d2" }} />
-            <Typography variant="h6" color="white">
-              Cargando datos del perfil...
-            </Typography>
-          </div>
-        </div>
+      <CustomLoading/>
       )}
 
       <div className="min-h-screen from-blue-50 to-white p-4 dark:bg-gray-950 dark:text-white">
@@ -582,6 +580,19 @@ const PerfilUsuarioPrime = () => {
                     accept="image/*"
                   />
                 </div>
+                {!usuariosC.fotoPerfil && (
+                   <motion.div
+                    className="flex items-center justify-center gap-2 p-3 mt-4 bg-teal-50 border border-teal-200 rounded-lg shadow-sm dark:bg-teal-900/30 dark:border-teal-700 max-w-md mx-auto"
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ duration: 0.5 }}
+                  >
+                    <Star className="w-5 h-5 text-teal-500 dark:text-teal-400 flex-shrink-0" />
+                    <p className="text-sm font-medium text-teal-700 dark:text-teal-200 text-center">
+                      ¡Sube tu primera foto de perfil y gana Puntos Fiesta! ✨
+                    </p>
+                  </motion.div>
+                )}
 
               
                 <div className="text-center">
@@ -644,6 +655,24 @@ const PerfilUsuarioPrime = () => {
                   <h2 className="text-xl font-semibold text-gray-800 dark:text-white mb-6">
                     Información Personal
                   </h2>
+                  {!isProfileComplete && (
+                  <motion.div
+                    className="flex items-center gap-4 p-4 mb-6 bg-yellow-50 border-l-4 border-yellow-400 rounded-lg shadow-sm dark:bg-yellow-900/20 dark:border-yellow-500"
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.5 }}
+                  >
+                    <Star className="w-8 h-8 text-yellow-500 dark:text-yellow-400 flex-shrink-0" />
+                    <div>
+                      <h3 className="font-bold text-yellow-800 dark:text-yellow-200">
+                        ¡Gana 50 Puntos Fiesta!
+                      </h3>
+                      <p className="text-sm text-yellow-700 dark:text-yellow-300">
+                        Completa todos tus datos personales para recibir tu recompensa.
+                      </p>
+                    </div>
+                  </motion.div>
+                )}
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                     {fields.map((field, index) => (
                       <div

@@ -191,15 +191,15 @@ const GestionPedidos = ({ onNavigate }) => {
     setShowTimelineModal(pedido);
     setShowMoreTimeline(false);
   };
+
+
   const handleShowDetails = (pedido) => setShowDetailsModal(pedido);
   const handleShowTicketModal = (pedido) => setShowTicketModal(pedido);
   const handleSendTicket = (email, pdfBlob) => {
     toast.success(`Ticket enviado al correo ${email} en formato PDF.`);
     setShowTicketModal(null);
   };
-  const handleNavigateDashboard = (dashboard) =>
-    toast.info(`Navegando al Dashboard de ${dashboard}... (en desarrollo)`);
-
+ 
   const renderTimelineModal = () => {
     const visibleEvents = showMoreTimeline
       ? timelineData
