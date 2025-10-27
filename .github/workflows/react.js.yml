@@ -1,0 +1,78 @@
+name: React CI Pipeline
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  build-and-test:
+    name: Build, Lint & Test
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [18]       
+        include:
+          - node-version: 18
+
+    steps:
+      - name: 📦 Clonar repo
+        uses: actions/checkout@v4
+
+      - name: 🧾 Cache node modules
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.npm
+            node_modules
+            .vite
+          key: ${{ runner.os }}-node-${{ matrix.node-version }}-${{ hashFiles('**/package-lock.json', '**/yarn.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-node-${{ matrix.node-version }}-
+
+      - name: 🧩 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'npm'
+
+      - name: ⚙️ Instalar dependencias
+        run: npm ci
+
+      - name: 🔍 Lint (ESLint)
+        run: npm run lint
+        continue-on-error: false
+
+      - name: 🧪 Ejecutar tests (Jest)
+        env:
+          CI: true
+        run: npm test -- --coverage --watchAll=false
+
+      - name: 🏗️ Build producción (Vite / CRA)
+        run: npm run build
+
+      - name: 📁 Guardar artefacto de build
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-dist
+          path: ./dist
+
+  deploy:
+    name: Deploy to GitHub Pages 
+    needs: build-and-test
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+
+    steps:
+      - name: 📦 Descargar artefacto de build
+        uses: actions/download-artifact@v4
+        with:
+          name: build-dist
+          path: dist
+
+      - name: 🚀 Publicar en GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./dist
