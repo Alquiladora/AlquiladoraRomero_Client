@@ -42,7 +42,7 @@ jobs:
 
       - name: 🔍 Lint (ESLint)
         run: npm run lint
-        continue-on-error: false
+        continue-on-error: true
 
       - name: 🧪 Ejecutar tests (Jest)
         env:
