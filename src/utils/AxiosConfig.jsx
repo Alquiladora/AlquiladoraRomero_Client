@@ -1,10 +1,10 @@
 import axios from 'axios';
-import { useNavigate } from "react-router-dom";
+
 
 const api = axios.create({
  baseURL:  "http://localhost:3001",    
   // baseURL:"https://alquiladora-romero-server.onrender.com",
-  timeout: 15000,
+  timeout: 19000,
 });
 
 api.interceptors.response.use(

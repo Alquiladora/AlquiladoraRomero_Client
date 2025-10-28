@@ -170,6 +170,18 @@ const IconoPerfil = () => {
           </span>
         </MenuItem>
 
+          <MenuItem
+          onClick={handleMenuClose}
+          component={Link}
+          to="/cliente/nivel/logros"
+          className="hover:bg-gray-100 dark:hover:bg-gray-800 p-3 rounded-lg flex items-center transition-all duration-200"
+        >
+          <FontAwesomeIcon icon={faHistory} className="mr-3 text-green-500" />
+          <span className="text-gray-700 dark:text-gray-200 font-medium text-sm">
+            Nivel / Logoros
+          </span>
+        </MenuItem>
+
         <MenuItem
           onClick={handleMenuClose}
           component={Link}

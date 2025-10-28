@@ -20,6 +20,7 @@ export const AuthProvider = ({ children }) => {
   const [error, setError] = useState(null);
   const navigate = useNavigate();
   const isMounted = useRef(true);
+  
  
 
   const fetchCsrfToken = async () => {

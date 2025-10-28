@@ -42,7 +42,7 @@ import api from "../../../utils/AxiosConfig";
 import { useAuth } from "../../../hooks/ContextAuth";
 import CustomLoading from "../../../components/spiner/SpinerGlobal";
 import PredictCancelModal from "./PedidosPredicion";
-import PedidosConPrediccion from "./PedidosModeloPrevenir";
+
 
 // Función para capitalizar estados
 const capitalizeStatus = (status) => {
@@ -122,7 +122,7 @@ const GestionPedidos = ({ onNavigate }) => {
 
         console.log("Datos de pedidos general", transformedPedidos);
       } else {
-       
+       console.log("Eroor")
       }
     } catch (error) {
      
@@ -191,15 +191,15 @@ const GestionPedidos = ({ onNavigate }) => {
     setShowTimelineModal(pedido);
     setShowMoreTimeline(false);
   };
+
+
   const handleShowDetails = (pedido) => setShowDetailsModal(pedido);
   const handleShowTicketModal = (pedido) => setShowTicketModal(pedido);
   const handleSendTicket = (email, pdfBlob) => {
     toast.success(`Ticket enviado al correo ${email} en formato PDF.`);
     setShowTicketModal(null);
   };
-  const handleNavigateDashboard = (dashboard) =>
-    toast.info(`Navegando al Dashboard de ${dashboard}... (en desarrollo)`);
-
+ 
   const renderTimelineModal = () => {
     const visibleEvents = showMoreTimeline
       ? timelineData
@@ -697,6 +697,7 @@ const GestionPedidos = ({ onNavigate }) => {
                       </option>
                     ))}
                   </select>
+                  
                 </div>
                 <div className="flex items-center space-x-3 w-full sm:w-auto">
                   <FontAwesomeIcon icon={faSearch} className="text-yellow-500" />

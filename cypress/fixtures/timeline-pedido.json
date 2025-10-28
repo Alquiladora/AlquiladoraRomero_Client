@@ -1,0 +1,8 @@
+{
+  "success": true,
+  "data": [
+    { "estadoNuevo": "Procesando", "fechaActualizacion": "2025-10-20T10:00:00Z" },
+    { "estadoNuevo": "Enviando", "fechaActualizacion": "2025-10-21T14:00:00Z" },
+    { "estadoNuevo": "Finalizado", "fechaActualizacion": "2025-10-25T09:00:00Z" }
+  ]
+}

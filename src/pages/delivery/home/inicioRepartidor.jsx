@@ -99,7 +99,7 @@ const InicioRepartidor = ({ datosRepartidor }) => {
 
           setPedidosFinalizadosPorMes(data.pedidosFinalizadosPorMes || []);
         } else {
-
+           console.log("Error")
         }
       } catch (error) {
 

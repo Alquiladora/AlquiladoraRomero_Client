@@ -14,11 +14,10 @@ import {
 import api from "../../../utils/AxiosConfig";
 import { useAuth } from "../../../hooks/ContextAuth";
 import { toast } from "react-toastify";
-import Swal from 'sweetalert2';
+
 
 const ColorManager = () => {
-  const { user, csrfToken } = useAuth();
-
+  const { csrfToken } = useAuth();
   const [colors, setColors] = useState([]);
   const [newColor, setNewColor] = useState({ name: "", hex: "#000000" });
   const [editingColor, setEditingColor] = useState(null);
@@ -46,8 +45,9 @@ const ColorManager = () => {
           toast.error("Los datos recibidos no son válidos.");
           setColors([]);
         }
+        // eslint-disable-next-line no-useless-escape
       } else {
-       
+       console.log("Datos de error")
       }
     } catch (err) {
       toast.error("Error al conectar con el servidor. Por favor, intenta de nuevo.");

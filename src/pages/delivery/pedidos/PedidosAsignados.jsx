@@ -31,7 +31,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faDollarSign } from "@fortawesome/free-solid-svg-icons";
 import PaymentModal from "../../admin/pedidosamanuales/PaymentModal";
 
-// Función para capitalizar estados
+
 const capitalizeStatus = (status) => {
   if (!status || typeof status !== "string") return "Disponible";
   return status.charAt(0).toUpperCase() + status.slice(1).toLowerCase();
@@ -925,6 +925,8 @@ const OrderDetailsModal = ({ isOpen, onClose, order }) => {
     </div>
   );
 };
+
+
 
 // Main Component
 const AssignedOrders = () => {

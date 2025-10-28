@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 import HomeAdmin from "./HomeAdmin";
 import Usuarios from "../usuarios/usuarios";
 import ProductTable from "../productos/Productos";
@@ -36,10 +37,10 @@ import {
   faDollarSign,
   faWarehouse,
   faBoxOpen,
-  faUndoAlt,
+  faUndoAlt ,
   faShoppingCart,
   faClipboardList,
-  faArrowUp,
+   faArrowUp,
   faChartLine,
   faExclamationTriangle,
   faSignOutAlt,
@@ -48,15 +49,18 @@ import {
   faTasks,
   faPalette,
   faCalendarAlt,
-  faTruck,
-  faMoneyCheckAlt,
-  faBell,
-  faDatabase,
-  faHeadset,
-  faClipboardCheck,
+  faTruck,           // Para gestión de repartidores
+  faMoneyCheckAlt,   // Para gestión de pagos
+  faBell,            // Para gestión de notificaciones
+  faDatabase,        // Para resguardo de datos
+  faHeadset,         // Para atención al cliente
+  faClipboardCheck,  // Para auditoría de datos
 } from "@fortawesome/free-solid-svg-icons";
 import PagosGeneral from "../pagos/Pagos";
+
+
 import GestionPedidosDevueltos from "../gestion-pedidos/PedidosDevueltos";
+
 import AgregarProductosSubbodegas from "../inventario/AgregarProductosSubbodegas";
 import DashboardPedidos from "../dashboard/DashboardPedidos";
 import GestionPedidos from "../gestion-pedidos/GestionPedidos";
@@ -93,7 +97,9 @@ const Breadcrumbs = ({ activeTab, onNavigate }) => {
     "Pedidos General Calendario": ["Inicio", "Gestion Pedidos"],
     "Pedidos General Dashboard": ["Inicio", "Gestion Pedidos"],
     "Dasboard Productos": ["Inicio", "Gestion Pedidos"],
+
     "Dasboard Usuarios": ["Inicio"],
+
     "Auditoría de Sesiones": ["Inicio", "Dasboard Usuarios"],
     Perfilempresa: ["Inicio", "Datos de la Empresa"],
     "Sobre Nosotros": ["Inicio", "Datos de la Empresa"],
@@ -170,6 +176,8 @@ const MenuHomeAdmin = () => {
   const [loading, setLoading] = useState(true);
   const [usuariosC, setUsuariosC] = useState([]);
   const [isPageLoading, setIsPageLoading] = useState(true);
+  const location = useLocation();
+  const navigate = useNavigate();
   const [totalUsuarios, setTotalUsuarios] = useState(0);
   const [totalRentas, setTotalRentas] = useState(0);
   const [totalFinalizado, setTotalFinalizado] = useState(0);
@@ -177,7 +185,7 @@ const MenuHomeAdmin = () => {
   const [fotoEmpresa, setFotoEmpresa] = useState("");
   const [datosInventario, setDatosInventario] = useState([]);
   const [pedidos, setPedidos] = useState([]);
-  const [showScrollButton, setShowScrollButton] = useState(false);
+   const [showScrollButton, setShowScrollButton] = useState(false);
 
   const socket = useSocket();
 
@@ -194,6 +202,14 @@ const MenuHomeAdmin = () => {
     }
   }, [socket]);
 
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const tab = params.get("tab");
+    if (tab) {
+      setActiveTab(tab);
+    }
+  }, [location.search]);
+
   const handleLogout = async () => {
     try {
       await logout();
@@ -202,8 +218,7 @@ const MenuHomeAdmin = () => {
       setFotoEmpresa("");
       setDatosInventario([]);
       setPedidos([]);
-     
-      window.location.href = "/login";
+      navigate("/login");
     } catch (error) {
       console.error("Error during logout:", error);
     }
@@ -229,11 +244,12 @@ const MenuHomeAdmin = () => {
         }),
       ]);
       setUsuariosC(perfilResponse.data.user);
+
       setTotalUsuarios(totalUsuariosResponse.data[0]?.totalUsuarios ?? 0);
       setTotalRentas(totalUsuariosResponse.data[0]?.totalRentasActivas ?? 0);
       setTotalIngresos(parseFloat(totalUsuariosResponse.data[0]?.ingresosMes ?? 0));
-      setTotalFinalizado(totalUsuariosResponse.data[0]?.totalPedidosFinalizados ?? 0);
-      console.log("Total de ingresos ", parseFloat(totalUsuariosResponse.data[0]?.ingresosMes ?? 0));
+      setTotalFinalizado(totalUsuariosResponse.data[0]?.totalPedidosFinalizados ?? 0)
+      console.log("Total de ingresos ",parseFloat(totalUsuariosResponse.data[0]?.ingresosMes ?? 0))
       setLoading(false);
     } catch (error) {
       setLoading(false);
@@ -243,9 +259,7 @@ const MenuHomeAdmin = () => {
 
   const handleNavigate = (tabName) => {
     setActiveTab(tabName);
-    if (tabName === "Cerrar Sesion") {
-      handleLogout();
-    }
+    navigate(`?tab=${tabName}`);
   };
 
   useEffect(() => {
@@ -256,6 +270,7 @@ const MenuHomeAdmin = () => {
     }
   }, [user]);
 
+// Handle scroll to show/hide button
   useEffect(() => {
     const handleScroll = () => {
       if (window.scrollY > 300) {
@@ -269,9 +284,12 @@ const MenuHomeAdmin = () => {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
+  // Scroll to top function
   const scrollToTop = () => {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
+
+
 
   const navSections = [
     {
@@ -291,6 +309,7 @@ const MenuHomeAdmin = () => {
         { icon: faPalette, label: "Colores" },
         { icon: faWarehouse, label: "Bodegas" },
         { icon: faClipboardList, label: "Inventario" },
+       
       ],
     },
     {
@@ -298,43 +317,58 @@ const MenuHomeAdmin = () => {
       items: [
         { icon: faShoppingCart, label: "Pedidos Manuales" },
         { icon: faTasks, label: "Gestion Pedidos" },
-        { icon: faExclamationTriangle, label: "Gestion Pedidos Inicidentes" },
+       { icon: faExclamationTriangle, label: "Gestion Pedidos Inicidentes" },
         { icon: faUndoAlt, label: "Pedidos devueltos" },
+          
+
+
+
       ],
     },
-    {
-      title: "Gestión de Repartidores",
-      items: [
-        { icon: faTruck, label: "Repartidores" },
-        { icon: faClipboardList, label: "Asignación de Pedidos" },
-      ],
-    },
+     {
+    title: "Gestión de Repartidores",
+    items: [
+      { icon: faTruck, label: "Repartidores" },               // Gestión de repartidores
+      { icon: faClipboardList, label: "Asignación de Pedidos" }, 
+    ],
+  },
     {
       title: "Gestión Financiera",
       items: [
-        { icon: faMoneyCheckAlt, label: "Gestión de Pagos" },
+        { icon: faMoneyCheckAlt, label: "Gestión de Pagos" },  // Gestión de pagos
         { icon: faDollarSign, label: "Actualizacion Precios" },
         { icon: faDollarSign, label: "Pagos" },
       ],
     },
+  //    {
+  //   title: "Notificaciones y Soporte",
+  //   items: [
+  //     // { icon: faBell, label: "Gestión de Notificaciones" },  // Notificaciones
+  //     // { icon: faHeadset, label: "Atención al Cliente" },     // Atención al cliente
+  //   ],
+  // },
+
     {
       title: "Horarios",
       items: [
         { icon: faClock, label: "Horario" },
       ],
     },
+   
     {
       title: "Seguridad",
-      items: [
-        { icon: faUsers, label: "Dasboard Usuarios" },
-      ],
-    },
-    {
-      title: "Wear OS",
-      items: [
-        { icon: faClock, label: "Dispositivos Wear OS" },
-      ],
-    },
+     items: [
+      // { icon: faDatabase, label: "Resguardo de Datos" },   
+      // { icon: faClipboardCheck, label: "Auditoría de Datos" },
+      { icon: faUsers, label: "Dasboard Usuarios" },
+    ],
+  },
+  {
+    title: "Wear OS",
+    items: [
+       { icon: faClock, label: "Dispositivos Wear OS" },  // Aquí tu nueva opción
+    ],
+  },
     {
       title: "Salida",
       items: [
@@ -349,13 +383,13 @@ const MenuHomeAdmin = () => {
         return (
           <HomeAdmin
             totalUsuarios={totalUsuarios}
-            totalRentas={totalRentas}
-            totalIngresos={totalIngresos}
+             totalRentas={totalRentas}
+              totalIngresos={totalIngresos}
             onNavigate={handleNavigate}
           />
         );
       case "Perfil":
-        return <PerfilAdmin totalUsuarios={totalUsuarios} totalRentas={totalRentas} totalFinalizado={totalFinalizado} />;
+        return <PerfilAdmin    totalUsuarios={totalUsuarios}    totalRentas={totalRentas}  totalFinalizado={totalFinalizado} />;
       case "Usuarios":
         return <Usuarios />;
       case "Actualizacion Precios":
@@ -366,18 +400,26 @@ const MenuHomeAdmin = () => {
         return <Horario />;
       case "Bodegas":
         return <Bodegas />;
-      case "Dispositivos Wear OS":
+        case "Dispositivos Wear OS":
         return <WearOsLogin />;
-      case "Asignación de Pedidos":
+
+          case "Asignación de Pedidos":
         return <AsignacionPedidosV2 />;
       case "Productos":
         return <ProductTable />;
-      case "Pagos":
+           case "Pagos":
         return <PagosGeneral />;
       case "Pedidos Manuales":
-        return <PedidosManuales onNavigate={handleNavigate} setPedidos={setPedidos} />;
+        return (
+          <PedidosManuales onNavigate={handleNavigate} setPedidos={setPedidos} />
+        );
       case "Inventario":
-        return <Inventory onNavigate={handleNavigate} setDatosInventario={setDatosInventario} />;
+        return (
+          <Inventory
+            onNavigate={handleNavigate}
+            setDatosInventario={setDatosInventario}
+          />
+        );
       case "Agregar Productos a subodegas":
         return <AgregarProductosSubbodegas datosInventario={datosInventario} />;
       case "Usuarios Sospechosos":
@@ -385,25 +427,37 @@ const MenuHomeAdmin = () => {
       case "Subcategorias-Categorias":
         return <CrudSubcategorias />;
       case "Datos de la Empresa":
-        return <DashboardModulosEmpresa onNavigate={handleNavigate} fotoEmpresa={fotoEmpresa} />;
+        return (
+          <DashboardModulosEmpresa
+            onNavigate={handleNavigate}
+            fotoEmpresa={fotoEmpresa}
+          />
+        );
+        //Daboar de peidodos manueles
       case "Dashboard-pedidos":
         return <DashboardPedidos orders={pedidos} />;
       case "pedidos-calendario":
         return <PedidosCalendario />;
-      case "Predecir cancelación":
+          case "Predecir cancelación":
         return <PedidosConPrediccion />;
+
+        
+        
+        //Daboar de PEDIDOS GENERAL
       case "Pedidos General Dashboard":
-        return <PedidosGeneralesDashboard />;
+        return <PedidosGeneralesDashboard  />;
       case "Dasboard Productos":
-        return <ProductosDashboard orders={pedidos} />;
+        return <ProductosDashboard  orders={pedidos}/>;
       case "Gestion Pedidos":
         return <GestionPedidos onNavigate={handleNavigate} />;
       case "Pedidos General Calendario":
         return <CalendarioGeneralPedidos />;
-      case "Gestion Pedidos Inicidentes":
+        case "Gestion Pedidos Inicidentes":
         return <GestionPedidosIncidentes />;
-      case "Pedidos devueltos":
+         case "Pedidos devueltos":
         return <GestionPedidosDevueltos />;
+
+
       case "Dasboard Usuarios":
         return <DasboardUsuarios onNavigate={handleNavigate} />;
       case "Auditoría de Sesiones":
@@ -418,7 +472,7 @@ const MenuHomeAdmin = () => {
         return <Terminos onNavigate={handleNavigate} />;
       case "Deslin":
         return <DeslindeLegal onNavigate={handleNavigate} />;
-      case "privacidad":
+         case "privacidad":
         return <DeslindeLegal onNavigate={handleNavigate} />;
       case "historialPoliticas":
         return <HistorialPoliticas onNavigate={handleNavigate} />;
@@ -426,10 +480,10 @@ const MenuHomeAdmin = () => {
         return <HistorialTerminos onNavigate={handleNavigate} />;
       case "historialDeslinde":
         return <HistorialDeslindeLegal onNavigate={handleNavigate} />;
-      case "Repartidores":
-        return <GestionRepartidores />;
-      case "Gestión de Pagos":
-        return <GestionPagos />;
+     case "Repartidores":
+        return <GestionRepartidores/>;
+           case "Gestión de Pagos":
+        return <GestionPagos/>;
       case "Cerrar Sesion":
         return <div>Cerrando sesión...</div>;
       default:
@@ -443,6 +497,7 @@ const MenuHomeAdmin = () => {
 
   return (
     <div className="min-h-screen flex dark:bg-gray-900 text-gray-800 dark:text-white relative">
+      {/* Sidebar Mobile Overlay */}
       {isOpen && (
         <div
           className="fixed inset-0 bg-black/50 lg:hidden z-40"
@@ -537,7 +592,9 @@ const MenuHomeAdmin = () => {
 
       <div className="flex-1 flex flex-col min-w-0">
         <header className="sticky top-0 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-3 sm:px-4 lg:px-6 py-3 flex items-center justify-between z-30 shadow-sm">
+          {/* Sección izquierda */}
           <div className="flex items-center space-x-2 sm:space-x-3 min-w-0 flex-1">
+            {/* Botón menú móvil */}
             <button
               onClick={() => setIsOpen(!isOpen)}
               className="lg:hidden p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors flex-shrink-0"
@@ -558,6 +615,7 @@ const MenuHomeAdmin = () => {
               </svg>
             </button>
 
+            {/* Logo y título */}
             <div className="flex items-center space-x-2 sm:space-x-3 min-w-0 flex-1">
               <img
                 src={fotoEmpresa || Logo}
@@ -570,36 +628,63 @@ const MenuHomeAdmin = () => {
             </div>
           </div>
 
+          {/* Sección derecha */}
           <div className="flex items-center space-x-2 sm:space-x-3 flex-shrink-0 ml-2">
+            {/* Toggle theme button */}
             <div className="flex-shrink-0">
               <ToggleThemeButton />
             </div>
+
+            {/* Botón de notificaciones */}
+            {/* <button
+              className="relative p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors flex-shrink-0"
+              aria-label="Notifications"
+            >
+              <svg
+                className="w-5 h-5 sm:w-6 sm:h-6 text-gray-600 dark:text-gray-300"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"
+                />
+              </svg>
+              <span className="absolute -top-1 -right-1 w-4 h-4 sm:w-5 sm:h-5 bg-red-500 text-white text-xs font-semibold rounded-full flex items-center justify-center">
+                3
+              </span>
+            </button> */}
           </div>
         </header>
 
+        {/* Main content */}
         <main className="p-3 sm:p-4 lg:p-6 max-w-7xl w-full mx-auto flex-1">
           <Breadcrumbs activeTab={activeTab} onNavigate={handleNavigate} />
           {renderContent()}
         </main>
 
-        {showScrollButton && (
-          <button
-            onClick={scrollToTop}
-            className="fixed bottom-16 right-6 z-50 w-14 h-14 rounded-full bg-gradient-to-br from-yellow-400 to-orange-500 text-white flex items-center justify-center shadow-xl hover:shadow-2xl hover:scale-110 transition-transform duration-300"
-            aria-label="Volver arriba"
-          >
-            <FontAwesomeIcon icon={faArrowUp} className="w-6 h-6" />
-          </button>
-        )}
+        {/* Scroll to Top Button */}
+                {showScrollButton && (
+                  <button
+                    onClick={scrollToTop}
+                    className="fixed bottom-16 right-6 z-50 w-14 h-14 rounded-full bg-gradient-to-br from-yellow-400 to-orange-500 text-white flex items-center justify-center shadow-xl hover:shadow-2xl hover:scale-110 transition-transform duration-300"
+                    aria-label="Volver arriba"
+                  >
+                    <FontAwesomeIcon icon={faArrowUp} className="w-6 h-6" />
+                  </button>
+                )}
       </div>
 
       <style jsx>{`
         .scrollbar-none {
-          -ms-overflow-style: none;
-          scrollbar-width: none;
+          -ms-overflow-style: none; /* Internet Explorer 10+ */
+          scrollbar-width: none; /* Firefox */
         }
         .scrollbar-none::-webkit-scrollbar {
-          display: none;
+          display: none; /* Chrome, Safari, and Opera */
         }
       `}</style>
     </div>

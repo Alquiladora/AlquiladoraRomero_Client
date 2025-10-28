@@ -50,7 +50,7 @@ function DetalleProducto() {
           }
         }
       } catch (error) {
-
+        console.log(error)
       }
     };
 

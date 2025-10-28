@@ -1,0 +1,30 @@
+{
+  "success": true,
+  "pedido": {
+    "idPedido": 101,
+    "idRastreo": "ALQ-2025-001",
+    "estado": "Finalizado",
+    "totalPagar": 450.00,
+    "direccionEnvio": {
+      "nombre": "Juan",
+      "apellido": "Pérez",
+      "telefono": "1234567890",
+      "direccion": "Calle Falsa 123",
+      "localidad": "Centro",
+      "municipio": "CDMX",
+      "estado": "Ciudad de México",
+      "pais": "México",
+      "codigoPostal": "06000"
+    },
+    "productos": [
+      {
+        "producto": "Silla Gamer Pro",
+        "cantidad": 1,
+        "precioUnitario": 250.00,
+        "subtotal": 250.00,
+        "fotoProducto": "https://placehold.co/60x60",
+        "estadoProducto": "Completo"
+      }
+    ]
+  }
+}

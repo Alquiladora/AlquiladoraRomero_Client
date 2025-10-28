@@ -105,7 +105,7 @@ const Terminos = ({ onNavigate }) => {
       });
 
       //EStructuramo slo datos a enviar
-      const parseDate= response .data.map((termino)=>{
+      const parseDate= response.data.map((termino)=>{
         const originalDate= termino.fechaVigencia
         ?new Date(termino.fechaVigencia)
         : new Date(getMexico());

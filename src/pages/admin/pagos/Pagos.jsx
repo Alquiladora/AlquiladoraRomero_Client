@@ -34,6 +34,7 @@ const PagosGeneral = () => {
     try {
       let all = [];
       let page = 1;
+      // eslint-disable-next-line no-constant-condition
       while (true) {
         const response = await api.get(`/api/pedidos/pedidos/detalles/pagos?page=${page}`, {
           withCredentials: true,

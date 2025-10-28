@@ -76,6 +76,7 @@ const ChangePasswordClient = ({ idUsuario }) => {
       } else if (!/(?=.*\d)/.test(newPassword)) {
         validationError = "La contraseña debe contener al menos un número.";
         isValid = false;
+        // eslint-disable-next-line no-useless-escape
       } else if (!/(?=.*[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?])/.test(newPassword)) {
         validationError = "La contraseña debe contener al menos un carácter especial.";
         isValid = false;

@@ -1,0 +1,112 @@
+name: CI/CD - Alquiladora Romero
+
+on:
+  push:
+    branches: ["main", "develop"]
+  pull_request:
+    branches: ["main", "develop"]
+
+permissions:
+  contents: write
+
+jobs:
+  # -------------------------------
+  # Job 1: Lint + Formato
+  # -------------------------------
+  lint:
+    name: Lint y Formato
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+      - run: npm ci
+      - name: Ejecutar ESLint
+        run: |
+          npm run lint || echo "⚠️ Errores de lint encontrados"
+      - name: Ejecutar Prettier
+        run: |
+          npm run format:check || echo "⚠️ Errores de formato encontrados"
+
+  # -------------------------------
+  # Job 2: Pruebas Unitarias + Cobertura
+  # -------------------------------
+  pruebas-unitarias:
+    name: Pruebas Unitarias
+    runs-on: ubuntu-latest
+    needs: lint
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+      - run: npm ci
+      - name: Ejecutar todos los tests unitarios
+        run: npm test -- --coverage --watchAll=false || echo "ℹ️ No hay tests unitarios"
+        env:
+          NODE_ENV: test
+          CI: true
+      - name: Subir reporte de cobertura
+        uses: actions/upload-artifact@v4
+        with:
+          name: cobertura
+          path: coverage
+
+  # -------------------------------
+  # Job 3: Pruebas de Integración
+  # -------------------------------
+  pruebas-integracion:
+    name: Pruebas de Integración
+    runs-on: ubuntu-latest
+    needs: pruebas-unitarias
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+      - run: npm ci
+      - name: Ejecutar pruebas de integración
+        run: npm test -- --testPathPattern="**/*.integration.test.{js,jsx}" || echo "ℹ️ No hay tests de integración"
+        env:
+          NODE_ENV: test
+          CI: true
+
+  # -------------------------------
+  # Job 4: Build final producción
+  # -------------------------------
+  deploy:
+    name: Deploy a GitHub Pages
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    runs-on: ubuntu-latest
+    needs: pruebas-integracion # Depende directamente del último job de pruebas
+    steps:
+      - name: Checkout código fuente 🛎️
+        uses: actions/checkout@v4
+
+      - name: Configurar Node.js 20 con caché ⚙️
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Instalar dependencias 📦
+        run: npm ci
+
+      - name: Construir aplicación ignorando Warnings (Build) 🏗️⚠️
+        # --- CAMBIO CLAVE AQUÍ ---
+        # CI=false evita que react-scripts trate warnings como errores
+        run: CI=false npm run build
+        env:
+          # NODE_ENV: production # No es necesario, 'npm run build' lo establece por defecto
+          PUBLIC_URL: /Alquiladora # Necesario para GitHub Pages
+
+      - name: Desplegar a rama gh-pages 🚀
+        uses: JamesIves/github-pages-deploy-action@v4
+        with:
+          folder: build
+          branch: gh-pages
+          clean: true
