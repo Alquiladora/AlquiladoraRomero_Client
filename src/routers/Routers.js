@@ -1,5 +1,4 @@
-import { BrowserRouter as Router, Routes, Route,useNavigate } from 'react-router-dom';
-import { useContext, useEffect } from "react";
+import { BrowserRouter as Router, Routes, Route} from 'react-router-dom';
 
 //----------------------LAYOUTS--------------------------------------------
 import LayoutHeader from "../components/layout/LayHeader";
