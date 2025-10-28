@@ -47,7 +47,7 @@ const ColorManager = () => {
         }
         // eslint-disable-next-line no-useless-escape
       } else {
-       
+       console.log("Datos de error")
       }
     } catch (err) {
       toast.error("Error al conectar con el servidor. Por favor, intenta de nuevo.");

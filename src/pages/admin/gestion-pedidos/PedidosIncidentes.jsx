@@ -373,6 +373,7 @@ const GestionPedidosIncidentes = ({ onNavigate }) => {
           setPedidos(filteredPedidos);
           // eslint-disable-next-line no-useless-escape
         } else {
+          console.log("Datos de error")
           
         }
       } catch (error) {
