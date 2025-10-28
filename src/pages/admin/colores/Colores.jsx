@@ -45,6 +45,7 @@ const ColorManager = () => {
           toast.error("Los datos recibidos no son válidos.");
           setColors([]);
         }
+        // eslint-disable-next-line no-useless-escape
       } else {
        
       }
