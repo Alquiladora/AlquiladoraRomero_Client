@@ -87,7 +87,10 @@
     "test": "react-scripts test",
     "eject": "react-scripts eject",
     "lint": "eslint src --ext .js,.jsx",
-    "format:check": "prettier --check 'src/**/*.{js,jsx}'"
+    "format:check": "prettier --check 'src/**/*.{js,jsx}'",
+    "cy:open": "cypress open",
+   "cy:run": "cypress run",
+   "cy:run:record": "cypress run --record --key=tu-key-de-cypress-dashboard"
   },
   "eslintConfig": {
     "extends": [
@@ -108,14 +111,15 @@
     ]
   },
   "jest": {
-  "transformIgnorePatterns": [
-    "/node_modules/(?!(axios|react-router-dom))/"
-  ]
-},
+    "transformIgnorePatterns": [
+      "/node_modules/(?!(axios|react-router-dom))/"
+    ]
+  },
   "devDependencies": {
     "@babel/plugin-proposal-private-property-in-object": "^7.21.11",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.0",
+    "cypress": "^15.5.0",
     "eslint": "^8.57.1"
   }
 }

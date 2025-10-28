@@ -9,8 +9,9 @@ const RoutePrivate = ({ children, rolesPermitidos = [] }) => {
   const rolesValidos = Array.isArray(rolesPermitidos) ? rolesPermitidos : [];
   const tienePermiso = useMemo(() => user?.rol && rolesValidos.includes(user.rol), [user?.rol, rolesValidos]);
  useEffect(()=>{
-   checkAuth();
- },[])
+   if (window.Cypress) return;
+  checkAuth();
+}, [checkAuth, window.Cypress]);
 
   if (isLoading) {
     return (

@@ -1,0 +1,20 @@
+{
+  "success": true,
+  "data": [
+    {
+      "idPedido": 17288,
+      "idRastreo": "ROMERO-17615526225239",
+      "fechaInicio": "2025-04-05T10:00:00Z",
+      "totalPagar": 125000,
+      "estado": "Devuelto",
+      "nombreCliente": "Juan Pérez",
+      "numeroDeProductos": 2,
+      "fotosProductos": "[\"https://via.placeholder.com/80\",\"https://via.placeholder.com/80\"]"
+    }
+  ],
+  "paginacion": {
+    "paginaActual": 1,
+    "totalPaginas": 1,
+    "totalPedidos": 1
+  }
+}

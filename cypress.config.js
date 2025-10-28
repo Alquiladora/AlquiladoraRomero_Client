@@ -1,9 +1,12 @@
+// cypress.config.js
 const { defineConfig } = require('cypress');
 
 module.exports = defineConfig({
   e2e: {
-    baseUrl: 'http://localhost:3000', // Puerto confirmado
-    specPattern: 'cypress/e2e/gamificacion_ruleta.cy.js', // Solo este archivo
-    supportFile: false, // Sin archivo de soporte
+    baseUrl: 'http://localhost:3000',
+    chromeWebSecurity: false,  // <--- CLAVE PARA COOKIES
+    setupNodeEvents(on, config) {
+      return config;
+    },
   },
 });

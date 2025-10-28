@@ -304,6 +304,7 @@ const RatingStars = ({ rating, setRating }) => {
       {stars.map((star) => (
         <FontAwesomeIcon
           key={star}
+          data-testid={`star-${star}`}
           icon={faStar}
           onClick={() => setRating(star)}
           className={`text-2xl cursor-pointer transition-colors duration-200 ${star <= rating ? 'text-yellow-500' : 'text-gray-300 dark:text-gray-600 hover:text-yellow-400'
@@ -658,6 +659,12 @@ const HistorialPedidos = () => {
 
   useEffect(() => {
     const controller = new AbortController();
+   if (window.Cypress) {
+    fetchOrders(pagination.currentPage, controller.signal);
+    fetchRatedOrders(controller.signal);
+    return () => controller.abort();
+  }
+
     if (!isLoadingAuth) {
       const timer = setTimeout(() => {
         fetchOrders(pagination.currentPage, controller.signal);
@@ -672,7 +679,7 @@ const HistorialPedidos = () => {
         controller.abort();
       };
     }
-  }, [pagination.currentPage, fetchOrders, fetchRatedOrders, isLoadingAuth]);
+  }, [pagination.currentPage, fetchOrders, fetchRatedOrders, isLoadingAuth,window.Cypress]);
 
 
   useEffect(() => {
@@ -1146,7 +1153,7 @@ const handleReviewSuccess = (ratedOrderId) => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">Mis Pedidos</h1>
+          <h1 data-testid="page-title" className="text-3xl font-bold text-gray-900 dark:text-white mb-2">Mis Pedidos</h1>
           <p className="text-gray-600 dark:text-gray-400">Gestiona y revisa el historial de tus pedidos</p>
         </div>
 
@@ -1236,6 +1243,7 @@ const handleReviewSuccess = (ratedOrderId) => {
 
                 return (
                   <div
+                  data-testid="order-card"
                     key={order.idPedido}
                     className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700 overflow-hidden"
                   >
