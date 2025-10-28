@@ -659,12 +659,6 @@ const HistorialPedidos = () => {
 
   useEffect(() => {
     const controller = new AbortController();
-   if (window.Cypress) {
-    fetchOrders(pagination.currentPage, controller.signal);
-    fetchRatedOrders(controller.signal);
-    return () => controller.abort();
-  }
-
     if (!isLoadingAuth) {
       const timer = setTimeout(() => {
         fetchOrders(pagination.currentPage, controller.signal);
@@ -679,7 +673,7 @@ const HistorialPedidos = () => {
         controller.abort();
       };
     }
-  }, [pagination.currentPage, fetchOrders, fetchRatedOrders, isLoadingAuth,window.Cypress]);
+  }, [pagination.currentPage, fetchOrders, fetchRatedOrders, isLoadingAuth]);
 
 
   useEffect(() => {
