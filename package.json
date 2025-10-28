@@ -86,7 +86,8 @@
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
-    "lint": "eslint src/**/*.{js,jsx}"
+    "lint": "eslint src --ext .js,.jsx",
+    "format:check": "prettier --check 'src/**/*.{js,jsx}'"
   },
   "eslintConfig": {
     "extends": [
@@ -107,6 +108,9 @@
     ]
   },
   "devDependencies": {
+    "@babel/plugin-proposal-private-property-in-object": "^7.21.11",
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.0",
     "eslint": "^8.57.1"
   }
 }
