@@ -123,6 +123,7 @@ const Paso3 = ({ guardarCorreo }) => {
       if (!/(?=.*\d)/.test(value)) {
         missing.push("un número");
       }
+      // eslint-disable-next-line no-useless-escape
       if (!/(?=.*[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?])/.test(value)) {
         missing.push("un carácter especial");
       }

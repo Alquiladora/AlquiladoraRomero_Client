@@ -333,9 +333,9 @@ const PerfilAdmin = ( {totalUsuarios , totalRentas, totalFinalizado}) => {
         }
       );
       setSessions(response.data);
-      
+      // eslint-disable-next-line no-empty
     } catch (error) {
-  
+     console.log("Datos de error")
     }
   };
 

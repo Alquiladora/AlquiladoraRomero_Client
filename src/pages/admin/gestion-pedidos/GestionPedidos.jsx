@@ -42,7 +42,7 @@ import api from "../../../utils/AxiosConfig";
 import { useAuth } from "../../../hooks/ContextAuth";
 import CustomLoading from "../../../components/spiner/SpinerGlobal";
 import PredictCancelModal from "./PedidosPredicion";
-import PedidosConPrediccion from "./PedidosModeloPrevenir";
+
 
 // Función para capitalizar estados
 const capitalizeStatus = (status) => {
@@ -122,7 +122,7 @@ const GestionPedidos = ({ onNavigate }) => {
 
         console.log("Datos de pedidos general", transformedPedidos);
       } else {
-       
+       console.log("Eroor")
       }
     } catch (error) {
      

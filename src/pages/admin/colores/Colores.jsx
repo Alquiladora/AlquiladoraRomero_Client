@@ -14,11 +14,10 @@ import {
 import api from "../../../utils/AxiosConfig";
 import { useAuth } from "../../../hooks/ContextAuth";
 import { toast } from "react-toastify";
-import Swal from 'sweetalert2';
+
 
 const ColorManager = () => {
-  const { user, csrfToken } = useAuth();
-
+  const { csrfToken } = useAuth();
   const [colors, setColors] = useState([]);
   const [newColor, setNewColor] = useState({ name: "", hex: "#000000" });
   const [editingColor, setEditingColor] = useState(null);

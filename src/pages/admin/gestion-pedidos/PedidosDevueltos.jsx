@@ -168,7 +168,7 @@ const GestionPedidosDevueltos = ({ onNavigate }) => {
             }));
           setPedidos(filteredPedidos);
         } else {
-          
+          console("Error ")
         }
       } catch (error) {
      
