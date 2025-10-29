@@ -1,0 +1,26 @@
+{
+  "files": {
+    "main.css": "/Alquiladora/static/css/main.9ddaa65d.css",
+    "main.js": "/Alquiladora/static/js/main.cdc1c18f.js",
+    "static/js/239.eab0352a.chunk.js": "/Alquiladora/static/js/239.eab0352a.chunk.js",
+    "static/js/977.3becd578.chunk.js": "/Alquiladora/static/js/977.3becd578.chunk.js",
+    "static/js/455.69109110.chunk.js": "/Alquiladora/static/js/455.69109110.chunk.js",
+    "static/media/LogoOriginal.png": "/Alquiladora/static/media/LogoOriginal.798fd07ada3b7019d024.png",
+    "static/media/logo3.jpg": "/Alquiladora/static/media/logo3.65496a0da02e2ce93496.jpg",
+    "static/media/logo4.jpg": "/Alquiladora/static/media/logo4.c23eea28e10c2262ce45.jpg",
+    "static/media/logo7.jpg": "/Alquiladora/static/media/logo7.7c709695dbbdbfcfd74a.jpg",
+    "static/media/logo6.jpg": "/Alquiladora/static/media/logo6.fdf224001e9417c48498.jpg",
+    "static/media/LogoOriginal--.png": "/Alquiladora/static/media/LogoOriginal--.165a1b912e2cddc40a49.png",
+    "static/media/logo.jpg": "/Alquiladora/static/media/logo.a8e1b4989c2c803bbc06.jpg",
+    "static/media/color.png": "/Alquiladora/static/media/color.6441e63a57ccc5105bad.png",
+    "index.html": "/Alquiladora/index.html",
+    "main.9ddaa65d.css.map": "/Alquiladora/static/css/main.9ddaa65d.css.map",
+    "main.cdc1c18f.js.map": "/Alquiladora/static/js/main.cdc1c18f.js.map",
+    "239.eab0352a.chunk.js.map": "/Alquiladora/static/js/239.eab0352a.chunk.js.map",
+    "455.69109110.chunk.js.map": "/Alquiladora/static/js/455.69109110.chunk.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.9ddaa65d.css",
+    "static/js/main.cdc1c18f.js"
+  ]
+}
