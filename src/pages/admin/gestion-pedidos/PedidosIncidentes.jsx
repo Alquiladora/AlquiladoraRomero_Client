@@ -6,11 +6,10 @@ import {
   faFrown,
   faImage,
   faSearch,
-  faFileExport,
-  faFileInvoice,
+ 
   faMapMarkerAlt,
   faEye,
-  faMoneyCheckAlt,
+
   faChevronLeft,
   faChevronRight,
   faCalendarAlt,
@@ -21,19 +20,18 @@ import {
   faCreditCard,
   faDollarSign,
   faCheckCircle,
-  faBoxOpen,
+ 
   faUndo,
   faExclamationTriangle,
   faExclamationCircle,
   faTimes,
   faBan,
   faQuestionCircle,
-  faPlus,
-  faMinus,
+  
   faTicketAlt,
-  faChartBar,
+  
   faBox,
-  faCalendar,
+  
   faUserShield,
 } from "@fortawesome/free-solid-svg-icons";
 import { toast } from "react-toastify";
@@ -59,7 +57,7 @@ const UpdateStatusModal = ({ pedido, onClose, onUpdateStatus }) => {
   );
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const estadosProducto = ["Disponible", "Incidente", "Incompleto"];
+
   const estadosCambioPedido = [
     "Seleciona un estado",
     "Enviando",
@@ -326,23 +324,12 @@ const GestionPedidosIncidentes = ({ onNavigate }) => {
   const [timelineData, setTimelineData] = useState([]);
   const [timelineLoading, setTimelineLoading] = useState(false);
   const [timelineError, setTimelineError] = useState(null);
-  const [repartidorData, setRepartidorData] = useState(null);
+  const [ setRepartidorData] = useState(null);
   const { csrfToken } = useAuth();
   const ordersPerPage = 10;
 
   const estadosDisponibles = ["Todos", "Incidente", "Incompleto"];
-  const estadosProducto = ["Completado", "Incidente", "Incompleto"];
-  const estadosCambioPedido = [
-    "Procesando",
-    "Enviando",
-    "Recogiendo",
-    "En alquiler",
-    "Devuelto",
-    "Incompleto",
-    "Incidente",
-    "Cancelado",
-    "Finalizado",
-  ];
+  
 
   useEffect(() => {
     const fetchPedidos = async () => {
@@ -542,28 +529,19 @@ const handleUpdateStatus = async (idPedido, newStatus, productUpdates = []) => {
     if (page >= 1 && page <= totalPages) setCurrentPage(page);
   };
 
-  const handleGenerateReport = () =>
-    toast.info("Funcionalidad de generar reporte en desarrollo");
-  const handleExportCSV = () =>
-    toast.info("Funcionalidad de exportar a CSV en desarrollo");
-  const handleGenerateInvoice = (pedido) =>
-    toast.info(
-      `Generando factura para el pedido ${pedido.idRastreo}... (en desarrollo)`
-    );
+
   const handleShowTimeline = (pedido) => {
     setShowTimelineModal(pedido);
   };
   const handleShowDetails = (pedido) => setShowDetailsModal(pedido);
 
-  const handleShowTicketModal = (pedido) => setShowTicketModal(pedido);
   const handleShowUpdateStatusModal = (pedido) =>
     setShowUpdateStatusModal(pedido);
   const handleSendTicket = (email, pdfBlob) => {
     toast.success(`Ticket enviado al correo ${email} en formato PDF.`);
     setShowTicketModal(null);
   };
-  const handleNavigateDashboard = (dashboard) =>
-    toast.info(`Navegando al Dashboard de ${dashboard}... (en desarrollo)`);
+
 
   const renderTimelineModal = () => {
     return (

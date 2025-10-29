@@ -10,9 +10,6 @@ import {
   faBoxOpen,
   faPlayCircle,
   faCheckCircle,
-  faChartBar,
-  faChartLine,
-  faChartPie,
 } from "@fortawesome/free-solid-svg-icons";
 import { toast } from "react-toastify";
 import api from "../../../utils/AxiosConfig";
@@ -112,7 +109,7 @@ const PedidosGeneralesDashboard = () => {
 
   useEffect(() => {
     fetchStats();
-  }, [csrfToken, selectedYear, selectedStatus]);
+  }, [fetchStats,csrfToken, selectedYear, selectedStatus]);
 
   const months = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"];
 

@@ -3,7 +3,6 @@ import React, { useState, useEffect } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faTasks,
-  faFilter,
   faImage,
   faSearch,
   faMapMarkerAlt,
@@ -129,7 +128,7 @@ const UpdateStatusModal = ({ pedido, onClose, onUpdateStatus }) => {
 const GestionPedidosDevueltos = ({ onNavigate }) => {
   const [pedidos, setPedidos] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [filterEstado, setFilterEstado] = useState("Devuelto");
+  const [filterEstado] = useState("Devuelto");
   const [searchTerm, setSearchTerm] = useState("");
   const [dateRange, setDateRange] = useState({ start: "", end: "" });
   const [currentPage, setCurrentPage] = useState(1);
@@ -295,7 +294,7 @@ const GestionPedidosDevueltos = ({ onNavigate }) => {
 
   const handleShowDetails = (pedido) => setShowDetailsModal(pedido);
 
-  const handleShowTicketModal = (pedido) => setShowTicketModal(pedido);
+
 
   const handleShowUpdateStatusModal = (pedido) =>
     setShowUpdateStatusModal(pedido);

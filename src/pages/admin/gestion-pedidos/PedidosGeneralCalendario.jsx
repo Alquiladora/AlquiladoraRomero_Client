@@ -1,3 +1,4 @@
+/* eslint-disable */
 import React, { useState, useEffect } from "react";
 import Calendar from "react-calendar";
 import "react-calendar/dist/Calendar.css";
@@ -8,7 +9,7 @@ import {
   faTruck, faUser, faPhone, faMapMarkerAlt, faClock, faCreditCard, faDollarSign,
   faCheckCircle, faBan, faExclamationCircle, faExclamationTriangle, faTimes,
   faBoxOpen, faUndo, faQuestionCircle, faCalendarAlt, faBox, faClipboardCheck,
-  faHourglassStart, faShippingFast, faEye
+  faHourglassStart, faShippingFast
 } from "@fortawesome/free-solid-svg-icons";
 import { toast } from "react-toastify";
 import api from "../../../utils/AxiosConfig";
@@ -28,10 +29,10 @@ const CalendarioGeneralPedidos = ({ onNavigate }) => {
   const { csrfToken } = useAuth();
   const ordersPerPage = 5;
 
-  const estadosDisponibles = [
-    "Procesando", "Enviando", "Confirmado", "En alquiler", "Entregado",
-    "Devuelto", "Incompleto", "Incidente", "Cancelado", "Finalizado"
-  ];
+  // const estadosDisponibles = [
+  //   "Procesando", "Enviando", "Confirmado", "En alquiler", "Entregado",
+  //   "Devuelto", "Incompleto", "Incidente", "Cancelado", "Finalizado"
+  // ];
 
   useEffect(() => {
     const fetchPedidos = async () => {

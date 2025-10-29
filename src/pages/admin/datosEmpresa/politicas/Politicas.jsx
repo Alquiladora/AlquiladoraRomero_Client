@@ -60,33 +60,13 @@ const Politicas = ({ onNavigate }) => {
  
   const [editMode, setEditMode] = useState(false);
   const [currentVersion, setCurrentVersion] = useState(null);
-
-  const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
-
   const { csrfToken } = useAuth();
 
   // Estados para la paginación
   const [page, setPage] = useState(0);
-  const [rowsPerPage, setRowsPerPage] = useState(5); 
+  const [rowsPerPage] = useState(5); 
 
- 
-
-  useEffect(() => {
-    fetchPoliticas();
-  }, [fetchPoliticas]);
-
-
-
-  
-
-  const extractValue = (versioField) => {
-    if (typeof versioField === 'object' && versioField !== null) {
-      return versioField.data || versioField.value || '';
-    }
-    return versioField;
-  };
-
-  const fetchPoliticas = async () => {
+   const fetchPoliticas = async () => {
     try {
       const response = await api.get("/api/politicas", { withCredentials: true });
      
@@ -120,6 +100,23 @@ const Politicas = ({ onNavigate }) => {
     }
   };
   
+
+  useEffect(() => {
+    fetchPoliticas();
+  }, [fetchPoliticas]);
+
+
+
+  
+
+  const extractValue = (versioField) => {
+    if (typeof versioField === 'object' && versioField !== null) {
+      return versioField.data || versioField.value || '';
+    }
+    return versioField;
+  };
+
+
 
 
   const formik = useFormik({

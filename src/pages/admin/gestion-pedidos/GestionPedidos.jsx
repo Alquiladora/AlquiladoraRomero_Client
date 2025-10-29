@@ -5,8 +5,7 @@ import {
   faFilter,
   faBrain,
   faSearch,
-  faFileExport,
-  faFileInvoice,
+ 
   faMapMarkerAlt,
   faEye,
   faMoneyCheckAlt,
@@ -20,7 +19,7 @@ import {
   faCreditCard,
   faDollarSign,
   faCheckCircle,
-  faBoxOpen,
+ 
   faUndo,
   faExclamationTriangle,
   faExclamationCircle,
@@ -31,8 +30,6 @@ import {
   faMinus,
   faTicketAlt,
   faChartBar,
-  faMoneyBillWave,
-  faUsers,
   faBox,
   faCalendar,
 } from "@fortawesome/free-solid-svg-icons";
@@ -134,7 +131,7 @@ const GestionPedidos = ({ onNavigate }) => {
 
   useEffect(() => {
     fetchPedidos();
-  }, [currentPage, filterEstado, searchTerm, dateRange.start, dateRange.end, csrfToken]);
+  }, [fetchPedidos,currentPage, filterEstado, searchTerm, dateRange.start, dateRange.end, csrfToken]);
 
   useEffect(() => {
     const fetchTimelineData = async () => {
@@ -179,14 +176,7 @@ const GestionPedidos = ({ onNavigate }) => {
     if (page >= 1 && page <= totalPages) setCurrentPage(page);
   };
 
-  const handleGenerateReport = () =>
-    toast.info("Funcionalidad de generar reporte en desarrollo");
-  const handleExportCSV = () =>
-    toast.info("Funcionalidad de exportar a CSV en desarrollo");
-  const handleGenerateInvoice = (pedido) =>
-    toast.info(
-      `Generando factura para el pedido ${pedido.idRastreo}... (en desarrollo)`
-    );
+ 
   const handleShowTimeline = (pedido) => {
     setShowTimelineModal(pedido);
     setShowMoreTimeline(false);

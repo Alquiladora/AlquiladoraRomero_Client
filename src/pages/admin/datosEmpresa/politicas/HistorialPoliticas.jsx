@@ -27,7 +27,7 @@ import {
 } from '@mui/material';
 import { Visibility, ArrowBack } from '@mui/icons-material';
 import api from '../../../../utils/AxiosConfig';
-import { useNavigate } from 'react-router-dom';
+
 
 const HistorialPoliticas = ({ onNavigate }) => {
     const [politicas, setPoliticas] = useState([]);
