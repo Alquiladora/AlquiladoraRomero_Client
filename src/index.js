@@ -7,6 +7,8 @@ import ThemeProvider from './hooks/ContextThem';
 import { AuthProvider } from './hooks/ContextAuth';
 import InactivityHandler from './hooks/ContexInactividad';
 import { useSocket } from './utils/Socket';
+import * as serviceWorkerRegistration from './serviceWorkerRegistration';
+import { register } from './serviceWorkerRegistration';
 
 function SocketController() {
   useSocket();
@@ -28,3 +30,23 @@ root.render(
     </BrowserRouter>
   </React.StrictMode>
 );
+
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker
+      .register('/service-worker.js')
+      .then((reg) => console.log('SW registrado:', reg))
+      .catch((err) => console.log('SW error:', err));
+  });
+}
+
+register({
+  onUpdate: (registration) => {
+    const waitingWorker = registration.waiting;
+    if (waitingWorker) {
+      waitingWorker.postMessage({ type: 'SKIP_WAITING' });
+    }
+  },
+});
+
+serviceWorkerRegistration.register();
