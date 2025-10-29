@@ -1,31 +1,18 @@
 {
-  "short_name": "Alquiladora",
-  "name": "Alquiladora Romero",
+  "name": "RentFast",
+  "short_name": "RentFast",
   "icons": [
     {
-      "src": "/favicon.ico",
-      "sizes": "64x64 32x32 24x24 16x16",
-      "type": "image/x-icon"
+      "src": "/icons/web-app-manifest-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
     },
     {
-      "src": "/favicon.png",
+      "src": "/icons/web-app-manifest-512x512.png",
+      "sizes": "512x512",
       "type": "image/png",
-      "sizes": "64x64"
-    },
-    {
-      "src": "/logo192.png",
-      "type": "image/png",
-      "sizes": "192x192"
-    },
-    {
-      "src": "/favicon-32x32.png",
-      "type": "image/png",
-      "sizes": "32x32"
-    },
-    {
-      "src": "/favicon-16x16.png",
-      "type": "image/png",
-      "sizes": "16x16"
+      "purpose": "maskable"
     }
   ],
   "start_url": ".",
