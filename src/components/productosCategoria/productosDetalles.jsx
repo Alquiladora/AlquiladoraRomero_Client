@@ -4,7 +4,6 @@ import ProductosRelacionados from "./ProductosRelacionados";
 import { toast } from "react-toastify";
 import { useAuth } from "../../hooks/ContextAuth";
 import api from "../../utils/AxiosConfig";
-import colorMap from "./Colors";
 import { useCart } from "../carrito/ContextCarrito";
 import { FaMoneyBillWave, FaTimes } from "react-icons/fa";
 import { GiMaterialsScience } from "react-icons/gi";
@@ -24,7 +23,6 @@ function DetalleProducto() {
   const [hoveredColor, setHoveredColor] = useState(null);
   const [quantity, setQuantity] = useState(1);
   const [isAddingToCart, setIsAddingToCart] = useState(false);
-  const navigate = useNavigate();
   const { actualizarRecomendaciones } = useRecomendaciones();
 
   useEffect(() => {

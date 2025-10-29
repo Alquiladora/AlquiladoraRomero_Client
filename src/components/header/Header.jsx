@@ -1,8 +1,8 @@
 import NavEncabezado from "./navHeader/NavHeader"
 import HeaderChild1 from "./headerChild/HeaderChil1";
 import { useAuth } from "../../hooks/ContextAuth";
-import React, { useState, useEffect, useContext, useRef } from "react";
-import { Link, useNavigate, useLocation } from "react-router-dom";
+import React, {  useEffect } from "react";
+import {  useNavigate, useLocation } from "react-router-dom";
 
 const Header=()=>{
   const { user,isLoading} = useAuth();

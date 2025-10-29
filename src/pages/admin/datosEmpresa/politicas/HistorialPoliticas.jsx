@@ -1,6 +1,6 @@
-// src/components/HistorialPoliticas.jsx
-import React, { useEffect, useState, useContext, useRef } from 'react';
-import axios from 'axios';
+
+import React, { useEffect, useState } from 'react';
+
 import {
     Container,
     Typography,
@@ -17,7 +17,6 @@ import {
     TablePagination,
     Dialog,
     Grid,
-    DialogTitle,
     DialogContent,
     Chip,
     DialogActions,
@@ -27,7 +26,6 @@ import {
     ListItemText,
 } from '@mui/material';
 import { Visibility, ArrowBack } from '@mui/icons-material';
-import { toast } from "react-toastify";
 import api from '../../../../utils/AxiosConfig';
 import { useNavigate } from 'react-router-dom';
 
@@ -35,7 +33,6 @@ const HistorialPoliticas = ({ onNavigate }) => {
     const [politicas, setPoliticas] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
-    const navigate = useNavigate();
 
     // Estados para la paginación
     const [page, setPage] = useState(0);

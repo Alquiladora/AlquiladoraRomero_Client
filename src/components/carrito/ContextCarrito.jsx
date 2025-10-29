@@ -39,7 +39,7 @@ export const CartProvider = ({ children }) => {
 
   useEffect(() => {
     fetchCartCount();
-  }, [user, csrfToken, isCliente]); 
+  }, [fetchCartCount,user, csrfToken, isCliente]); 
 
   const addToCart = async () => {
     if (isCliente && userId) {

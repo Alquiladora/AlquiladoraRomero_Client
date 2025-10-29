@@ -13,12 +13,9 @@ import {
 import {
   faUser,
   faSignOutAlt,
-  faHistory,
-  faBell,
-  faComments,
+  faHistory
 } from "@fortawesome/free-solid-svg-icons";
 import Swal from "sweetalert2";
-import axios from "axios";
 import { useAuth } from "../../../hooks/ContextAuth";
 import { UserIcon } from "@heroicons/react/outline";
 

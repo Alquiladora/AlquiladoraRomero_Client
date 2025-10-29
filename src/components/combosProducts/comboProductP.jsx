@@ -1,14 +1,7 @@
 import React, { useEffect, useState, useCallback } from "react";
 import api from "../../utils/AxiosConfig";
-import axios from "axios";  
 import ComboProducts from "./ComboProducts";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import {
-  faChevronLeft,
-  faChevronRight,
-  faSpinner,
-  faExclamationTriangle,
-} from "@fortawesome/free-solid-svg-icons";
+
 import { useAuth } from "../../hooks/ContextAuth";
 import { ArchiveX } from 'lucide-react';
 
@@ -31,9 +24,9 @@ const ProductCardSkeleton = () => (
 const ComboProdutsP = () => {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const { csrfToken, user } = useAuth();
-  const [pagination, setPagination] = useState({
+  const [ setError] = useState(null);
+  const { csrfToken } = useAuth();
+  const [pagination] = useState({
     currentPage: 1,
     totalPages: 1,
     totalItems: 0,

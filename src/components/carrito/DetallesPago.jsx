@@ -4,10 +4,10 @@ import { useAuth } from "../../hooks/ContextAuth";
 import { useCart } from "./ContextCarrito";
 import api from "../../utils/AxiosConfig";
 import { toast } from "react-toastify";
-import { FaCreditCard, FaLock, FaTimes, FaPlus, FaEdit } from "react-icons/fa";
+import { FaCreditCard, FaLock, FaPlus, FaEdit } from "react-icons/fa";
 import AddressBook from "../../pages/client/perfil/componetsPerfil/ListaDirecciones";
 import { loadStripe } from "@stripe/stripe-js";
-import { Elements } from "@stripe/react-stripe-js";
+
 
 const stripePromise = loadStripe(process.env.REACT_APP_STRIPE_PUBLISHABLE_KEY);
 
@@ -30,7 +30,7 @@ const DetallesPago = ({ cartItems, total, rentalDate, returnDate, onBack }) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [showAddressModal, setShowAddressModal] = useState(false);
   const [editAddressId, setEditAddressId] = useState(null);
-  const [updaDirrecion, setUpdaDirrecion] = useState([]);
+  const [updaDirrecion] = useState([]);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
 
   const itemsPerPage = 10;
@@ -77,7 +77,7 @@ const DetallesPago = ({ cartItems, total, rentalDate, returnDate, onBack }) => {
     if (user?.idUsuarios || user?.id) {
       cargarDirecciones();
     }
-  }, [updaDirrecion]);
+}, [updaDirrecion, csrfToken, user?.id, user?.idUsuarios]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -137,7 +137,7 @@ const DetallesPago = ({ cartItems, total, rentalDate, returnDate, onBack }) => {
       );
 
       if (response.data.success) {
-        const { idPago, idPedido } = response.data;
+        const { idPago } = response.data;
         clearCart();
         navigate(`/cliente/compra-exitosa/${idPago}`);
       } else {
@@ -211,9 +211,7 @@ const DetallesPago = ({ cartItems, total, rentalDate, returnDate, onBack }) => {
     }
   };
 
-  const handleClosePaymentModal = () => {
-    setShowPaymentModal(false);
-  };
+
 
   useEffect(() => {
     
@@ -225,7 +223,7 @@ const DetallesPago = ({ cartItems, total, rentalDate, returnDate, onBack }) => {
     if (sessionId) {
       handlePaymentSuccess(sessionId, "success");
     }
-  }, []);
+  }, [handlePaymentSuccess]);
 
   if (cartCount === 0 || cartItems.length === 0) {
     return (

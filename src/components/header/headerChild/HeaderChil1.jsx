@@ -10,36 +10,29 @@ import {
    ExclamationCircleIcon,
 } from "@heroicons/react/outline";
 import { LoginLink, IconoPerfil } from "../btnLogin/LoginClient";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faHeadset } from "@fortawesome/free-solid-svg-icons";
-import SearchBar from "./Seach";
+
 import ToggleThemeButton from "../../btnTheme/ToggleThemeButton";
 import Logo from "../../../img/Logos/LogoOriginal--.png";
-import { Link, useLocation } from "react-router-dom";
-import Chatbox from "../../chabox/Chabox";
+import { Link} from "react-router-dom";
 import { useAuth } from "../../../hooks/ContextAuth";
 import api from "../../../utils/AxiosConfig";
-import { useSocket } from "../../../utils/Socket";
+
 import { useCart } from "../../carrito/ContextCarrito";
 
 const HeaderChil1 = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isCategoriesOpen, setIsCategoriesOpen] = useState(false);
-  const [isChatboxOpen, setIsChatboxOpen] = useState(false);
   const { user, csrfToken } = useAuth();
   const { cartCount, isLoading } = useCart();
   const [categorias, setCategorias] = useState([]);
-  const socket = useSocket();
-  const location = useLocation();
+
   const [showMessage, setShowMessage] = useState(false);
 
   const isCliente = user && user.rol === "cliente";
-  const isCartPage =
-    location.pathname === (isCliente ? "/cliente/carrito" : "/carrito");
 
   useEffect(() => {
     fetchCategorias();
-  }, []);
+  }, [fetchCategorias]);
 
   const handleCartClick = (e) => {
     if (!isCliente) {

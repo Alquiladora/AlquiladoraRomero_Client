@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
 import {
-  CheckIcon,
   TrashIcon,
   PlusIcon,
   MinusIcon,
@@ -15,7 +14,7 @@ import { toast } from "react-toastify";
 import { useCart } from "./ContextCarrito";
 import DetallesPago from "./DetallesPago";
 import { useRecomendaciones } from "./ContextRecomendaciones";
-import { ShoppingCart, Star, ArrowRight } from "lucide-react";
+import { ShoppingCart } from "lucide-react";
 import "./carrito.css";
 import { Link } from "react-router-dom";
 
@@ -597,13 +596,13 @@ function CarritoRentaSheinStyle() {
 
   const handleRentalDateChange = (e) => {
     const newRentalDate = e.target.value;
-    const today = new Date(getMexicoCityDate()).toISOString().split("T")[0];
+  
 
     if (isTodaySunday() && isSunday(newRentalDate)) {
       toast.error(
         "Los domingos no trabajamos. Por favor, selecciona otro día."
       );
-      setRentalDate(""); // Limpia el campo si es domingo y hoy también lo es
+      setRentalDate(""); 
       return;
     }
 
@@ -682,9 +681,6 @@ function CarritoRentaSheinStyle() {
       ? calculateTotalToPay(totalCalculated)
       : { subtotal: 0, stripeFee: 0, total: 0 };
 
-  const beforeShowDate = (date) => {
-    return !isSunday(date.toISOString().split("T")[0]);
-  };
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-900 text-gray-900 dark:text-gray-100">

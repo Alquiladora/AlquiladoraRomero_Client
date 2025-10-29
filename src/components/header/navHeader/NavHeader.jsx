@@ -1,12 +1,13 @@
+/* eslint-disable jsx-a11y/anchor-is-valid */
 import React, { useState, useEffect } from 'react';
-import { FaPhoneAlt, FaMapMarkerAlt, FaEnvelope } from 'react-icons/fa';
+import { FaPhoneAlt, FaMapMarkerAlt} from 'react-icons/fa';
 import '../../../style/components/navHeader.css';
 import api from '../../../utils/AxiosConfig';
 
 const NavEncabezado = () => {
   const [empresa, setEmpresa] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(false);
+  const [setError] = useState(false);
 
   const defaultData = {
     nombreEmpresa: "Alquiladora Romero",

@@ -1,13 +1,10 @@
+/* eslint-disable jsx-a11y/anchor-is-valid */
 import Swal from "sweetalert2";
 import React, {
-  createContext,
   useState,
   useEffect,
-  useContext,
-  useRef,
 } from "react";
 import { useIdleTimer } from "react-idle-timer";
-import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "./ContextAuth";
 

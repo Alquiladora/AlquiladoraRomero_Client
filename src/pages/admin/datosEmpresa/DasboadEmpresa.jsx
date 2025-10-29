@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+
 import Logo from "../../../img/Logos/LogoOriginal.png";
 
 const modulesData = [
@@ -148,21 +148,7 @@ function getModuleIcon(key) {
   }
 }
 
-const LoadingSkeleton = () => (
-  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
-    {Array.from({ length: 6 }).map((_, index) => (
-      <div
-        key={index}
-        className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-md animate-pulse"
-      >
-        <div className="w-16 h-16 mx-auto bg-gray-300 dark:bg-gray-700 rounded-full mb-4"></div>
-        <div className="h-6 w-3/4 mx-auto bg-gray-300 dark:bg-gray-700 rounded mb-4"></div>
-        <div className="h-4 w-full bg-gray-300 dark:bg-gray-700 rounded mb-2"></div>
-        <div className="h-4 w-5/6 mx-auto bg-gray-300 dark:bg-gray-700 rounded"></div>
-      </div>
-    ))}
-  </div>
-);
+
 
 function DashboardModulosEmpresa({ onNavigate, fotoEmpresa }) {
   const handleModuleClick = (mod) => {

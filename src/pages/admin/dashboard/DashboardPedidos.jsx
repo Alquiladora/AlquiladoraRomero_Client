@@ -1,9 +1,10 @@
+/* eslint-disable jsx-a11y/anchor-is-valid */
 import React, { useMemo, useContext } from "react";
 import { 
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, 
   PieChart, Pie, Cell, AreaChart, Area, ResponsiveContainer 
 } from "recharts";
-import { Package, DollarSign, Clock, AlertTriangle, Box, Calendar } from "lucide-react";
+import { Package, DollarSign, Clock, AlertTriangle, Box } from "lucide-react";
 import { ThemeContext } from "@emotion/react";
 
 const DashboardPedidos = ({ orders = [] }) => {

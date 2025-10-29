@@ -4,39 +4,15 @@ import * as yup from 'yup';
 import Swal from 'sweetalert2';
 import withReactContent from 'sweetalert2-react-content';
 import {
-  Container,
-  TextField,
-  Button,
-  Typography,
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableRow,
-  Paper,
-  IconButton,
   Box,
-  Grid,
   CircularProgress,
   Alert,
-  TablePagination,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  Chip,
-  List,
-  ListItem,
-  ListItemText,
-  Tooltip,
 } from '@mui/material';
-import { Add, Delete, Edit, History } from '@mui/icons-material';
 import api from '../../../../utils/AxiosConfig';
 import { useAuth } from '../../../../hooks/ContextAuth';
 import { toast } from "react-toastify";
-import { useNavigate } from 'react-router-dom'; 
 
-const MySwal = withReactContent(Swal);
+
 
 // Función para obtener la fecha actual en México
 const getMexicoDate = () => {
@@ -220,10 +196,7 @@ const DeslindeLegal = ({ onNavigate}) => {
     setPage(newPage);
   };
 
-  const handleChangeRowsPerPage = (event) => {
-    setRowsPerPage(parseInt(event.target.value, 10));
-    setPage(0);
-  };
+ 
 
   if (loading)
     return (

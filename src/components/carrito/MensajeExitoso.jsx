@@ -4,7 +4,7 @@ import { FaCheckCircle, FaHome } from "react-icons/fa"; // Cambiado FaArrowLeft 
 import { motion } from "framer-motion"; // Para añadir animaciones sutiles
 
 const MensajeCompraExitosa = () => {
-  const { trackingId } = useParams();
+
   const navigate = useNavigate();
 
   const handleVolverInicio = () => {

@@ -1,10 +1,8 @@
-import React, { useState, useEffect, memo } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Plus,
-  Trash,
   Package,
   List,
-  X,
   Search,
   ChevronLeft,
   ChevronRight,
@@ -55,7 +53,7 @@ function CrudSubcategorias() {
   const [modalType, setModalType] = useState("");
   const [inputValue, setInputValue] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("");
-  const { user, csrfToken } = useAuth();
+  const {  csrfToken } = useAuth();
 
   
   const [subcatSearch, setSubcatSearch] = useState("");

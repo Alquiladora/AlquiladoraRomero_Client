@@ -5,7 +5,6 @@ import {
   ClockIcon,
   CheckCircleIcon,
   PaperAirplaneIcon,
-  HomeIcon,
   TruckIcon,
   RefreshIcon,
   ExclamationCircleIcon,

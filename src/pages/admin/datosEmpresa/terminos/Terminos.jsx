@@ -1,34 +1,21 @@
-import React, { useEffect, useState, useContext, useRef } from 'react';
+import React, { useEffect, useState } from 'react';
 import Swal from 'sweetalert2';
 import withReactContent from 'sweetalert2-react-content';
 import { useFormik, FieldArray, FormikProvider } from 'formik';
 import * as yup from 'yup';
 import {
-  Container,
-  TextField,
-  Button,
-  Typography,
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableRow,
-  Paper,
-  IconButton,
+ 
   Box,
-  Grid,
+ 
   CircularProgress,
   Alert,
-  Snackbar,
-  TablePagination, 
 } from '@mui/material';
-import { Add, Delete, Edit, History } from '@mui/icons-material'; 
 import { useAuth } from '../../../../hooks/ContextAuth';
 import api from '../../../../utils/AxiosConfig';
 import { useNavigate } from 'react-router-dom'; 
 import { toast } from "react-toastify";
 
-const MySwal = withReactContent(Swal);
+
 
 
 //==============================fUNCION PAR AOBTENER EL TIRMPO ACTUAL
@@ -73,10 +60,8 @@ const Terminos = ({ onNavigate }) => {
   const [editMode, setEditMode] = useState(false);
   const [currentVersion, setCurrentVersion] = useState(null);
 
- const { user, csrfToken } = useAuth();
+ const { csrfToken } = useAuth();
   const [error, setError]= useState(null);
-  const [snackbar, setSnackbar]=useState({open: false, message:'', severity: 'success'});
-  const navigate= useNavigate();
   //Pagination
   const [page, setPage]= useState(0);
   const [rowsPerPage, setRowsPerPage]=useState(5);
@@ -85,7 +70,7 @@ const Terminos = ({ onNavigate }) => {
 
   useEffect(() => {
     fetchTerminos();
-  }, []);
+  }, [fetchTerminos]);
 
 
 
@@ -159,11 +144,6 @@ const Terminos = ({ onNavigate }) => {
     const handleChangePage=(event, newPage)=>{
       setPage(newPage);
     }
-  //Funcion para manejar el cambio de filas por pagina
-  const handleChangeRowsPerPage= (event)=>{
-    setRowsPerPage(parseInt(event.target.value, 10));
-    setPage(0);
-  }
 
   //Creamos un nuevo termino version 1.0
   const createTermino = async (data) => {

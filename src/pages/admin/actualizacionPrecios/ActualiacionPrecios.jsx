@@ -103,7 +103,7 @@ function ActualizacionPrecios() {
   const [searchValueUnassigned, setSearchValueUnassigned] = useState("");
   const itemsPerPageUnassigned = 5;
   const [isLoading, setIsLoading] = useState(true);
-  const { user, logout, csrfToken } = useAuth();
+  const { csrfToken } = useAuth();
 
   useEffect(() => {
     fetchData();
@@ -227,6 +227,7 @@ function ActualizacionPrecios() {
           withCredentials: true,
         }
       );
+      console.log("Correcto actualizado precio",response)
 
       toast.success("Precio actualizado correctamente.");
       fetchData();

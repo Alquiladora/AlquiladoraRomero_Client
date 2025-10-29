@@ -1,28 +1,14 @@
 
-import React, { useEffect, useState, useContext, useRef } from 'react';
+import React, { useEffect, useState} from 'react';
 import DetalleProducto from '../../../../components/productosCategoria/productosDetalles';
 import { useFormik, FieldArray, FormikProvider } from 'formik';
 import * as yup from 'yup';
 import {
-  Container,
-  TextField,
-  Button,
-  Typography,
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableRow,
-  Paper,
-  IconButton,
   Box,
-  Grid,
   CircularProgress,
   Alert,
-  Snackbar,
-  TablePagination, 
+ 
 } from '@mui/material';
-import { Add, Delete, Edit, History } from '@mui/icons-material'; 
 import api from '../../../../utils/AxiosConfig';
 
 import { toast } from "react-toastify";
@@ -79,8 +65,7 @@ const Politicas = ({ onNavigate }) => {
 
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
 
-  const navigate = useNavigate(); 
-  const { user, csrfToken } = useAuth();
+  const { csrfToken } = useAuth();
 
   // Estados para la paginación
   const [page, setPage] = useState(0);
@@ -90,12 +75,9 @@ const Politicas = ({ onNavigate }) => {
 
   useEffect(() => {
     fetchPoliticas();
-  }, []);
+  }, [fetchPoliticas]);
 
-  // Función para cerrar el Snackbar
-  const handleCloseSnackbar = () => {
-    setSnackbar({ ...snackbar, open: false });
-  };
+
 
   
 
@@ -172,11 +154,6 @@ const Politicas = ({ onNavigate }) => {
     setPage(newPage);
   };
 
-  // Función para manejar el cambio de filas por página
-  const handleChangeRowsPerPage = (event) => {
-    setRowsPerPage(parseInt(event.target.value, 10));
-    setPage(0);
-  };
 
   const createPolitica = async (data) => {
     try {

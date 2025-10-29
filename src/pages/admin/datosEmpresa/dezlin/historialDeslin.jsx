@@ -1,7 +1,7 @@
-// src/components/admin/deslin/HistorialDeslindeLegal.jsx
 
-import React, { useEffect, useState, useContext } from 'react';
-import axios from 'axios';
+
+import React, { useEffect, useState} from 'react';
+
 import {
   Container,
   Typography,
@@ -18,7 +18,6 @@ import {
   TablePagination,
   Dialog,
   Grid,
-  DialogTitle,
   DialogContent,
   Chip,
   DialogActions,
@@ -26,9 +25,8 @@ import {
   List,
   ListItem,
   ListItemText,
-  Tooltip,
 } from '@mui/material';
-import { Visibility, ArrowBack, History } from '@mui/icons-material';
+import { Visibility, ArrowBack} from '@mui/icons-material';
 import api from '../../../../utils/AxiosConfig';
 import { useNavigate } from 'react-router-dom';
 
@@ -36,7 +34,7 @@ const HistorialDeslindeLegal = ({ onNavigate}) => {
   const [deslindes, setDeslindes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const navigate = useNavigate();
+
 
   // Estados para la paginación
   const [page, setPage] = useState(0);

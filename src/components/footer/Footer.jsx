@@ -1,5 +1,5 @@
 import React from "react";
-import { FaFacebook, FaInstagram, FaTwitter } from "react-icons/fa";
+
 import '../../style/components/navHeader.css'
 import Seccion5 from '../ubicacion_Horario/Secion5'
 import { FooterDatos } from "./FooterDatos";

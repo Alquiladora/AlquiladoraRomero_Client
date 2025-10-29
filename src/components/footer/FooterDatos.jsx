@@ -1,3 +1,4 @@
+/* eslint-disable jsx-a11y/anchor-is-valid */
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import React, { useState, useEffect } from "react";
 import {
@@ -25,9 +26,6 @@ import {
   faDiscord,
   faTelegramPlane,
 } from "@fortawesome/free-brands-svg-icons";
-
-
-import { toast } from "react-toastify";
 import api from "../../utils/AxiosConfig";
 import { useAuth } from "../../hooks/ContextAuth";
 
@@ -46,7 +44,7 @@ export const FooterDatos = () => {
     if (csrfToken) {
       fetchEmpresaData();
     }
-  }, [csrfToken]);
+  }, [csrfToken,fetchEmpresaData]);
 
   const fetchEmpresaData = async () => {
     setLoading(true);

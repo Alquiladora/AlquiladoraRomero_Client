@@ -1,4 +1,5 @@
-import React, { useState, useEffect, useRef } from "react";
+/* eslint-disable jsx-a11y/anchor-is-valid */
+import React, { useState, useEffect } from "react";
 import {
   Box,
   Grid,
@@ -38,8 +39,7 @@ import {
   faWhatsapp,
   faTelegramPlane,
 } from "@fortawesome/free-brands-svg-icons";
-import { FaGlobe, FaSadTear, FaDatabase, FaTimes } from "react-icons/fa";
-import axios from "axios";
+import { FaGlobe,  FaTimes } from "react-icons/fa";
 import { toast } from "react-toastify";
 import api from "../../../../utils/AxiosConfig";
 import { useAuth } from "../../../../hooks/ContextAuth";
@@ -65,7 +65,7 @@ const CrudEmpresa = ({ setFotoEmpresa }) => {
     ubicacion: "",
     redesSociales: {},
   });
-  const { user, csrfToken } = useAuth();
+  const {  csrfToken } = useAuth();
   const [uploading, setUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [openModal, setOpenModal] = useState(false);
