@@ -1,29 +1,29 @@
-import React, { useEffect, useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { X, AlertTriangle } from "lucide-react";
+import React, { useEffect, useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { X, AlertTriangle } from 'lucide-react';
 
 const ServerErrorModal = () => {
   const [visible, setVisible] = useState(false);
-  const [modalTitle, setModalTitle] = useState("");
-  const [modalMessage, setModalMessage] = useState("");
+  const [modalTitle, setModalTitle] = useState('');
+  const [modalMessage, setModalMessage] = useState('');
 
   useEffect(() => {
     // Mapea eventos a mensajes y títulos
     const errorMap = {
-      "offline-error": {
-        title: "Sin Conexión a Internet",
+      'offline-error': {
+        title: 'Sin Conexión a Internet',
         message:
-          "Parece que tu dispositivo no tiene conexión a Internet. Por favor, verifica tu red e inténtalo de nuevo.",
+          'Parece que tu dispositivo no tiene conexión a Internet. Por favor, verifica tu red e inténtalo de nuevo.',
       },
-      "timeout-error": {
-        title: "Conexión Lenta",
+      'timeout-error': {
+        title: 'Conexión Lenta',
         message:
-          "La solicitud tardó demasiado en responder. Tu conexión podría ser lenta o el servidor está tardando en responder.",
+          'La solicitud tardó demasiado en responder. Tu conexión podría ser lenta o el servidor está tardando en responder.',
       },
-      "server-unreachable": {
-        title: "Servidor No Disponible",
+      'server-unreachable': {
+        title: 'Servidor No Disponible',
         message:
-          "No se pudo conectar con el servidor. Intenta nuevamente más tarde.",
+          'No se pudo conectar con el servidor. Intenta nuevamente más tarde.',
       },
     };
 

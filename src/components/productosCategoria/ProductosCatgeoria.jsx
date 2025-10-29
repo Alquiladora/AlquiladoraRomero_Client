@@ -1,9 +1,9 @@
-import React, { useEffect, useState, useMemo } from "react";
-import { useParams, Link } from "react-router-dom";
-import api from "../../utils/AxiosConfig";
-import { useAuth } from "../../hooks/ContextAuth";
-import { toast } from "react-toastify";
-import CustomLoading from "../spiner/SpinerGlobal";
+import React, { useEffect, useState, useMemo } from 'react';
+import { useParams, Link } from 'react-router-dom';
+import api from '../../utils/AxiosConfig';
+import { useAuth } from '../../hooks/ContextAuth';
+import { toast } from 'react-toastify';
+import CustomLoading from '../spiner/SpinerGlobal';
 
 const ProductosCategoria = () => {
   const { categori } = useParams();
@@ -11,26 +11,31 @@ const ProductosCategoria = () => {
   const [loading, setLoading] = useState(true);
   const { csrfToken, user } = useAuth();
   const [subcategorias, setSubcategorias] = useState([]);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [selectedSubcat, setSelectedSubcat] = useState("Todas");
+  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedSubcat, setSelectedSubcat] = useState('Todas');
   const [availableOnly, setAvailableOnly] = useState(false);
 
   useEffect(() => {
     const fetchSubcategorias = async () => {
       try {
-        const response = await api.get(`/api/productos/subcategorias/${categori}`, {
-          withCredentials: true,
-          headers: { "X-CSRF-Token": csrfToken },
-        });
-        
-        if (response.data.subcategories && response.data.subcategories.length > 0) {
+        const response = await api.get(
+          `/api/productos/subcategorias/${categori}`,
+          {
+            withCredentials: true,
+            headers: { 'X-CSRF-Token': csrfToken },
+          }
+        );
+
+        if (
+          response.data.subcategories &&
+          response.data.subcategories.length > 0
+        ) {
           setSubcategorias(response.data.subcategories[0].subcats);
         } else {
           setSubcategorias([]);
         }
       } catch (error) {
-       
-        toast.error("Error al cargar subcategorías");
+        toast.error('Error al cargar subcategorías');
       }
     };
 
@@ -42,12 +47,12 @@ const ProductosCategoria = () => {
       try {
         const response = await api.get(`/api/productos/categoria/${categori}`, {
           withCredentials: true,
-          headers: { "X-CSRF-Token": csrfToken },
+          headers: { 'X-CSRF-Token': csrfToken },
         });
-    
+
         setProducts(response.data.products);
       } catch (error) {
-        console.error("Error al cargar productos:", error);
+        console.error('Error al cargar productos:', error);
       } finally {
         setLoading(false);
       }
@@ -68,7 +73,7 @@ const ProductosCategoria = () => {
         };
       }
 
-      if (product.estadoProducto === "activo") {
+      if (product.estadoProducto === 'activo') {
         groups[product.idProducto].stock += Number(product.stock) || 0;
         groups[product.idProducto].activeCount += 1;
       }
@@ -83,15 +88,16 @@ const ProductosCategoria = () => {
       .toLowerCase()
       .includes(searchTerm.toLowerCase());
     const matchesSubcat =
-      selectedSubcat === "Todas" || product.nombreSubcategoria === selectedSubcat;
+      selectedSubcat === 'Todas' ||
+      product.nombreSubcategoria === selectedSubcat;
     const matchesAvailability = !availableOnly || stockNumber > 0;
     return matchesSearch && matchesSubcat && matchesAvailability;
   });
 
-  const fallbackImage = "https://via.placeholder.com/400x300?text=Sin+Imagen";
+  const fallbackImage = 'https://via.placeholder.com/400x300?text=Sin+Imagen';
 
   const slideUpFadeStyle = {
-    animation: "slideUpFade 3s ease-in-out infinite",
+    animation: 'slideUpFade 3s ease-in-out infinite',
   };
 
   const isNewProduct = (fechaCreacion) => {
@@ -129,13 +135,11 @@ const ProductosCategoria = () => {
 
       <div className="min-h-screen py-6 bg-gray-50 dark:bg-gray-900">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        
           <h1 className="text-2xl xs:text-3xl sm:text-4xl font-extrabold text-center text-gray-800 dark:text-white mb-6 sm:mb-8">
-            Productos en la categoría:{" "}
+            Productos en la categoría:{' '}
             <span className="text-blue-600 dark:text-blue-400">{categori}</span>
           </h1>
 
-       
           <div className="mb-6 sm:mb-8 flex flex-col sm:flex-row items-center gap-3 sm:gap-4">
             <div className="flex items-center space-x-2">
               <select
@@ -193,9 +197,8 @@ const ProductosCategoria = () => {
             </div>
           </div>
 
-        
           {loading ? (
-            <CustomLoading/>
+            <CustomLoading />
           ) : filteredProducts.length > 0 ? (
             <div className="grid gap-4 xs:gap-6 sm:gap-8 grid-cols-1 xs:grid-cols-2 sm:grid-cols-2 lg:grid-cols-3">
               {filteredProducts.map((product) => {
@@ -203,7 +206,7 @@ const ProductosCategoria = () => {
                 const isOutOfStock = stockNumber === 0;
                 const isLowStock = stockNumber > 0 && stockNumber <= 10;
                 const imageUrl = product.imagenes
-                  ? product.imagenes.split(",")[0]
+                  ? product.imagenes.split(',')[0]
                   : fallbackImage;
                 const nuevo = isNewProduct(product.fechaCreacion);
 
@@ -211,7 +214,7 @@ const ProductosCategoria = () => {
                   <Link
                     key={product.idProducto}
                     to={
-                      user && user.rol === "cliente"
+                      user && user.rol === 'cliente'
                         ? `/cliente/${categori}/${product.idProducto}`
                         : `/${categori}/${product.idProducto}`
                     }
@@ -221,11 +224,10 @@ const ProductosCategoria = () => {
                       className={`relative bg-white dark:bg-gray-800 shadow-md rounded-lg overflow-hidden transform transition-all duration-500 
                       ${
                         isOutOfStock
-                          ? "opacity-70 saturate-50 cursor-not-allowed"
-                          : "hover:scale-105 hover:shadow-2xl hover:shadow-blue-300 dark:hover:shadow-blue-700"
+                          ? 'opacity-70 saturate-50 cursor-not-allowed'
+                          : 'hover:scale-105 hover:shadow-2xl hover:shadow-blue-300 dark:hover:shadow-blue-700'
                       }`}
                     >
-                   
                       <div className="relative h-40 xs:h-48 sm:h-56 w-full overflow-hidden">
                         {nuevo && (
                           <div className="absolute top-1 xs:top-2 left-1 xs:left-2 z-10 bg-gradient-to-r from-green-500 to-green-700 text-white px-2 xs:px-3 py-0.5 xs:py-1 text-[10px] xs:text-xs font-bold rounded-full animate-pulse shadow-lg">
@@ -252,7 +254,6 @@ const ProductosCategoria = () => {
                         )}
                       </div>
 
-                   
                       <div className="p-4 xs:p-5 sm:p-6 transition-colors duration-500 hover:bg-gray-50 dark:hover:bg-gray-700">
                         <h2 className="text-lg xs:text-xl sm:text-2xl font-bold text-gray-900 dark:text-white mb-1 xs:mb-2 text-center">
                           {product.nombreProducto}

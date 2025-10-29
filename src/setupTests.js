@@ -1,6 +1,4 @@
-
 import '@testing-library/jest-dom';
-
 
 const localStorageMock = {
   getItem: jest.fn(),
@@ -18,9 +16,9 @@ beforeAll(() => {
     if (
       typeof args[0] === 'string' &&
       (args[0].includes('Warning: ReactDOM.render') ||
-       args[0].includes('Warning: An update to') ||
-       args[0].includes('not wrapped in act') ||
-       args[0].includes('ReactDOMTestUtils.act'))
+        args[0].includes('Warning: An update to') ||
+        args[0].includes('not wrapped in act') ||
+        args[0].includes('ReactDOMTestUtils.act'))
     ) {
       return;
     }
@@ -36,7 +34,6 @@ beforeAll(() => {
     }
     originalWarn.call(console, ...args);
   };
-  
 
   console.log = jest.fn();
 });

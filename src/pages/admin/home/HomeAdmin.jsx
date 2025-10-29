@@ -1,26 +1,31 @@
-import React from "react";
+import React from 'react';
 
-const HomeAdmin = ({ totalUsuarios,totalRentas,totalIngresos, onNavigate }) => {
+const HomeAdmin = ({
+  totalUsuarios,
+  totalRentas,
+  totalIngresos,
+  onNavigate,
+}) => {
   const stats = [
     {
-      title: "Total Usuarios",
+      title: 'Total Usuarios',
       value: totalUsuarios,
-      icon: "👥",
-      tabToNavigate: "Usuarios",
+      icon: '👥',
+      tabToNavigate: 'Usuarios',
     },
-    { title: "Rentas Activas", value:totalRentas, icon: "📦" },
+    { title: 'Rentas Activas', value: totalRentas, icon: '📦' },
     {
-      title: "Ingresos Mensuales",
-   value: `$${totalIngresos.toFixed(2).toLocaleString()}`,
+      title: 'Ingresos Mensuales',
+      value: `$${totalIngresos.toFixed(2).toLocaleString()}`,
 
-      icon: "💰",
+      icon: '💰',
     },
   ];
 
   const activities = [
-    { text: "Nueva renta registrada", time: "Hace 5 minutos", icon: "📝" },
-    { text: "Usuario actualizado", time: "Hace 12 minutos", icon: "👤" },
-    { text: "Pago recibido", time: "Hace 25 minutos", icon: "💳" },
+    { text: 'Nueva renta registrada', time: 'Hace 5 minutos', icon: '📝' },
+    { text: 'Usuario actualizado', time: 'Hace 12 minutos', icon: '👤' },
+    { text: 'Pago recibido', time: 'Hace 25 minutos', icon: '💳' },
   ];
 
   return (
@@ -60,11 +65,15 @@ const HomeAdmin = ({ totalUsuarios,totalRentas,totalIngresos, onNavigate }) => {
           {stats.map((stat, index) => (
             <div
               key={index}
-              onClick={() => stat.tabToNavigate && onNavigate(stat.tabToNavigate)}
+              onClick={() =>
+                stat.tabToNavigate && onNavigate(stat.tabToNavigate)
+              }
               className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-3 sm:p-4 hover:shadow-lg transition-all duration-200 cursor-pointer transform hover:scale-105 min-w-[250px]"
             >
               <div className="flex items-center justify-between mb-2">
-                <span className="text-xl sm:text-2xl md:text-3xl">{stat.icon}</span>
+                <span className="text-xl sm:text-2xl md:text-3xl">
+                  {stat.icon}
+                </span>
               </div>
               <h3 className="text-gray-600 dark:text-gray-300 text-sm sm:text-base font-medium">
                 {stat.title}
@@ -88,7 +97,9 @@ const HomeAdmin = ({ totalUsuarios,totalRentas,totalIngresos, onNavigate }) => {
               key={index}
               className="flex items-center space-x-3 py-2 sm:py-3 px-2 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-lg transition-all duration-200 slideIn"
             >
-              <span className="text-xl sm:text-2xl md:text-3xl">{activity.icon}</span>
+              <span className="text-xl sm:text-2xl md:text-3xl">
+                {activity.icon}
+              </span>
               <div>
                 <p className="text-gray-800 dark:text-gray-200 text-sm sm:text-base font-medium">
                   {activity.text}

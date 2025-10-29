@@ -1,26 +1,30 @@
-import React, { useEffect, useState } from "react";
-import api from "../../../utils/AxiosConfig";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faInfoCircle, faSearch, faSpinner } from "@fortawesome/free-solid-svg-icons";
-import { useAuth } from "../../../hooks/ContextAuth";
-import { toast } from "react-toastify";
-import CustomLoading from "../../../components/spiner/SpinerGlobal";
+import React, { useEffect, useState } from 'react';
+import api from '../../../utils/AxiosConfig';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import {
+  faInfoCircle,
+  faSearch,
+  faSpinner,
+} from '@fortawesome/free-solid-svg-icons';
+import { useAuth } from '../../../hooks/ContextAuth';
+import { toast } from 'react-toastify';
+import CustomLoading from '../../../components/spiner/SpinerGlobal';
 const roleOptions = [
-  { value: "administrador", label: "Administrador" },
-  { value: "cliente", label: "Cliente" },
-  { value: "repartidor", label: "Repartidor" },
+  { value: 'administrador', label: 'Administrador' },
+  { value: 'cliente', label: 'Cliente' },
+  { value: 'repartidor', label: 'Repartidor' },
 ];
 
 const Usuarios = () => {
   const [usuarios, setUsuarios] = useState([]);
-  const { user,  csrfToken } = useAuth();
+  const { user, csrfToken } = useAuth();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
   const [openDialog, setOpenDialog] = useState(false);
   const [selectedUserSessions, setSelectedUserSessions] = useState([]);
-  const [selectedUserName, setSelectedUserName] = useState("");
-  const [searchTerm, setSearchTerm] = useState("");
-  const [filterRole, setFilterRole] = useState("all");
+  const [selectedUserName, setSelectedUserName] = useState('');
+  const [searchTerm, setSearchTerm] = useState('');
+  const [filterRole, setFilterRole] = useState('all');
   const [currentAdminId, setCurrentAdminId] = useState(null);
   const [updatingUserId, setUpdatingUserId] = useState(null);
   const usersPerPage = 8;
@@ -29,12 +33,12 @@ const Usuarios = () => {
     fetchUsuarios();
     const fetchCurrentAdmin = async () => {
       try {
-        const response = await api.get("/api/usuarios/current", {
+        const response = await api.get('/api/usuarios/current', {
           withCredentials: true,
         });
         setCurrentAdminId(response.data.idUsuarios);
       } catch (error) {
-        console.error("Error fetching current admin:", error);
+        console.error('Error fetching current admin:', error);
       }
     };
     fetchCurrentAdmin();
@@ -42,13 +46,13 @@ const Usuarios = () => {
 
   const fetchUsuarios = async () => {
     try {
-      const response = await api.get("/api/usuarios/lista", {
+      const response = await api.get('/api/usuarios/lista', {
         withCredentials: true,
       });
       setUsuarios(response.data);
       setLoading(false);
     } catch (error) {
-      console.error("Error al obtener usuarios:", error);
+      console.error('Error al obtener usuarios:', error);
       setError(true);
       setLoading(false);
     }
@@ -68,7 +72,7 @@ const Usuarios = () => {
       );
       setSelectedUserSessions(response.data);
     } catch (error) {
-      console.error("Error al obtener detalles de sesiones:", error);
+      console.error('Error al obtener detalles de sesiones:', error);
       setSelectedUserSessions([]);
     }
     setOpenDialog(true);
@@ -77,12 +81,12 @@ const Usuarios = () => {
   const handleCloseDialog = () => {
     setOpenDialog(false);
     setSelectedUserSessions([]);
-    setSelectedUserName("");
+    setSelectedUserName('');
   };
 
   const handleRoleChange = async (userId, newRole) => {
     if (userId === currentAdminId) {
-      toast.error("No puedes cambiar tu propio rol.");
+      toast.error('No puedes cambiar tu propio rol.');
       return;
     }
     setUpdatingUserId(userId);
@@ -93,24 +97,22 @@ const Usuarios = () => {
         { rol: newRole },
         {
           withCredentials: true,
-          headers: { "X-CSRF-Token": csrfToken },
+          headers: { 'X-CSRF-Token': csrfToken },
         }
       );
 
       setUsuarios((prev) =>
-        prev.map((u) =>
-          u.idUsuarios === userId ? { ...u, rol: newRole } : u
-        )
+        prev.map((u) => (u.idUsuarios === userId ? { ...u, rol: newRole } : u))
       );
-      toast.success(response.data.message || "Rol actualizado correctamente");
+      toast.success(response.data.message || 'Rol actualizado correctamente');
     } catch (err) {
-      console.error("Error actualizando rol:", err);
+      console.error('Error actualizando rol:', err);
       if (err.response && err.response.data && err.response.data.message) {
         toast.error(err.response.data.message);
       } else if (err.request) {
-        toast.error("No hay respuesta del servidor. Intenta de nuevo.");
+        toast.error('No hay respuesta del servidor. Intenta de nuevo.');
       } else {
-        toast.error("Error al actualizar el rol. Intenta más tarde.");
+        toast.error('Error al actualizar el rol. Intenta más tarde.');
       }
     } finally {
       setTimeout(() => {
@@ -120,11 +122,11 @@ const Usuarios = () => {
   };
 
   const administradores = usuarios.filter(
-    (usuario) => usuario.rol === "administrador"
+    (usuario) => usuario.rol === 'administrador'
   );
-  const clientes = usuarios.filter((usuario) => usuario.rol === "cliente");
+  const clientes = usuarios.filter((usuario) => usuario.rol === 'cliente');
   const repartidores = usuarios.filter(
-    (usuario) => usuario.rol === "repartidor"
+    (usuario) => usuario.rol === 'repartidor'
   );
 
   const filterBySearchAndRole = (array) =>
@@ -133,7 +135,7 @@ const Usuarios = () => {
         usuario.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
         usuario.correo.toLowerCase().includes(searchTerm.toLowerCase());
       if (!termMatch) return false;
-      return filterRole === "all" || usuario.rol === filterRole;
+      return filterRole === 'all' || usuario.rol === filterRole;
     });
 
   const filteredAdministradores = filterBySearchAndRole(administradores);
@@ -183,10 +185,7 @@ const Usuarios = () => {
     filteredRepartidores.length === 0;
 
   if (loading) {
-    return (
-       <CustomLoading/>
-
-    );
+    return <CustomLoading />;
   }
 
   if (error) {
@@ -354,8 +353,8 @@ const Usuarios = () => {
                                 title={
                                   usuario.idUsuarios === user?.idUsuarios ||
                                   usuario.idUsuarios === user?.id
-                                    ? "No puedes cambiar tu propio rol"
-                                    : ""
+                                    ? 'No puedes cambiar tu propio rol'
+                                    : ''
                                 }
                               >
                                 {roleOptions.map(({ value, label }) => (
@@ -394,8 +393,8 @@ const Usuarios = () => {
                         onClick={() => paginateAdmin(i + 1)}
                         className={`px-3 py-1 rounded-full text-sm ${
                           currentPageAdmin === i + 1
-                            ? "bg-yellow-500 text-white"
-                            : "bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 hover:bg-gray-300 dark:hover:bg-gray-600"
+                            ? 'bg-yellow-500 text-white'
+                            : 'bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 hover:bg-gray-300 dark:hover:bg-gray-600'
                         } transition-colors`}
                       >
                         {i + 1}
@@ -504,8 +503,8 @@ const Usuarios = () => {
                         onClick={() => paginateClient(i + 1)}
                         className={`px-3 py-1 rounded-full text-sm ${
                           currentPageClient === i + 1
-                            ? "bg-yellow-500 text-white"
-                            : "bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 hover:bg-gray-300 dark:hover:bg-gray-600"
+                            ? 'bg-yellow-500 text-white'
+                            : 'bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 hover:bg-gray-300 dark:hover:bg-gray-600'
                         } transition-colors`}
                       >
                         {i + 1}
@@ -614,8 +613,8 @@ const Usuarios = () => {
                         onClick={() => paginateRepartidor(i + 1)}
                         className={`px-3 py-1 rounded-full text-sm ${
                           currentPageRepartidor === i + 1
-                            ? "bg-yellow-500 text-white"
-                            : "bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 hover:bg-gray-300 dark:hover:bg-gray-600"
+                            ? 'bg-yellow-500 text-white'
+                            : 'bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 hover:bg-gray-300 dark:hover:bg-gray-600'
                         } transition-colors`}
                       >
                         {i + 1}
@@ -711,25 +710,25 @@ const Usuarios = () => {
                               {sesion.horaInicio
                                 ? new Date(
                                     sesion.horaInicio
-                                  ).toLocaleDateString("es-ES", {
-                                    year: "numeric",
-                                    month: "short",
-                                    day: "numeric",
-                                    hour: "2-digit",
-                                    minute: "2-digit",
+                                  ).toLocaleDateString('es-ES', {
+                                    year: 'numeric',
+                                    month: 'short',
+                                    day: 'numeric',
+                                    hour: '2-digit',
+                                    minute: '2-digit',
                                   })
-                                : "N/A"}
+                                : 'N/A'}
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm">
                               {sesion.horaFin ? (
                                 new Date(sesion.horaFin).toLocaleDateString(
-                                  "es-ES",
+                                  'es-ES',
                                   {
-                                    year: "numeric",
-                                    month: "short",
-                                    day: "numeric",
-                                    hour: "2-digit",
-                                    minute: "2-digit",
+                                    year: 'numeric',
+                                    month: 'short',
+                                    day: 'numeric',
+                                    hour: '2-digit',
+                                    minute: '2-digit',
                                   }
                                 )
                               ) : (
@@ -741,7 +740,7 @@ const Usuarios = () => {
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap">
                               <span className="text-sm font-mono text-gray-900 dark:text-gray-100 bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded">
-                                {sesion.direccionIP || "N/A"}
+                                {sesion.direccionIP || 'N/A'}
                               </span>
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap">
@@ -749,7 +748,7 @@ const Usuarios = () => {
                                 <div className="flex-shrink-0 h-8 w-8">
                                   {sesion.tipoDispositivo
                                     ?.toLowerCase()
-                                    .includes("mobile") ? (
+                                    .includes('mobile') ? (
                                     <div className="h-8 w-8 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center">
                                       <svg
                                         className="w-4 h-4 text-blue-600 dark:text-blue-400"
@@ -784,7 +783,7 @@ const Usuarios = () => {
                                   )}
                                 </div>
                                 <div className="ml-3 text-sm text-gray-900 dark:text-gray-100">
-                                  {sesion.tipoDispositivo || "Desconocido"}
+                                  {sesion.tipoDispositivo || 'Desconocido'}
                                 </div>
                               </div>
                             </td>
@@ -805,7 +804,7 @@ const Usuarios = () => {
                           <div className="flex items-center gap-2">
                             {sesion.tipoDispositivo
                               ?.toLowerCase()
-                              .includes("mobile") ? (
+                              .includes('mobile') ? (
                               <div className="h-6 w-6 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center">
                                 <svg
                                   className="w-4 h-4 text-blue-600 dark:text-blue-400"
@@ -839,7 +838,7 @@ const Usuarios = () => {
                               </div>
                             )}
                             <span className="text-sm font-medium text-gray-900 dark:text-gray-100">
-                              {sesion.tipoDispositivo || "Desconocido"}
+                              {sesion.tipoDispositivo || 'Desconocido'}
                             </span>
                           </div>
                           {!sesion.horaFin && (
@@ -858,13 +857,13 @@ const Usuarios = () => {
                               {sesion.horaInicio
                                 ? new Date(
                                     sesion.horaInicio
-                                  ).toLocaleDateString("es-ES", {
-                                    month: "short",
-                                    day: "numeric",
-                                    hour: "2-digit",
-                                    minute: "2-digit",
+                                  ).toLocaleDateString('es-ES', {
+                                    month: 'short',
+                                    day: 'numeric',
+                                    hour: '2-digit',
+                                    minute: '2-digit',
                                   })
-                                : "N/A"}
+                                : 'N/A'}
                             </span>
                           </div>
                           <div className="flex justify-between">
@@ -874,15 +873,15 @@ const Usuarios = () => {
                             <span className="text-gray-900 dark:text-gray-100 font-medium">
                               {sesion.horaFin
                                 ? new Date(sesion.horaFin).toLocaleDateString(
-                                    "es-ES",
+                                    'es-ES',
                                     {
-                                      month: "short",
-                                      day: "numeric",
-                                      hour: "2-digit",
-                                      minute: "2-digit",
+                                      month: 'short',
+                                      day: 'numeric',
+                                      hour: '2-digit',
+                                      minute: '2-digit',
                                     }
                                   )
-                                : "En curso"}
+                                : 'En curso'}
                             </span>
                           </div>
                           <div className="flex justify-between">
@@ -890,7 +889,7 @@ const Usuarios = () => {
                               IP:
                             </span>
                             <span className="text-gray-900 dark:text-gray-100 font-mono text-xs bg-gray-200 dark:bg-gray-600 px-2 py-1 rounded">
-                              {sesion.direccionIP || "N/A"}
+                              {sesion.direccionIP || 'N/A'}
                             </span>
                           </div>
                         </div>
@@ -930,9 +929,9 @@ const Usuarios = () => {
                 <span className="text-sm text-gray-500 dark:text-gray-400">
                   {selectedUserSessions.length > 0 &&
                     `${selectedUserSessions.length} sesión${
-                      selectedUserSessions.length !== 1 ? "es" : ""
+                      selectedUserSessions.length !== 1 ? 'es' : ''
                     } encontrada${
-                      selectedUserSessions.length !== 1 ? "s" : ""
+                      selectedUserSessions.length !== 1 ? 's' : ''
                     }`}
                 </span>
                 <button

@@ -1,5 +1,5 @@
 /* eslint-disable */
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo } from 'react';
 import {
   Package,
   CheckCircle,
@@ -16,25 +16,24 @@ import {
   AlertTriangle,
   CheckCircle2,
   Info,
-} from "lucide-react";
+} from 'lucide-react';
 import {
   AiOutlineCar,
   AiOutlineShoppingCart,
   AiOutlineUndo,
   AiOutlineWarning,
   AiFillExclamationCircle,
-} from "react-icons/ai";
-import api from "../../../utils/AxiosConfig";
-import { useAuth } from "../../../hooks/ContextAuth";
-import CustomSpinner from "../../../components/spiner/SpinerGlobal";
-import { toast } from "react-toastify";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faDollarSign } from "@fortawesome/free-solid-svg-icons";
-import PaymentModal from "../../admin/pedidosamanuales/PaymentModal";
-
+} from 'react-icons/ai';
+import api from '../../../utils/AxiosConfig';
+import { useAuth } from '../../../hooks/ContextAuth';
+import CustomSpinner from '../../../components/spiner/SpinerGlobal';
+import { toast } from 'react-toastify';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faDollarSign } from '@fortawesome/free-solid-svg-icons';
+import PaymentModal from '../../admin/pedidosamanuales/PaymentModal';
 
 const capitalizeStatus = (status) => {
-  if (!status || typeof status !== "string") return "Disponible";
+  if (!status || typeof status !== 'string') return 'Disponible';
   return status.charAt(0).toUpperCase() + status.slice(1).toLowerCase();
 };
 
@@ -49,22 +48,22 @@ const NoDataDisplay = ({ message }) => (
 );
 
 const IncidentFormModal = ({ isOpen, onClose, order, onSubmit }) => {
-  console.log("datos de order", order);
+  console.log('datos de order', order);
   const [productIssues, setProductIssues] = useState(
     order
       ? order.products.map((product, index) => ({
           id: product.id || index + 1,
-          status: product.status || "Disponible",
+          status: product.status || 'Disponible',
           issueQuantity: 0,
-          observations: product.observations || "",
-          fotoProducto: product.fotoProducto || "",
+          observations: product.observations || '',
+          fotoProducto: product.fotoProducto || '',
           selected: false,
         }))
       : []
   );
   const [entireOrderIssue, setEntireOrderIssue] = useState(false);
-  const [orderStatus, setOrderStatus] = useState("");
-  const [orderObservations, setOrderObservations] = useState("");
+  const [orderStatus, setOrderStatus] = useState('');
+  const [orderObservations, setOrderObservations] = useState('');
   const [error, setError] = useState(null);
 
   // Reiniciar estado cuando el modal se abre o cierra
@@ -73,23 +72,23 @@ const IncidentFormModal = ({ isOpen, onClose, order, onSubmit }) => {
       setProductIssues(
         order.products.map((product, index) => ({
           id: product.id || index + 1,
-          status: product.status || "Disponible",
+          status: product.status || 'Disponible',
           issueQuantity: 0,
-          observations: product.observations || "",
-          fotoProducto: product.fotoProducto || "",
+          observations: product.observations || '',
+          fotoProducto: product.fotoProducto || '',
           selected: false,
         }))
       );
       setEntireOrderIssue(false);
-      setOrderStatus("");
-      setOrderObservations("");
+      setOrderStatus('');
+      setOrderObservations('');
       setError(null);
     }
   }, [isOpen, order]);
 
   if (!isOpen || !order) return null;
 
-  const availableStatuses = ["Incompleto", "Incidente"];
+  const availableStatuses = ['Incompleto', 'Incidente'];
 
   const handleProductSelection = (productId) => {
     setProductIssues((prev) => {
@@ -110,7 +109,7 @@ const IncidentFormModal = ({ isOpen, onClose, order, onSubmit }) => {
           ? {
               ...issue,
               [field]:
-                field === "issueQuantity"
+                field === 'issueQuantity'
                   ? Math.min(
                       Number(value) || 0,
                       order.products.find((p) => p.id === issue.id)?.quantity ||
@@ -125,13 +124,13 @@ const IncidentFormModal = ({ isOpen, onClose, order, onSubmit }) => {
 
   const validateInputs = () => {
     if (!orderStatus) {
-      setError("Por favor, seleccione un estado para el pedido.");
+      setError('Por favor, seleccione un estado para el pedido.');
       return false;
     }
-    if (!["En alquiler", "Devuelto"].includes(orderStatus)) {
+    if (!['En alquiler', 'Devuelto'].includes(orderStatus)) {
       if (entireOrderIssue && !orderObservations.trim()) {
         setError(
-          "Por favor, proporcione observaciones para el incidente del pedido."
+          'Por favor, proporcione observaciones para el incidente del pedido.'
         );
         return false;
       }
@@ -139,13 +138,13 @@ const IncidentFormModal = ({ isOpen, onClose, order, onSubmit }) => {
         const selectedIssues = productIssues.filter((issue) => issue.selected);
         if (selectedIssues.length === 0) {
           setError(
-            "Por favor, seleccione al menos un producto para reportar el incidente."
+            'Por favor, seleccione al menos un producto para reportar el incidente.'
           );
           return false;
         }
         for (const issue of selectedIssues) {
           const product = order.products.find((p) => p.id === issue.id);
-          if (issue.status === "Incompleto") {
+          if (issue.status === 'Incompleto') {
             if (
               issue.issueQuantity <= 0 ||
               issue.issueQuantity > product.quantity
@@ -162,7 +161,7 @@ const IncidentFormModal = ({ isOpen, onClose, order, onSubmit }) => {
               return false;
             }
           } else if (
-            issue.status === "Incidente" &&
+            issue.status === 'Incidente' &&
             !issue.observations.trim()
           ) {
             setError(
@@ -190,9 +189,9 @@ const IncidentFormModal = ({ isOpen, onClose, order, onSubmit }) => {
               id: issue.id,
               estado: issue.status,
               cantidad_afectada:
-                issue.status === "Incompleto" ? issue.issueQuantity : 0,
+                issue.status === 'Incompleto' ? issue.issueQuantity : 0,
               nota:
-                issue.status === "Incompleto"
+                issue.status === 'Incompleto'
                   ? `${issue.issueQuantity} ${issue.observations}`
                   : issue.observations,
             })),
@@ -214,11 +213,11 @@ const IncidentFormModal = ({ isOpen, onClose, order, onSubmit }) => {
 
   const getStatusIcon = (status) => {
     switch (status) {
-      case "Disponible":
+      case 'Disponible':
         return <CheckCircle2 className="h-4 w-4 text-green-500" />;
-      case "Incompleto":
+      case 'Incompleto':
         return <AlertTriangle className="h-4 w-4 text-orange-500" />;
-      case "Incidente":
+      case 'Incidente':
         return <AlertCircle className="h-4 w-4 text-red-500" />;
       default:
         return <Package className="h-4 w-4 text-gray-400" />;
@@ -227,14 +226,14 @@ const IncidentFormModal = ({ isOpen, onClose, order, onSubmit }) => {
 
   const getStatusColor = (status) => {
     switch (status) {
-      case "Disponible":
-        return "bg-green-50 text-green-700 border-green-200";
-      case "Incompleto":
-        return "bg-orange-50 text-orange-700 border-orange-200";
-      case "Incidente":
-        return "bg-red-50 text-red-700 border-red-200";
+      case 'Disponible':
+        return 'bg-green-50 text-green-700 border-green-200';
+      case 'Incompleto':
+        return 'bg-orange-50 text-orange-700 border-orange-200';
+      case 'Incidente':
+        return 'bg-red-50 text-red-700 border-red-200';
       default:
-        return "bg-gray-50 text-gray-700 border-gray-200";
+        return 'bg-gray-50 text-gray-700 border-gray-200';
     }
   };
 
@@ -349,7 +348,7 @@ const IncidentFormModal = ({ isOpen, onClose, order, onSubmit }) => {
                         Productos Afectados
                       </h3>
                       <span className="text-sm text-gray-500">
-                        ({productIssues.filter((p) => p.selected).length}{" "}
+                        ({productIssues.filter((p) => p.selected).length}{' '}
                         seleccionados)
                       </span>
                     </div>
@@ -366,8 +365,8 @@ const IncidentFormModal = ({ isOpen, onClose, order, onSubmit }) => {
                             key={product.id}
                             className={`border rounded-2xl p-5 shadow-sm transition-all duration-200 overflow-hidden ${
                               isSelected
-                                ? "border-[#fcb900]/50 bg-[#fff9db] shadow-md"
-                                : "border-gray-200 bg-white hover:border-[#fcb900]/30"
+                                ? 'border-[#fcb900]/50 bg-[#fff9db] shadow-md'
+                                : 'border-gray-200 bg-white hover:border-[#fcb900]/30'
                             }`}
                           >
                             {/* Encabezado producto */}
@@ -396,7 +395,7 @@ const IncidentFormModal = ({ isOpen, onClose, order, onSubmit }) => {
                                     </span>
                                     <span></span>
                                     <span className="text-gray-500">
-                                      Color: {product.color || "N/A"}
+                                      Color: {product.color || 'N/A'}
                                     </span>
                                   </div>
                                 </div>
@@ -423,17 +422,17 @@ const IncidentFormModal = ({ isOpen, onClose, order, onSubmit }) => {
                                     Estado del Producto
                                   </label>
                                   <select
-                                    value={issue?.status || "Disponible"}
+                                    value={issue?.status || 'Disponible'}
                                     onChange={(e) =>
                                       handleProductIssueChange(
                                         product.id,
-                                        "status",
+                                        'status',
                                         e.target.value
                                       )
                                     }
                                     className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#fcb900] focus:border-[#fcb900] bg-white text-gray-900"
                                   >
-                                    {["Disponible", ...availableStatuses].map(
+                                    {['Disponible', ...availableStatuses].map(
                                       (status) => (
                                         <option key={status} value={status}>
                                           {status}
@@ -444,7 +443,7 @@ const IncidentFormModal = ({ isOpen, onClose, order, onSubmit }) => {
                                 </div>
 
                                 {/* Cantidad */}
-                                {issue.status === "Incompleto" && (
+                                {issue.status === 'Incompleto' && (
                                   <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-1">
                                       Cantidad Afectada
@@ -457,7 +456,7 @@ const IncidentFormModal = ({ isOpen, onClose, order, onSubmit }) => {
                                       onChange={(e) =>
                                         handleProductIssueChange(
                                           product.id,
-                                          "issueQuantity",
+                                          'issueQuantity',
                                           e.target.value
                                         )
                                       }
@@ -470,27 +469,27 @@ const IncidentFormModal = ({ isOpen, onClose, order, onSubmit }) => {
                                 )}
 
                                 {/* Observaciones */}
-                                {(issue.status === "Incidente" ||
-                                  issue.status === "Incompleto") && (
+                                {(issue.status === 'Incidente' ||
+                                  issue.status === 'Incompleto') && (
                                   <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-1">
                                       Observaciones
                                     </label>
                                     <textarea
-                                      value={issue.observations || ""}
+                                      value={issue.observations || ''}
                                       onChange={(e) =>
                                         handleProductIssueChange(
                                           product.id,
-                                          "observations",
+                                          'observations',
                                           e.target.value
                                         )
                                       }
                                       className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#fcb900] focus:border-[#fcb900] resize-none"
                                       rows={3}
                                       placeholder={`Describe el ${
-                                        issue.status === "Incidente"
-                                          ? "incidente"
-                                          : "motivo del faltante"
+                                        issue.status === 'Incidente'
+                                          ? 'incidente'
+                                          : 'motivo del faltante'
                                       }...`}
                                     />
                                   </div>
@@ -540,52 +539,52 @@ const OrderCard = ({
 }) => {
   const statusStyles = {
     Enviando: {
-      color: "text-blue-700 dark:text-blue-300",
+      color: 'text-blue-700 dark:text-blue-300',
       icon: <Truck className="h-4 w-4" />,
-      bg: "bg-blue-50 dark:bg-blue-900 border-blue-200 dark:border-blue-600",
-      dot: "bg-blue-500",
+      bg: 'bg-blue-50 dark:bg-blue-900 border-blue-200 dark:border-blue-600',
+      dot: 'bg-blue-500',
     },
     Recogiendo: {
-      color: "text-amber-700 dark:text-amber-300",
+      color: 'text-amber-700 dark:text-amber-300',
       icon: <ShoppingCart className="h-4 w-4" />,
-      bg: "bg-amber-50 dark:bg-amber-900 border-amber-200 dark:border-amber-600",
-      dot: "bg-amber-500",
+      bg: 'bg-amber-50 dark:bg-amber-900 border-amber-200 dark:border-amber-600',
+      dot: 'bg-amber-500',
     },
     Devuelto: {
-      color: "text-slate-600 dark:text-slate-300",
+      color: 'text-slate-600 dark:text-slate-300',
       icon: <RotateCcw className="h-4 w-4" />,
-      bg: "bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-600",
-      dot: "bg-slate-400",
+      bg: 'bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-600',
+      dot: 'bg-slate-400',
     },
     Incompleto: {
-      color: "text-orange-700 dark:text-orange-300",
+      color: 'text-orange-700 dark:text-orange-300',
       icon: <AlertTriangle className="h-4 w-4" />,
-      bg: "bg-orange-50 dark:bg-orange-900 border-orange-200 dark:border-orange-600",
-      dot: "bg-orange-500",
+      bg: 'bg-orange-50 dark:bg-orange-900 border-orange-200 dark:border-orange-600',
+      dot: 'bg-orange-500',
     },
     Incidente: {
-      color: "text-red-700 dark:text-red-300",
+      color: 'text-red-700 dark:text-red-300',
       icon: <AlertCircle className="h-4 w-4" />,
-      bg: "bg-red-50 dark:bg-red-900 border-red-200 dark:border-red-600",
-      dot: "bg-red-500",
+      bg: 'bg-red-50 dark:bg-red-900 border-red-200 dark:border-red-600',
+      dot: 'bg-red-500',
     },
-    "En alquiler": {
-      color: "text-emerald-700 dark:text-emerald-300",
+    'En alquiler': {
+      color: 'text-emerald-700 dark:text-emerald-300',
       icon: <Package className="h-4 w-4" />,
-      bg: "bg-emerald-50 dark:bg-emerald-900 border-emerald-200 dark:border-emerald-600",
-      dot: "bg-emerald-500",
+      bg: 'bg-emerald-50 dark:bg-emerald-900 border-emerald-200 dark:border-emerald-600',
+      dot: 'bg-emerald-500',
     },
     Cancelado: {
-      color: "text-red-600 dark:text-red-400",
+      color: 'text-red-600 dark:text-red-400',
       icon: <X className="h-4 w-4" />,
-      bg: "bg-red-50 dark:bg-red-900 border-red-200 dark:border-red-600",
-      dot: "bg-red-400",
+      bg: 'bg-red-50 dark:bg-red-900 border-red-200 dark:border-red-600',
+      dot: 'bg-red-400',
     },
     Pendiente: {
-      color: "text-slate-600 dark:text-slate-300",
+      color: 'text-slate-600 dark:text-slate-300',
       icon: <Package className="h-4 w-4" />,
-      bg: "bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-600",
-      dot: "bg-slate-400",
+      bg: 'bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-600',
+      dot: 'bg-slate-400',
     },
   };
 
@@ -593,14 +592,14 @@ const OrderCard = ({
   const paymentProgress =
     order.totalToPay > 0 ? (order.totalPaid / order.totalToPay) * 100 : 0;
 
-  const normalizedStatus = order.status?.toLowerCase() || "pendiente";
+  const normalizedStatus = order.status?.toLowerCase() || 'pendiente';
   const displayStatus = capitalizeStatus(normalizedStatus);
   const availableStatuses =
-    normalizedStatus === "enviando"
-      ? ["Enviando", "En alquiler", "Incompleto", "Incidente"]
-      : normalizedStatus === "recogiendo"
-      ? ["Recogiendo", "Devuelto", "Incompleto", "Incidente"]
-      : [];
+    normalizedStatus === 'enviando'
+      ? ['Enviando', 'En alquiler', 'Incompleto', 'Incidente']
+      : normalizedStatus === 'recogiendo'
+        ? ['Recogiendo', 'Devuelto', 'Incompleto', 'Incidente']
+        : [];
 
   const statusStyle = statusStyles[displayStatus] || statusStyles.Pendiente;
 
@@ -608,7 +607,7 @@ const OrderCard = ({
     <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl shadow-sm hover:shadow-md transition-all duration-200 overflow-hidden">
       <div
         className={`h-1 ${
-          order.type === "entrega" ? "bg-emerald-500" : "bg-blue-500"
+          order.type === 'entrega' ? 'bg-emerald-500' : 'bg-blue-500'
         }`}
       />
       <div className="p-4 sm:p-6">
@@ -662,8 +661,8 @@ const OrderCard = ({
             <div className="flex items-center gap-2">
               <Calendar className="h-4 w-4 text-slate-400" />
               <span>
-                Ocupación:{" "}
-                {new Date(order.deliveryDate).toLocaleDateString("es-MX")}
+                Ocupación:{' '}
+                {new Date(order.deliveryDate).toLocaleDateString('es-MX')}
               </span>
             </div>
           </div>
@@ -726,14 +725,14 @@ const OrderCard = ({
               className={`w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors
                 ${
                   availableStatuses.length === 0
-                    ? "cursor-not-allowed bg-slate-100 dark:bg-slate-700 text-slate-400 border-slate-200"
-                    : "bg-white dark:bg-slate-800 border-slate-300 dark:border-slate-600 text-slate-900 dark:text-white hover:border-slate-400"
+                    ? 'cursor-not-allowed bg-slate-100 dark:bg-slate-700 text-slate-400 border-slate-200'
+                    : 'bg-white dark:bg-slate-800 border-slate-300 dark:border-slate-600 text-slate-900 dark:text-white hover:border-slate-400'
                 }`}
             >
               <option value="" disabled>
                 {availableStatuses.length === 0
-                  ? "No hay estados disponibles"
-                  : "Selecciona nuevo estado"}
+                  ? 'No hay estados disponibles'
+                  : 'Selecciona nuevo estado'}
               </option>
               {availableStatuses.map((status) => (
                 <option key={status} value={status.toLowerCase()}>
@@ -762,29 +761,29 @@ const OrderDetailsModal = ({ isOpen, onClose, order }) => {
 
   const statusStyles = {
     Disponible: {
-      color: "text-green-600",
-      bg: "bg-green-100",
-      border: "border-green-200",
+      color: 'text-green-600',
+      bg: 'bg-green-100',
+      border: 'border-green-200',
     },
     Incompleto: {
-      color: "text-yellow-700",
-      bg: "bg-yellow-200",
-      border: "border-yellow-300",
+      color: 'text-yellow-700',
+      bg: 'bg-yellow-200',
+      border: 'border-yellow-300',
     },
     Incidente: {
-      color: "text-red-600",
-      bg: "bg-red-100",
-      border: "border-red-200",
+      color: 'text-red-600',
+      bg: 'bg-red-100',
+      border: 'border-red-200',
     },
     Faltante: {
-      color: "text-orange-600",
-      bg: "bg-orange-100",
-      border: "border-orange-200",
+      color: 'text-orange-600',
+      bg: 'bg-orange-100',
+      border: 'border-orange-200',
     },
     Default: {
-      color: "text-gray-600",
-      bg: "bg-gray-100",
-      border: "border-gray-200",
+      color: 'text-gray-600',
+      bg: 'bg-gray-100',
+      border: 'border-gray-200',
     },
   };
 
@@ -825,7 +824,7 @@ const OrderDetailsModal = ({ isOpen, onClose, order }) => {
                 Fecha
               </p>
               <p className="font-semibold text-slate-900 dark:text-white">
-                {new Date(order.deliveryDate).toLocaleDateString("es-MX")}
+                {new Date(order.deliveryDate).toLocaleDateString('es-MX')}
               </p>
             </div>
             <div>
@@ -878,7 +877,7 @@ const OrderDetailsModal = ({ isOpen, onClose, order }) => {
                     Color: {product.color}
                   </p>
                   <p>
-                    Estado:{" "}
+                    Estado:{' '}
                     <span
                       className={`${
                         statusStyles[product.status]?.bg ||
@@ -891,20 +890,20 @@ const OrderDetailsModal = ({ isOpen, onClose, order }) => {
                       {capitalizeStatus(product.status)}
                     </span>
                   </p>
-                  {(product.status === "Incompleto" ||
-                    product.status === "Incidente" ||
-                    product.status === "Faltante") && (
+                  {(product.status === 'Incompleto' ||
+                    product.status === 'Incidente' ||
+                    product.status === 'Faltante') && (
                     <>
                       <p className="text-slate-600 dark:text-slate-300">
-                        Cantidad Afectada:{" "}
+                        Cantidad Afectada:{' '}
                         <span className="font-semibold">
                           {product.issueQuantity || 0}
                         </span>
                       </p>
                       <p className="text-slate-600 dark:text-slate-300">
-                        Observaciones:{" "}
+                        Observaciones:{' '}
                         <span className="font-semibold">
-                          {product.observations || "Ninguna"}
+                          {product.observations || 'Ninguna'}
                         </span>
                       </p>
                     </>
@@ -926,8 +925,6 @@ const OrderDetailsModal = ({ isOpen, onClose, order }) => {
     </div>
   );
 };
-
-
 
 // Main Component
 const AssignedOrders = () => {
@@ -964,9 +961,9 @@ const AssignedOrders = () => {
       setLoading(true);
       setError(null);
 
-      const response = await api.get("/api/repartidor/repartidor/pedidos-hoy", {
+      const response = await api.get('/api/repartidor/repartidor/pedidos-hoy', {
         withCredentials: true,
-        headers: { "X-CSRF-Token": csrfToken },
+        headers: { 'X-CSRF-Token': csrfToken },
       });
 
       const data = response.data;
@@ -976,33 +973,33 @@ const AssignedOrders = () => {
         .map((order) => ({
           id: order.id || 0,
           diasAlquiler: order.diasAlquiler || 0,
-          type: order.tipo_pedido || "entrega",
-          status: capitalizeStatus(order.estado_pedido || "Pendiente"),
-          description: order.descripcion || "Sin descripción",
-          locality: order.localidad || "Desconocido",
-          municipality: order.municipio || "Desconocido",
-          state: order.estado || "Desconocido",
+          type: order.tipo_pedido || 'entrega',
+          status: capitalizeStatus(order.estado_pedido || 'Pendiente'),
+          description: order.descripcion || 'Sin descripción',
+          locality: order.localidad || 'Desconocido',
+          municipality: order.municipio || 'Desconocido',
+          state: order.estado || 'Desconocido',
           deliveryDate: order.fecha_entrega
-            ? new Date(order.fecha_entrega).toISOString().split("T")[0]
-            : new Date().toISOString().split("T")[0],
-          address: order.direccion || "Sin dirección",
+            ? new Date(order.fecha_entrega).toISOString().split('T')[0]
+            : new Date().toISOString().split('T')[0],
+          address: order.direccion || 'Sin dirección',
           totalToPay: parseFloat(order.total_a_pagar) || 0,
           totalPaid: parseFloat(order.total_pagado) || 0,
           isUrgent: order.urgente || false,
-          observaciones: order.observaciones || "",
+          observaciones: order.observaciones || '',
           products: order.productos
             ? order.productos
                 .filter((product) => product.id && product.nombre) // Filtrar productos inválidos
                 .map((product) => ({
                   id: product.id || 0,
-                  name: product.nombre || "Sin nombre",
+                  name: product.nombre || 'Sin nombre',
                   quantity: product.cantidad || 0,
                   unitPrice: parseFloat(product.precio) || 0,
                   subtotal: parseFloat(product.subtotal) || 0,
-                  color: product.color || "N/A",
-                  status: capitalizeStatus(product.estado || "Disponible"),
-                  observations: product.nota || "",
-                  fotoProducto: product.foto || "",
+                  color: product.color || 'N/A',
+                  status: capitalizeStatus(product.estado || 'Disponible'),
+                  observations: product.nota || '',
+                  fotoProducto: product.foto || '',
                 }))
             : [],
         }));
@@ -1023,36 +1020,36 @@ const AssignedOrders = () => {
   const onCancel = async (pedidoId) => {
     try {
       const confirm = window.confirm(
-        "¿Estás seguro de que deseas cancelar este pedido?"
+        '¿Estás seguro de que deseas cancelar este pedido?'
       );
       if (!confirm) return;
 
       const res = await api.put(
         `/api/repartidor/pedidos/${pedidoId}`,
-        { estadoActual: "Cancelado" },
+        { estadoActual: 'Cancelado' },
         {
           withCredentials: true,
-          headers: { "X-CSRF-Token": csrfToken },
+          headers: { 'X-CSRF-Token': csrfToken },
         }
       );
 
       if (res.status !== 200) {
-        throw new Error(res.data?.message || "Error al cancelar el pedido");
+        throw new Error(res.data?.message || 'Error al cancelar el pedido');
       }
 
       // Actualización inmediata del estado local
       setOrders((prev) =>
         prev.map((order) =>
-          order.id === pedidoId ? { ...order, status: "Cancelado" } : order
+          order.id === pedidoId ? { ...order, status: 'Cancelado' } : order
         )
       );
-      toast.success(res.data?.message || "Pedido cancelado correctamente");
+      toast.success(res.data?.message || 'Pedido cancelado correctamente');
 
       // Recargar los pedidos para asegurar consistencia con el servidor
       await fetchOrders();
     } catch (error) {
-      console.error("Error al cancelar pedido:", error);
-      toast.error(error.message || "Hubo un error al cancelar el pedido");
+      console.error('Error al cancelar pedido:', error);
+      toast.error(error.message || 'Hubo un error al cancelar el pedido');
     }
   };
 
@@ -1081,27 +1078,27 @@ const AssignedOrders = () => {
   const handleStatusChange = async (orderId, newStatus) => {
     const capitalizedStatus = capitalizeStatus(newStatus);
     console.log(
-      "Datos recibidos para cambiar estado de pedido",
+      'Datos recibidos para cambiar estado de pedido',
       orderId,
       newStatus
     );
-    if (["Incompleto", "Incidente"].includes(capitalizedStatus)) {
+    if (['Incompleto', 'Incidente'].includes(capitalizedStatus)) {
       const order = orders.find((o) => o.id === orderId);
       setIncidentOrder(order);
       setIncidentModalOpen(true);
-    } else if (["En alquiler", "Devuelto"].includes(capitalizedStatus)) {
+    } else if (['En alquiler', 'Devuelto'].includes(capitalizedStatus)) {
       try {
         // Reemplazar espacios por guiones
         const normalizedStatus = capitalizedStatus
           .toLowerCase()
-          .replace(/\s+/g, "-");
+          .replace(/\s+/g, '-');
         const endpoint = `/api/repartidor/pedidos/${orderId}/status/${normalizedStatus}`;
         const response = await api.put(
           endpoint,
           {},
           {
             withCredentials: true,
-            headers: { "X-CSRF-Token": csrfToken },
+            headers: { 'X-CSRF-Token': csrfToken },
           }
         );
 
@@ -1130,12 +1127,12 @@ const AssignedOrders = () => {
           { estado_pedido: capitalizedStatus },
           {
             withCredentials: true,
-            headers: { "X-CSRF-Token": csrfToken },
+            headers: { 'X-CSRF-Token': csrfToken },
           }
         );
 
         if (response.status !== 200) {
-          throw new Error("Error al actualizar el estado del pedido");
+          throw new Error('Error al actualizar el estado del pedido');
         }
 
         setOrders((prev) =>
@@ -1148,7 +1145,7 @@ const AssignedOrders = () => {
         toast.success(`Estado actualizado a ${capitalizedStatus}`);
       } catch (err) {
         setError(err?.response?.data?.error || err.message);
-        toast.error("Error al actualizar el estado del pedido");
+        toast.error('Error al actualizar el estado del pedido');
       }
     }
   };
@@ -1166,19 +1163,19 @@ const AssignedOrders = () => {
         estado_pedido: capitalizedStatus,
       };
 
-      console.log("Datos recibidos", payload);
+      console.log('Datos recibidos', payload);
 
       const response = await api.post(
         `/api/repartidor/pedidos/${orderId}/incidente`,
         payload,
         {
           withCredentials: true,
-          headers: { "X-CSRF-Token": csrfToken },
+          headers: { 'X-CSRF-Token': csrfToken },
         }
       );
 
       if (response.status !== 200) {
-        throw new Error("Error al reportar el incidente");
+        throw new Error('Error al reportar el incidente');
       }
 
       // Actualizar el estado local basado en la respuesta de la API
@@ -1195,11 +1192,11 @@ const AssignedOrders = () => {
                   return {
                     ...p,
                     status:
-                      capitalizedStatus === "Incidente"
-                        ? "Incidente"
-                        : capitalizedStatus === "Incompleto"
-                        ? "Incompleto"
-                        : p.status,
+                      capitalizedStatus === 'Incidente'
+                        ? 'Incidente'
+                        : capitalizedStatus === 'Incompleto'
+                          ? 'Incompleto'
+                          : p.status,
                     observations: orderObservations || p.observations,
                   };
                 } else {
@@ -1208,7 +1205,7 @@ const AssignedOrders = () => {
                     ...p,
                     status: issue ? capitalizeStatus(issue.estado) : p.status, // Mantén el estado original si no está seleccionado
                     observations:
-                      issue && issue.estado !== "Disponible"
+                      issue && issue.estado !== 'Disponible'
                         ? issue.nota
                         : p.observations, // Actualiza solo si hay un cambio
                   };
@@ -1218,23 +1215,23 @@ const AssignedOrders = () => {
           : order
       );
 
-    // Filtrar el pedido si es Incompleto o Incidente
-    const filteredOrders = updatedOrders.filter(
-      (order) => !["Incompleto", "Incidente"].includes(order.status)
-    );
-    setOrders(filteredOrders);
+      // Filtrar el pedido si es Incompleto o Incidente
+      const filteredOrders = updatedOrders.filter(
+        (order) => !['Incompleto', 'Incidente'].includes(order.status)
+      );
+      setOrders(filteredOrders);
 
-    const updatedOrder = updatedOrders.find((o) => o.id === orderId);
+      const updatedOrder = updatedOrders.find((o) => o.id === orderId);
 
-    if (["Incidente", "Incompleto"].includes(capitalizedStatus)) {
-      setSelectedOrder(updatedOrder);
-      setModalOpen(true);
-    }
+      if (['Incidente', 'Incompleto'].includes(capitalizedStatus)) {
+        setSelectedOrder(updatedOrder);
+        setModalOpen(true);
+      }
       setIncidentModalOpen(false);
-      toast.success("Incidente reportado correctamente");
+      toast.success('Incidente reportado correctamente');
     } catch (err) {
       setError(err?.response?.data?.error || err.message);
-      toast.error("Error al reportar el incidente");
+      toast.error('Error al reportar el incidente');
     }
   };
 
@@ -1249,10 +1246,10 @@ const AssignedOrders = () => {
         setLoading(true);
         setError(null);
         const response = await api.get(
-          "/api/repartidor/repartidor/pedidos-hoy",
+          '/api/repartidor/repartidor/pedidos-hoy',
           {
             withCredentials: true,
-            headers: { "X-CSRF-Token": csrfToken },
+            headers: { 'X-CSRF-Token': csrfToken },
           }
         );
         const data = response.data;
@@ -1261,41 +1258,41 @@ const AssignedOrders = () => {
           .map((order) => ({
             id: order.id || 0,
             diasAlquiler: order.diasAlquiler || 0,
-            type: order.tipo_pedido || "entrega",
-            status: capitalizeStatus(order.estado_pedido || "Pendiente"),
-            description: order.descripcion || "Sin descripción",
-            locality: order.localidad || "Desconocido",
-            municipality: order.municipio || "Desconocido",
-            state: order.estado || "Desconocido",
+            type: order.tipo_pedido || 'entrega',
+            status: capitalizeStatus(order.estado_pedido || 'Pendiente'),
+            description: order.descripcion || 'Sin descripción',
+            locality: order.localidad || 'Desconocido',
+            municipality: order.municipio || 'Desconocido',
+            state: order.estado || 'Desconocido',
             deliveryDate: order.fecha_entrega
-              ? new Date(order.fecha_entrega).toISOString().split("T")[0]
-              : new Date().toISOString().split("T")[0],
-            address: order.direccion || "Sin dirección",
+              ? new Date(order.fecha_entrega).toISOString().split('T')[0]
+              : new Date().toISOString().split('T')[0],
+            address: order.direccion || 'Sin dirección',
             totalToPay: parseFloat(order.total_a_pagar) || 0,
             totalPaid: parseFloat(order.total_pagado) || 0,
             isUrgent: order.urgente || false,
-            observaciones: order.observaciones || "",
+            observaciones: order.observaciones || '',
             products: order.productos
               ? order.productos
                   .filter((product) => product.id && product.nombre)
                   .map((product) => ({
                     id: product.id || 0,
-                    name: product.nombre || "Sin nombre",
+                    name: product.nombre || 'Sin nombre',
                     quantity: product.cantidad || 0,
                     unitPrice: parseFloat(product.precio) || 0,
                     subtotal: parseFloat(product.subtotal) || 0,
-                    color: product.color || "N/A",
-                    status: capitalizeStatus(product.estado || "Disponible"),
-                    observations: product.nota || "",
-                    fotoProducto: product.foto || "",
+                    color: product.color || 'N/A',
+                    status: capitalizeStatus(product.estado || 'Disponible'),
+                    observations: product.nota || '',
+                    fotoProducto: product.foto || '',
                   }))
               : [],
           }));
         setOrders(mappedOrders);
-        toast.success("Pago registrado y actualizado correctamente");
+        toast.success('Pago registrado y actualizado correctamente');
       } catch (err) {
         setError(err?.response?.data?.error || err.message);
-        toast.error("Error al actualizar los pedidos");
+        toast.error('Error al actualizar los pedidos');
       } finally {
         setLoading(false);
       }
@@ -1371,7 +1368,7 @@ const AssignedOrders = () => {
                               </h4>
                               <div className="mt-1 sm:mt-0 sm:ml-2 inline-flex">
                                 <div className="px-2 py-0.5 sm:px-3 sm:py-1 bg-gradient-to-r from-amber-100 to-orange-100 dark:from-amber-900 dark:to-orange-900 text-amber-800 dark:text-amber-200 rounded-full text-xs font-bold shadow-sm">
-                                  {groupedOrders[state][municipality].length}{" "}
+                                  {groupedOrders[state][municipality].length}{' '}
                                   pedidos
                                 </div>
                               </div>
@@ -1381,8 +1378,8 @@ const AssignedOrders = () => {
                             <div className="w-6 h-6 sm:w-7 sm:h-7 bg-gradient-to-r from-amber-200 to-orange-200 dark:from-gray-600 dark:to-gray-500 rounded-full flex items-center justify-center group-hover:from-amber-300 group-hover:to-orange-300 dark:group-hover:from-gray-500 dark:group-hover:to-gray-400 transition-all duration-300 shadow-md">
                               <span className="text-amber-700 dark:text-gray-200 font-bold text-sm">
                                 {openMunicipality[state]?.[municipality]
-                                  ? "−"
-                                  : "+"}
+                                  ? '−'
+                                  : '+'}
                               </span>
                             </div>
                           </div>

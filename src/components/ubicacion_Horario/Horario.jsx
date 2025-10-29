@@ -1,6 +1,6 @@
-import React, { useEffect, useState, useRef } from "react";
-import { motion } from "framer-motion";
-import { FaRegCalendarCheck, FaSun, FaMoon } from "react-icons/fa";
+import React, { useEffect, useState, useRef } from 'react';
+import { motion } from 'framer-motion';
+import { FaRegCalendarCheck, FaSun, FaMoon } from 'react-icons/fa';
 
 const Horario = () => {
   const [inView, setInView] = useState(false);
@@ -15,12 +15,12 @@ const Horario = () => {
   useEffect(() => {
     handleScroll(); // Ejecutar al inicio para verificar si ya está visible
 
-    window.addEventListener("scroll", handleScroll);
-    window.addEventListener("resize", handleScroll); // Para manejar cambios de tamaño
+    window.addEventListener('scroll', handleScroll);
+    window.addEventListener('resize', handleScroll); // Para manejar cambios de tamaño
 
     return () => {
-      window.removeEventListener("scroll", handleScroll);
-      window.removeEventListener("resize", handleScroll);
+      window.removeEventListener('scroll', handleScroll);
+      window.removeEventListener('resize', handleScroll);
     };
   }, []);
 
@@ -38,11 +38,23 @@ const Horario = () => {
 
       <div className="overflow-x-auto">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 dark:bg-gray-950 dark:text-white">
-          {["Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"].map((day, index) => {
+          {[
+            'Lunes',
+            'Martes',
+            'Miércoles',
+            'Jueves',
+            'Viernes',
+            'Sábado',
+            'Domingo',
+          ].map((day, index) => {
             const icon =
-              day === "Sábado" ? <FaSun className="text-xl" /> :
-              day === "Domingo" ? <FaMoon className="text-xl" /> :
-              <FaRegCalendarCheck className="text-xl" />;
+              day === 'Sábado' ? (
+                <FaSun className="text-xl" />
+              ) : day === 'Domingo' ? (
+                <FaMoon className="text-xl" />
+              ) : (
+                <FaRegCalendarCheck className="text-xl" />
+              );
 
             return (
               <motion.div
@@ -57,7 +69,11 @@ const Horario = () => {
                 </div>
                 <h3 className="font-semibold text-lg text-center">{day}</h3>
                 <p className="text-center">
-                  {day === "Sábado" ? "10:00 AM - 4:00 PM" : day === "Domingo" ? "Cerrado" : "9:00 AM - 6:00 PM"}
+                  {day === 'Sábado'
+                    ? '10:00 AM - 4:00 PM'
+                    : day === 'Domingo'
+                      ? 'Cerrado'
+                      : '9:00 AM - 6:00 PM'}
                 </p>
               </motion.div>
             );

@@ -1,25 +1,25 @@
-import React, { useState } from "react";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { 
-  faUserCheck, 
-  faArrowRight, 
-  faCheckCircle, 
-  faEnvelope, 
-  faKey, 
-  faUserEdit 
-} from "@fortawesome/free-solid-svg-icons";
+import React, { useState } from 'react';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import {
+  faUserCheck,
+  faArrowRight,
+  faCheckCircle,
+  faEnvelope,
+  faKey,
+  faUserEdit,
+} from '@fortawesome/free-solid-svg-icons';
 import Paso1 from './Paso1';
 import Paso2 from './Paso2';
 import Paso3 from './Paso3';
 
 const Registro = () => {
-  const [step, setStep] = useState(0); 
-  
+  const [step, setStep] = useState(0);
+
   const [animate, setAnimate] = useState(false);
-  const [guardarCorreo, setGuardarCorreo] = useState("");
+  const [guardarCorreo, setGuardarCorreo] = useState('');
 
   const handleNextStep = () => {
-    console.log("Este es el valor de guardar correo", guardarCorreo);
+    console.log('Este es el valor de guardar correo', guardarCorreo);
     setAnimate(true);
     setTimeout(() => {
       setStep(step + 1);
@@ -27,28 +27,31 @@ const Registro = () => {
     }, 300);
   };
 
- 
   const steps = [
-    { label: "Verificar Correo", icon: faEnvelope },
-    { label: "Validar Código", icon: faKey },
-    { label: "Datos Personales", icon: faUserEdit }
+    { label: 'Verificar Correo', icon: faEnvelope },
+    { label: 'Validar Código', icon: faKey },
+    { label: 'Datos Personales', icon: faUserEdit },
   ];
-  
+
   return (
     <div className="min-h-full flex justify-center items-center transition-all p-4 md:p-8 relative overflow-hidden">
       {/* Efecto de lluvia de meteoritos */}
       <div className="meteor-shower">
         {[...Array(20)].map((_, i) => (
-          <div key={i} className="meteor" style={{ 
-            left: `${Math.random() * 100}%`, 
-            animationDelay: `${Math.random() * 5}s`,
-            animationDuration: `${3 + Math.random() * 4}s`
-          }}></div>
+          <div
+            key={i}
+            className="meteor"
+            style={{
+              left: `${Math.random() * 100}%`,
+              animationDelay: `${Math.random() * 5}s`,
+              animationDuration: `${3 + Math.random() * 4}s`,
+            }}
+          ></div>
         ))}
       </div>
 
       <div
-        className={`login-box ${animate ? "fade-out" : "slide-in"} w-full max-w-2xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white border rounded-lg shadow-xl p-6 transition-all duration-300 flex flex-col relative z-10`}
+        className={`login-box ${animate ? 'fade-out' : 'slide-in'} w-full max-w-2xl bg-white dark:bg-gray-800 text-gray-900 dark:text-white border rounded-lg shadow-xl p-6 transition-all duration-300 flex flex-col relative z-10`}
       >
         {/* Progress Steps - Only visible after instructions */}
         {step > 0 && (
@@ -58,28 +61,38 @@ const Registro = () => {
                 <React.Fragment key={index}>
                   {/* Step Circle */}
                   <div className="flex flex-col items-center">
-                    <div 
+                    <div
                       className={`
                         step-circle w-12 h-12 rounded-full flex items-center justify-center transition-all duration-500
-                        ${step > index + 1 ? "bg-green-500" : step === index + 1 ? "bg-[#fcb900]" : "bg-gray-300"}
+                        ${step > index + 1 ? 'bg-green-500' : step === index + 1 ? 'bg-[#fcb900]' : 'bg-gray-300'}
                         text-white font-semibold transform hover:scale-105
                       `}
                     >
                       {step > index + 1 ? (
-                        <FontAwesomeIcon icon={faCheckCircle} className="text-lg" />
+                        <FontAwesomeIcon
+                          icon={faCheckCircle}
+                          className="text-lg"
+                        />
                       ) : (
-                        <FontAwesomeIcon icon={stepItem.icon} className="text-lg" />
+                        <FontAwesomeIcon
+                          icon={stepItem.icon}
+                          className="text-lg"
+                        />
                       )}
                     </div>
-                    <span className={`text-sm mt-2 font-medium ${step === index + 1 ? "text-[#fcb900]" : ""}`}>
+                    <span
+                      className={`text-sm mt-2 font-medium ${step === index + 1 ? 'text-[#fcb900]' : ''}`}
+                    >
                       {stepItem.label}
                     </span>
                   </div>
-                  
+
                   {/* Connection Line */}
                   {index < steps.length - 1 && (
                     <div className="flex-1 mx-4">
-                      <div className={`h-1.5 ${step > index + 1 ? "bg-green-500" : "bg-gray-300"} rounded-full transition-all duration-500 progress-line`}></div>
+                      <div
+                        className={`h-1.5 ${step > index + 1 ? 'bg-green-500' : 'bg-gray-300'} rounded-full transition-all duration-500 progress-line`}
+                      ></div>
                     </div>
                   )}
                 </React.Fragment>
@@ -93,42 +106,61 @@ const Registro = () => {
           <div className="flex-1 intro-container">
             <div className="flex justify-center mb-6">
               <div className="logo-container p-3 rounded-full bg-[#fcb900]/10 animate-pulse">
-                <FontAwesomeIcon icon={faUserCheck} className="text-4xl text-[#fcb900]" />
+                <FontAwesomeIcon
+                  icon={faUserCheck}
+                  className="text-4xl text-[#fcb900]"
+                />
               </div>
             </div>
-            
+
             <h2 className="text-2xl md:text-3xl font-bold mb-6 text-center text-[#fcb900]">
               Proceso de Registro
             </h2>
-            
+
             <p className="text-lg mb-6 text-gray-700 dark:text-gray-300 text-center px-4">
-              Regístrate en la plataforma y obtén los beneficios de ser parte de la familia Alquiladora Romero.
+              Regístrate en la plataforma y obtén los beneficios de ser parte de
+              la familia Alquiladora Romero.
             </p>
-            
+
             <div className="steps-overview bg-gray-100 dark:bg-gray-700 rounded-lg p-6 mb-8">
-              <h3 className="text-lg font-semibold mb-4 text-center">Pasos a seguir</h3>
+              <h3 className="text-lg font-semibold mb-4 text-center">
+                Pasos a seguir
+              </h3>
               <ul className="space-y-4">
                 <li className="flex items-center">
-                  <div className="w-8 h-8 rounded-full bg-[#fcb900] flex items-center justify-center text-white mr-3">1</div>
-                  <span className="text-gray-800 dark:text-gray-200">Ingresa y verifica tu correo electrónico</span>
+                  <div className="w-8 h-8 rounded-full bg-[#fcb900] flex items-center justify-center text-white mr-3">
+                    1
+                  </div>
+                  <span className="text-gray-800 dark:text-gray-200">
+                    Ingresa y verifica tu correo electrónico
+                  </span>
                 </li>
                 <li className="flex items-center">
-                  <div className="w-8 h-8 rounded-full bg-[#fcb900] flex items-center justify-center text-white mr-3">2</div>
-                  <span className="text-gray-800 dark:text-gray-200">Recibe e ingresa el código de validación</span>
+                  <div className="w-8 h-8 rounded-full bg-[#fcb900] flex items-center justify-center text-white mr-3">
+                    2
+                  </div>
+                  <span className="text-gray-800 dark:text-gray-200">
+                    Recibe e ingresa el código de validación
+                  </span>
                 </li>
                 <li className="flex items-center">
-                  <div className="w-8 h-8 rounded-full bg-[#fcb900] flex items-center justify-center text-white mr-3">3</div>
-                  <span className="text-gray-800 dark:text-gray-200">Completa tus datos personales y finaliza</span>
+                  <div className="w-8 h-8 rounded-full bg-[#fcb900] flex items-center justify-center text-white mr-3">
+                    3
+                  </div>
+                  <span className="text-gray-800 dark:text-gray-200">
+                    Completa tus datos personales y finaliza
+                  </span>
                 </li>
               </ul>
             </div>
-            
+
             {/* Botón "Comenzar" */}
             <button
               onClick={handleNextStep}
               className="start-button py-3 px-6 bg-[#fcb900] hover:bg-[#e0a500] text-white rounded-lg font-semibold transition-all duration-300 mx-auto block shadow-lg hover:shadow-xl transform hover:-translate-y-1"
             >
-              Comenzar ahora <FontAwesomeIcon icon={faArrowRight} className="ml-2" />
+              Comenzar ahora{' '}
+              <FontAwesomeIcon icon={faArrowRight} className="ml-2" />
             </button>
           </div>
         )}
@@ -142,7 +174,12 @@ const Registro = () => {
         )}
 
         {/* Paso 2 - Validación del token */}
-        {step === 2 && <Paso2 onValidationSuccess={handleNextStep} guardarCorreo={guardarCorreo} />}
+        {step === 2 && (
+          <Paso2
+            onValidationSuccess={handleNextStep}
+            guardarCorreo={guardarCorreo}
+          />
+        )}
 
         {/* Paso 3 - Registro final */}
         {step === 3 && <Paso3 guardarCorreo={guardarCorreo} />}
@@ -166,7 +203,11 @@ const Registro = () => {
           top: -100px;
           width: 2px;
           height: 60px;
-          background: linear-gradient(to bottom, rgba(252, 185, 0, 0), rgba(252, 185, 0, 0.8));
+          background: linear-gradient(
+            to bottom,
+            rgba(252, 185, 0, 0),
+            rgba(252, 185, 0, 0.8)
+          );
           animation: meteor-fall 5s linear infinite;
           opacity: 0.7;
         }
@@ -181,17 +222,17 @@ const Registro = () => {
             opacity: 0;
           }
         }
-        
+
         .step-circle {
           box-shadow: 0 0 0 5px rgba(252, 185, 0, 0.15);
           transition: all 0.4s ease;
         }
-        
+
         .fade-out {
           opacity: 0;
           transform: translateY(-20px);
         }
-        
+
         .slide-in {
           opacity: 1;
           transform: translateY(0);
@@ -221,7 +262,12 @@ const Registro = () => {
           left: 0;
           width: 100%;
           height: 100%;
-          background: linear-gradient(90deg, rgba(252,185,0,0) 0%, rgba(252,185,0,0.3) 50%, rgba(252,185,0,0) 100%);
+          background: linear-gradient(
+            90deg,
+            rgba(252, 185, 0, 0) 0%,
+            rgba(252, 185, 0, 0.3) 50%,
+            rgba(252, 185, 0, 0) 100%
+          );
           animation: shimmer 2s infinite;
           transform: translateX(-100%);
         }
@@ -275,7 +321,12 @@ const Registro = () => {
           left: 0;
           width: 100%;
           height: 100%;
-          background: linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.2) 50%, rgba(255,255,255,0) 100%);
+          background: linear-gradient(
+            90deg,
+            rgba(255, 255, 255, 0) 0%,
+            rgba(255, 255, 255, 0.2) 50%,
+            rgba(255, 255, 255, 0) 100%
+          );
           animation: shine 3s infinite;
           transform: translateX(-100%);
         }
@@ -292,29 +343,31 @@ const Registro = () => {
             width: 10px;
             height: 10px;
           }
-          
+
           .steps-overview {
             padding: 1rem;
           }
-          
+
           .login-box {
             padding: 1rem;
           }
-          
+
           h2 {
             font-size: 1.5rem;
           }
-          
-          p, li, span {
+
+          p,
+          li,
+          span {
             font-size: 0.875rem;
           }
         }
-        
+
         @media (max-width: 480px) {
           .login-box {
             margin: 0 1rem;
           }
-          
+
           .start-button {
             padding: 0.75rem 1.25rem;
           }

@@ -1,11 +1,11 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback } from 'react';
 
-import Swal from "sweetalert2";
-import { FaLock, FaLockOpen, FaUserTag } from "react-icons/fa";
-import { useAuth } from "../../../../hooks/ContextAuth";
-import api from "../../../../utils/AxiosConfig";
-import { FaUserSecret } from "react-icons/fa";
-import '../../../../style/global/StyleSpiderAdmini.css'
+import Swal from 'sweetalert2';
+import { FaLock, FaLockOpen, FaUserTag } from 'react-icons/fa';
+import { useAuth } from '../../../../hooks/ContextAuth';
+import api from '../../../../utils/AxiosConfig';
+import { FaUserSecret } from 'react-icons/fa';
+import '../../../../style/global/StyleSpiderAdmini.css';
 
 const UsuariosSospechosos = () => {
   const [usuarios, setUsuarios] = useState([]);
@@ -13,7 +13,8 @@ const UsuariosSospechosos = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const { user, csrfToken } = useAuth();
-  const [debouncedMinIntentos, setDebouncedMinIntentos] = useState(minIntentosReales);
+  const [debouncedMinIntentos, setDebouncedMinIntentos] =
+    useState(minIntentosReales);
 
   useEffect(() => {
     const handler = setTimeout(() => {
@@ -33,15 +34,15 @@ const UsuariosSospechosos = () => {
       const response = await api.get(
         `/api/usuarios/usuarios-sospechosos?minIntentos=${debouncedMinIntentos}`,
         {
-          headers: { "X-CSRF-Token": csrfToken },
+          headers: { 'X-CSRF-Token': csrfToken },
           withCredentials: true,
           timeout: 10000,
         }
       );
       setUsuarios(response.data);
     } catch (err) {
-      console.error("Error al obtener usuarios sospechosos:", err);
-      setError("Error al obtener usuarios sospechosos.");
+      console.error('Error al obtener usuarios sospechosos:', err);
+      setError('Error al obtener usuarios sospechosos.');
     } finally {
       setLoading(false);
     }
@@ -51,12 +52,11 @@ const UsuariosSospechosos = () => {
     fetchUsuariosSospechosos();
   }, [csrfToken, debouncedMinIntentos, fetchUsuariosSospechosos]);
 
-  
   const handleToggleBlock = async (idUsuario, bloqueado) => {
     if (user && user.idUsuarios === idUsuario) {
       Swal.fire({
-        icon: "info",
-        title: "Esta es tu cuenta actual.",
+        icon: 'info',
+        title: 'Esta es tu cuenta actual.',
         showConfirmButton: false,
         timer: 1500,
       });
@@ -70,25 +70,25 @@ const UsuariosSospechosos = () => {
         url,
         {},
         {
-          headers: { "X-CSRF-Token": csrfToken },
+          headers: { 'X-CSRF-Token': csrfToken },
           withCredentials: true,
           timeout: 10000,
         }
       );
       Swal.fire({
-        icon: "success",
-        title: bloqueado ? "Usuario desbloqueado" : "Usuario bloqueado",
+        icon: 'success',
+        title: bloqueado ? 'Usuario desbloqueado' : 'Usuario bloqueado',
         showConfirmButton: false,
         timer: 1500,
       });
       // Refrescar lista
       fetchUsuariosActualizados();
     } catch (err) {
-      console.error("Error al cambiar el estado de bloqueo:", err);
+      console.error('Error al cambiar el estado de bloqueo:', err);
       Swal.fire({
-        icon: "error",
-        title: "Error al cambiar el estado de bloqueo",
-        text: err.response?.data?.message || "Intenta de nuevo",
+        icon: 'error',
+        title: 'Error al cambiar el estado de bloqueo',
+        text: err.response?.data?.message || 'Intenta de nuevo',
       });
     }
   };
@@ -99,18 +99,17 @@ const UsuariosSospechosos = () => {
       const response = await api.get(
         `/api/usuarios/usuarios-sospechosos?minIntentos=${debouncedMinIntentos}`,
         {
-          headers: { "X-CSRF-Token": csrfToken },
+          headers: { 'X-CSRF-Token': csrfToken },
           withCredentials: true,
           timeout: 10000,
         }
       );
       setUsuarios(response.data);
     } catch (err) {
-      console.error("Error al actualizar usuarios sospechosos:", err);
-      setError("Error al actualizar usuarios sospechosos.");
+      console.error('Error al actualizar usuarios sospechosos:', err);
+      setError('Error al actualizar usuarios sospechosos.');
     }
   };
-
 
   const handleChangeMinIntentosReales = (event) => {
     const value = parseInt(event.target.value);
@@ -138,7 +137,7 @@ const UsuariosSospechosos = () => {
       <h1 className="text-center text-2xl font-bold text-gray-800 dark:text-gray-100 mb-6">
         Usuarios Sospechosos
       </h1>
-  
+
       {/* Filtro de Intentos Reales */}
       <div className="flex justify-center mb-6">
         <input
@@ -150,7 +149,7 @@ const UsuariosSospechosos = () => {
           className="w-48 p-2 border border-gray-300 dark:border-gray-700 rounded-full focus:outline-none focus:ring-2 focus:ring-yellow-500 dark:bg-gray-900 dark:text-gray-100"
         />
       </div>
-  
+
       {/* Contenedor responsivo de la tabla */}
       <div className="overflow-x-auto shadow-lg rounded-lg my-4">
         <table className="w-full min-w-full divide-y divide-gray-200 dark:divide-gray-700">
@@ -219,11 +218,14 @@ const UsuariosSospechosos = () => {
                       <button
                         className={`flex items-center justify-center gap-1 px-4 py-2 rounded-full transition-colors ${
                           usuario.bloqueado
-                            ? "bg-green-500 hover:bg-green-600 text-white"
-                            : "bg-red-500 hover:bg-red-600 text-white"
+                            ? 'bg-green-500 hover:bg-green-600 text-white'
+                            : 'bg-red-500 hover:bg-red-600 text-white'
                         }`}
                         onClick={() =>
-                          handleToggleBlock(usuario.idUsuarios, usuario.bloqueado)
+                          handleToggleBlock(
+                            usuario.idUsuarios,
+                            usuario.bloqueado
+                          )
                         }
                       >
                         {usuario.bloqueado ? (
@@ -257,7 +259,6 @@ const UsuariosSospechosos = () => {
       </div>
     </div>
   );
-  
 };
 
 export default UsuariosSospechosos;

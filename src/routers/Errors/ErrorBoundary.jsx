@@ -5,7 +5,12 @@ import { v4 as uuidv4 } from 'uuid';
 class ErrorBoundary extends React.Component {
   constructor(props) {
     super(props);
-    this.state = { hasError: false, error: null, errorId: null, errorCode: null };
+    this.state = {
+      hasError: false,
+      error: null,
+      errorId: null,
+      errorCode: null,
+    };
   }
 
   static getDerivedStateFromError(error) {
@@ -15,7 +20,7 @@ class ErrorBoundary extends React.Component {
   }
 
   componentDidCatch(error, errorInfo) {
-    console.error("Error capturado por ErrorBoundary:", {
+    console.error('Error capturado por ErrorBoundary:', {
       error,
       errorInfo,
       errorId: this.state.errorId,
@@ -24,43 +29,53 @@ class ErrorBoundary extends React.Component {
   }
 
   handleReset = () => {
-    this.setState({ hasError: false, error: null, errorId: null, errorCode: null });
+    this.setState({
+      hasError: false,
+      error: null,
+      errorId: null,
+      errorCode: null,
+    });
   };
 
   render() {
     if (this.state.hasError) {
       return (
         <AnimatePresence>
-          <motion.div 
+          <motion.div
             className="flex flex-col justify-center items-center min-h-screen bg-gray-100 dark:bg-gray-800 p-4"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
           >
-            <motion.div 
+            <motion.div
               className="mb-4"
               initial={{ scale: 0 }}
               animate={{ scale: 1 }}
               transition={{ type: 'spring', stiffness: 300 }}
             >
-              <svg 
-                xmlns="http://www.w3.org/2000/svg" 
-                className="h-20 w-20 text-red-500" 
-                fill="none" 
-                viewBox="0 0 24 24" 
-                stroke="currentColor">
-                <motion.path 
-                  strokeLinecap="round" 
-                  strokeLinejoin="round" 
-                  strokeWidth={2} 
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-20 w-20 text-red-500"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <motion.path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
                   d="M15.232 5.232l3.536 3.536M4 13.5V20h6.5M14.121 9.879l3.536 3.536m-3.536-3.536a2 2 0 11-2.828-2.828l2.828 2.828zM9.879 14.121l-2.828 2.828a2 2 0 102.828-2.828z"
                   initial={{ rotate: -20 }}
                   animate={{ rotate: 20 }}
-                  transition={{ repeat: Infinity, repeatType: "reverse", duration: 1 }}
+                  transition={{
+                    repeat: Infinity,
+                    repeatType: 'reverse',
+                    duration: 1,
+                  }}
                 />
               </svg>
             </motion.div>
-            <motion.h1 
+            <motion.h1
               className="text-3xl font-bold mb-4 text-gray-800 dark:text-white"
               initial={{ y: -20, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
@@ -68,7 +83,7 @@ class ErrorBoundary extends React.Component {
             >
               Lo sentimos, ha ocurrido un error.
             </motion.h1>
-            <motion.p 
+            <motion.p
               className="mb-4 text-center text-gray-700 dark:text-gray-300"
               initial={{ y: 20, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}

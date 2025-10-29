@@ -1,152 +1,163 @@
-import React, { useState } from "react";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faTimes, faExclamationTriangle, faCheckCircle, faBrain, faSync } from "@fortawesome/free-solid-svg-icons";
-import { toast } from "react-toastify";
-import api from "../../../utils/AxiosConfig";
-import { useAuth } from "../../../hooks/ContextAuth";
+import React, { useState } from 'react';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import {
+  faTimes,
+  faExclamationTriangle,
+  faCheckCircle,
+  faBrain,
+  faSync,
+} from '@fortawesome/free-solid-svg-icons';
+import { toast } from 'react-toastify';
+import api from '../../../utils/AxiosConfig';
+import { useAuth } from '../../../hooks/ContextAuth';
 
 // Component for the probability bar, for better visualization
-const ProbabilityBar = ({ probability }) => {
-};
+const ProbabilityBar = ({ probability }) => {};
 
 const PredictCancelModal = ({ pedido, onClose }) => {
-    console.log("Recibí los datos de predecir", pedido);
-    const [prediction, setPrediction] = useState(null);
-    const [loading, setLoading] = useState(false);
-    const [error, setError] = useState(null);
-    const { csrfToken } = useAuth();
+  console.log('Recibí los datos de predecir', pedido);
+  const [prediction, setPrediction] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const { csrfToken } = useAuth();
 
+  const handleFetchPrediction = async () => {
+    if (!pedido || !pedido.idPedido) return;
 
-   const handleFetchPrediction = async () => {
-        if (!pedido || !pedido.idPedido) return;
-
-        try {
-            setLoading(true);
-            setError(null);
-            setPrediction(null); 
-            const response = await api.get(
-                `/api/pedidos/predecir-pedido/${pedido.idPedido}`,
-                {
-                    headers: { "X-CSRF-Token": csrfToken },
-                    withCredentials: true,
-                    timeout: 30000, 
-                }
-            );
-            const result = response.data;
-
-            if (result.success && result.data && result.data.prediccion) {
-                setPrediction(result.data.prediccion);
-            } else {
-                throw new Error(result.error || "No se recibió una predicción válida.");
-            }
-        } catch (err) {
-            const errorMessage = err.response?.data?.error || err.message || "Error al conectar con el servidor";
-            setError(errorMessage);
-            toast.error("No se pudo obtener la predicción");
-        } finally {
-            setLoading(false);
+    try {
+      setLoading(true);
+      setError(null);
+      setPrediction(null);
+      const response = await api.get(
+        `/api/pedidos/predecir-pedido/${pedido.idPedido}`,
+        {
+          headers: { 'X-CSRF-Token': csrfToken },
+          withCredentials: true,
+          timeout: 30000,
         }
-    };
+      );
+      const result = response.data;
 
-    return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60 p-4 animate-fade-in">
-            <div className="bg-white dark:bg-gray-800 w-full max-w-md rounded-2xl shadow-2xl p-6 transform transition-all duration-300 scale-100">
-                <div className="flex justify-between items-center mb-4">
-                    <h2 className="text-xl font-bold text-gray-800 dark:text-gray-100 flex items-center">
-                        <FontAwesomeIcon icon={faBrain} className="mr-3 text-purple-500" />
-                        Análisis Predictivo
-                    </h2>
-                    <button
-                        onClick={onClose}
-                        className="text-gray-600 hover:text-red-500 dark:text-gray-300 dark:hover:text-red-400 transition"
-                        aria-label="Cerrar modal"
-                    >
-                        <FontAwesomeIcon icon={faTimes} size="lg" />
-                    </button>
-                </div>
-                <div className="space-y-4 text-center">
-                    <p className="text-sm text-gray-600 dark:text-gray-300">
-                        Pedido ID: <span className="font-semibold bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded">{pedido?.idRastreo || "N/A"}</span>
-                    </p>
-                    
-                    {/* Results area */}
-                    <div className="min-h-[120px] flex flex-col items-center justify-center bg-gray-50 dark:bg-gray-700/50 rounded-lg p-4">
-                        {!loading && !error && !prediction && (
-                            <div className="text-center">
-                                <p className="text-gray-600 dark:text-gray-400 mb-4">Haz clic en el botón para analizar el riesgo de cancelación del pedido.</p>
-                                <button
-                                    onClick={handleFetchPrediction}
-                                    disabled={loading}
-                                    className="bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-bold py-3 px-6 rounded-lg shadow-lg hover:scale-105 transform transition-all duration-300 flex items-center justify-center w-full"
-                                >
-                                    <FontAwesomeIcon icon={faBrain} className="mr-2" />
-                                    Predecir Cancelación
-                                </button>
-                            </div>
-                        )}
-                        {loading && (
-                            <div className="flex flex-col items-center justify-center">
-                                <FontAwesomeIcon icon={faSync} className="text-purple-500 text-4xl animate-spin" />
-                                <p className="mt-3 text-purple-600 dark:text-purple-300">Analizando...</p>
-                            </div>
-                        )}
-                        {error && (
-                            <div className="text-red-600 dark:text-red-400">
-                                <FontAwesomeIcon icon={faExclamationTriangle} className="text-4xl mb-2" />
-                                <p className="font-semibold">Error</p>
-                                <p className="text-sm">{error}</p>
-                            </div>
-                        )}
-                        {prediction && (
-                            <div className="w-full text-center animate-fade-in">
-                                <p className="text-lg font-semibold text-gray-800 dark:text-gray-100">
-                                    Probabilidad de Cancelación:
-                                </p>
-                                <ProbabilityBar probability={prediction.probabilidad_de_cancelacion} />
-                                <div className={`mt-2 text-xl font-bold ${
-                                    prediction.prediccion_clase === 1 ? "text-red-600 dark:text-red-400" : "text-green-600 dark:text-green-400"
-                                }`}>
-                                    <FontAwesomeIcon
-                                        icon={prediction.prediccion_clase === 1 ? faExclamationTriangle : faCheckCircle}
-                                        className="mr-2"
-                                    />
-                                    {prediction.prediccion_texto}
-                                </div>
-                            </div>
-                        )}
-                    </div>
+      if (result.success && result.data && result.data.prediccion) {
+        setPrediction(result.data.prediccion);
+      } else {
+        throw new Error(result.error || 'No se recibió una predicción válida.');
+      }
+    } catch (err) {
+      const errorMessage =
+        err.response?.data?.error ||
+        err.message ||
+        'Error al conectar con el servidor';
+      setError(errorMessage);
+      toast.error('No se pudo obtener la predicción');
+    } finally {
+      setLoading(false);
+    }
+  };
 
-                    {/* Close button */}
-                    <button
-                        onClick={onClose}
-                        className="w-full mt-4 bg-gray-200 text-gray-700 dark:bg-gray-600 dark:text-gray-200 font-bold py-2 px-4 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-500 transition"
-                    >
-                        Cerrar
-                    </button>
-                </div>
-            </div>
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60 p-4 animate-fade-in">
+      <div className="bg-white dark:bg-gray-800 w-full max-w-md rounded-2xl shadow-2xl p-6 transform transition-all duration-300 scale-100">
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-xl font-bold text-gray-800 dark:text-gray-100 flex items-center">
+            <FontAwesomeIcon icon={faBrain} className="mr-3 text-purple-500" />
+            Análisis Predictivo
+          </h2>
+          <button
+            onClick={onClose}
+            className="text-gray-600 hover:text-red-500 dark:text-gray-300 dark:hover:text-red-400 transition"
+            aria-label="Cerrar modal"
+          >
+            <FontAwesomeIcon icon={faTimes} size="lg" />
+          </button>
         </div>
-    );
+        <div className="space-y-4 text-center">
+          <p className="text-sm text-gray-600 dark:text-gray-300">
+            Pedido ID:{' '}
+            <span className="font-semibold bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded">
+              {pedido?.idRastreo || 'N/A'}
+            </span>
+          </p>
+
+          {/* Results area */}
+          <div className="min-h-[120px] flex flex-col items-center justify-center bg-gray-50 dark:bg-gray-700/50 rounded-lg p-4">
+            {!loading && !error && !prediction && (
+              <div className="text-center">
+                <p className="text-gray-600 dark:text-gray-400 mb-4">
+                  Haz clic en el botón para analizar el riesgo de cancelación
+                  del pedido.
+                </p>
+                <button
+                  onClick={handleFetchPrediction}
+                  disabled={loading}
+                  className="bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-bold py-3 px-6 rounded-lg shadow-lg hover:scale-105 transform transition-all duration-300 flex items-center justify-center w-full"
+                >
+                  <FontAwesomeIcon icon={faBrain} className="mr-2" />
+                  Predecir Cancelación
+                </button>
+              </div>
+            )}
+            {loading && (
+              <div className="flex flex-col items-center justify-center">
+                <FontAwesomeIcon
+                  icon={faSync}
+                  className="text-purple-500 text-4xl animate-spin"
+                />
+                <p className="mt-3 text-purple-600 dark:text-purple-300">
+                  Analizando...
+                </p>
+              </div>
+            )}
+            {error && (
+              <div className="text-red-600 dark:text-red-400">
+                <FontAwesomeIcon
+                  icon={faExclamationTriangle}
+                  className="text-4xl mb-2"
+                />
+                <p className="font-semibold">Error</p>
+                <p className="text-sm">{error}</p>
+              </div>
+            )}
+            {prediction && (
+              <div className="w-full text-center animate-fade-in">
+                <p className="text-lg font-semibold text-gray-800 dark:text-gray-100">
+                  Probabilidad de Cancelación:
+                </p>
+                <ProbabilityBar
+                  probability={prediction.probabilidad_de_cancelacion}
+                />
+                <div
+                  className={`mt-2 text-xl font-bold ${
+                    prediction.prediccion_clase === 1
+                      ? 'text-red-600 dark:text-red-400'
+                      : 'text-green-600 dark:text-green-400'
+                  }`}
+                >
+                  <FontAwesomeIcon
+                    icon={
+                      prediction.prediccion_clase === 1
+                        ? faExclamationTriangle
+                        : faCheckCircle
+                    }
+                    className="mr-2"
+                  />
+                  {prediction.prediccion_texto}
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Close button */}
+          <button
+            onClick={onClose}
+            className="w-full mt-4 bg-gray-200 text-gray-700 dark:bg-gray-600 dark:text-gray-200 font-bold py-2 px-4 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-500 transition"
+          >
+            Cerrar
+          </button>
+        </div>
+      </div>
+    </div>
+  );
 };
 
 export default PredictCancelModal;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

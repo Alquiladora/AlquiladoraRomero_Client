@@ -1,25 +1,25 @@
 /* eslint-disable */
-import React, { useState, useEffect } from "react";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { 
-  faMoneyCheckAlt, 
-  faTimes, 
+import React, { useState, useEffect } from 'react';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import {
+  faMoneyCheckAlt,
+  faTimes,
   faCreditCard,
   faMoneyBillWave,
   faExclamationTriangle,
   faCheckCircle,
   faInfoCircle,
   faCalendarCheck,
-  faReceipt
-} from "@fortawesome/free-solid-svg-icons";
-import api from "../../../utils/AxiosConfig";
-import { useAuth } from "../../../hooks/ContextAuth";
+  faReceipt,
+} from '@fortawesome/free-solid-svg-icons';
+import api from '../../../utils/AxiosConfig';
+import { useAuth } from '../../../hooks/ContextAuth';
 
 function PaymentModal({ selectedOrder, onClose, onPaymentRegistered }) {
-  const [montoPago, setMontoPago] = useState("");
-  const [formaPago, setFormaPago] = useState("");
-  const [metodoPago, setMetodoPago] = useState("");
-  const [detallesPago, setDetallesPago] = useState("");
+  const [montoPago, setMontoPago] = useState('');
+  const [formaPago, setFormaPago] = useState('');
+  const [metodoPago, setMetodoPago] = useState('');
+  const [detallesPago, setDetallesPago] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(false);
@@ -27,14 +27,16 @@ function PaymentModal({ selectedOrder, onClose, onPaymentRegistered }) {
 
   // Determinar dinámicamente las propiedades de selectedOrder
   const idPedido = selectedOrder.idPedido ?? selectedOrder.id ?? 0;
-  const total = Number(selectedOrder.totalPagar ?? selectedOrder.totalToPay) || 0;
-  const totalPagado = Number(selectedOrder.pago?.totalPagado ?? selectedOrder.totalPaid) || 0;
+  const total =
+    Number(selectedOrder.totalPagar ?? selectedOrder.totalToPay) || 0;
+  const totalPagado =
+    Number(selectedOrder.pago?.totalPagado ?? selectedOrder.totalPaid) || 0;
   const pendiente = Math.max(total - totalPagado, 0);
 
   const validateMonto = (value) => {
     const numValue = parseFloat(value);
     if (isNaN(numValue) || numValue <= 0) {
-      return "El monto debe ser mayor a 0";
+      return 'El monto debe ser mayor a 0';
     }
     if (numValue > pendiente) {
       return `El monto no puede exceder $${pendiente.toFixed(2)}`;
@@ -44,13 +46,13 @@ function PaymentModal({ selectedOrder, onClose, onPaymentRegistered }) {
 
   const handleMontoChange = (e) => {
     let value = e.target.value;
-    if (value.startsWith("-")) {
+    if (value.startsWith('-')) {
       value = value.substring(1);
     }
-    if (value.includes(".")) {
-      const parts = value.split(".");
+    if (value.includes('.')) {
+      const parts = value.split('.');
       if (parts[1] && parts[1].length > 2) {
-        value = parts[0] + "." + parts[1].substring(0, 2);
+        value = parts[0] + '.' + parts[1].substring(0, 2);
       }
     }
     const numValue = parseFloat(value);
@@ -85,35 +87,39 @@ function PaymentModal({ selectedOrder, onClose, onPaymentRegistered }) {
     }
 
     if (!formaPago || !metodoPago.trim()) {
-      setError("Por favor completa todos los campos requeridos");
+      setError('Por favor completa todos los campos requeridos');
       return;
     }
 
     setLoading(true);
 
     try {
-      console.log("Payload enviado:", {
+      console.log('Payload enviado:', {
         idPedido,
         monto: parseFloat(montoPago),
         formaPago,
         metodoPago: metodoPago.trim(),
         detallesPago: detallesPago.trim(),
       });
-      const response = await api.post("/api/pedidos/pagos/registrar", {
-        idPedido,
-        monto: parseFloat(montoPago),
-        formaPago,
-        metodoPago: metodoPago.trim(),
-        detallesPago: detallesPago.trim(),
-      }, {
-        headers: {
-          "X-CSRF-Token": csrfToken,
+      const response = await api.post(
+        '/api/pedidos/pagos/registrar',
+        {
+          idPedido,
+          monto: parseFloat(montoPago),
+          formaPago,
+          metodoPago: metodoPago.trim(),
+          detallesPago: detallesPago.trim(),
         },
-        withCredentials: true,
-      });
+        {
+          headers: {
+            'X-CSRF-Token': csrfToken,
+          },
+          withCredentials: true,
+        }
+      );
 
       if (!response.data.success) {
-        setError(response.data.message || "Error al registrar el pago");
+        setError(response.data.message || 'Error al registrar el pago');
       } else {
         setSuccess(true);
         setTimeout(() => {
@@ -122,10 +128,10 @@ function PaymentModal({ selectedOrder, onClose, onPaymentRegistered }) {
         }, 1500);
       }
     } catch (error) {
-      setError("Error de conexión. Verifica tu internet e intenta nuevamente.");
-      console.error("Error al registrar pago:", error);
+      setError('Error de conexión. Verifica tu internet e intenta nuevamente.');
+      console.error('Error al registrar pago:', error);
       if (error.response) {
-        console.error("Respuesta del servidor:", error.response.data);
+        console.error('Respuesta del servidor:', error.response.data);
       }
     } finally {
       setLoading(false);
@@ -133,10 +139,10 @@ function PaymentModal({ selectedOrder, onClose, onPaymentRegistered }) {
   };
 
   const getPaymentIcon = (forma) => {
-    switch ((forma || "").toLowerCase()) {
-      case "tarjeta":
+    switch ((forma || '').toLowerCase()) {
+      case 'tarjeta':
         return faCreditCard;
-      case "efectivo":
+      case 'efectivo':
         return faMoneyBillWave;
       default:
         return faMoneyCheckAlt;
@@ -176,15 +182,17 @@ function PaymentModal({ selectedOrder, onClose, onPaymentRegistered }) {
                   />
                   <div>
                     <p className="text-blue-800 dark:text-blue-200 font-medium text-sm sm:text-base">
-                      Monto total:{" "}
+                      Monto total:{' '}
                       <span className="font-bold">${total.toFixed(2)}</span>
                     </p>
                     <p className="text-blue-800 dark:text-blue-200 font-medium text-sm sm:text-base">
-                      Ya pagado:{" "}
-                      <span className="font-bold">${totalPagado.toFixed(2)}</span>
+                      Ya pagado:{' '}
+                      <span className="font-bold">
+                        ${totalPagado.toFixed(2)}
+                      </span>
                     </p>
                     <p className="text-blue-900 dark:text-blue-100 font-bold text-base sm:text-lg">
-                      Pendiente:{" "}
+                      Pendiente:{' '}
                       <span className="text-red-600 dark:text-red-400">
                         ${pendiente.toFixed(2)}
                       </span>
@@ -273,7 +281,9 @@ function PaymentModal({ selectedOrder, onClose, onPaymentRegistered }) {
                   >
                     <option value="">Selecciona una forma de pago</option>
                     <option value="efectivo">💵 Efectivo</option>
-                    <option value="transferencia">🏦 Transferencia Bancaria</option>
+                    <option value="transferencia">
+                      🏦 Transferencia Bancaria
+                    </option>
                   </select>
                 </div>
 
@@ -338,7 +348,8 @@ function PaymentModal({ selectedOrder, onClose, onPaymentRegistered }) {
                     ¡Pago Completado!
                   </h3>
                   <p className="text-green-800 dark:text-green-300 text-sm sm:text-base max-w-lg">
-                    Este pedido ya fue completamente pagado. No hay saldo pendiente por cobrar.
+                    Este pedido ya fue completamente pagado. No hay saldo
+                    pendiente por cobrar.
                   </p>
                 </div>
               </div>

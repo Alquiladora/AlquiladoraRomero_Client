@@ -1,10 +1,10 @@
-import React, { useState, useEffect } from "react";
-import { motion, useAnimation } from "framer-motion";
-import { useInView } from "react-intersection-observer";
-import Img1 from "../../../img/Logos/logo4.jpg";
-import Img2 from "../../../img/Logos/logo6.jpg";
-import ClientDestacados from "./clientDestacados";
-import api from "../../../utils/AxiosConfig";
+import React, { useState, useEffect } from 'react';
+import { motion, useAnimation } from 'framer-motion';
+import { useInView } from 'react-intersection-observer';
+import Img1 from '../../../img/Logos/logo4.jpg';
+import Img2 from '../../../img/Logos/logo6.jpg';
+import ClientDestacados from './clientDestacados';
+import api from '../../../utils/AxiosConfig';
 
 const SobreNosotros = () => {
   const controlsLeft = useAnimation();
@@ -21,11 +21,9 @@ const SobreNosotros = () => {
   const [sobreNosotrosData, setSobreNosotrosData] = useState(null);
   const [dataLoading, setDataLoading] = useState(true);
 
-  
   useEffect(() => {
     setMounted(true);
   }, []);
-
 
   useEffect(() => {
     if (!mounted) return;
@@ -55,10 +53,10 @@ const SobreNosotros = () => {
   useEffect(() => {
     const fetchSobreNosotros = async () => {
       try {
-        const response = await api.get("/api/empresa/sobreNosotros");
+        const response = await api.get('/api/empresa/sobreNosotros');
         setSobreNosotrosData(response.data);
       } catch (error) {
-        console.error("Error al obtener datos de sobre nosotros:", error);
+        console.error('Error al obtener datos de sobre nosotros:', error);
       } finally {
         setDataLoading(false);
       }
@@ -66,7 +64,6 @@ const SobreNosotros = () => {
     fetchSobreNosotros();
   }, []);
 
- 
   if (dataLoading) {
     return (
       <div className="min-h-screen flex justify-center items-center dark:bg-gray-950 dark:text-white">
@@ -77,7 +74,6 @@ const SobreNosotros = () => {
 
   return (
     <div className="min-h-screen py-12 px-4 sm:px-6 lg:px-8 dark:bg-gray-950 dark:text-white">
-     
       <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
         <motion.div
           ref={refLeft}
@@ -92,7 +88,7 @@ const SobreNosotros = () => {
           <p className="text-lg text-gray-700 dark:text-white">
             {sobreNosotrosData && sobreNosotrosData.quienesSomos
               ? sobreNosotrosData.quienesSomos
-              : "Información no disponible."}
+              : 'Información no disponible.'}
           </p>
         </motion.div>
         <motion.div
@@ -110,7 +106,6 @@ const SobreNosotros = () => {
         </motion.div>
       </div>
 
-      
       <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-8 items-center mt-20">
         <motion.div
           ref={refBottomLeft}
@@ -138,7 +133,7 @@ const SobreNosotros = () => {
           <p className="text-lg text-gray-700 dark:text-white">
             {sobreNosotrosData && sobreNosotrosData.nuestraHistoria
               ? sobreNosotrosData.nuestraHistoria
-              : "Información no disponible."}
+              : 'Información no disponible.'}
           </p>
         </motion.div>
       </div>

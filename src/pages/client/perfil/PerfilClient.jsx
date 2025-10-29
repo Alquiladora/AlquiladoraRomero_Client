@@ -1,5 +1,5 @@
 /* eslint-disable */
-import React, { useState, useEffect, useRef, useContext,useMemo } from "react";
+import React, { useState, useEffect, useRef, useContext, useMemo } from 'react';
 import {
   Tabs,
   Tab,
@@ -8,28 +8,28 @@ import {
   Grid,
   Typography,
   CircularProgress,
-} from "@mui/material";
-import ComputerIcon from "@mui/icons-material/Computer";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { toast } from "react-toastify";
-import AddressBook from "./componetsPerfil/ListaDirecciones";
+} from '@mui/material';
+import ComputerIcon from '@mui/icons-material/Computer';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { toast } from 'react-toastify';
+import AddressBook from './componetsPerfil/ListaDirecciones';
 
-import "primereact/resources/themes/saga-blue/theme.css";
-import "primereact/resources/primereact.min.css";
+import 'primereact/resources/themes/saga-blue/theme.css';
+import 'primereact/resources/primereact.min.css';
 import {
   validateName,
   validatePhone,
   validateFechaNacimiento,
-} from "./componetsPerfil/validaciones";
-import EditableInput from "./componetsPerfil/EditableInput";
-import CambiarContrasenaModal from "./componetsPerfil/CambiarPass";
-import MFAComponent from "./componetsPerfil/Mfa";
-import "primereact/resources/themes/saga-blue/theme.css";
-import "primereact/resources/primereact.min.css"
+} from './componetsPerfil/validaciones';
+import EditableInput from './componetsPerfil/EditableInput';
+import CambiarContrasenaModal from './componetsPerfil/CambiarPass';
+import MFAComponent from './componetsPerfil/Mfa';
+import 'primereact/resources/themes/saga-blue/theme.css';
+import 'primereact/resources/primereact.min.css';
 import {
   Camera,
   User,
-  ServerCrash, 
+  ServerCrash,
   RefreshCw,
   FileText,
   Clock,
@@ -47,25 +47,22 @@ import {
   Edit3,
   ChartNoAxesColumnDecreasing,
   Star,
-} from "lucide-react";
+} from 'lucide-react';
 
 import {
   faWindows,
   faAndroid,
   faLinux,
   faApple,
-} from "@fortawesome/free-brands-svg-icons";
-import { motion, useAnimation } from "framer-motion";
-import PhoneIphoneIcon from "@mui/icons-material/PhoneIphone";
-import TabletMacIcon from "@mui/icons-material/TabletMac";
-import { useAuth } from "../../../hooks/ContextAuth";
-import api from "../../../utils/AxiosConfig";
-import CustomLoading from "../../../components/spiner/SpinerGlobal";
-
-
+} from '@fortawesome/free-brands-svg-icons';
+import { motion, useAnimation } from 'framer-motion';
+import PhoneIphoneIcon from '@mui/icons-material/PhoneIphone';
+import TabletMacIcon from '@mui/icons-material/TabletMac';
+import { useAuth } from '../../../hooks/ContextAuth';
+import api from '../../../utils/AxiosConfig';
+import CustomLoading from '../../../components/spiner/SpinerGlobal';
 
 const PerfilUsuarioPrime = () => {
- 
   const fileInputRef = useRef(null);
   const [uploading, setUploading] = useState(false);
   const [isMfaEnabled, setIsMfaEnabled] = useState(false);
@@ -81,21 +78,22 @@ const PerfilUsuarioPrime = () => {
   const [activo, setActivo] = useState(false);
   const [sessions, setSessions] = useState([]);
   const [openModal, setOpenModal] = useState(false);
-  const [activeTab, setActiveTab] = useState("personal");
+  const [activeTab, setActiveTab] = useState('personal');
   const isMounted = useRef(true);
   const controls = useAnimation();
   const [cambiosContrasena, setCambiosContrasena] = useState(0);
   const [bloqueado, setBloqueado] = useState(false);
-  const [error, setError] = useState(null); 
-
+  const [error, setError] = useState(null);
 
   const isProfileComplete = useMemo(() => {
     if (!usuariosC) return false;
-    const { nombre, apellidoP, apellidoM, telefono, fechaNacimiento } = usuariosC;
-    
-    return Boolean(nombre && apellidoP && apellidoM && telefono && fechaNacimiento);
+    const { nombre, apellidoP, apellidoM, telefono, fechaNacimiento } =
+      usuariosC;
+
+    return Boolean(
+      nombre && apellidoP && apellidoM && telefono && fechaNacimiento
+    );
   }, [usuariosC]);
-  
 
   useEffect(() => {
     isMounted.current = true;
@@ -108,66 +106,64 @@ const PerfilUsuarioPrime = () => {
     };
   }, [controls]);
 
-  
   const fetchProfileData = async () => {
     if (!isMounted.current) return;
 
     try {
       setLoading(true);
-       setError(null);
+      setError(null);
       const response = await api.get(`api/usuarios/perfil`, {
         withCredentials: true,
-        headers: { "X-CSRF-Token": csrfToken },
+        headers: { 'X-CSRF-Token': csrfToken },
       });
 
       if (isMounted.current) {
         setUsuariosC(response.data.user);
-        console.log("datos de perfil cliente", response.data.user.idUsuarios)
+        console.log('datos de perfil cliente', response.data.user.idUsuarios);
 
         setActivo(!!response.data.user.multifaltor);
         setLastUpdated(new Date(response.data.user.fechaActualizacionF));
         setLoading(false);
         controls.start({ opacity: 1, y: 0 });
-        console.log("✅ Datos de usuario obtenidos:", response.data.user);
+        console.log('✅ Datos de usuario obtenidos:', response.data.user);
       }
     } catch (error) {
       if (isMounted.current) {
         setLoading(false);
-         setError("No pudimos cargar tu información. Por favor, intenta de nuevo.");
+        setError(
+          'No pudimos cargar tu información. Por favor, intenta de nuevo.'
+        );
       }
-      console.error("❌ Error al obtener los datos del perfil:", error);
+      console.error('❌ Error al obtener los datos del perfil:', error);
     }
   };
 
   const verificarCambiosContrasena = async (idUsuario) => {
     if (!idUsuario) {
       console.warn(
-        "⚠️ ID de usuario no disponible, no se verificará cambios de contraseña."
+        '⚠️ ID de usuario no disponible, no se verificará cambios de contraseña.'
       );
       return;
     }
     try {
       const response = await api.get(`/api/usuarios/vecesCambioPass`, {
         params: { idUsuario },
-        headers: { "X-CSRF-Token": csrfToken },
+        headers: { 'X-CSRF-Token': csrfToken },
         withCredentials: true,
       });
-      console.log("Respuesta de vecesCambioPass:", response.data);
+      console.log('Respuesta de vecesCambioPass:', response.data);
       setCambiosContrasena(response.data.cambiosRealizados);
       setBloqueado(response.data.cambiosRealizados >= 20);
     } catch (error) {
-      console.error("Error al verificar los cambios de contraseña:", error);
+      console.error('Error al verificar los cambios de contraseña:', error);
     }
   };
-
-
 
   const handleOpenModal = () => {
     if (!bloqueado) {
       setOpenModal(true);
     }
   };
-
 
   const handleCloseModal = () => {
     setOpenModal(false);
@@ -183,38 +179,33 @@ const PerfilUsuarioPrime = () => {
       const lastUpdatedTime = lastUpdated?.getTime();
       const twoMonths = 60 * 60 * 24 * 1000 * 30 * 2;
       if (lastUpdated && now - lastUpdatedTime < twoMonths) {
-        console.log("Solo puedes cambiar tu foto de perfil cada dos meses.");
-       toast.error(
-        "Solo puedes cambiar tu foto de perfil cada dos meses."
-        );
+        console.log('Solo puedes cambiar tu foto de perfil cada dos meses.');
+        toast.error('Solo puedes cambiar tu foto de perfil cada dos meses.');
         return;
       }
       if (
         ![
-          "image/png",
-          "image/jpeg",
-          "image/jpg",
-          "image/gif",
-          "image/webp",
-          "image/svg+xml",
+          'image/png',
+          'image/jpeg',
+          'image/jpg',
+          'image/gif',
+          'image/webp',
+          'image/svg+xml',
         ].includes(file.type)
       ) {
-        console.log("Error Formato de imagen inválido");
+        console.log('Error Formato de imagen inválido');
         toast.error(
-          "Solo se aceptan imágenes en formatos PNG, JPG, JPEG, GIF, WEBP, o SVG."
+          'Solo se aceptan imágenes en formatos PNG, JPG, JPEG, GIF, WEBP, o SVG.'
         );
         return;
       }
 
       if (file.size > 10 * 1024 * 1024) {
-        console.log("El tamaño de la imagen debe ser menor a 10 MB.");
-        toast.error(
-       
-          "El tamaño de la imagen debe ser menor a 2MB."
-        );
+        console.log('El tamaño de la imagen debe ser menor a 10 MB.');
+        toast.error('El tamaño de la imagen debe ser menor a 2MB.');
         return;
       }
-      console.log("Imagen enviado  handleImagenChange", file);
+      console.log('Imagen enviado  handleImagenChange', file);
       handleImageChange(file);
     }
   };
@@ -223,21 +214,18 @@ const PerfilUsuarioPrime = () => {
     const now = new Date();
 
     const formData = new FormData();
-    formData.append("imagen", file);
+    formData.append('imagen', file);
 
     setUploading(true);
     setIsBlocked(true);
-    console.log("Subiendo imagen");
-   toast.warning(
-     
-      "Espera mientras se sube la imagen..."
-    );
+    console.log('Subiendo imagen');
+    toast.warning('Espera mientras se sube la imagen...');
 
     try {
       const response = await api.post(`/api/imagenes/upload`, formData, {
         headers: {
-          "Content-Type": "multipart/form-data",
-          "X-CSRF-Token": csrfToken,
+          'Content-Type': 'multipart/form-data',
+          'X-CSRF-Token': csrfToken,
         },
         withCredentials: true,
         onUploadProgress: (progressEvent) => {
@@ -249,19 +237,16 @@ const PerfilUsuarioPrime = () => {
       });
 
       const imageUrl = response.data.url;
-    
 
-      
       await api.patch(
         `/api/usuarios/perfil/${usuariosC.idUsuarios}/foto`,
         {
           fotoPerfil: imageUrl,
           fechaActualizacionF: now.toISOString(),
         },
-        { headers: { "X-CSRF-Token": csrfToken }, withCredentials: true }
+        { headers: { 'X-CSRF-Token': csrfToken }, withCredentials: true }
       );
 
-     
       setUsuariosC((prevProfile) => ({
         ...prevProfile,
         fotoPerfil: imageUrl,
@@ -269,14 +254,11 @@ const PerfilUsuarioPrime = () => {
 
       setLastUpdated(now);
       fetchProfileData();
-      console.log("Imagen subido correctamente");
-      toast.success(
-    
-        "Foto de perfil actualizada correctamente."
-      );
+      console.log('Imagen subido correctamente');
+      toast.success('Foto de perfil actualizada correctamente.');
     } catch (error) {
-      console.error("Error al actualizar la foto de perfil:", error);
-      toast.error("Error al actualizar la foto de perfil.");
+      console.error('Error al actualizar la foto de perfil:', error);
+      toast.error('Error al actualizar la foto de perfil.');
     } finally {
       setUploading(false);
       setIsBlocked(false);
@@ -287,26 +269,23 @@ const PerfilUsuarioPrime = () => {
   //===================GUARDAR EN LA BASE DE DATOS=======================================================================
   const saveField = async (field, value) => {
     try {
-     
       const response = await api.patch(
         `/api/usuarios/perfil/${usuariosC.idUsuarios}/${field}`,
         { value },
         {
-          headers: { "X-CSRF-Token": csrfToken },
+          headers: { 'X-CSRF-Token': csrfToken },
           withCredentials: true,
         }
       );
       fetchProfileData();
 
-     if (response.data && response.data.message) {
+      if (response.data && response.data.message) {
         toast.success(response.data.message);
-        } else {
+      } else {
         toast.success(`El ${field} ha sido guardado correctamente.`);
       }
     } catch (error) {
-      toast.error(
-        `Hubo un error al guardar el ${field}.`
-      );
+      toast.error(`Hubo un error al guardar el ${field}.`);
       console.error(`Error al guardar el ${field}:`, error);
     }
   };
@@ -332,15 +311,14 @@ const PerfilUsuarioPrime = () => {
         `/api/usuarios/sesiones`,
         { userId: usuariosC.idUsuarios },
         {
-          headers: { "X-CSRF-Token": csrfToken },
+          headers: { 'X-CSRF-Token': csrfToken },
           withCredentials: true,
           timeout: 10000,
         }
       );
       setSessions(response.data);
-      
     } catch (error) {
-      console.error("Error al obtener las sesiones activas:", error);
+      console.error('Error al obtener las sesiones activas:', error);
     }
   };
 
@@ -350,7 +328,7 @@ const PerfilUsuarioPrime = () => {
         `/api/usuarios/Delete/login/all-except-current`,
         {},
         {
-          headers: { "X-CSRF-Token": csrfToken },
+          headers: { 'X-CSRF-Token': csrfToken },
           withCredentials: true,
           timeout: 10000,
         }
@@ -359,22 +337,22 @@ const PerfilUsuarioPrime = () => {
         prevSessions.filter((session) => session.isCurrent)
       );
 
-     toast.success({
-        severity: "success",
-        summary: "Sesiones cerradas",
+      toast.success({
+        severity: 'success',
+        summary: 'Sesiones cerradas',
         detail:
           response.data.message ||
-          "Todas las sesiones excepto la actual han sido cerradas.",
+          'Todas las sesiones excepto la actual han sido cerradas.',
         life: 3000,
       });
     } catch (error) {
-      console.error("Error al cerrar todas las sesiones:", error);
+      console.error('Error al cerrar todas las sesiones:', error);
       toast.error({
-        severity: "error",
-        summary: "Error",
+        severity: 'error',
+        summary: 'Error',
         detail:
           error.response?.data?.message ||
-          "Hubo un problema al cerrar las sesiones.",
+          'Hubo un problema al cerrar las sesiones.',
         life: 3000,
       });
     }
@@ -398,98 +376,95 @@ const PerfilUsuarioPrime = () => {
   }, [usuariosC]);
 
   const getDeviceIcon = (deviceType) => {
-    if (deviceType === "Windows") return <FontAwesomeIcon icon={faWindows} />;
-    if (deviceType === "Android") return <FontAwesomeIcon icon={faAndroid} />;
-    if (deviceType === "Linux") return <FontAwesomeIcon icon={faLinux} />;
-    if (deviceType === "Mac") return <FontAwesomeIcon icon={faApple} />;
-    if (deviceType === "iOS") return <PhoneIphoneIcon />;
-    if (deviceType === "iPad") return <TabletMacIcon />;
+    if (deviceType === 'Windows') return <FontAwesomeIcon icon={faWindows} />;
+    if (deviceType === 'Android') return <FontAwesomeIcon icon={faAndroid} />;
+    if (deviceType === 'Linux') return <FontAwesomeIcon icon={faLinux} />;
+    if (deviceType === 'Mac') return <FontAwesomeIcon icon={faApple} />;
+    if (deviceType === 'iOS') return <PhoneIphoneIcon />;
+    if (deviceType === 'iPad') return <TabletMacIcon />;
     return <ComputerIcon />;
   };
-  const formatDateForDisplay = (dateString, format = "dd-MM-yyyy") => {
-    if (!dateString) return "";
+  const formatDateForDisplay = (dateString, format = 'dd-MM-yyyy') => {
+    if (!dateString) return '';
 
     const date = new Date(dateString);
     if (isNaN(date.getTime())) {
-      console.error("Fecha inválida:", dateString);
-      return "";
+      console.error('Fecha inválida:', dateString);
+      return '';
     }
 
-    const day = date.getDate().toString().padStart(2, "0");
-    const month = (date.getMonth() + 1).toString().padStart(2, "0");
+    const day = date.getDate().toString().padStart(2, '0');
+    const month = (date.getMonth() + 1).toString().padStart(2, '0');
     const year = date.getFullYear();
 
-    if (format === "yyyy-MM-dd") {
+    if (format === 'yyyy-MM-dd') {
       return `${year}-${month}-${day}`;
     }
 
     return `${day}-${month}-${year}`;
   };
 
- 
   const fields = [
     {
-      label: "Nombre",
-      value: usuariosC?.nombre || "",
+      label: 'Nombre',
+      value: usuariosC?.nombre || '',
       icon: User,
-      validate: (value) => validateName(value, "nombre"),
-      field: "nombre",
+      validate: (value) => validateName(value, 'nombre'),
+      field: 'nombre',
       editable: true,
     },
     {
-      label: "Apellido Paterno",
-      value: usuariosC?.apellidoP || "",
+      label: 'Apellido Paterno',
+      value: usuariosC?.apellidoP || '',
       icon: User,
-      validate: (value) => validateName(value, "apellido paterno"),
-      field: "apellidoP",
+      validate: (value) => validateName(value, 'apellido paterno'),
+      field: 'apellidoP',
       editable: true,
     },
     {
-      label: "Apellido Materno",
-      value: usuariosC?.apellidoM || "",
+      label: 'Apellido Materno',
+      value: usuariosC?.apellidoM || '',
       icon: User,
-      validate: (value) => validateName(value, "apellido materno"),
-      field: "apellidoM",
+      validate: (value) => validateName(value, 'apellido materno'),
+      field: 'apellidoM',
       editable: true,
     },
     {
-      label: "Teléfono",
-      value: usuariosC?.telefono || "",
+      label: 'Teléfono',
+      value: usuariosC?.telefono || '',
       icon: Phone,
       validate: validatePhone,
-      field: "telefono",
+      field: 'telefono',
       editable: true,
     },
     {
-      label: "Correo",
-      value: usuariosC?.correo || "",
+      label: 'Correo',
+      value: usuariosC?.correo || '',
       icon: Mail,
-      field: "correo",
+      field: 'correo',
       editable: false,
     },
     {
-      label: "Fecha de Nacimiento",
-      value: formatDateForDisplay(usuariosC.fechaNacimiento, "yyyy-MM-dd"),
+      label: 'Fecha de Nacimiento',
+      value: formatDateForDisplay(usuariosC.fechaNacimiento, 'yyyy-MM-dd'),
       icon: Calendar,
       validate: validateFechaNacimiento,
-      field: "fechaNacimiento",
+      field: 'fechaNacimiento',
       editable: true,
     },
   ];
 
   function formatDate(dateString) {
     const dateObj = new Date(dateString);
-    const day = String(dateObj.getDate()).padStart(2, "0");
-    const month = String(dateObj.getMonth() + 1).padStart(2, "0");
+    const day = String(dateObj.getDate()).padStart(2, '0');
+    const month = String(dateObj.getMonth() + 1).padStart(2, '0');
     const year = String(dateObj.getFullYear()).slice(-2);
     return `${day}/${month}/${year}`;
   }
   //==========================================================================================
 
   if (loading) {
-    return (
-     <CustomLoading/>
-    );
+    return <CustomLoading />;
   }
 
   // ▼ AÑADE ESTE BLOQUE COMPLETO ▼
@@ -527,38 +502,32 @@ const PerfilUsuarioPrime = () => {
 
   return (
     <div className="dark:bg-gray-950 dark:text-white">
-      {loading && (
-      <CustomLoading/>
-      )}
+      {loading && <CustomLoading />}
 
       <div className="min-h-screen from-blue-50 to-white p-4 dark:bg-gray-950 dark:text-white">
         <div className="max-w-6xl mx-auto space-y-6">
           <div className="bg-white rounded-2xl shadow-lg overflow-hidden dark:bg-gray-800">
-          
             <div className="h-32 bg-[#fcb900] relative dark:bg-gray-900">
               <div className="absolute top-4 right-4 bg-white/90 rounded-lg px-4 py-2 shadow-sm dark:bg-gray-700 dark:text-white">
                 <span className="text-blue-600 font-medium dark:text-blue-300">
-                  Cliente desde:{" "}
-                  {new Date(usuariosC.fechaCreacion).toLocaleString("es-ES", {
-                    day: "2-digit",
-                    month: "long",
+                  Cliente desde:{' '}
+                  {new Date(usuariosC.fechaCreacion).toLocaleString('es-ES', {
+                    day: '2-digit',
+                    month: 'long',
                   })}
                 </span>
               </div>
             </div>
 
             <div className="px-4 sm:px-6 pb-6">
-           
               <div className="flex flex-col items-center -mt-16 space-y-6">
-              
-
                 <div className="relative">
                   <div className="w-28 h-28 md:w-32 md:h-32 rounded-full border-4 border-white bg-white overflow-hidden shadow-lg dark:border-gray-700 dark:bg-gray-700">
                     <img
                       src={
                         usuariosC.fotoPerfil ||
                         `https://ui-avatars.com/api/?name=${encodeURIComponent(
-                          usuariosC.nombre ? usuariosC.nombre.charAt(0) : "U"
+                          usuariosC.nombre ? usuariosC.nombre.charAt(0) : 'U'
                         )}&background=0D6EFD&color=fff`
                       }
                       alt="Foto de Perfil"
@@ -577,12 +546,12 @@ const PerfilUsuarioPrime = () => {
                     type="file"
                     ref={fileInputRef}
                     onChange={handleFileChange}
-                    style={{ display: "none" }}
+                    style={{ display: 'none' }}
                     accept="image/*"
                   />
                 </div>
                 {!usuariosC.fotoPerfil && (
-                   <motion.div
+                  <motion.div
                     className="flex items-center justify-center gap-2 p-3 mt-4 bg-teal-50 border border-teal-200 rounded-lg shadow-sm dark:bg-teal-900/30 dark:border-teal-700 max-w-md mx-auto"
                     initial={{ opacity: 0, scale: 0.9 }}
                     animate={{ opacity: 1, scale: 1 }}
@@ -595,7 +564,6 @@ const PerfilUsuarioPrime = () => {
                   </motion.div>
                 )}
 
-              
                 <div className="text-center">
                   <h2 className="text-xl md:text-2xl font-bold text-gray-800 dark:text-white">
                     {`${usuariosC.nombre} ${usuariosC.apellidoP}`}
@@ -630,17 +598,18 @@ const PerfilUsuarioPrime = () => {
           <div className="bg-white rounded-xl shadow-md p-2 overflow-x-auto dark:bg-gray-800">
             <div className="flex justify-start md:justify-center space-x-2">
               {[
-                { id: "personal", icon: User, label: "Datos Personales" },
-                { id: "Seguridad", icon: Shield, label: "Seguridad" },
-                { id: "direccion", icon: MapPin, label: "Dirección" },
+                { id: 'personal', icon: User, label: 'Datos Personales' },
+                { id: 'Seguridad', icon: Shield, label: 'Seguridad' },
+                { id: 'direccion', icon: MapPin, label: 'Dirección' },
               ].map((tab) => (
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}
-                  className={`flex items-center space-x-2 px-3 py-2 rounded-lg transition-all whitespace-nowrap ${activeTab === tab.id
-                      ? "bg-blue-600 text-white dark:bg-blue-700 dark:text-white"
-                      : "text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700"
-                    }`}
+                  className={`flex items-center space-x-2 px-3 py-2 rounded-lg transition-all whitespace-nowrap ${
+                    activeTab === tab.id
+                      ? 'bg-blue-600 text-white dark:bg-blue-700 dark:text-white'
+                      : 'text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700'
+                  }`}
                 >
                   <tab.icon className="w-4 h-4 md:w-5 md:h-5" />
                   <span className="text-sm md:text-base">{tab.label}</span>
@@ -650,30 +619,31 @@ const PerfilUsuarioPrime = () => {
           </div>
 
           <div className="bg-white rounded-2xl shadow-lg p-4 sm:p-6 dark:bg-gray-800">
-            {activeTab === "personal" && (
+            {activeTab === 'personal' && (
               <>
                 <div className=" dark:bg-gray-800 rounded-2xl  p-6">
                   <h2 className="text-xl font-semibold text-gray-800 dark:text-white mb-6">
                     Información Personal
                   </h2>
                   {!isProfileComplete && (
-                  <motion.div
-                    className="flex items-center gap-4 p-4 mb-6 bg-yellow-50 border-l-4 border-yellow-400 rounded-lg shadow-sm dark:bg-yellow-900/20 dark:border-yellow-500"
-                    initial={{ opacity: 0, y: -10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.5 }}
-                  >
-                    <Star className="w-8 h-8 text-yellow-500 dark:text-yellow-400 flex-shrink-0" />
-                    <div>
-                      <h3 className="font-bold text-yellow-800 dark:text-yellow-200">
-                        ¡Gana 50 Puntos Fiesta!
-                      </h3>
-                      <p className="text-sm text-yellow-700 dark:text-yellow-300">
-                        Completa todos tus datos personales para recibir tu recompensa.
-                      </p>
-                    </div>
-                  </motion.div>
-                )}
+                    <motion.div
+                      className="flex items-center gap-4 p-4 mb-6 bg-yellow-50 border-l-4 border-yellow-400 rounded-lg shadow-sm dark:bg-yellow-900/20 dark:border-yellow-500"
+                      initial={{ opacity: 0, y: -10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.5 }}
+                    >
+                      <Star className="w-8 h-8 text-yellow-500 dark:text-yellow-400 flex-shrink-0" />
+                      <div>
+                        <h3 className="font-bold text-yellow-800 dark:text-yellow-200">
+                          ¡Gana 50 Puntos Fiesta!
+                        </h3>
+                        <p className="text-sm text-yellow-700 dark:text-yellow-300">
+                          Completa todos tus datos personales para recibir tu
+                          recompensa.
+                        </p>
+                      </div>
+                    </motion.div>
+                  )}
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                     {fields.map((field, index) => (
                       <div
@@ -697,11 +667,11 @@ const PerfilUsuarioPrime = () => {
                               <EditableInput
                                 label={field.label}
                                 value={field.value}
-                                validate={field.validate || (() => "")}
+                                validate={field.validate || (() => '')}
                                 onSave={(newValue) =>
                                   saveField(field.field, newValue)
                                 }
-                                showHint={field.label === "Teléfono"}
+                                showHint={field.label === 'Teléfono'}
                                 hintMessage="Ingrese su número real para recuperación de cuenta."
                               />
                             </div>
@@ -749,7 +719,7 @@ const PerfilUsuarioPrime = () => {
               </motion.div>
             )}
 
-            {activeTab === "Seguridad" && (
+            {activeTab === 'Seguridad' && (
               <div className="p-4 sm:p-6 space-y-8 max-w-full overflow-hidden">
                 {/* 🔹 Título de la sección */}
                 <motion.h2
@@ -776,9 +746,9 @@ const PerfilUsuarioPrime = () => {
                   >
                     {bloqueado && (
                       <div className="bg-red-100 border border-red-300 text-red-800 p-4 rounded-md mb-6 text-center">
-                        <strong>🚨 Atención:</strong> Límite de cambios alcanzado. Espera hasta el próximo mes.
+                        <strong>🚨 Atención:</strong> Límite de cambios
+                        alcanzado. Espera hasta el próximo mes.
                       </div>
-
                     )}
 
                     <h3 className="text-xl font-bold text-gray-800 dark:text-gray-100 mb-3 flex items-center space-x-2">
@@ -819,12 +789,13 @@ const PerfilUsuarioPrime = () => {
                     </p>
                     <button
                       onClick={handleOpenMfaModal}
-                      className={`px-4 py-2 w-full sm:w-auto rounded-lg transition-all ${activo
-                          ? "bg-red-600 hover:bg-red-700"
-                          : "bg-blue-600 hover:bg-blue-700"
-                        } text-white`}
+                      className={`px-4 py-2 w-full sm:w-auto rounded-lg transition-all ${
+                        activo
+                          ? 'bg-red-600 hover:bg-red-700'
+                          : 'bg-blue-600 hover:bg-blue-700'
+                      } text-white`}
                     >
-                      {activo ? "Desactivar MFA" : "Activar MFA"}
+                      {activo ? 'Desactivar MFA' : 'Activar MFA'}
                     </button>
                   </motion.div>
                 </div>
@@ -877,11 +848,11 @@ const PerfilUsuarioPrime = () => {
                                   </p>
                                   <p className="text-sm text-gray-600 dark:text-gray-300 flex items-center space-x-2">
                                     <span className="text-blue-500 dark:text-blue-300">
-                                      <i className="fas fa-calendar-alt"></i>{" "}
+                                      <i className="fas fa-calendar-alt"></i>{' '}
                                       {/* Icono de calendario */}
                                     </span>
                                     <span>
-                                      Fecha de inicio:{" "}
+                                      Fecha de inicio:{' '}
                                       {formatDate(session.horaInicio)}
                                     </span>
                                   </p>
@@ -895,73 +866,71 @@ const PerfilUsuarioPrime = () => {
 
                   {sessions.filter((session) => !session.isCurrent).length >
                     0 && (
-                      <>
-                        <motion.h4
-                          className="text-xl font-semibold text-gray-800 dark:text-white mt-8 mb-4 text-center sm:text-left"
-                          initial={{ opacity: 0 }}
-                          animate={{ opacity: 1 }}
-                          transition={{ duration: 0.5 }}
-                        >
-                          🔄 Otras Sesiones Activas
-                        </motion.h4>
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                          {sessions
-                            .filter((session) => !session.isCurrent)
-                            .map((session, index) => (
-                              <motion.div
-                                key={`other-${index}`}
-                                className="flex items-center justify-between p-4 bg-gray-100 dark:bg-gray-800 
+                    <>
+                      <motion.h4
+                        className="text-xl font-semibold text-gray-800 dark:text-white mt-8 mb-4 text-center sm:text-left"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        transition={{ duration: 0.5 }}
+                      >
+                        🔄 Otras Sesiones Activas
+                      </motion.h4>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                        {sessions
+                          .filter((session) => !session.isCurrent)
+                          .map((session, index) => (
+                            <motion.div
+                              key={`other-${index}`}
+                              className="flex items-center justify-between p-4 bg-gray-100 dark:bg-gray-800 
                  rounded-lg shadow-md hover:shadow-lg transition-all overflow-hidden 
                  border border-gray-300 dark:border-gray-700"
-                                initial={{ opacity: 0, scale: 0.95 }}
-                                animate={{ opacity: 1, scale: 1 }}
-                                transition={{ duration: 0.3 }}
-                              >
-                                <div className="flex items-center space-x-3">
-                                  <div className="text-blue-600 dark:text-blue-300 text-3xl">
-                                    {getDeviceIcon(session.tipoDispositivo)}
-                                  </div>
-                                  <div>
-                                    <p className="text-lg font-semibold text-gray-900 dark:text-gray-100">
-                                      {session.tipoDispositivo}
-                                    </p>
-                                    <p className="text-sm text-gray-600 dark:text-gray-300 flex items-center space-x-2">
-                                      <span className="text-blue-500 dark:text-blue-300">
-                                        <i className="fas fa-calendar-alt"></i>{" "}
-                                      </span>
-                                      <span>
-                                        Fecha de inicio:{" "}
-                                        {formatDate(session.horaInicio)}
-                                      </span>
-                                    </p>
-                                  </div>
+                              initial={{ opacity: 0, scale: 0.95 }}
+                              animate={{ opacity: 1, scale: 1 }}
+                              transition={{ duration: 0.3 }}
+                            >
+                              <div className="flex items-center space-x-3">
+                                <div className="text-blue-600 dark:text-blue-300 text-3xl">
+                                  {getDeviceIcon(session.tipoDispositivo)}
                                 </div>
-                              </motion.div>
-                            ))}
-                        </div>
-                      </>
-                    )}
+                                <div>
+                                  <p className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+                                    {session.tipoDispositivo}
+                                  </p>
+                                  <p className="text-sm text-gray-600 dark:text-gray-300 flex items-center space-x-2">
+                                    <span className="text-blue-500 dark:text-blue-300">
+                                      <i className="fas fa-calendar-alt"></i>{' '}
+                                    </span>
+                                    <span>
+                                      Fecha de inicio:{' '}
+                                      {formatDate(session.horaInicio)}
+                                    </span>
+                                  </p>
+                                </div>
+                              </div>
+                            </motion.div>
+                          ))}
+                      </div>
+                    </>
+                  )}
 
                   {/* Botón para cerrar otras sesiones */}
                   {sessions.filter((session) => !session.isCurrent).length >
                     0 && (
-                      <motion.button
-                        onClick={closeAllSessions}
-                        className="mt-6 px-6 py-3 w-full sm:w-auto bg-red-600 text-white rounded-lg hover:bg-red-700 transition-all transform hover:scale-105 flex items-center justify-center space-x-2"
-                        whileHover={{ scale: 1.05 }}
-                        whileTap={{ scale: 0.95 }}
-                      >
-                        <LogOut className="w-5 h-5" />
-                        <span>Cerrar otras sesiones</span>
-                      </motion.button>
-                    )}
+                    <motion.button
+                      onClick={closeAllSessions}
+                      className="mt-6 px-6 py-3 w-full sm:w-auto bg-red-600 text-white rounded-lg hover:bg-red-700 transition-all transform hover:scale-105 flex items-center justify-center space-x-2"
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                    >
+                      <LogOut className="w-5 h-5" />
+                      <span>Cerrar otras sesiones</span>
+                    </motion.button>
+                  )}
                 </motion.div>
               </div>
             )}
 
-
-
-            {activeTab === "historial" && (
+            {activeTab === 'historial' && (
               <div className="space-y-6">
                 <h3 className="text-lg md:text-xl font-semibold text-gray-800 mb-4 dark:text-white">
                   Historial de Pedidos
@@ -969,16 +938,16 @@ const PerfilUsuarioPrime = () => {
                 <div className="space-y-4">
                   {[
                     {
-                      producto: "Carpa 6x6m",
+                      producto: 'Carpa 6x6m',
                       cantidad: 1,
-                      fecha: "15/01/2024",
-                      total: "$1,200",
+                      fecha: '15/01/2024',
+                      total: '$1,200',
                     },
                     {
-                      producto: "Mesas Redondas",
+                      producto: 'Mesas Redondas',
                       cantidad: 8,
-                      fecha: "10/01/2024",
-                      total: "$960",
+                      fecha: '10/01/2024',
+                      total: '$960',
                     },
                   ].map((historial, index) => (
                     <div
@@ -1009,11 +978,9 @@ const PerfilUsuarioPrime = () => {
               </div>
             )}
 
-            {activeTab === "direccion" && (
+            {activeTab === 'direccion' && (
               <div className="space-y-6">
-
-                <AddressBook  idUsuarios={usuariosC.idUsuarios}/>
-
+                <AddressBook idUsuarios={usuariosC.idUsuarios} />
               </div>
             )}
           </div>

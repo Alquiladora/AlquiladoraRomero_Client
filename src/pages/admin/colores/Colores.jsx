@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from "react";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import React, { useState, useEffect } from 'react';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faPlus,
   faEdit,
@@ -10,16 +10,15 @@ import {
   faSpinner,
   faChevronLeft,
   faChevronRight,
-} from "@fortawesome/free-solid-svg-icons";
-import api from "../../../utils/AxiosConfig";
-import { useAuth } from "../../../hooks/ContextAuth";
-import { toast } from "react-toastify";
-
+} from '@fortawesome/free-solid-svg-icons';
+import api from '../../../utils/AxiosConfig';
+import { useAuth } from '../../../hooks/ContextAuth';
+import { toast } from 'react-toastify';
 
 const ColorManager = () => {
   const { csrfToken } = useAuth();
   const [colors, setColors] = useState([]);
-  const [newColor, setNewColor] = useState({ name: "", hex: "#000000" });
+  const [newColor, setNewColor] = useState({ name: '', hex: '#000000' });
   const [editingColor, setEditingColor] = useState(null);
   const [isAdding, setIsAdding] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -42,16 +41,17 @@ const ColorManager = () => {
         if (Array.isArray(response.data.data)) {
           setColors(response.data.data);
         } else {
-          toast.error("Los datos recibidos no son válidos.");
+          toast.error('Los datos recibidos no son válidos.');
           setColors([]);
         }
         // eslint-disable-next-line no-useless-escape
       } else {
-       console.log("Datos de error")
+        console.log('Datos de error');
       }
     } catch (err) {
-      toast.error("Error al conectar con el servidor. Por favor, intenta de nuevo.");
-      
+      toast.error(
+        'Error al conectar con el servidor. Por favor, intenta de nuevo.'
+      );
     } finally {
       setLoading(false);
     }
@@ -69,7 +69,7 @@ const ColorManager = () => {
   const handleAddColor = async (e) => {
     e.preventDefault();
     if (!newColor.name || !newColor.hex) {
-      toast.error("Por favor, completa todos los campos.");
+      toast.error('Por favor, completa todos los campos.');
       return;
     }
 
@@ -81,36 +81,39 @@ const ColorManager = () => {
         { color: newColor.name, codigoH: newColor.hex },
         {
           withCredentials: true,
-          headers: { "X-CSRF-Token": csrfToken },
+          headers: { 'X-CSRF-Token': csrfToken },
         }
       );
 
       if (response.data.success) {
         setColors([...colors, response.data.data]);
-        setNewColor({ name: "", hex: "#000000" });
+        setNewColor({ name: '', hex: '#000000' });
         setIsAdding(false);
         // Reset to the last page if a new color is added
         setCurrentPage(Math.ceil((colors.length + 1) / colorsPerPage));
       } else {
-          toast.error(response.data.message || "Error al agregar el color.");
+        toast.error(response.data.message || 'Error al agregar el color.');
       }
     } catch (err) {
-         toast.error("Error al agregar el color. Por favor, intenta de nuevo.");
-     
+      toast.error('Error al agregar el color. Por favor, intenta de nuevo.');
     } finally {
       setLoading(false);
     }
   };
 
   const handleEditColor = (color) => {
-    setEditingColor({ id: color.idColores, name: color.color, hex: color.codigoH || "#000000" });
+    setEditingColor({
+      id: color.idColores,
+      name: color.color,
+      hex: color.codigoH || '#000000',
+    });
     setIsAdding(false);
   };
 
   const handleSaveEdit = async (e) => {
     e.preventDefault();
     if (!editingColor.name || !editingColor.hex) {
-       toast.error("Por favor, completa todos los campos.");
+      toast.error('Por favor, completa todos los campos.');
       return;
     }
 
@@ -122,7 +125,7 @@ const ColorManager = () => {
         { color: editingColor.name, codigoH: editingColor.hex },
         {
           withCredentials: true,
-          headers: { "X-CSRF-Token": csrfToken },
+          headers: { 'X-CSRF-Token': csrfToken },
         }
       );
 
@@ -134,11 +137,10 @@ const ColorManager = () => {
         );
         setEditingColor(null);
       } else {
-           toast.error(response.data.message || "Error al actualizar el color.");
+        toast.error(response.data.message || 'Error al actualizar el color.');
       }
     } catch (err) {
-        toast.error("Error al actualizar el color. Por favor, intenta de nuevo.");
-     
+      toast.error('Error al actualizar el color. Por favor, intenta de nuevo.');
     } finally {
       setLoading(false);
     }
@@ -149,40 +151,40 @@ const ColorManager = () => {
     setError(null);
   };
 
-
   const handleDeleteColor = async (id) => {
-    if (!window.confirm("¿Estás seguro de que deseas eliminar este color?")) {
+    if (!window.confirm('¿Estás seguro de que deseas eliminar este color?')) {
       return;
     }
 
     setLoading(true);
-   
+
     try {
       const response = await api.delete(`api/colores/colores/${id}`, {
         withCredentials: true,
-        headers: { "X-CSRF-Token": csrfToken },
+        headers: { 'X-CSRF-Token': csrfToken },
       });
 
       if (response.data.success) {
-         toast.success("Color eliminado exitosamente.");
+        toast.success('Color eliminado exitosamente.');
         const updatedColors = colors.filter((color) => color.idColores !== id);
         setColors(updatedColors);
-      
+
         const totalPages = Math.ceil(updatedColors.length / colorsPerPage);
         if (currentPage > totalPages && totalPages > 0) {
           setCurrentPage(totalPages);
         }
       } else {
-          toast.error(response.data.message || "Error al eliminar el color.");
+        toast.error(response.data.message || 'Error al eliminar el color.');
       }
     } catch (err) {
-         const errorMessage = err.response?.data?.message || "Ocurrió un error inesperado. Intenta de nuevo.";
-        toast.error(errorMessage);
+      const errorMessage =
+        err.response?.data?.message ||
+        'Ocurrió un error inesperado. Intenta de nuevo.';
+      toast.error(errorMessage);
     } finally {
       setLoading(false);
     }
   };
-
 
   const totalPages = Math.ceil(colors.length / colorsPerPage);
   const indexOfLastColor = currentPage * colorsPerPage;
@@ -191,54 +193,58 @@ const ColorManager = () => {
 
   const handlePageChange = (pageNumber) => {
     setCurrentPage(pageNumber);
-    window.scrollTo({ top: 0, behavior: "smooth" });
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   return (
     <div className="p-4 sm:p-6 lg:p-8 min-h-screen  from-gray-50 to-gray-200 dark:from-gray-800 dark:to-gray-900 dark:text-white">
-    
       <h1 className="text-3xl sm:text-4xl font-extrabold mb-10 text-gray-900 dark:text-white flex items-center justify-center sm:justify-start">
         <FontAwesomeIcon icon={faPalette} className="mr-3 text-indigo-500" />
         Gestión de Colores
       </h1>
 
-   
       {error && (
         <div className="mb-6 p-4 bg-red-50 dark:bg-red-900/50 text-red-700 dark:text-red-200 rounded-xl shadow-md border border-red-200 dark:border-red-700 animate-fade-in">
           {error}
         </div>
       )}
 
-    
       {loading && (
         <div className="mb-6 flex justify-center">
-          <FontAwesomeIcon icon={faSpinner} className="text-indigo-500 text-3xl animate-spin" />
+          <FontAwesomeIcon
+            icon={faSpinner}
+            className="text-indigo-500 text-3xl animate-spin"
+          />
         </div>
       )}
 
-   
       <div className="mb-8 flex justify-center sm:justify-start">
         <button
           onClick={() => {
             setIsAdding(!isAdding);
             setEditingColor(null);
-            setNewColor({ name: "", hex: "#000000" });
+            setNewColor({ name: '', hex: '#000000' });
             setError(null);
           }}
           className="px-5 py-2.5 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 transition-all duration-300 flex items-center shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed transform hover:scale-105"
           disabled={loading}
         >
-          <FontAwesomeIcon icon={isAdding ? faTimes : faPlus} className="mr-2" />
-          {isAdding ? "Cancelar" : "Agregar Color"}
+          <FontAwesomeIcon
+            icon={isAdding ? faTimes : faPlus}
+            className="mr-2"
+          />
+          {isAdding ? 'Cancelar' : 'Agregar Color'}
         </button>
       </div>
 
-    
       {(isAdding || editingColor) && (
         <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 sm:p-8 mb-8 shadow-2xl border border-gray-200 dark:border-gray-700 animate-slide-down">
           <h2 className="text-xl sm:text-2xl font-semibold text-gray-900 dark:text-white mb-6 flex items-center">
-            <FontAwesomeIcon icon={editingColor ? faEdit : faPlus} className="mr-3 text-indigo-500" />
-            {editingColor ? "Editar Color" : "Agregar Nuevo Color"}
+            <FontAwesomeIcon
+              icon={editingColor ? faEdit : faPlus}
+              className="mr-3 text-indigo-500"
+            />
+            {editingColor ? 'Editar Color' : 'Agregar Nuevo Color'}
           </h2>
           <form onSubmit={editingColor ? handleSaveEdit : handleAddColor}>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
@@ -288,11 +294,13 @@ const ColorManager = () => {
                 disabled={loading}
               >
                 <FontAwesomeIcon icon={faSave} className="mr-2" />
-                {editingColor ? "Guardar Cambios" : "Agregar Color"}
+                {editingColor ? 'Guardar Cambios' : 'Agregar Color'}
               </button>
               <button
                 type="button"
-                onClick={editingColor ? handleCancelEdit : () => setIsAdding(false)}
+                onClick={
+                  editingColor ? handleCancelEdit : () => setIsAdding(false)
+                }
                 className="px-5 py-2.5 bg-gray-500 text-white rounded-xl hover:bg-gray-600 transition-all duration-300 flex items-center shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed transform hover:scale-105"
                 disabled={loading}
               >
@@ -318,14 +326,14 @@ const ColorManager = () => {
               <div className="flex items-center space-x-4">
                 <div
                   className="w-16 h-16 rounded-lg border border-gray-300 dark:border-gray-600"
-                  style={{ backgroundColor: color.codigoH || "#000000" }}
+                  style={{ backgroundColor: color.codigoH || '#000000' }}
                 ></div>
                 <div className="flex-1">
                   <h3 className="text-lg font-semibold text-gray-900 dark:text-white truncate">
                     {color.color}
                   </h3>
                   <p className="text-sm text-gray-500 dark:text-gray-400">
-                    {color.codigoH || "Sin código"}
+                    {color.codigoH || 'Sin código'}
                   </p>
                 </div>
               </div>
@@ -364,19 +372,21 @@ const ColorManager = () => {
             Anterior
           </button>
           <div className="flex space-x-2">
-            {Array.from({ length: totalPages }, (_, index) => index + 1).map((page) => (
-              <button
-                key={page}
-                onClick={() => handlePageChange(page)}
-                className={`px-4 py-2 rounded-xl transition-all duration-300 shadow-md hover:shadow-lg ${
-                  currentPage === page
-                    ? "bg-indigo-600 text-white"
-                    : "bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-300 dark:hover:bg-gray-600"
-                }`}
-              >
-                {page}
-              </button>
-            ))}
+            {Array.from({ length: totalPages }, (_, index) => index + 1).map(
+              (page) => (
+                <button
+                  key={page}
+                  onClick={() => handlePageChange(page)}
+                  className={`px-4 py-2 rounded-xl transition-all duration-300 shadow-md hover:shadow-lg ${
+                    currentPage === page
+                      ? 'bg-indigo-600 text-white'
+                      : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-300 dark:hover:bg-gray-600'
+                  }`}
+                >
+                  {page}
+                </button>
+              )
+            )}
           </div>
           <button
             onClick={() => handlePageChange(currentPage + 1)}

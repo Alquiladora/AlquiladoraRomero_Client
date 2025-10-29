@@ -1,9 +1,9 @@
-import React, { useState, useEffect, memo } from "react";
-import api from "../../../../utils/AxiosConfig";
-import { useAuth } from "../../../../hooks/ContextAuth";
-import { toast } from "react-toastify";
-import { motion, AnimatePresence } from "framer-motion";
-import { Pencil, Save, X, ChevronDown, Home, Loader } from "lucide-react";
+import React, { useState, useEffect, memo } from 'react';
+import api from '../../../../utils/AxiosConfig';
+import { useAuth } from '../../../../hooks/ContextAuth';
+import { toast } from 'react-toastify';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Pencil, Save, X, ChevronDown, Home, Loader } from 'lucide-react';
 
 const AccordionSection = memo(function AccordionSection({
   title,
@@ -23,7 +23,7 @@ const AccordionSection = memo(function AccordionSection({
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.4, ease: "easeOut" }}
+      transition={{ duration: 0.4, ease: 'easeOut' }}
       className="mb-6 rounded-2xl shadow-md overflow-hidden border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800"
     >
       <button
@@ -35,9 +35,12 @@ const AccordionSection = memo(function AccordionSection({
         </h2>
         <motion.div
           animate={{ rotate: isOpen ? 180 : 0 }}
-          transition={{ duration: 0.3, ease: "easeInOut" }}
+          transition={{ duration: 0.3, ease: 'easeInOut' }}
         >
-          <ChevronDown size={20} className="sm:size-6 text-gray-500 dark:text-gray-400" />
+          <ChevronDown
+            size={20}
+            className="sm:size-6 text-gray-500 dark:text-gray-400"
+          />
         </motion.div>
       </button>
 
@@ -45,9 +48,9 @@ const AccordionSection = memo(function AccordionSection({
         {isOpen && (
           <motion.div
             initial={{ height: 0, opacity: 0 }}
-            animate={{ height: "auto", opacity: 1 }}
+            animate={{ height: 'auto', opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.4, ease: "easeInOut" }}
+            transition={{ duration: 0.4, ease: 'easeInOut' }}
             className="px-4 sm:px-6 pb-6"
           >
             {!isEditing ? (
@@ -117,10 +120,10 @@ const AccordionSection = memo(function AccordionSection({
 export default function SobreNosotros() {
   const [sections, setSections] = useState({
     id: null,
-    quienesSomos: "",
-    nuestraHistoria: "",
-    mision: "",
-    vision: "",
+    quienesSomos: '',
+    nuestraHistoria: '',
+    mision: '',
+    vision: '',
   });
   const [editing, setEditing] = useState({
     quienesSomos: false,
@@ -129,10 +132,10 @@ export default function SobreNosotros() {
     vision: false,
   });
   const [drafts, setDrafts] = useState({
-    quienesSomos: "",
-    nuestraHistoria: "",
-    mision: "",
-    vision: "",
+    quienesSomos: '',
+    nuestraHistoria: '',
+    mision: '',
+    vision: '',
   });
   const [openSection, setOpenSection] = useState(null);
   const [isUpdating, setIsUpdating] = useState(false);
@@ -142,25 +145,25 @@ export default function SobreNosotros() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const { data } = await api.get("/api/sobrenosotros", {
+        const { data } = await api.get('/api/sobrenosotros', {
           withCredentials: true,
         });
         setSections({
           id: data.id || null,
-          quienesSomos: data.quienesSomos || "",
-          nuestraHistoria: data.nuestraHistoria || "",
-          mision: data.mision || "",
-          vision: data.vision || "",
+          quienesSomos: data.quienesSomos || '',
+          nuestraHistoria: data.nuestraHistoria || '',
+          mision: data.mision || '',
+          vision: data.vision || '',
         });
         setDrafts({
-          quienesSomos: data.quienesSomos || "",
-          nuestraHistoria: data.nuestraHistoria || "",
-          mision: data.mision || "",
-          vision: data.vision || "",
+          quienesSomos: data.quienesSomos || '',
+          nuestraHistoria: data.nuestraHistoria || '',
+          mision: data.mision || '',
+          vision: data.vision || '',
         });
       } catch (error) {
-        console.error("Error al obtener datos:", error);
-        toast.error("Error al cargar la información");
+        console.error('Error al obtener datos:', error);
+        toast.error('Error al cargar la información');
       } finally {
         setLoading(false);
       }
@@ -169,36 +172,36 @@ export default function SobreNosotros() {
   }, []);
 
   const handleEdit = (key) => {
-    setDrafts((prev) => ({ ...prev, [key]: sections[key] || "" }));
+    setDrafts((prev) => ({ ...prev, [key]: sections[key] || '' }));
     setEditing((prev) => ({ ...prev, [key]: true }));
     setOpenSection(key);
   };
 
   const handleCancel = (key) => {
     setEditing((prev) => ({ ...prev, [key]: false }));
-    setDrafts((prev) => ({ ...prev, [key]: sections[key] || "" }));
-    setOpenSection(null); 
+    setDrafts((prev) => ({ ...prev, [key]: sections[key] || '' }));
+    setOpenSection(null);
   };
 
   const handleUpdate = async (key) => {
     const trimmedDraft = drafts[key]?.trim();
 
-
     if (!trimmedDraft || trimmedDraft.length < 6) {
-      toast.warning("El contenido debe tener al menos 6 caracteres");
+      toast.warning('El contenido debe tener al menos 6 caracteres');
       return;
     }
 
-
     const hasVowel = /[aeiouáéíóú]/i.test(trimmedDraft);
     if (!hasVowel) {
-      toast.warning("El contenido debe incluir al menos una vocal para ser significativo");
+      toast.warning(
+        'El contenido debe incluir al menos una vocal para ser significativo'
+      );
       return;
     }
 
     const isGibberish = /^[^aeiouáéíóú\s]{6,}$/i.test(trimmedDraft);
     if (isGibberish) {
-      toast.warning("El contenido no debe ser una secuencia sin sentido");
+      toast.warning('El contenido no debe ser una secuencia sin sentido');
       return;
     }
 
@@ -206,22 +209,18 @@ export default function SobreNosotros() {
 
     try {
       const updatedSections = { ...sections, [key]: trimmedDraft };
-      await api.put(
-        `/api/sobrenosotros/${sections.id || 1}`,
-        updatedSections,
-        {
-          withCredentials: true,
-          headers: { "X-CSRF-Token": csrfToken },
-        }
-      );
+      await api.put(`/api/sobrenosotros/${sections.id || 1}`, updatedSections, {
+        withCredentials: true,
+        headers: { 'X-CSRF-Token': csrfToken },
+      });
 
       setSections(updatedSections);
       setEditing((prev) => ({ ...prev, [key]: false }));
-      setOpenSection(null); 
-      toast.success("Información actualizada correctamente");
+      setOpenSection(null);
+      toast.success('Información actualizada correctamente');
     } catch (error) {
-      console.error("Error al actualizar:", error);
-      toast.error("No se pudo actualizar la información");
+      console.error('Error al actualizar:', error);
+      toast.error('No se pudo actualizar la información');
     } finally {
       setIsUpdating(false);
     }
@@ -236,7 +235,7 @@ export default function SobreNosotros() {
       <div className="flex items-center justify-center h-screen bg-gray-50 dark:bg-gray-900">
         <motion.div
           animate={{ rotate: 360 }}
-          transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+          transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
           className="w-12 h-12 border-4 border-yellow-500 border-t-transparent rounded-full"
         />
       </div>
@@ -244,10 +243,14 @@ export default function SobreNosotros() {
   }
 
   const sectionData = [
-    { key: "quienesSomos", title: "¿Quiénes Somos?", label: "quiénes somos" },
-    { key: "nuestraHistoria", title: "Nuestra Historia", label: "nuestra historia" },
-    { key: "mision", title: "Misión", label: "nuestra misión" },
-    { key: "vision", title: "Visión", label: "nuestra visión" },
+    { key: 'quienesSomos', title: '¿Quiénes Somos?', label: 'quiénes somos' },
+    {
+      key: 'nuestraHistoria',
+      title: 'Nuestra Historia',
+      label: 'nuestra historia',
+    },
+    { key: 'mision', title: 'Misión', label: 'nuestra misión' },
+    { key: 'vision', title: 'Visión', label: 'nuestra visión' },
   ];
 
   return (
@@ -255,7 +258,7 @@ export default function SobreNosotros() {
       <motion.div
         initial={{ opacity: 0, y: -30 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, ease: "easeOut" }}
+        transition={{ duration: 0.5, ease: 'easeOut' }}
         className="text-center mb-10 sm:mb-12"
       >
         <div className="inline-flex items-center justify-center w-12 h-12 sm:w-14 sm:h-14 mb-4 sm:mb-6 rounded-full bg-gradient-to-r from-yellow-400 to-yellow-600 shadow-lg">
@@ -281,7 +284,9 @@ export default function SobreNosotros() {
             onCancel={() => handleCancel(section.key)}
             onUpdate={() => handleUpdate(section.key)}
             draft={drafts[section.key]}
-            setDraft={(val) => setDrafts((prev) => ({ ...prev, [section.key]: val }))}
+            setDraft={(val) =>
+              setDrafts((prev) => ({ ...prev, [section.key]: val }))
+            }
             isOpen={openSection === section.key}
             toggleOpen={() => toggleSection(section.key)}
             isUpdating={isUpdating}

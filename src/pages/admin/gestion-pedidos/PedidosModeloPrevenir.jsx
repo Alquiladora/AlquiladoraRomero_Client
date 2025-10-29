@@ -1,9 +1,7 @@
-import React, { useState, useEffect } from "react";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import React, { useState, useEffect } from 'react';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
- 
   faSearch,
- 
   faChevronLeft,
   faChevronRight,
   faExclamationTriangle,
@@ -14,22 +12,21 @@ import {
   faSort,
   faSortUp,
   faSortDown,
-} from "@fortawesome/free-solid-svg-icons";
-import { toast } from "react-toastify";
-import api from "../../../utils/AxiosConfig";
-import { useAuth } from "../../../hooks/ContextAuth";
-import CustomLoading from "../../../components/spiner/SpinerGlobal";
+} from '@fortawesome/free-solid-svg-icons';
+import { toast } from 'react-toastify';
+import api from '../../../utils/AxiosConfig';
+import { useAuth } from '../../../hooks/ContextAuth';
+import CustomLoading from '../../../components/spiner/SpinerGlobal';
 
 // Componente para la barra de probabilidad
 const ProbabilityBar = ({ probability }) => {
-
-    console.log("dATOS RECIBIDOS DE PROBABILIDAD", probability)
+  console.log('dATOS RECIBIDOS DE PROBABILIDAD', probability);
   const percentage = (probability * 100).toFixed(2);
-  let barColor = "bg-green-500";
+  let barColor = 'bg-green-500';
   if (probability > 0.85) {
-    barColor = "bg-red-500";
+    barColor = 'bg-red-500';
   } else {
-    barColor = "bg-yellow-500";
+    barColor = 'bg-yellow-500';
   }
 
   return (
@@ -48,9 +45,12 @@ const ProbabilityBar = ({ probability }) => {
 const PedidosConPrediccion = () => {
   const [pedidos, setPedidos] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [searchTerm, setSearchTerm] = useState("");
+  const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
-  const [sortConfig, setSortConfig] = useState({ key: 'probabilidad', direction: 'descending' });
+  const [sortConfig, setSortConfig] = useState({
+    key: 'probabilidad',
+    direction: 'descending',
+  });
   const { csrfToken } = useAuth();
   const ordersPerPage = 10;
 
@@ -58,20 +58,23 @@ const PedidosConPrediccion = () => {
     const fetchPedidosConPrediccion = async () => {
       try {
         setLoading(true);
-        const response = await api.get("/api/pedidos/predecir-pedidos-activos", {
-          headers: { "X-CSRF-Token": csrfToken },
-          withCredentials: true,
-        });
+        const response = await api.get(
+          '/api/pedidos/predecir-pedidos-activos',
+          {
+            headers: { 'X-CSRF-Token': csrfToken },
+            withCredentials: true,
+          }
+        );
         const result = response.data;
-        console.log("rESULATFF", response)
+        console.log('rESULATFF', response);
 
         if (result.success) {
           setPedidos(result.data);
         } else {
-          toast.error("Error al cargar las predicciones de los pedidos");
+          toast.error('Error al cargar las predicciones de los pedidos');
         }
       } catch (error) {
-        toast.error("Error de conexión al servidor de predicciones");
+        toast.error('Error de conexión al servidor de predicciones');
         console.error(error);
       } finally {
         setLoading(false);
@@ -112,7 +115,6 @@ const PedidosConPrediccion = () => {
     }
     return sortableItems;
   }, [pedidos, sortConfig]);
-
 
   const filteredPedidos = sortedPedidos.filter((pedido) => {
     const search = searchTerm.toLowerCase();
@@ -159,10 +161,7 @@ const PedidosConPrediccion = () => {
           <>
             <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-md mb-6">
               <div className="flex items-center space-x-3 w-full">
-                <FontAwesomeIcon
-                  icon={faSearch}
-                  className="text-purple-500"
-                />
+                <FontAwesomeIcon icon={faSearch} className="text-purple-500" />
                 <input
                   type="text"
                   placeholder="Buscar por ID, cliente o estado..."
@@ -189,13 +188,16 @@ const PedidosConPrediccion = () => {
                     <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-tight text-white">
                       Estado Actual
                     </th>
-                    <th 
+                    <th
                       className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-tight text-white cursor-pointer"
                       onClick={() => handleSort('probabilidad')}
                     >
                       <FontAwesomeIcon icon={faPercentage} className="mr-1" />
                       Prob. Cancelación
-                      <FontAwesomeIcon icon={getSortIcon('probabilidad')} className="ml-2" />
+                      <FontAwesomeIcon
+                        icon={getSortIcon('probabilidad')}
+                        className="ml-2"
+                      />
                     </th>
                     <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-tight text-white">
                       Predicción
@@ -205,9 +207,10 @@ const PedidosConPrediccion = () => {
                 <tbody>
                   {currentPedidos.map((pedido, index) => {
                     const prob = pedido.prediccion?.probabilidad_de_cancelacion;
-                    let rowClass = "";
-                    if (prob > 0.75) rowClass = "bg-red-100 dark:bg-red-900/30";
-                    else if (prob > 0.4) rowClass = "bg-yellow-100 dark:bg-yellow-900/30";
+                    let rowClass = '';
+                    if (prob > 0.75) rowClass = 'bg-red-100 dark:bg-red-900/30';
+                    else if (prob > 0.4)
+                      rowClass = 'bg-yellow-100 dark:bg-yellow-900/30';
 
                     return (
                       <tr
@@ -218,7 +221,7 @@ const PedidosConPrediccion = () => {
                           {pedido.idRastreo}
                         </td>
                         <td className="px-4 py-3 text-sm font-medium text-gray-800 dark:text-gray-200">
-                          {pedido.nombreCliente || "No especificado"}
+                          {pedido.nombreCliente || 'No especificado'}
                         </td>
                         <td className="px-4 py-3 text-sm">
                           <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-semibold shadow-sm bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300">
@@ -229,23 +232,37 @@ const PedidosConPrediccion = () => {
                           {pedido.prediccion && !pedido.prediccion.error ? (
                             <ProbabilityBar probability={prob} />
                           ) : (
-                            <span className="text-xs text-gray-500 italic">No disponible</span>
+                            <span className="text-xs text-gray-500 italic">
+                              No disponible
+                            </span>
                           )}
                         </td>
                         <td className="px-4 py-3 text-sm">
                           {pedido.prediccion && !pedido.prediccion.error ? (
-                            <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-semibold ${
-                                prob > 0.5 
-                                ? "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300" 
-                                : "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300"
-                            }`}>
-                              <FontAwesomeIcon icon={prob > 0.5 ? faExclamationTriangle : faCheckCircle} className="mr-1" />
+                            <span
+                              className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-semibold ${
+                                prob > 0.5
+                                  ? 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300'
+                                  : 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300'
+                              }`}
+                            >
+                              <FontAwesomeIcon
+                                icon={
+                                  prob > 0.5
+                                    ? faExclamationTriangle
+                                    : faCheckCircle
+                                }
+                                className="mr-1"
+                              />
                               {pedido.prediccion.prediccion_texto}
                             </span>
                           ) : (
                             <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-semibold bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-300">
-                               <FontAwesomeIcon icon={faQuestionCircle} className="mr-1" />
-                               Error
+                              <FontAwesomeIcon
+                                icon={faQuestionCircle}
+                                className="mr-1"
+                              />
+                              Error
                             </span>
                           )}
                         </td>
@@ -258,7 +275,9 @@ const PedidosConPrediccion = () => {
 
             <div className="flex flex-col sm:flex-row justify-between items-center mt-6 gap-4">
               <p className="text-sm text-gray-600 dark:text-gray-300">
-                Mostrando {indexOfFirstOrder + 1} - {Math.min(indexOfLastOrder, filteredPedidos.length)} de {filteredPedidos.length} pedidos
+                Mostrando {indexOfFirstOrder + 1} -{' '}
+                {Math.min(indexOfLastOrder, filteredPedidos.length)} de{' '}
+                {filteredPedidos.length} pedidos
               </p>
               <div className="flex items-center space-x-2">
                 <button
@@ -266,8 +285,8 @@ const PedidosConPrediccion = () => {
                   disabled={currentPage === 1}
                   className={`px-3 py-1 rounded-l-lg ${
                     currentPage === 1
-                      ? "bg-gray-300 text-gray-500 cursor-not-allowed dark:bg-gray-600"
-                      : "bg-purple-500 text-white hover:bg-purple-600 dark:hover:bg-purple-600 transition-all duration-200"
+                      ? 'bg-gray-300 text-gray-500 cursor-not-allowed dark:bg-gray-600'
+                      : 'bg-purple-500 text-white hover:bg-purple-600 dark:hover:bg-purple-600 transition-all duration-200'
                   }`}
                 >
                   <FontAwesomeIcon icon={faChevronLeft} />
@@ -280,8 +299,8 @@ const PedidosConPrediccion = () => {
                   disabled={currentPage === totalPages}
                   className={`px-3 py-1 rounded-r-lg ${
                     currentPage === totalPages
-                      ? "bg-gray-300 text-gray-500 cursor-not-allowed dark:bg-gray-600"
-                      : "bg-purple-500 text-white hover:bg-purple-600 dark:hover:bg-purple-600 transition-all duration-200"
+                      ? 'bg-gray-300 text-gray-500 cursor-not-allowed dark:bg-gray-600'
+                      : 'bg-purple-500 text-white hover:bg-purple-600 dark:hover:bg-purple-600 transition-all duration-200'
                   }`}
                 >
                   <FontAwesomeIcon icon={faChevronRight} />

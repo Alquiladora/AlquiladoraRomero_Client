@@ -1,9 +1,9 @@
-import { useState, useRef, useEffect } from "react";
-import { SearchIcon, XIcon } from "@heroicons/react/outline";
+import { useState, useRef, useEffect } from 'react';
+import { SearchIcon, XIcon } from '@heroicons/react/outline';
 
 const SearchBar = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const [searchTerm, setSearchTerm] = useState("");
+  const [searchTerm, setSearchTerm] = useState('');
   const [isFocused, setIsFocused] = useState(false);
   const inputRef = useRef(null);
   const mobileInputRef = useRef(null);
@@ -15,7 +15,7 @@ const SearchBar = () => {
   const handleSearch = (e) => {
     e.preventDefault();
     if (searchTerm.trim()) {
-      console.log("Buscando:", searchTerm);
+      console.log('Buscando:', searchTerm);
       // Aquí puedes agregar tu lógica de búsqueda
       // navigate(`/buscar?q=${encodeURIComponent(searchTerm.trim())}`);
       setIsOpen(false); // Cierra la búsqueda al enviar
@@ -23,7 +23,7 @@ const SearchBar = () => {
   };
 
   const handleClear = () => {
-    setSearchTerm("");
+    setSearchTerm('');
     if (inputRef.current) inputRef.current.focus();
     if (mobileInputRef.current) mobileInputRef.current.focus();
   };
@@ -37,17 +37,16 @@ const SearchBar = () => {
       }
     };
 
-    document.addEventListener("mousedown", handleClickOutside);
+    document.addEventListener('mousedown', handleClickOutside);
     return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener('mousedown', handleClickOutside);
     };
   }, [isOpen]);
 
-
   const handleKeyDown = (e) => {
-    if (e.key === "Escape") {
+    if (e.key === 'Escape') {
       setIsOpen(false);
-      setSearchTerm("");
+      setSearchTerm('');
     }
   };
 
@@ -63,17 +62,20 @@ const SearchBar = () => {
       {/* Campo de búsqueda en pantallas grandes */}
       <div className="hidden md:flex relative w-72 ml-4">
         <form onSubmit={handleSearch} className="w-full relative">
-          <div className={`
+          <div
+            className={`
             relative flex items-center w-full
-            ${isFocused || searchTerm ?
-              'bg-white dark:bg-gray-800 shadow-lg ring-2 ring-blue-500/50' :
-              'bg-gray-50 dark:bg-gray-900 hover:bg-gray-100 dark:hover:bg-gray-800'
+            ${
+              isFocused || searchTerm
+                ? 'bg-white dark:bg-gray-800 shadow-lg ring-2 ring-blue-500/50'
+                : 'bg-gray-50 dark:bg-gray-900 hover:bg-gray-100 dark:hover:bg-gray-800'
             }
             border border-gray-300 dark:border-gray-600
             hover:border-gray-400 dark:hover:border-gray-500
             focus-within:border-blue-500 dark:focus-within:border-blue-400
             rounded-full transition-all duration-300 ease-in-out
-          `}>
+          `}
+          >
             <input
               ref={inputRef}
               type="text"
@@ -109,9 +111,10 @@ const SearchBar = () => {
               type="submit"
               className={`absolute right-2 top-1/2 transform -translate-y-1/2 p-2 rounded-full
                          transition-all duration-300 ease-in-out
-                         ${isFocused || searchTerm ?
-                           'text-blue-500 dark:text-blue-400 hover:text-blue-600 dark:hover:text-blue-300 hover:bg-blue-50 dark:hover:bg-blue-900/30' :
-                           'text-gray-500 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-gray-100 dark:hover:bg-gray-700'
+                         ${
+                           isFocused || searchTerm
+                             ? 'text-blue-500 dark:text-blue-400 hover:text-blue-600 dark:hover:text-blue-300 hover:bg-blue-50 dark:hover:bg-blue-900/30'
+                             : 'text-gray-500 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-gray-100 dark:hover:bg-gray-700'
                          }`}
             >
               <SearchIcon className="w-5 h-5" />
@@ -152,7 +155,6 @@ const SearchBar = () => {
                            p-4 rounded-xl shadow-xl w-full relative backdrop-blur-sm
                            bg-white/95 dark:bg-gray-900/95 animate-slide-down"
               >
-
                 <button
                   onClick={toggleSearch}
                   className="absolute top-3 right-3 text-gray-500 dark:text-gray-400
@@ -165,17 +167,20 @@ const SearchBar = () => {
                 </button>
 
                 <form onSubmit={handleSearch} className="mt-2">
-                  <div className={`
+                  <div
+                    className={`
                     relative flex items-center
-                    ${isFocused || searchTerm ?
-                      'bg-white dark:bg-gray-800 shadow-md ring-2 ring-blue-500/50' :
-                      'bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700'
+                    ${
+                      isFocused || searchTerm
+                        ? 'bg-white dark:bg-gray-800 shadow-md ring-2 ring-blue-500/50'
+                        : 'bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700'
                     }
                     border border-gray-300 dark:border-gray-600
                     hover:border-gray-400 dark:hover:border-gray-500
                     focus-within:border-blue-500 dark:focus-within:border-blue-400
                     rounded-full transition-all duration-300 ease-in-out
-                  `}>
+                  `}
+                  >
                     <input
                       ref={mobileInputRef}
                       type="text"
@@ -209,9 +214,10 @@ const SearchBar = () => {
                       type="submit"
                       className={`absolute right-2 top-1/2 transform -translate-y-1/2 p-2 rounded-full
                                  transition-all duration-300 ease-in-out
-                                 ${isFocused || searchTerm ?
-                                   'text-blue-500 dark:text-blue-400 hover:text-blue-600 dark:hover:text-blue-300 hover:bg-blue-50 dark:hover:bg-blue-900/30' :
-                                   'text-gray-500 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-gray-100 dark:hover:bg-gray-700'
+                                 ${
+                                   isFocused || searchTerm
+                                     ? 'text-blue-500 dark:text-blue-400 hover:text-blue-600 dark:hover:text-blue-300 hover:bg-blue-50 dark:hover:bg-blue-900/30'
+                                     : 'text-gray-500 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-gray-100 dark:hover:bg-gray-700'
                                  }`}
                     >
                       <SearchIcon className="w-5 h-5" />
@@ -247,8 +253,12 @@ const SearchBar = () => {
       {/* Estilos personalizados para animaciones */}
       <style jsx>{`
         @keyframes fadeInFast {
-          from { opacity: 0; }
-          to { opacity: 1; }
+          from {
+            opacity: 0;
+          }
+          to {
+            opacity: 1;
+          }
         }
         @keyframes slideDown {
           0% {

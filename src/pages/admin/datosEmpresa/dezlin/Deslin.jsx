@@ -1,18 +1,11 @@
-
 import React, { useEffect, useState } from 'react';
 import { useFormik, FieldArray, FormikProvider } from 'formik';
 import * as yup from 'yup';
 
-import {
-  Box,
-  CircularProgress,
-  Alert,
-} from '@mui/material';
+import { Box, CircularProgress, Alert } from '@mui/material';
 import api from '../../../../utils/AxiosConfig';
 import { useAuth } from '../../../../hooks/ContextAuth';
-import { toast } from "react-toastify";
-
-
+import { toast } from 'react-toastify';
 
 // Función para obtener la fecha actual en México
 const getMexicoDate = () => {
@@ -33,7 +26,10 @@ const getMexicoDate = () => {
 
 // Validaciones con Yup
 const validationSchema = yup.object().shape({
-  titulo: yup.string().required('El título es obligatorio').max(255, 'Máximo 255 caracteres'),
+  titulo: yup
+    .string()
+    .required('El título es obligatorio')
+    .max(255, 'Máximo 255 caracteres'),
   contenido: yup.string().required('El contenido es obligatorio'),
   fechaVigencia: yup
     .date()
@@ -44,13 +40,15 @@ const validationSchema = yup.object().shape({
     .of(
       yup.object().shape({
         titulo: yup.string().required('El título de la sección es obligatorio'),
-        contenido: yup.string().required('El contenido de la sección es obligatorio'),
+        contenido: yup
+          .string()
+          .required('El contenido de la sección es obligatorio'),
       })
     )
     .min(1, 'Debe haber al menos una sección'),
 });
 
-const DeslindeLegal = ({ onNavigate}) => {
+const DeslindeLegal = ({ onNavigate }) => {
   const [documentos, setDocumentos] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -58,21 +56,16 @@ const DeslindeLegal = ({ onNavigate}) => {
   const [currentVersion, setCurrentVersion] = useState(null);
   const [page, setPage] = useState(0);
   const [rowsPerPage] = useState(5);
-   const {  csrfToken } = useAuth();
-
+  const { csrfToken } = useAuth();
 
   useEffect(() => {
-  
     fetchDocumentos();
-   
   }, []);
-
-
 
   // Función para obtener y procesar los documentos
   const fetchDocumentos = async () => {
     try {
-      const response = await api.get("/api/deslin", { withCredentials: true });
+      const response = await api.get('/api/deslin', { withCredentials: true });
 
       const parsedData = response.data.map((documento) => {
         const originalDate = documento.fechaVigencia
@@ -124,12 +117,21 @@ const DeslindeLegal = ({ onNavigate}) => {
     },
   });
 
-  const { values, errors, touched, handleChange, handleSubmit, handleReset, setFieldValue, setFieldTouched } = formik;
+  const {
+    values,
+    errors,
+    touched,
+    handleChange,
+    handleSubmit,
+    handleReset,
+    setFieldValue,
+    setFieldTouched,
+  } = formik;
 
   // Función para crear un nuevo documento
   const createDocumento = async (data) => {
     try {
-      await api.post("/api/deslin", data, {
+      await api.post('/api/deslin', data, {
         headers: { 'X-CSRF-Token': csrfToken },
         withCredentials: true,
       });
@@ -148,38 +150,43 @@ const DeslindeLegal = ({ onNavigate}) => {
       });
       toast.success('Se creó una nueva versión del documento');
     } catch (error) {
-     toast.error( 'No se pudo crear la nueva versión');
+      toast.error('No se pudo crear la nueva versión');
     }
   };
 
   // Función para eliminar un documento
-  const  deleteDeslinde = async (id) => {
+  const deleteDeslinde = async (id) => {
     const confirmDeletion = window.confirm(
-        "Esta acción marcará el deslinde como eliminada. ¿Desea continuar?"
-      );
-      if (confirmDeletion) {
-        try {
-          await api.delete(`/api/deslin/${id}`, {
-            headers: { 'X-CSRF-Token': csrfToken },
-            withCredentials: true,
-          });
-          toast.success("Deslinde eliminada correctamente");
-          fetchDocumentos();
-        } catch (error) {
-          console.error("Error al eliminar el deslinde:", error);
-          toast.error("No se pudo eliminar el deslinde");
-        }
+      'Esta acción marcará el deslinde como eliminada. ¿Desea continuar?'
+    );
+    if (confirmDeletion) {
+      try {
+        await api.delete(`/api/deslin/${id}`, {
+          headers: { 'X-CSRF-Token': csrfToken },
+          withCredentials: true,
+        });
+        toast.success('Deslinde eliminada correctamente');
+        fetchDocumentos();
+      } catch (error) {
+        console.error('Error al eliminar el deslinde:', error);
+        toast.error('No se pudo eliminar el deslinde');
       }
-    };
-    
+    }
+  };
 
   // Función para editar un documento
   const editDeslinde = (documento) => {
     setCurrentVersion(documento);
     setFieldValue('titulo', documento.titulo);
     setFieldValue('contenido', documento.contenido);
-    setFieldValue('fechaVigencia', documento.fechaVigencia ? documento.fechaVigencia.substring(0, 10) : '');
-    setFieldValue('secciones', documento.secciones || [{ titulo: '', contenido: '' }]);
+    setFieldValue(
+      'fechaVigencia',
+      documento.fechaVigencia ? documento.fechaVigencia.substring(0, 10) : ''
+    );
+    setFieldValue(
+      'secciones',
+      documento.secciones || [{ titulo: '', contenido: '' }]
+    );
     setEditMode(true);
   };
 
@@ -196,8 +203,6 @@ const DeslindeLegal = ({ onNavigate}) => {
     setPage(newPage);
   };
 
- 
-
   if (loading)
     return (
       <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
@@ -208,46 +213,54 @@ const DeslindeLegal = ({ onNavigate}) => {
   if (error) return <Alert severity="error">{error}</Alert>;
 
   // Datos a mostrar en la tabla según la paginación
-  const paginatedDeslindes = documentos.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
+  const paginatedDeslindes = documentos.slice(
+    page * rowsPerPage,
+    page * rowsPerPage + rowsPerPage
+  );
 
- 
   return (
     <div className="max-w-3xl mx-auto p-8 mt-8 bg-white dark:bg-gray-900 transition-colors duration-300">
-      
       <h1 className="text-3xl font-extrabold text-center mb-8 text-gray-800 dark:text-gray-100">
         Gestión de Deslinde de Responsabilidad
       </h1>
 
       <FormikProvider value={formik}>
         <form onSubmit={handleSubmitWrapper} className="space-y-8">
-          {Object.keys(errors).length > 0 && Object.keys(touched).length > 0 && (
-            <div className="bg-red-100 dark:bg-red-200 border border-red-400 text-red-700 dark:text-red-900 px-5 py-3 rounded shadow-sm transition-colors duration-300">
-              <p className="font-semibold">Por favor corrige los siguientes errores:</p>
-              <ul className="list-disc ml-6">
-                {Object.entries(errors).map(([key, value]) => {
-                  if (typeof value === 'string') {
-                    return <li key={key}>{value}</li>;
-                  } else if (Array.isArray(value)) {
-                    return value
-                      .map((err, index) => {
-                        const erroresSeccion = Object.values(err).filter(Boolean);
-                        return erroresSeccion.map((mensajeError, idx) => (
-                          <li key={`${key}-${index}-${idx}`}>
-                            {`Sección ${index + 1}: ${mensajeError}`}
-                          </li>
-                        ));
-                      })
-                      .flat();
-                  }
-                  return null;
-                })}
-              </ul>
-            </div>
-          )}
+          {Object.keys(errors).length > 0 &&
+            Object.keys(touched).length > 0 && (
+              <div className="bg-red-100 dark:bg-red-200 border border-red-400 text-red-700 dark:text-red-900 px-5 py-3 rounded shadow-sm transition-colors duration-300">
+                <p className="font-semibold">
+                  Por favor corrige los siguientes errores:
+                </p>
+                <ul className="list-disc ml-6">
+                  {Object.entries(errors).map(([key, value]) => {
+                    if (typeof value === 'string') {
+                      return <li key={key}>{value}</li>;
+                    } else if (Array.isArray(value)) {
+                      return value
+                        .map((err, index) => {
+                          const erroresSeccion =
+                            Object.values(err).filter(Boolean);
+                          return erroresSeccion.map((mensajeError, idx) => (
+                            <li key={`${key}-${index}-${idx}`}>
+                              {`Sección ${index + 1}: ${mensajeError}`}
+                            </li>
+                          ));
+                        })
+                        .flat();
+                    }
+                    return null;
+                  })}
+                </ul>
+              </div>
+            )}
 
           {/* Campo Título */}
           <div>
-            <label htmlFor="titulo" className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">
+            <label
+              htmlFor="titulo"
+              className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300"
+            >
               Título
             </label>
             <input
@@ -257,7 +270,9 @@ const DeslindeLegal = ({ onNavigate}) => {
               value={values.titulo}
               onChange={handleChange}
               className={`mt-1 w-full p-3 rounded-md border shadow-sm focus:outline-none focus:ring-2 focus:ring-yellow-500 transition-colors duration-300 bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 ${
-                touched.titulo && errors.titulo ? 'border-red-500' : 'border-gray-300 dark:border-gray-700'
+                touched.titulo && errors.titulo
+                  ? 'border-red-500'
+                  : 'border-gray-300 dark:border-gray-700'
               }`}
             />
             {touched.titulo && errors.titulo && (
@@ -266,7 +281,10 @@ const DeslindeLegal = ({ onNavigate}) => {
           </div>
 
           <div>
-            <label htmlFor="contenido" className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">
+            <label
+              htmlFor="contenido"
+              className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300"
+            >
               Contenido
             </label>
             <textarea
@@ -276,7 +294,9 @@ const DeslindeLegal = ({ onNavigate}) => {
               onChange={handleChange}
               rows={4}
               className={`mt-1 w-full p-3 rounded-md border shadow-sm focus:outline-none focus:ring-2 focus:ring-yellow-500 transition-colors duration-300 bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 ${
-                touched.contenido && errors.contenido ? 'border-red-500' : 'border-gray-300 dark:border-gray-700'
+                touched.contenido && errors.contenido
+                  ? 'border-red-500'
+                  : 'border-gray-300 dark:border-gray-700'
               }`}
             />
             {touched.contenido && errors.contenido && (
@@ -286,7 +306,10 @@ const DeslindeLegal = ({ onNavigate}) => {
 
           {/* Fecha de Vigencia */}
           <div>
-            <label htmlFor="fechaVigencia" className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">
+            <label
+              htmlFor="fechaVigencia"
+              className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300"
+            >
               Fecha de Vigencia
             </label>
             <input
@@ -297,11 +320,15 @@ const DeslindeLegal = ({ onNavigate}) => {
               onChange={handleChange}
               min={getMexicoDate()}
               className={`mt-1 w-full p-3 rounded-md border shadow-sm focus:outline-none focus:ring-2 focus:ring-yellow-500 transition-colors duration-300 bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 ${
-                touched.fechaVigencia && errors.fechaVigencia ? 'border-red-500' : 'border-gray-300 dark:border-gray-700'
+                touched.fechaVigencia && errors.fechaVigencia
+                  ? 'border-red-500'
+                  : 'border-gray-300 dark:border-gray-700'
               }`}
             />
             {touched.fechaVigencia && errors.fechaVigencia && (
-              <p className="text-red-500 text-sm mt-1">{errors.fechaVigencia}</p>
+              <p className="text-red-500 text-sm mt-1">
+                {errors.fechaVigencia}
+              </p>
             )}
           </div>
 
@@ -428,8 +455,8 @@ const DeslindeLegal = ({ onNavigate}) => {
               {formik.isSubmitting
                 ? 'Cargando...'
                 : editMode
-                ? 'Crear Nueva Versión'
-                : 'Agregar Deslinde'}
+                  ? 'Crear Nueva Versión'
+                  : 'Agregar Deslinde'}
             </button>
           </div>
         </form>
@@ -451,13 +478,19 @@ const DeslindeLegal = ({ onNavigate}) => {
           </thead>
           <tbody>
             {paginatedDeslindes.map((deslinde) => (
-              <tr key={deslinde.id} className="border-t transition-colors duration-300">
+              <tr
+                key={deslinde.id}
+                className="border-t transition-colors duration-300"
+              >
                 <td className="px-4 py-3">{deslinde.titulo}</td>
                 <td className="px-4 py-3">{deslinde.versio}</td>
                 <td className="px-4 py-3">
-                  {new Date(deslinde.fechaVigencia).toLocaleDateString('es-MX', {
-                    timeZone: 'America/Mexico_City',
-                  })}
+                  {new Date(deslinde.fechaVigencia).toLocaleDateString(
+                    'es-MX',
+                    {
+                      timeZone: 'America/Mexico_City',
+                    }
+                  )}
                 </td>
                 <td className="px-4 py-3">
                   <span
@@ -465,11 +498,12 @@ const DeslindeLegal = ({ onNavigate}) => {
                       deslinde.estado === 'vigente'
                         ? 'text-green-600'
                         : deslinde.estado === 'no vigente'
-                        ? 'text-orange-600'
-                        : 'text-red-600'
+                          ? 'text-orange-600'
+                          : 'text-red-600'
                     }`}
                   >
-                    {deslinde.estado.charAt(0).toUpperCase() + deslinde.estado.slice(1)}
+                    {deslinde.estado.charAt(0).toUpperCase() +
+                      deslinde.estado.slice(1)}
                   </span>
                 </td>
                 <td className="px-4 py-3">
@@ -530,6 +564,6 @@ const DeslindeLegal = ({ onNavigate}) => {
       </div>
     </div>
   );
-}
+};
 
 export default DeslindeLegal;

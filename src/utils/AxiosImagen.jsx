@@ -1,9 +1,9 @@
-import axios from "axios";
+import axios from 'axios';
 
 const apiImagen = axios.create({
-   baseURL:  "http://localhost:3001",  
-   // baseURL: "https://alquiladora-romero-server.onrender.com",
-  timeout: 60000, 
+  baseURL: 'http://localhost:3001',
+  // baseURL: "https://alquiladora-romero-server.onrender.com",
+  timeout: 60000,
   withCredentials: true,
 });
 

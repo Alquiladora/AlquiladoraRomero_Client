@@ -35,28 +35,63 @@ const NotaRomeroLimpia = () => {
         }}
       >
         {/* ENCABEZADO */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px' }}>
+        <div
+          style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            marginBottom: '10px',
+          }}
+        >
           <img src="/nota.png" alt="logo" style={{ width: '140px' }} />
           <div style={{ textAlign: 'right', fontSize: '11px' }}>
-            <div><strong>Tel:</strong> 771 203 0090</div>
-            <div><strong>Facebook:</strong> Alquiladora Romero</div>
-            <div style={{ color: 'red' }}><strong>N° _____</strong></div>
+            <div>
+              <strong>Tel:</strong> 771 203 0090
+            </div>
+            <div>
+              <strong>Facebook:</strong> Alquiladora Romero
+            </div>
+            <div style={{ color: 'red' }}>
+              <strong>N° _____</strong>
+            </div>
           </div>
         </div>
 
         {/* LE OFRECEMOS */}
-        <div style={{ fontSize: '12px', fontWeight: 'bold', marginBottom: '12px', textAlign: 'center' }}>
-          LE OFRECEMOS: SERVICIO DE BANQUETES · BASE DE MESEROS · CERVEZA · REFRESCO · HIELOS · MANTELERÍA · HIELERAS · LOZA · MOBILIARIO · COMALES ·<br />
-          CAFETERAS · PARRILLA PARA COCINAR · PARRILLA PARA TACOS · CHOCOLATERAS · ROCKOLAS · BRINCOLÍN · LONAS · TOLDOS · CARPAS · ESCALERAS · ANDAMIOS · ARREGLOS FLORALES
+        <div
+          style={{
+            fontSize: '12px',
+            fontWeight: 'bold',
+            marginBottom: '12px',
+            textAlign: 'center',
+          }}
+        >
+          LE OFRECEMOS: SERVICIO DE BANQUETES · BASE DE MESEROS · CERVEZA ·
+          REFRESCO · HIELOS · MANTELERÍA · HIELERAS · LOZA · MOBILIARIO ·
+          COMALES ·<br />
+          CAFETERAS · PARRILLA PARA COCINAR · PARRILLA PARA TACOS · CHOCOLATERAS
+          · ROCKOLAS · BRINCOLÍN · LONAS · TOLDOS · CARPAS · ESCALERAS ·
+          ANDAMIOS · ARREGLOS FLORALES
         </div>
 
         {/* DATOS CLIENTE, DOMICILIO, CIUDAD */}
         <div style={{ marginBottom: '6px' }}>
           <div style={{ display: 'flex' }}>
-            <div style={{ border: '1px solid black', padding: '3px', width: '70%' }}>
+            <div
+              style={{
+                border: '1px solid black',
+                padding: '3px',
+                width: '70%',
+              }}
+            >
               <strong>CLIENTE:</strong>
             </div>
-            <div style={{ border: '1px solid black', padding: '3px', width: '30%' }}>
+            <div
+              style={{
+                border: '1px solid black',
+                padding: '3px',
+                width: '30%',
+              }}
+            >
               <strong>TEL:</strong>
             </div>
           </div>
@@ -64,27 +99,83 @@ const NotaRomeroLimpia = () => {
 
         <div style={{ marginBottom: '6px' }}>
           <div style={{ display: 'flex' }}>
-            <div style={{ border: '1px solid black', padding: '3px', width: '70%' }}>
+            <div
+              style={{
+                border: '1px solid black',
+                padding: '3px',
+                width: '70%',
+              }}
+            >
               <strong>DOMICILIO:</strong>
             </div>
-            <div style={{ border: '1px solid black', padding: '3px', width: '30%' }}>
+            <div
+              style={{
+                border: '1px solid black',
+                padding: '3px',
+                width: '30%',
+              }}
+            >
               <strong>FECHA:</strong>
             </div>
           </div>
         </div>
 
-        <div style={{ border: '1px solid black', padding: '3px', marginBottom: '10px' }}>
+        <div
+          style={{
+            border: '1px solid black',
+            padding: '3px',
+            marginBottom: '10px',
+          }}
+        >
           <strong>CIUDAD:</strong>
         </div>
 
         {/* TABLA PRODUCTOS */}
-        <table style={{ width: '100%', borderCollapse: 'collapse', marginBottom: '16px' }}>
+        <table
+          style={{
+            width: '100%',
+            borderCollapse: 'collapse',
+            marginBottom: '16px',
+          }}
+        >
           <thead>
             <tr>
-              <th style={{ width: '10%', border: '1px solid black', padding: '4px' }}>Cantidad</th>
-              <th style={{ width: '55%', border: '1px solid black', padding: '4px' }}>Descripción</th>
-              <th style={{ width: '15%', border: '1px solid black', padding: '4px' }}>Precio Unit.</th>
-              <th style={{ width: '20%', border: '1px solid black', padding: '4px' }}>Importe</th>
+              <th
+                style={{
+                  width: '10%',
+                  border: '1px solid black',
+                  padding: '4px',
+                }}
+              >
+                Cantidad
+              </th>
+              <th
+                style={{
+                  width: '55%',
+                  border: '1px solid black',
+                  padding: '4px',
+                }}
+              >
+                Descripción
+              </th>
+              <th
+                style={{
+                  width: '15%',
+                  border: '1px solid black',
+                  padding: '4px',
+                }}
+              >
+                Precio Unit.
+              </th>
+              <th
+                style={{
+                  width: '20%',
+                  border: '1px solid black',
+                  padding: '4px',
+                }}
+              >
+                Importe
+              </th>
             </tr>
           </thead>
           <tbody>
@@ -100,26 +191,71 @@ const NotaRomeroLimpia = () => {
         </table>
 
         {/* IMPORTE CON LETRA + TOTALES */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px' }}>
-          <div style={{ border: '1px solid black', padding: '6px', fontSize: '11px', flex: 1, marginRight: '10px', height: '76px' }}>
+        <div
+          style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            marginBottom: '10px',
+          }}
+        >
+          <div
+            style={{
+              border: '1px solid black',
+              padding: '6px',
+              fontSize: '11px',
+              flex: 1,
+              marginRight: '10px',
+              height: '76px',
+            }}
+          >
             <strong>Importe con letra:</strong>
           </div>
           <table style={{ borderCollapse: 'collapse', height: '76px' }}>
             <tbody>
-              <tr><td style={{ border: '1px solid black', padding: '4px' }}><strong>Total</strong></td><td style={{ border: '1px solid black', padding: '4px' }}></td></tr>
-              <tr><td style={{ border: '1px solid black', padding: '4px' }}><strong>Anticipo</strong></td><td style={{ border: '1px solid black', padding: '4px' }}></td></tr>
-              <tr><td style={{ border: '1px solid black', padding: '4px' }}><strong>Resta</strong></td><td style={{ border: '1px solid black', padding: '4px' }}></td></tr>
+              <tr>
+                <td style={{ border: '1px solid black', padding: '4px' }}>
+                  <strong>Total</strong>
+                </td>
+                <td style={{ border: '1px solid black', padding: '4px' }}></td>
+              </tr>
+              <tr>
+                <td style={{ border: '1px solid black', padding: '4px' }}>
+                  <strong>Anticipo</strong>
+                </td>
+                <td style={{ border: '1px solid black', padding: '4px' }}></td>
+              </tr>
+              <tr>
+                <td style={{ border: '1px solid black', padding: '4px' }}>
+                  <strong>Resta</strong>
+                </td>
+                <td style={{ border: '1px solid black', padding: '4px' }}></td>
+              </tr>
             </tbody>
           </table>
         </div>
 
         {/* TEXTO LEGAL */}
-        <p style={{ fontSize: '12px', fontWeight: 'bold', textAlign: 'left', marginBottom: '30px' }}>
-          ME COMPROMETO A DEVOLVER EL MOBILIARIO AQUÍ DETALLADO EN LA FECHA ESTABLECIDA Y EN LAS CONDICIONES RECIBIDAS, EN CASO DE INCUMPLIMIENTO PAGARÉ EL IMPORTE DEL DÍA(S) O EL VALOR DE LO DETERIORADO.
+        <p
+          style={{
+            fontSize: '12px',
+            fontWeight: 'bold',
+            textAlign: 'left',
+            marginBottom: '30px',
+          }}
+        >
+          ME COMPROMETO A DEVOLVER EL MOBILIARIO AQUÍ DETALLADO EN LA FECHA
+          ESTABLECIDA Y EN LAS CONDICIONES RECIBIDAS, EN CASO DE INCUMPLIMIENTO
+          PAGARÉ EL IMPORTE DEL DÍA(S) O EL VALOR DE LO DETERIORADO.
         </p>
 
         {/* FIRMAS */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', padding: '0 60px' }}>
+        <div
+          style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            padding: '0 60px',
+          }}
+        >
           <div style={{ textAlign: 'center' }}>
             <div>__________________________</div>
             <div style={{ fontSize: '11px' }}>Nombre quien recibe</div>
@@ -131,7 +267,12 @@ const NotaRomeroLimpia = () => {
         </div>
       </div>
 
-      <button onClick={generarPDF} style={{ marginTop: '30px', padding: '10px 20px' }}>📄 Descargar PDF</button>
+      <button
+        onClick={generarPDF}
+        style={{ marginTop: '30px', padding: '10px 20px' }}
+      >
+        📄 Descargar PDF
+      </button>
     </div>
   );
 };

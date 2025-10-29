@@ -1,40 +1,34 @@
-import React, { useEffect, useState,useCallback } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { useFormik, FieldArray, FormikProvider } from 'formik';
 import * as yup from 'yup';
-import {
- 
-  Box,
- 
-  CircularProgress,
-  Alert,
-} from '@mui/material';
+import { Box, CircularProgress, Alert } from '@mui/material';
 import { useAuth } from '../../../../hooks/ContextAuth';
 import api from '../../../../utils/AxiosConfig';
-import { toast } from "react-toastify";
-
-
-
+import { toast } from 'react-toastify';
 
 //==============================fUNCION PAR AOBTENER EL TIRMPO ACTUAL
-const getMexico=()=>{
-  const options={
+const getMexico = () => {
+  const options = {
     timeZone: 'America/Mexico_City',
     year: 'numeric',
     month: '2-digit',
     day: '2-digit',
-  }
-  const formatear= new Intl.DateTimeFormat([], options);
-  const parts= formatear.formatToParts(new Date());
-  const dateParts={};
-  parts.forEach(({type, value})=>{
-    dateParts[type]= value;
+  };
+  const formatear = new Intl.DateTimeFormat([], options);
+  const parts = formatear.formatToParts(new Date());
+  const dateParts = {};
+  parts.forEach(({ type, value }) => {
+    dateParts[type] = value;
   });
   return `${dateParts.year}-${dateParts.month}-${dateParts.day}`;
-}
+};
 
 //====================================VALIDACIONES==============================================
 const validationSchema = yup.object().shape({
-  titulo: yup.string().required('El título es obligatorio').max(50, 'Máximo 50 caracteres'),
+  titulo: yup
+    .string()
+    .required('El título es obligatorio')
+    .max(50, 'Máximo 50 caracteres'),
   contenido: yup.string().required('El contenido es obligatorio'),
   fechaVigencia: yup
     .date()
@@ -45,7 +39,9 @@ const validationSchema = yup.object().shape({
     .of(
       yup.object().shape({
         titulo: yup.string().required('El título de la sección es obligatorio'),
-        contenido: yup.string().required('El contenido de la sección es obligatorio'),
+        contenido: yup
+          .string()
+          .required('El contenido de la sección es obligatorio'),
       })
     )
     .min(1, 'Debe haber al menos una sección'),
@@ -57,60 +53,57 @@ const Terminos = ({ onNavigate }) => {
   const [editMode, setEditMode] = useState(false);
   const [currentVersion, setCurrentVersion] = useState(null);
 
- const { csrfToken } = useAuth();
-  const [error, setError]= useState(null);
+  const { csrfToken } = useAuth();
+  const [error, setError] = useState(null);
   //Pagination
-  const [page, setPage]= useState(0);
-  const [rowsPerPage]=useState(5);
+  const [page, setPage] = useState(0);
+  const [rowsPerPage] = useState(5);
   const [loading, setLoading] = useState(true);
 
-
-    const fetchTerminos = useCallback(async () =>{
+  const fetchTerminos = useCallback(async () => {
     try {
-      const response = await api.get("/api/terminos", {
+      const response = await api.get('/api/terminos', {
         withCredentials: true,
       });
 
       //EStructuramo slo datos a enviar
-      const parseDate= response.data.map((termino)=>{
-        const originalDate= termino.fechaVigencia
-        ?new Date(termino.fechaVigencia)
-        : new Date(getMexico());
+      const parseDate = response.data.map((termino) => {
+        const originalDate = termino.fechaVigencia
+          ? new Date(termino.fechaVigencia)
+          : new Date(getMexico());
 
-        originalDate.setDate(originalDate.getDate()+1)
+        originalDate.setDate(originalDate.getDate() + 1);
         return {
           ...termino,
           versio: extractValue(termino.versio),
           fechaVigencia: originalDate.toISOString().split('T')[0],
           secciones:
-          typeof termino.secciones=== "string"
-          ? JSON.parse(termino.secciones)
-          : termino.secciones || [],
-        }
+            typeof termino.secciones === 'string'
+              ? JSON.parse(termino.secciones)
+              : termino.secciones || [],
+        };
       });
 
       setTerminos(parseDate);
       setLoading(false);
     } catch (error) {
       console.error('Error al obtener términos:', error);
-     setError("No se pudieron cargar los terminos");
-     setLoading(false);
+      setError('No se pudieron cargar los terminos');
+      setLoading(false);
     }
-  },[]);
+  }, []);
 
   useEffect(() => {
     fetchTerminos();
   }, [fetchTerminos]);
 
-
-
   //EXTRAEMOS EL VALOR
-  const extractValue=(versionField)=>{
-    if(typeof versionField ==='object' && versionField !==null ){
+  const extractValue = (versionField) => {
+    if (typeof versionField === 'object' && versionField !== null) {
       return versionField || versionField.value || '';
     }
     return versionField;
-  }
+  };
 
   //===============================================================================
 
@@ -136,25 +129,33 @@ const Terminos = ({ onNavigate }) => {
       setPage(0);
     },
   });
-  const { values, errors, touched, handleChange, handleSubmit, handleReset, setFieldValue , setFieldTouched} = formik;
+  const {
+    values,
+    errors,
+    touched,
+    handleChange,
+    handleSubmit,
+    handleReset,
+    setFieldValue,
+    setFieldTouched,
+  } = formik;
   //=======================================================================
-    //Funcion par acontrolar ña paginacion
-    const handleChangePage=(event, newPage)=>{
-      setPage(newPage);
-    }
+  //Funcion par acontrolar ña paginacion
+  const handleChangePage = (event, newPage) => {
+    setPage(newPage);
+  };
 
   //Creamos un nuevo termino version 1.0
   const createTermino = async (data) => {
     try {
-      await api.post("/api/terminos", data, {
+      await api.post('/api/terminos', data, {
         headers: { 'X-CSRF-Token': csrfToken },
         withCredentials: true,
       });
-      toast.success( 'Se creo el termino correctamente');
-     
+      toast.success('Se creo el termino correctamente');
     } catch (error) {
       console.log('Error al crear el termino:', error);
-      toast.error(  'No se pudo crar el termino');
+      toast.error('No se pudo crar el termino');
     }
   };
 
@@ -166,44 +167,46 @@ const Terminos = ({ onNavigate }) => {
         headers: { 'X-CSRF-Token': csrfToken },
         withCredentials: true,
       });
-      toast.success( 'Se creó una nueva versión de termino');
-
+      toast.success('Se creó una nueva versión de termino');
     } catch (error) {
       console.error('Error al crear nueva versión:', error);
       toast.error('No se pudo crear la nueva versión');
-
     }
   };
 
   //Marcamos Termino como eliminado solo lógicamente
   const deleteTermino = async (id) => {
     const confirmDeletion = window.confirm(
-        "Esta acción marcará la política como eliminada. ¿Desea continuar?"
-      );
-      if (confirmDeletion) {
-        try {
-          await api.delete(`/api/terminos/${id}`, {
-            headers: { 'X-CSRF-Token': csrfToken },
-            withCredentials: true,
-          });
-          toast.success("Política eliminada correctamente");
-          fetchTerminos();
-               } catch (error) {
-                 console.error("Error al eliminar la política:", error);
-                 toast.error("No se pudo eliminar la política");
-               }
-             }
-           };
-           
-
+      'Esta acción marcará la política como eliminada. ¿Desea continuar?'
+    );
+    if (confirmDeletion) {
+      try {
+        await api.delete(`/api/terminos/${id}`, {
+          headers: { 'X-CSRF-Token': csrfToken },
+          withCredentials: true,
+        });
+        toast.success('Política eliminada correctamente');
+        fetchTerminos();
+      } catch (error) {
+        console.error('Error al eliminar la política:', error);
+        toast.error('No se pudo eliminar la política');
+      }
+    }
+  };
 
   //====Función para Editar término
   const editTermino = (termino) => {
     setCurrentVersion(termino);
     setFieldValue('titulo', termino.titulo);
     setFieldValue('contenido', termino.contenido);
-    setFieldValue('fechaVigencia', termino.fechaVigencia ? termino.fechaVigencia.substring(0, 10) : '');
-    setFieldValue('secciones', termino.secciones || [{ titulo: '', contenido: '' }]);
+    setFieldValue(
+      'fechaVigencia',
+      termino.fechaVigencia ? termino.fechaVigencia.substring(0, 10) : ''
+    );
+    setFieldValue(
+      'secciones',
+      termino.secciones || [{ titulo: '', contenido: '' }]
+    );
     setEditMode(true);
   };
   const handleSubmitWrapper = (e) => {
@@ -221,49 +224,54 @@ const Terminos = ({ onNavigate }) => {
     );
   if (error) return <Alert severity="error">{error}</Alert>;
 
-  const paginatedTerminos = terminos.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
-
+  const paginatedTerminos = terminos.slice(
+    page * rowsPerPage,
+    page * rowsPerPage + rowsPerPage
+  );
 
   return (
     <div className="max-w-3xl mx-auto p-8 mt-8 bg-white dark:bg-gray-900 transition-colors duration-300">
-      
       <h1 className="text-3xl font-extrabold text-center mb-8 text-gray-800 dark:text-gray-100">
         Gestión de Términos y Condiciones
       </h1>
-  
+
       <FormikProvider value={formik}>
         <form onSubmit={handleSubmitWrapper} className="space-y-8">
-          
-          {Object.keys(errors).length > 0 && Object.keys(touched).length > 0 && (
-            <div className="bg-red-100 dark:bg-red-200 border border-red-400 text-red-700 dark:text-red-900 px-5 py-3 rounded shadow-sm transition-colors duration-300">
-              <p className="font-semibold">
-                Por favor corrige los siguientes errores:
-              </p>
-              <ul className="list-disc ml-6">
-                {Object.entries(errors).map(([key, value]) => {
-                  if (typeof value === 'string') {
-                    return <li key={key}>{value}</li>;
-                  } else if (Array.isArray(value)) {
-                    return value
-                      .map((err, index) => {
-                        const erroresSeccion = Object.values(err).filter(Boolean);
-                        return erroresSeccion.map((mensajeError, idx) => (
-                          <li key={`${key}-${index}-${idx}`}>
-                            {`Sección ${index + 1}: ${mensajeError}`}
-                          </li>
-                        ));
-                      })
-                      .flat();
-                  }
-                  return null;
-                })}
-              </ul>
-            </div>
-          )}
-  
+          {Object.keys(errors).length > 0 &&
+            Object.keys(touched).length > 0 && (
+              <div className="bg-red-100 dark:bg-red-200 border border-red-400 text-red-700 dark:text-red-900 px-5 py-3 rounded shadow-sm transition-colors duration-300">
+                <p className="font-semibold">
+                  Por favor corrige los siguientes errores:
+                </p>
+                <ul className="list-disc ml-6">
+                  {Object.entries(errors).map(([key, value]) => {
+                    if (typeof value === 'string') {
+                      return <li key={key}>{value}</li>;
+                    } else if (Array.isArray(value)) {
+                      return value
+                        .map((err, index) => {
+                          const erroresSeccion =
+                            Object.values(err).filter(Boolean);
+                          return erroresSeccion.map((mensajeError, idx) => (
+                            <li key={`${key}-${index}-${idx}`}>
+                              {`Sección ${index + 1}: ${mensajeError}`}
+                            </li>
+                          ));
+                        })
+                        .flat();
+                    }
+                    return null;
+                  })}
+                </ul>
+              </div>
+            )}
+
           {/* Campo Título */}
           <div>
-            <label htmlFor="titulo" className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">
+            <label
+              htmlFor="titulo"
+              className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300"
+            >
               Título
             </label>
             <input
@@ -273,16 +281,21 @@ const Terminos = ({ onNavigate }) => {
               value={values.titulo}
               onChange={handleChange}
               className={`mt-1 w-full p-3 rounded-md border shadow-sm focus:outline-none focus:ring-2 focus:ring-yellow-500 transition-colors duration-300 bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 ${
-                touched.titulo && errors.titulo ? 'border-red-500' : 'border-gray-300 dark:border-gray-700'
+                touched.titulo && errors.titulo
+                  ? 'border-red-500'
+                  : 'border-gray-300 dark:border-gray-700'
               }`}
             />
             {touched.titulo && errors.titulo && (
               <p className="text-red-500 text-sm mt-1">{errors.titulo}</p>
             )}
           </div>
-  
+
           <div>
-            <label htmlFor="contenido" className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">
+            <label
+              htmlFor="contenido"
+              className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300"
+            >
               Contenido
             </label>
             <textarea
@@ -292,16 +305,21 @@ const Terminos = ({ onNavigate }) => {
               onChange={handleChange}
               rows={4}
               className={`mt-1 w-full p-3 rounded-md border shadow-sm focus:outline-none focus:ring-2 focus:ring-yellow-500 transition-colors duration-300 bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 ${
-                touched.contenido && errors.contenido ? 'border-red-500' : 'border-gray-300 dark:border-gray-700'
+                touched.contenido && errors.contenido
+                  ? 'border-red-500'
+                  : 'border-gray-300 dark:border-gray-700'
               }`}
             />
             {touched.contenido && errors.contenido && (
               <p className="text-red-500 text-sm mt-1">{errors.contenido}</p>
             )}
           </div>
-  
+
           <div>
-            <label htmlFor="fechaVigencia" className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">
+            <label
+              htmlFor="fechaVigencia"
+              className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300"
+            >
               Fecha de Vigencia
             </label>
             <input
@@ -312,14 +330,18 @@ const Terminos = ({ onNavigate }) => {
               onChange={handleChange}
               min={getMexico()}
               className={`mt-1 w-full p-3 rounded-md border shadow-sm focus:outline-none focus:ring-2 focus:ring-yellow-500 transition-colors duration-300 bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 ${
-                touched.fechaVigencia && errors.fechaVigencia ? 'border-red-500' : 'border-gray-300 dark:border-gray-700'
+                touched.fechaVigencia && errors.fechaVigencia
+                  ? 'border-red-500'
+                  : 'border-gray-300 dark:border-gray-700'
               }`}
             />
             {touched.fechaVigencia && errors.fechaVigencia && (
-              <p className="text-red-500 text-sm mt-1">{errors.fechaVigencia}</p>
+              <p className="text-red-500 text-sm mt-1">
+                {errors.fechaVigencia}
+              </p>
             )}
           </div>
-  
+
           {touched.secciones &&
             errors.secciones &&
             typeof errors.secciones === 'string' && (
@@ -327,7 +349,7 @@ const Terminos = ({ onNavigate }) => {
                 {errors.secciones}
               </div>
             )}
-  
+
           <FieldArray name="secciones">
             {({ push, remove }) => (
               <div>
@@ -354,7 +376,10 @@ const Terminos = ({ onNavigate }) => {
                         </button>
                       </div>
                       <div className="mb-3">
-                        <label htmlFor={`secciones[${index}].titulo`} className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">
+                        <label
+                          htmlFor={`secciones[${index}].titulo`}
+                          className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300"
+                        >
                           Título de la Sección
                         </label>
                         <input
@@ -364,7 +389,8 @@ const Terminos = ({ onNavigate }) => {
                           value={section.titulo}
                           onChange={handleChange}
                           className={`mt-1 w-full p-3 rounded-md border shadow-sm focus:outline-none focus:ring-2 focus:ring-yellow-500 transition-colors duration-300 bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 ${
-                            touched.secciones?.[index]?.titulo && errors.secciones?.[index]?.titulo
+                            touched.secciones?.[index]?.titulo &&
+                            errors.secciones?.[index]?.titulo
                               ? 'border-red-500'
                               : 'border-gray-300 dark:border-gray-700'
                           }`}
@@ -377,7 +403,10 @@ const Terminos = ({ onNavigate }) => {
                           )}
                       </div>
                       <div>
-                        <label htmlFor={`secciones[${index}].contenido`} className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">
+                        <label
+                          htmlFor={`secciones[${index}].contenido`}
+                          className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300"
+                        >
                           Contenido de la Sección
                         </label>
                         <textarea
@@ -387,7 +416,8 @@ const Terminos = ({ onNavigate }) => {
                           onChange={handleChange}
                           rows="3"
                           className={`mt-1 w-full p-3 rounded-md border shadow-sm focus:outline-none focus:ring-2 focus:ring-yellow-500 transition-colors duration-300 bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 ${
-                            touched.secciones?.[index]?.contenido && errors.secciones?.[index]?.contenido
+                            touched.secciones?.[index]?.contenido &&
+                            errors.secciones?.[index]?.contenido
                               ? 'border-red-500'
                               : 'border-gray-300 dark:border-gray-700'
                           }`}
@@ -411,7 +441,7 @@ const Terminos = ({ onNavigate }) => {
               </div>
             )}
           </FieldArray>
-  
+
           <div className="flex justify-end space-x-4">
             {editMode && (
               <button
@@ -434,13 +464,13 @@ const Terminos = ({ onNavigate }) => {
               {formik.isSubmitting
                 ? 'Cargando...'
                 : editMode
-                ? 'Crear Nueva Versión'
-                : 'Agregar Término'}
+                  ? 'Crear Nueva Versión'
+                  : 'Agregar Término'}
             </button>
           </div>
         </form>
       </FormikProvider>
-  
+
       <h2 className="text-2xl font-bold mt-10 mb-6 text-gray-800 dark:text-gray-100">
         Lista de Términos y Condiciones
       </h2>
@@ -474,11 +504,12 @@ const Terminos = ({ onNavigate }) => {
                       termino.estado === 'vigente'
                         ? 'text-green-600'
                         : termino.estado === 'no vigente'
-                        ? 'text-orange-600'
-                        : 'text-red-600'
+                          ? 'text-orange-600'
+                          : 'text-red-600'
                     }`}
                   >
-                    {termino.estado.charAt(0).toUpperCase() + termino.estado.slice(1)}
+                    {termino.estado.charAt(0).toUpperCase() +
+                      termino.estado.slice(1)}
                   </span>
                 </td>
                 <td className="px-4 py-3">
@@ -525,12 +556,12 @@ const Terminos = ({ onNavigate }) => {
           </button>
         </div>
       </div>
-  
+
       <div className="flex justify-end mt-8">
         <button
           onClick={(e) => {
             e.stopPropagation();
-            onNavigate("historialTerminos");
+            onNavigate('historialTerminos');
           }}
           className="flex items-center border border-yellow-500 text-yellow-500 hover:bg-yellow-500 hover:text-white px-5 py-3 rounded-md transition-colors duration-300"
         >
@@ -539,7 +570,6 @@ const Terminos = ({ onNavigate }) => {
       </div>
     </div>
   );
-  
 };
 
 export default Terminos;

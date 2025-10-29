@@ -1,12 +1,12 @@
-import React, { useRef, useState, useEffect } from "react";
-import { motion } from "framer-motion";
-import { Link } from "react-router-dom";
-import { useAuth } from "../../hooks/ContextAuth";
-import { ChevronLeftIcon, ChevronRightIcon } from "@heroicons/react/solid";
+import React, { useRef, useState, useEffect } from 'react';
+import { motion } from 'framer-motion';
+import { Link } from 'react-router-dom';
+import { useAuth } from '../../hooks/ContextAuth';
+import { ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/solid';
 
 const CategoryCard = ({ category }) => {
   const { user } = useAuth();
-  const isCliente = user?.rol === "cliente";
+  const isCliente = user?.rol === 'cliente';
   const categoryLink = isCliente
     ? `/cliente/categoria/${category.name}`
     : `/categoria/${category.name}`;
@@ -15,7 +15,7 @@ const CategoryCard = ({ category }) => {
     <motion.div
       className="relative flex-shrink-0 w-[160px] sm:w-[200px] h-[220px] sm:h-[260px] rounded-2xl overflow-hidden shadow-lg group snap-start"
       whileHover={{ y: -8 }}
-      transition={{ type: "spring", stiffness: 300 }}
+      transition={{ type: 'spring', stiffness: 300 }}
     >
       <img
         src={category.image}
@@ -38,7 +38,6 @@ const CategoryCard = ({ category }) => {
   );
 };
 
-
 const Categoria = ({ categories }) => {
   const carouselRef = useRef(null);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
@@ -55,14 +54,14 @@ const Categoria = ({ categories }) => {
   useEffect(() => {
     const el = carouselRef.current;
     if (el) {
-      el.addEventListener("scroll", checkScrollability);
+      el.addEventListener('scroll', checkScrollability);
       checkScrollability(); // Initial check
     }
-    window.addEventListener("resize", checkScrollability);
+    window.addEventListener('resize', checkScrollability);
 
     return () => {
-      if (el) el.removeEventListener("scroll", checkScrollability);
-      window.removeEventListener("resize", checkScrollability);
+      if (el) el.removeEventListener('scroll', checkScrollability);
+      window.removeEventListener('resize', checkScrollability);
     };
   }, [categories]);
 
@@ -70,8 +69,8 @@ const Categoria = ({ categories }) => {
     if (carouselRef.current) {
       const scrollAmount = carouselRef.current.clientWidth * 0.8; // Scroll 80% of the visible width
       carouselRef.current.scrollBy({
-        left: direction === "left" ? -scrollAmount : scrollAmount,
-        behavior: "smooth",
+        left: direction === 'left' ? -scrollAmount : scrollAmount,
+        behavior: 'smooth',
       });
     }
   };
@@ -88,7 +87,6 @@ const Categoria = ({ categories }) => {
   return (
     <div className="w-full bg-white dark:bg-slate-900 py-12 sm:py-16">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      
         <div className="flex justify-between items-center mb-8">
           <h2 className="text-3xl sm:text-4xl font-extrabold text-slate-900 dark:text-white tracking-tight text-center">
             <span className="text-yellow-500">Nuestras Categorías</span>
@@ -96,14 +94,14 @@ const Categoria = ({ categories }) => {
 
           <div className="hidden sm:flex items-center space-x-2">
             <button
-              onClick={() => scroll("left")}
+              onClick={() => scroll('left')}
               disabled={!canScrollLeft}
               className="w-10 h-10 flex items-center justify-center rounded-full bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-300 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-slate-300 dark:hover:bg-slate-700 transition-all"
             >
               <ChevronLeftIcon className="w-6 h-6" />
             </button>
             <button
-              onClick={() => scroll("right")}
+              onClick={() => scroll('right')}
               disabled={!canScrollRight}
               className="w-10 h-10 flex items-center justify-center rounded-full bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-300 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-slate-300 dark:hover:bg-slate-700 transition-all"
             >
@@ -112,11 +110,10 @@ const Categoria = ({ categories }) => {
           </div>
         </div>
 
-    
         <motion.div
           ref={carouselRef}
           className="flex overflow-x-auto space-x-6 pb-4 scroll-smooth snap-x snap-mandatory"
-          style={{ scrollbarWidth: "none", "-ms-overflow-style": "none" }}
+          style={{ scrollbarWidth: 'none', '-ms-overflow-style': 'none' }}
         >
           {categories.map((category) => (
             <CategoryCard key={category.name} category={category} />

@@ -1,33 +1,26 @@
 /* eslint-disable */
-import React, { useState, useEffect } from "react";
-import {
-  FaPlus,
-
-  FaImage,
-
-  FaSpinner,
-} from "react-icons/fa";
-import { toast } from "react-toastify";
-import api from "../../../utils/AxiosConfig";
-import { useAuth } from "../../../hooks/ContextAuth";
+import React, { useState, useEffect } from 'react';
+import { FaPlus, FaImage, FaSpinner } from 'react-icons/fa';
+import { toast } from 'react-toastify';
+import api from '../../../utils/AxiosConfig';
+import { useAuth } from '../../../hooks/ContextAuth';
 
 const AgregarProductosSubbodegas = ({ datosInventario }) => {
-  const [filterDisponibilidad, setFilterDisponibilidad] = useState("all");
-  const [filterMonth, setFilterMonth] = useState("all");
-  const [filterYear, setFilterYear] = useState("all");
+  const [filterDisponibilidad, setFilterDisponibilidad] = useState('all');
+  const [filterMonth, setFilterMonth] = useState('all');
+  const [filterYear, setFilterYear] = useState('all');
 
   const [setLoading] = useState(true);
- 
+
   const [groupedData, setGroupedData] = useState({});
   const { csrfToken } = useAuth();
 
   const [showModal, setShowModal] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState(null);
 
-
   const [selectedColors, setSelectedColors] = useState([]);
 
-  const [selectedBodega, setSelectedBodega] = useState("");
+  const [selectedBodega, setSelectedBodega] = useState('');
   const [isAdding, setIsAdding] = useState(false);
   const [bodegasSecundarias, setBodegasSecundarias] = useState([]);
 
@@ -37,23 +30,24 @@ const AgregarProductosSubbodegas = ({ datosInventario }) => {
 
   useEffect(() => {
     fetchBodegas();
-
   }, []);
 
   const fetchBodegas = async () => {
     setLoading(true);
     try {
-      const res = await api.get("/api/inventario/bodegas", {
+      const res = await api.get('/api/inventario/bodegas', {
         withCredentials: true,
       });
       if (res.data && Array.isArray(res.data.bodegas)) {
-        const secundarias = res.data.bodegas.filter((b) => b.es_principal === 0);
+        const secundarias = res.data.bodegas.filter(
+          (b) => b.es_principal === 0
+        );
         setBodegasSecundarias(secundarias);
       } else {
         setBodegasSecundarias([]);
       }
     } catch (error) {
-      console.error("Error fetching bodegas:", error);
+      console.error('Error fetching bodegas:', error);
     } finally {
       setLoading(false);
     }
@@ -65,30 +59,31 @@ const AgregarProductosSubbodegas = ({ datosInventario }) => {
     years.push(y);
   }
 
-// eslint-disable-next-line react-hooks/exhaustive-deps
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     groupByCategoria(datosInventario);
-
-  }, [datosInventario, filterDisponibilidad, filterMonth, filterYear, currentPage]);
-
+  }, [
+    datosInventario,
+    filterDisponibilidad,
+    filterMonth,
+    filterYear,
+    currentPage,
+  ]);
 
   const groupByCategoria = (productos) => {
     if (!productos || !Array.isArray(productos)) return;
 
-
     const filtrados = productos.filter((item) => applyFilters(item));
 
-   
     const total = filtrados.length;
     setTotalPages(Math.ceil(total / itemsPerPage) || 1);
 
     const start = (currentPage - 1) * itemsPerPage;
     const paginated = filtrados.slice(start, start + itemsPerPage);
 
-
     const grouped = {};
     paginated.forEach((item) => {
-      const cat = item.nombreCategoria || "Sin Categoría";
+      const cat = item.nombreCategoria || 'Sin Categoría';
       if (!grouped[cat]) {
         grouped[cat] = {};
       }
@@ -121,7 +116,6 @@ const AgregarProductosSubbodegas = ({ datosInventario }) => {
       }
     });
 
-   
     const finalGrouped = {};
     Object.keys(grouped).forEach((cat) => {
       finalGrouped[cat] = Object.values(grouped[cat]);
@@ -130,37 +124,34 @@ const AgregarProductosSubbodegas = ({ datosInventario }) => {
     setGroupedData(finalGrouped);
   };
 
-
   const applyFilters = (item) => {
-   
     if (!item.es_principal) return false;
 
-    if (filterDisponibilidad === "disponible") {
-      if (item.estado?.toLowerCase() !== "activo" || item.stockReal <= 0) {
+    if (filterDisponibilidad === 'disponible') {
+      if (item.estado?.toLowerCase() !== 'activo' || item.stockReal <= 0) {
         return false;
       }
-    } else if (filterDisponibilidad === "nodisponible") {
-      if (item.estado?.toLowerCase() === "activo" && item.stockReal > 0) {
+    } else if (filterDisponibilidad === 'nodisponible') {
+      if (item.estado?.toLowerCase() === 'activo' && item.stockReal > 0) {
         return false;
       }
     }
 
-    if (filterMonth !== "all" || filterYear !== "all") {
+    if (filterMonth !== 'all' || filterYear !== 'all') {
       const fecha = new Date(item.fechaRegistro);
-      const mes = String(fecha.getMonth() + 1).padStart(2, "0");
+      const mes = String(fecha.getMonth() + 1).padStart(2, '0');
       const anio = String(fecha.getFullYear());
 
-      if (filterMonth !== "all" && filterMonth !== mes) {
+      if (filterMonth !== 'all' && filterMonth !== mes) {
         return false;
       }
-      if (filterYear !== "all" && filterYear !== anio) {
+      if (filterYear !== 'all' && filterYear !== anio) {
         return false;
       }
     }
 
     return true;
   };
-
 
   const handleFilterDisponibilidad = (e) => {
     setFilterDisponibilidad(e.target.value);
@@ -175,10 +166,9 @@ const AgregarProductosSubbodegas = ({ datosInventario }) => {
     setCurrentPage(1);
   };
 
-  
   const handleOpenModal = (producto) => {
     setSelectedProduct(producto);
-    setSelectedBodega("");
+    setSelectedBodega('');
     setSelectedColors([]);
     setShowModal(true);
   };
@@ -188,7 +178,6 @@ const AgregarProductosSubbodegas = ({ datosInventario }) => {
     setSelectedProduct(null);
     setSelectedColors([]);
   };
-
 
   const handleToggleColor = (idProdColor) => {
     setSelectedColors((prev) => {
@@ -200,18 +189,17 @@ const AgregarProductosSubbodegas = ({ datosInventario }) => {
     });
   };
 
- 
   const handleAddToBodega = async () => {
     if (!selectedProduct) {
-      toast.error("Falta seleccionar un producto.");
+      toast.error('Falta seleccionar un producto.');
       return;
     }
     if (!selectedBodega) {
-      toast.error("Debes seleccionar una bodega.");
+      toast.error('Debes seleccionar una bodega.');
       return;
     }
     if (!selectedColors.length) {
-      toast.error("Debes seleccionar al menos un color.");
+      toast.error('Debes seleccionar al menos un color.');
       return;
     }
 
@@ -226,25 +214,30 @@ const AgregarProductosSubbodegas = ({ datosInventario }) => {
         coloresSeleccionados: selectedColors,
       };
 
-      const resp = await api.post("/api/inventario/agregar-subbodega", body, {
-        headers: { "X-CSRF-Token": csrfToken },
+      const resp = await api.post('/api/inventario/agregar-subbodega', body, {
+        headers: { 'X-CSRF-Token': csrfToken },
         withCredentials: true,
       });
 
       if (resp.data.success) {
-        toast.success("Producto agregado correctamente a la bodega secundaria.");
+        toast.success(
+          'Producto agregado correctamente a la bodega secundaria.'
+        );
         handleCloseModal();
       } else {
-        toast.error(resp.data.message || "Error al agregar producto a la bodega.");
+        toast.error(
+          resp.data.message || 'Error al agregar producto a la bodega.'
+        );
       }
     } catch (error) {
-      console.error("Error al agregar producto a la bodega secundaria:", error);
+      console.error('Error al agregar producto a la bodega secundaria:', error);
       if (error.response && error.response.data) {
         toast.error(
-          error.response.data.message || "Ocurrió un error al agregar el producto."
+          error.response.data.message ||
+            'Ocurrió un error al agregar el producto.'
         );
       } else {
-        toast.error("Ocurrió un error al agregar el producto.");
+        toast.error('Ocurrió un error al agregar el producto.');
       }
     } finally {
       setIsAdding(false);
@@ -375,11 +368,13 @@ const AgregarProductosSubbodegas = ({ datosInventario }) => {
                             className="w-16 h-auto object-contain rounded"
                           />
                         ) : (
-                          <span className="text-gray-400 italic">Sin imagen</span>
+                          <span className="text-gray-400 italic">
+                            Sin imagen
+                          </span>
                         )}
                       </td>
                       <td className="border border-gray-300 dark:border-gray-700 px-3 py-2">
-                        {producto.nombreSubcategoria || "N/A"}
+                        {producto.nombreSubcategoria || 'N/A'}
                       </td>
                       <td className="border border-gray-300 dark:border-gray-700 px-3 py-2">
                         <button
@@ -415,15 +410,17 @@ const AgregarProductosSubbodegas = ({ datosInventario }) => {
               onClick={() => setCurrentPage(page)}
               className={`px-3 py-1 rounded ${
                 currentPage === page
-                  ? "bg-yellow-500 text-white"
-                  : "bg-gray-300 dark:bg-gray-600 text-black dark:text-white"
+                  ? 'bg-yellow-500 text-white'
+                  : 'bg-gray-300 dark:bg-gray-600 text-black dark:text-white'
               }`}
             >
               {page}
             </button>
           ))}
           <button
-            onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+            onClick={() =>
+              setCurrentPage((prev) => Math.min(prev + 1, totalPages))
+            }
             disabled={currentPage === totalPages}
             className="px-3 py-1 rounded bg-gray-300 dark:bg-gray-600 text-black dark:text-white disabled:opacity-50"
           >
@@ -445,13 +442,16 @@ const AgregarProductosSubbodegas = ({ datosInventario }) => {
             </div>
 
             {/* Listado de checkboxes para cada color */}
-            {selectedProduct.coloresList && selectedProduct.coloresList.length > 0 ? (
+            {selectedProduct.coloresList &&
+            selectedProduct.coloresList.length > 0 ? (
               <div className="mb-4">
                 <label className="block mb-2 text-gray-700 dark:text-gray-300">
                   Selecciona uno o varios colores:
                 </label>
                 {selectedProduct.coloresList.map((objColor) => {
-                  const isChecked = selectedColors.includes(objColor.idProductoColor);
+                  const isChecked = selectedColors.includes(
+                    objColor.idProductoColor
+                  );
                   return (
                     <div
                       key={objColor.idProductoColor}
@@ -460,7 +460,9 @@ const AgregarProductosSubbodegas = ({ datosInventario }) => {
                       <input
                         type="checkbox"
                         checked={isChecked}
-                        onChange={() => handleToggleColor(objColor.idProductoColor)}
+                        onChange={() =>
+                          handleToggleColor(objColor.idProductoColor)
+                        }
                       />
                       <span className="text-gray-700 dark:text-gray-300">
                         {objColor.color}
@@ -487,7 +489,7 @@ const AgregarProductosSubbodegas = ({ datosInventario }) => {
               >
                 <option value="">-- Selecciona una bodega --</option>
                 {bodegasSecundarias
-                  .filter((bod) => bod.estado !== "inactiva")
+                  .filter((bod) => bod.estado !== 'inactiva')
                   .map((bod) => (
                     <option key={bod.idBodega} value={bod.idBodega}>
                       {bod.nombre}
@@ -501,7 +503,9 @@ const AgregarProductosSubbodegas = ({ datosInventario }) => {
                 onClick={handleAddToBodega}
                 disabled={isAdding}
                 className={`py-2 px-4 rounded mr-2 flex items-center gap-2 ${
-                  isAdding ? "bg-yellow-400" : "bg-yellow-500 hover:bg-yellow-600"
+                  isAdding
+                    ? 'bg-yellow-400'
+                    : 'bg-yellow-500 hover:bg-yellow-600'
                 } text-white`}
               >
                 {isAdding ? (
@@ -510,7 +514,7 @@ const AgregarProductosSubbodegas = ({ datosInventario }) => {
                     Guardando...
                   </>
                 ) : (
-                  "Agregar"
+                  'Agregar'
                 )}
               </button>
               <button

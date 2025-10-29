@@ -1,42 +1,42 @@
-import React, { useState, useRef, useEffect } from "react";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import React, { useState, useRef, useEffect } from 'react';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faExclamationCircle,
   faCheckCircle,
   faClock,
-} from "@fortawesome/free-solid-svg-icons";
+} from '@fortawesome/free-solid-svg-icons';
 
-import { motion } from "framer-motion";
-import api from "../../utils/AxiosConfig";
+import { motion } from 'framer-motion';
+import api from '../../utils/AxiosConfig';
 
 const Paso2 = ({ onValidationSuccess, guardarCorreo }) => {
-  const [tokens, setTokens] = useState(Array(6).fill(""));
-  const [errorMessage, setErrorMessage] = useState("");
+  const [tokens, setTokens] = useState(Array(6).fill(''));
+  const [errorMessage, setErrorMessage] = useState('');
   const [isButtonDisabled, setIsButtonDisabled] = useState(true);
   const [timeLeft, setTimeLeft] = useState(600);
   const [tokenRecuperado, setTokenRecuperado] = useState(null);
 
-  const inputRefs = useRef([]); 
+  const inputRefs = useRef([]);
 
   //======================================================================================
   // Obtenemos el token del correo registrado
   useEffect(() => {
-    if (!guardarCorreo) return; 
+    if (!guardarCorreo) return;
 
-    console.log("Valor de guardarCorreo:", guardarCorreo);
+    console.log('Valor de guardarCorreo:', guardarCorreo);
 
     api
       .get(`/api/token/correo/${guardarCorreo}`)
       .then((response) => {
         if (response.data && response.data.token) {
           setTokenRecuperado(response.data.token);
-          console.log("Token recuperado:", response.data.token);
+          console.log('Token recuperado:', response.data.token);
         } else {
-          console.error("El token ha expirado o no existe.");
+          console.error('El token ha expirado o no existe.');
         }
       })
       .catch((error) => {
-        console.error("Error al cargar los datos:", error);
+        console.error('Error al cargar los datos:', error);
       });
   }, [guardarCorreo]);
 
@@ -54,35 +54,35 @@ const Paso2 = ({ onValidationSuccess, guardarCorreo }) => {
       }
     }
 
-    const allTokensFilled = newTokens.every((token) => token !== "");
+    const allTokensFilled = newTokens.every((token) => token !== '');
     setIsButtonDisabled(!allTokensFilled || timeLeft <= 0);
   };
 
   const handleKeyDown = (e, index) => {
-    if (e.key === "Backspace") {
+    if (e.key === 'Backspace') {
       const newTokens = [...tokens];
-      if (newTokens[index] === "" && index > 0) {
+      if (newTokens[index] === '' && index > 0) {
         inputRefs.current[index - 1].focus();
       } else {
-        newTokens[index] = "";
+        newTokens[index] = '';
         setTokens(newTokens);
       }
     }
   };
 
   const handleSubmit = () => {
-    if (tokens.join("") === tokenRecuperado) {
-      setErrorMessage("");
+    if (tokens.join('') === tokenRecuperado) {
+      setErrorMessage('');
       showAlert(
-        "¡Token Correcto!",
-        "El token ha sido validado correctamente.",
-        "success"
+        '¡Token Correcto!',
+        'El token ha sido validado correctamente.',
+        'success'
       );
       if (onValidationSuccess) {
         onValidationSuccess();
       }
     } else {
-      setErrorMessage("Token inválido, vuelve a intentarlo.");
+      setErrorMessage('Token inválido, vuelve a intentarlo.');
     }
 
     // >>>> LÍNEA AÑADIDA: Habilita de nuevo el botón tras cada intento <<<<
@@ -91,8 +91,8 @@ const Paso2 = ({ onValidationSuccess, guardarCorreo }) => {
 
   const showAlert = (title, message, type) => {
     const alertClass =
-      type === "success" ? "bg-green-500 text-white" : "bg-red-500 text-white";
-    const icon = type === "success" ? faCheckCircle : faExclamationCircle;
+      type === 'success' ? 'bg-green-500 text-white' : 'bg-red-500 text-white';
+    const icon = type === 'success' ? faCheckCircle : faExclamationCircle;
 
     return (
       <div
@@ -111,7 +111,7 @@ const Paso2 = ({ onValidationSuccess, guardarCorreo }) => {
   const formatTime = (seconds) => {
     const minutes = Math.floor(seconds / 60);
     const remainingSeconds = seconds % 60;
-    return `${minutes}:${remainingSeconds < 10 ? "0" : ""}${remainingSeconds}`;
+    return `${minutes}:${remainingSeconds < 10 ? '0' : ''}${remainingSeconds}`;
   };
 
   useEffect(() => {
@@ -119,7 +119,7 @@ const Paso2 = ({ onValidationSuccess, guardarCorreo }) => {
       setTimeLeft((prevTime) => {
         if (prevTime <= 1) {
           clearInterval(timer);
-          setIsButtonDisabled(true); 
+          setIsButtonDisabled(true);
           return 0;
         }
         return prevTime - 1;
@@ -200,8 +200,8 @@ const Paso2 = ({ onValidationSuccess, guardarCorreo }) => {
           <motion.button
             className={`flex-grow p-2 bg-blue-500 text-white rounded-md font-bold transition-all duration-200 ease-in-out ${
               isButtonDisabled
-                ? "opacity-50 cursor-not-allowed"
-                : "hover:bg-blue-600 hover:scale-105"
+                ? 'opacity-50 cursor-not-allowed'
+                : 'hover:bg-blue-600 hover:scale-105'
             }`}
             onClick={handleSubmit}
             disabled={isButtonDisabled}
@@ -218,8 +218,8 @@ const Paso2 = ({ onValidationSuccess, guardarCorreo }) => {
           transition={{ delay: 0.8, duration: 0.5 }}
           className="text-center mt-3 text-sm text-red-500"
         >
-          El token es válido por 10 minutos.{" "}
-          {timeLeft === 0 && "El token ha expirado."}
+          El token es válido por 10 minutos.{' '}
+          {timeLeft === 0 && 'El token ha expirado.'}
         </motion.p>
       </div>
     </>

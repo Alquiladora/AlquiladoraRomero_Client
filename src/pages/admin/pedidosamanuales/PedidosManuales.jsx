@@ -1,7 +1,7 @@
 /* eslint-disable */
-import React, { useState, useEffect } from "react";
-import axios from "axios";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faTimes,
   faTicketAlt,
@@ -38,18 +38,18 @@ import {
   faCalendar,
   faHourglassStart,
   faShippingFast,
-} from "@fortawesome/free-solid-svg-icons";
-import { toast } from "react-toastify";
-import api from "../../../utils/AxiosConfig";
-import { useAuth } from "../../../hooks/ContextAuth";
-import DashboardPedidos from "../dashboard/DashboardPedidos";
-import StepOne from "./StepOne";
-import StepTwo from "./StepTwo";
-import StepThree from "./StepThree";
-import StepFour from "./StepFour";
-import PaymentModal from "./PaymentModal";
-import CustomLoading from "../../../components/spiner/SpinerGlobal";
-import TicketCompra from "../gestion-pedidos/Ticket";
+} from '@fortawesome/free-solid-svg-icons';
+import { toast } from 'react-toastify';
+import api from '../../../utils/AxiosConfig';
+import { useAuth } from '../../../hooks/ContextAuth';
+import DashboardPedidos from '../dashboard/DashboardPedidos';
+import StepOne from './StepOne';
+import StepTwo from './StepTwo';
+import StepThree from './StepThree';
+import StepFour from './StepFour';
+import PaymentModal from './PaymentModal';
+import CustomLoading from '../../../components/spiner/SpinerGlobal';
+import TicketCompra from '../gestion-pedidos/Ticket';
 
 function WizardAlquiler({ onNavigate, setPedidos }) {
   const { csrfToken, user } = useAuth();
@@ -62,56 +62,56 @@ function WizardAlquiler({ onNavigate, setPedidos }) {
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [showTicketModal, setShowTicketModal] = useState(false);
 
-  const [nombre, setNombre] = useState("");
-  const [apellido, setApellido] = useState("");
-  const [telefono, setTelefono] = useState("");
-  const [correo, setCorreo] = useState("");
+  const [nombre, setNombre] = useState('');
+  const [apellido, setApellido] = useState('');
+  const [telefono, setTelefono] = useState('');
+  const [correo, setCorreo] = useState('');
 
   const [showSubmodalCorreo, setShowSubmodalCorreo] = useState(false);
-  const [emailParaVerificar, setEmailParaVerificar] = useState("");
+  const [emailParaVerificar, setEmailParaVerificar] = useState('');
   const [cargandoVerificacion, setCargandoVerificacion] = useState(false);
   const [esClienteExistente, setEsClienteExistente] = useState(false);
 
   const [direccionesCliente, setDireccionesCliente] = useState([]);
   const [selectedDireccionId, setSelectedDireccionId] = useState(null);
 
-  const [codigoPostal, setCodigoPostal] = useState("");
-  const [direccion, setDireccion] = useState("");
+  const [codigoPostal, setCodigoPostal] = useState('');
+  const [direccion, setDireccion] = useState('');
 
   const [estadosData, setEstadosData] = useState([]);
   const [municipiosData, setMunicipiosData] = useState([]);
   const [localidadesData, setLocalidadesData] = useState([]);
 
-  const [pais, setPais] = useState("");
-  const [estado, setEstado] = useState("");
-  const [municipio, setMunicipio] = useState("");
-  const [localidad, setLocalidad] = useState("");
+  const [pais, setPais] = useState('');
+  const [estado, setEstado] = useState('');
+  const [municipio, setMunicipio] = useState('');
+  const [localidad, setLocalidad] = useState('');
 
   const [localidadesDisponibles, setLocalidadesDisponibles] = useState([]);
   const [cargandoCP, setCargandoCP] = useState(false);
   const [cpValido, setCpValido] = useState(false);
-  const [modoLocalidad, setModoLocalidad] = useState("seleccionar");
+  const [modoLocalidad, setModoLocalidad] = useState('seleccionar');
 
-  const [producto, setProducto] = useState("");
-  const [fechaInicio, setFechaInicio] = useState("");
-  const [fechaEntrega, setFechaEntrega] = useState("");
-  const [horaAlquiler, setHoraAlquiler] = useState("");
+  const [producto, setProducto] = useState('');
+  const [fechaInicio, setFechaInicio] = useState('');
+  const [fechaEntrega, setFechaEntrega] = useState('');
+  const [horaAlquiler, setHoraAlquiler] = useState('');
 
-  const [stock, setStock] = useState("");
-  const [precio, setPrecio] = useState("");
-  const [subPrecio, setSubPrecio] = useState("");
-  const [formaPago, setFormaPago] = useState("");
-  const [detallesPago, setDetallesPago] = useState("");
-  const [unitsToRent, setUnitsToRent] = useState("");
+  const [stock, setStock] = useState('');
+  const [precio, setPrecio] = useState('');
+  const [subPrecio, setSubPrecio] = useState('');
+  const [formaPago, setFormaPago] = useState('');
+  const [detallesPago, setDetallesPago] = useState('');
+  const [unitsToRent, setUnitsToRent] = useState('');
 
   const [productosAdicionales, setProductosAdicionales] = useState([]);
   const [productosDisponibles, setProductosDisponibles] = useState([]);
-  const [referencia, setReferencia] = useState("");
-  const [trackingId, setTrackingId] = useState("");
+  const [referencia, setReferencia] = useState('');
+  const [trackingId, setTrackingId] = useState('');
 
   const [currentPage, setCurrentPage] = useState(1);
   const ordersPerPage = 10;
-  const [filterEstado, setFilterEstado] = useState("Todos");
+  const [filterEstado, setFilterEstado] = useState('Todos');
 
   const [showPaymentsModal, setShowPaymentsModal] = useState(false);
 
@@ -135,10 +135,10 @@ function WizardAlquiler({ onNavigate, setPedidos }) {
 
   useEffect(() => {
     setCpValido(false);
-    setPais("");
-    setEstado("");
-    setMunicipio("");
-    setLocalidad("");
+    setPais('');
+    setEstado('');
+    setMunicipio('');
+    setLocalidad('');
     setLocalidadesDisponibles([]);
   }, [codigoPostal]);
 
@@ -153,42 +153,42 @@ function WizardAlquiler({ onNavigate, setPedidos }) {
 
   const resetCampos = () => {
     setCurrentStep(1);
-    setNombre("");
-    setApellido("");
-    setTelefono("");
-    setCorreo("");
+    setNombre('');
+    setApellido('');
+    setTelefono('');
+    setCorreo('');
     setEsClienteExistente(false);
     setDireccionesCliente([]);
     setSelectedDireccionId(null);
-    setCodigoPostal("");
-    setDireccion("");
-    setPais("");
-    setEstado("");
-    setMunicipio("");
-    setLocalidad("");
+    setCodigoPostal('');
+    setDireccion('');
+    setPais('');
+    setEstado('');
+    setMunicipio('');
+    setLocalidad('');
     setLocalidadesDisponibles([]);
-    setProducto("");
-    setFechaInicio("");
-    setFechaEntrega("");
-    setHoraAlquiler("");
+    setProducto('');
+    setFechaInicio('');
+    setFechaEntrega('');
+    setHoraAlquiler('');
     setCargandoCP(false);
     setCpValido(false);
-    setModoLocalidad("seleccionar");
+    setModoLocalidad('seleccionar');
     setEstadosData([]);
     setMunicipiosData([]);
     setLocalidadesData([]);
-    setStock("");
-    setPrecio("");
-    setSubPrecio("");
-    setFormaPago("");
-    setDetallesPago("");
-    setUnitsToRent("");
+    setStock('');
+    setPrecio('');
+    setSubPrecio('');
+    setFormaPago('');
+    setDetallesPago('');
+    setUnitsToRent('');
     setProductosAdicionales([]);
-    setReferencia("");
+    setReferencia('');
   };
 
   const handleAbrirSubmodalCorreo = () => {
-    setEmailParaVerificar("");
+    setEmailParaVerificar('');
     setShowSubmodalCorreo(true);
   };
 
@@ -205,32 +205,31 @@ function WizardAlquiler({ onNavigate, setPedidos }) {
         `/api/pedidos/pedidosmanuales/${correoParam}`,
         {
           withCredentials: true,
-          headers: { "X-CSRF-Token": csrfToken },
+          headers: { 'X-CSRF-Token': csrfToken },
         }
       );
 
       if (response.data && response.data.length > 0) {
         const cliente = response.data[0];
-        if (cliente.rol === "administrador") {
-          toast.info("Este usuario es administrador.");
+        if (cliente.rol === 'administrador') {
+          toast.info('Este usuario es administrador.');
           return;
         } else {
-        
           setEsClienteExistente(true);
           setNombre(cliente.nombre);
           setApellido(`${cliente.apellidoP} ${cliente.apellidoM}`);
           setTelefono(cliente.telefono);
           setCorreo(cliente.correo);
           setDireccionesCliente(response.data);
-          toast.success("¡Datos de cliente cargados!");
+          toast.success('¡Datos de cliente cargados!');
           setShowSubmodalCorreo(false);
         }
       } else {
-        toast.error("Cliente no encontrado.");
+        toast.error('Cliente no encontrado.');
       }
     } catch (error) {
       console.error(error);
-      toast.error("Error al verificar el cliente.");
+      toast.error('Error al verificar el cliente.');
     } finally {
       setCargandoVerificacion(false);
     }
@@ -258,10 +257,10 @@ function WizardAlquiler({ onNavigate, setPedidos }) {
         ];
 
         setCpValido(true);
-        setPais("México");
-        setEstado(uniqueEstados[0] || "");
-        setMunicipio(uniqueMunicipios[0] || "");
-        setLocalidad(uniqueLocalidades[0] || "");
+        setPais('México');
+        setEstado(uniqueEstados[0] || '');
+        setMunicipio(uniqueMunicipios[0] || '');
+        setLocalidad(uniqueLocalidades[0] || '');
         setEstadosData(uniqueEstados);
         setMunicipiosData(uniqueMunicipios);
         setLocalidadesData(uniqueLocalidades);
@@ -270,15 +269,15 @@ function WizardAlquiler({ onNavigate, setPedidos }) {
           uniqueLocalidades.map((asenta) => ({ d_asenta: asenta }))
         );
 
-        toast.success("Código Postal válido. Datos autocompletados.");
+        toast.success('Código Postal válido. Datos autocompletados.');
       } else {
         setCpValido(false);
-        toast.error("No se encontró información para ese Código Postal.");
+        toast.error('No se encontró información para ese Código Postal.');
       }
     } catch (error) {
       console.error(error);
       setCpValido(false);
-      toast.error("Error consultando el servicio de SEPOMEX.");
+      toast.error('Error consultando el servicio de SEPOMEX.');
     } finally {
       setCargandoCP(false);
     }
@@ -369,9 +368,9 @@ function WizardAlquiler({ onNavigate, setPedidos }) {
   const fetchOrders = async () => {
     setIsLoadingOrders(true);
     try {
-      const response = await api.get("/api/pedidos/pedidos-manuales", {
+      const response = await api.get('/api/pedidos/pedidos-manuales', {
         withCredentials: true,
-        headers: { "X-CSRF-Token": csrfToken },
+        headers: { 'X-CSRF-Token': csrfToken },
       });
       if (response.data.success) {
         const sortedOrders = response.data.data.sort((a, b) => {
@@ -384,8 +383,7 @@ function WizardAlquiler({ onNavigate, setPedidos }) {
         setPedidos(sortedOrders);
       }
     } catch (error) {
-      console.error("Error fetching orders:", error);
-     
+      console.error('Error fetching orders:', error);
     } finally {
       setIsLoadingOrders(false);
     }
@@ -432,22 +430,22 @@ function WizardAlquiler({ onNavigate, setPedidos }) {
     };
     try {
       const response = await api.post(
-        "api/pedidos/crear-pedido-no-cliente",
+        'api/pedidos/crear-pedido-no-cliente',
         payload,
         {
           headers: {
-            "X-CSRF-Token": csrfToken,
+            'X-CSRF-Token': csrfToken,
           },
           withCredentials: true,
         }
       );
 
-      toast.success("¡Pedido creado con éxito!");
+      toast.success('¡Pedido creado con éxito!');
       fetchOrders(); // Actualiza la lista con el nuevo ordenamiento
 
       handleCerrarWizard();
 
-      console.log("Respuesta del servidor:", response.data);
+      console.log('Respuesta del servidor:', response.data);
     } catch (error) {
       if (
         error.response &&
@@ -456,8 +454,8 @@ function WizardAlquiler({ onNavigate, setPedidos }) {
       ) {
         toast.error(error.response.data.message);
       } else {
-        console.error("Error al crear el pedido:", error);
-        toast.error("Hubo un error al crear el pedido.");
+        console.error('Error al crear el pedido:', error);
+        toast.error('Hubo un error al crear el pedido.');
       }
     } finally {
       setIsSubmitting(false);
@@ -467,14 +465,14 @@ function WizardAlquiler({ onNavigate, setPedidos }) {
   useEffect(() => {
     const fetchProductos = async () => {
       try {
-        const response = await api.get("/api/productos/pedidos-manual", {
+        const response = await api.get('/api/productos/pedidos-manual', {
           withCredentials: true,
-          headers: { "X-CSRF-Token": csrfToken },
+          headers: { 'X-CSRF-Token': csrfToken },
         });
         setProductosDisponibles(response.data);
-        console.log("Datos recibidos", response.data);
+        console.log('Datos recibidos', response.data);
       } catch (error) {
-        console.error("Error al obtener productos disponibles:", error);
+        console.error('Error al obtener productos disponibles:', error);
       }
     };
 
@@ -587,7 +585,7 @@ function WizardAlquiler({ onNavigate, setPedidos }) {
   };
 
   const filteredOrders =
-    filterEstado === "Todos"
+    filterEstado === 'Todos'
       ? orders
       : orders.filter((order) => order.estado === filterEstado);
   const indexOfLastOrder = currentPage * ordersPerPage;
@@ -603,15 +601,15 @@ function WizardAlquiler({ onNavigate, setPedidos }) {
   };
 
   const estadosDisponibles = [
-    "Todos",
-    "Procesando",
-    "Enviando",
-    "Confirmado",
-    "En alquiler",
-    "Devuelto",
-    "Incompleto",
-    "Incidente",
-    "Recogiendo",
+    'Todos',
+    'Procesando',
+    'Enviando',
+    'Confirmado',
+    'En alquiler',
+    'Devuelto',
+    'Incompleto',
+    'Incidente',
+    'Recogiendo',
   ];
 
   const renderOrdersTable = () => (
@@ -619,14 +617,14 @@ function WizardAlquiler({ onNavigate, setPedidos }) {
       <div className="flex flex-col md:flex-row md:justify-between md:items-center mb-6 space-y-4 md:space-y-0">
         <div className="flex flex-col sm:flex-row sm:space-x-4 space-y-2 sm:space-y-0">
           <button
-            onClick={() => onNavigate("Gestion Pedidos")}
+            onClick={() => onNavigate('Gestion Pedidos')}
             className="flex items-center justify-center px-5 py-2 bg-blue-600 text-white rounded-lg shadow-md hover:bg-blue-700 transition duration-300 focus:outline-none focus:ring-2 focus:ring-blue-400"
           >
             <FontAwesomeIcon icon={faTasks} className="mr-2" />
             Gestionar Pedidos
           </button>
           <button
-            onClick={() => onNavigate("Dashboard-pedidos")}
+            onClick={() => onNavigate('Dashboard-pedidos')}
             className="flex items-center justify-center px-5 py-2 bg-purple-600 text-white rounded-lg shadow-md hover:bg-purple-700 transition duration-300 focus:outline-none focus:ring-2 focus:ring-purple-400"
           >
             <FontAwesomeIcon icon={faChartBar} className="mr-2" />
@@ -678,15 +676,15 @@ function WizardAlquiler({ onNavigate, setPedidos }) {
             <thead className="bg-yellow-500 dark:bg-yellow-600 sticky top-0 z-10">
               <tr>
                 {[
-                  "ID Rastreo",
-                  "Cliente",
-                  "Teléfono",
-                  "Dirección",
-                  "Días",
-                  "Pago",
-                  "Total",
-                  "Estado",
-                  "Acción",
+                  'ID Rastreo',
+                  'Cliente',
+                  'Teléfono',
+                  'Dirección',
+                  'Días',
+                  'Pago',
+                  'Total',
+                  'Estado',
+                  'Acción',
                 ].map((title, idx) => (
                   <th
                     key={idx}
@@ -703,8 +701,8 @@ function WizardAlquiler({ onNavigate, setPedidos }) {
                   key={order.idPedido}
                   className={`transition-colors duration-200 ${
                     index % 2 === 0
-                      ? "bg-white dark:bg-gray-800"
-                      : "bg-gray-50 dark:bg-gray-900"
+                      ? 'bg-white dark:bg-gray-800'
+                      : 'bg-gray-50 dark:bg-gray-900'
                   } hover:bg-yellow-100 dark:hover:bg-yellow-900`}
                 >
                   <td
@@ -724,11 +722,11 @@ function WizardAlquiler({ onNavigate, setPedidos }) {
                   </td>
                   <td
                     className="px-4 py-3 text-sm dark:text-white max-w-[200px] truncate"
-                    title={order.cliente.direccion || "Sin dirección"}
+                    title={order.cliente.direccion || 'Sin dirección'}
                   >
                     {order.cliente.direccion
                       ? order.cliente.direccion
-                      : "Sin dirección"}
+                      : 'Sin dirección'}
                   </td>
                   <td className="px-4 py-3 text-sm dark:text-white text-center">
                     {order.fechas.diasAlquiler}
@@ -745,25 +743,25 @@ function WizardAlquiler({ onNavigate, setPedidos }) {
                   <td className="px-4 py-3 text-sm whitespace-nowrap">
                     <span
                       className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold select-none ${
-                        order.estado === "Procesando"
-                          ? "bg-orange-200 text-orange-800"
-                          : order.estado === "Confirmado"
-                          ? "bg-green-200 text-green-800"
-                          : order.estado === "Enviando"
-                          ? "bg-blue-200 text-blue-800"
-                          : order.estado === "En alquiler"
-                          ? "bg-purple-200 text-purple-800"
-                          : order.estado === "Devuelto"
-                          ? "bg-gray-200 text-gray-800"
-                          : order.estado === "Incompleto"
-                          ? "bg-yellow-200 text-yellow-800"
-                          : order.estado === "Incidente"
-                          ? "bg-red-200 text-red-800"
-                          : order.estado === "Cancelado"
-                          ? "bg-black text-white"
-                          : order.estado === "Finalizado"
-                          ? "bg-green-800 text-green-100"
-                          : "bg-gray-100 text-gray-800"
+                        order.estado === 'Procesando'
+                          ? 'bg-orange-200 text-orange-800'
+                          : order.estado === 'Confirmado'
+                            ? 'bg-green-200 text-green-800'
+                            : order.estado === 'Enviando'
+                              ? 'bg-blue-200 text-blue-800'
+                              : order.estado === 'En alquiler'
+                                ? 'bg-purple-200 text-purple-800'
+                                : order.estado === 'Devuelto'
+                                  ? 'bg-gray-200 text-gray-800'
+                                  : order.estado === 'Incompleto'
+                                    ? 'bg-yellow-200 text-yellow-800'
+                                    : order.estado === 'Incidente'
+                                      ? 'bg-red-200 text-red-800'
+                                      : order.estado === 'Cancelado'
+                                        ? 'bg-black text-white'
+                                        : order.estado === 'Finalizado'
+                                          ? 'bg-green-800 text-green-100'
+                                          : 'bg-gray-100 text-gray-800'
                       }`}
                     >
                       <FontAwesomeIcon icon={faCheckCircle} className="mr-1" />
@@ -814,99 +812,111 @@ function WizardAlquiler({ onNavigate, setPedidos }) {
         />
       )}
 
-   <div className="flex flex-col md:flex-row justify-between items-center mt-6 space-y-2 md:space-y-0">
-  <p className="text-sm text-gray-700 dark:text-gray-300">
-    Mostrando {indexOfFirstOrder + 1} - {Math.min(indexOfLastOrder, filteredOrders.length)} de {filteredOrders.length} pedidos
-  </p>
-  <div className="flex items-center space-x-2">
-    <button
-      onClick={() => handlePageChange(currentPage - 1)}
-      disabled={currentPage === 1}
-      className={`px-3 py-1 rounded-l-md transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-yellow-400 ${
-        currentPage === 1
-          ? "bg-gray-300 text-gray-500 cursor-not-allowed dark:bg-gray-600"
-          : "bg-yellow-500 text-white hover:bg-yellow-600"
-      }`}
-      aria-label="Página anterior"
-    >
-      <FontAwesomeIcon icon={faChevronLeft} />
-    </button>
-    {totalPages <= 7 ? (
-      Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-        <button
-          key={page}
-          onClick={() => handlePageChange(page)}
-          className={`px-3 py-1 rounded-md transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-yellow-400 ${
-            currentPage === page
-              ? "bg-yellow-600 text-white"
-              : "bg-gray-200 text-gray-700 hover:bg-gray-300 dark:bg-gray-700 dark:text-gray-200 hover:dark:bg-gray-600"
-          }`}
-          aria-label={`Página ${page}`}
-        >
-          {page}
-        </button>
-      ))
-    ) : (
-      <>
-        {Array.from({ length: 3 }, (_, i) => i + 1).map((page) => (
+      <div className="flex flex-col md:flex-row justify-between items-center mt-6 space-y-2 md:space-y-0">
+        <p className="text-sm text-gray-700 dark:text-gray-300">
+          Mostrando {indexOfFirstOrder + 1} -{' '}
+          {Math.min(indexOfLastOrder, filteredOrders.length)} de{' '}
+          {filteredOrders.length} pedidos
+        </p>
+        <div className="flex items-center space-x-2">
           <button
-            key={page}
-            onClick={() => handlePageChange(page)}
-            className={`px-3 py-1 rounded-md transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-yellow-400 ${
-              currentPage === page
-                ? "bg-yellow-600 text-white"
-                : "bg-gray-200 text-gray-700 hover:bg-gray-300 dark:bg-gray-700 dark:text-gray-200 hover:dark:bg-gray-600"
+            onClick={() => handlePageChange(currentPage - 1)}
+            disabled={currentPage === 1}
+            className={`px-3 py-1 rounded-l-md transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-yellow-400 ${
+              currentPage === 1
+                ? 'bg-gray-300 text-gray-500 cursor-not-allowed dark:bg-gray-600'
+                : 'bg-yellow-500 text-white hover:bg-yellow-600'
             }`}
-            aria-label={`Página ${page}`}
+            aria-label="Página anterior"
           >
-            {page}
+            <FontAwesomeIcon icon={faChevronLeft} />
           </button>
-        ))}
-        {currentPage > 4 && <span className="px-3 py-1 text-gray-700 dark:text-gray-300">...</span>}
-        {currentPage > 3 && currentPage < totalPages - 2 && (
+          {totalPages <= 7 ? (
+            Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+              <button
+                key={page}
+                onClick={() => handlePageChange(page)}
+                className={`px-3 py-1 rounded-md transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-yellow-400 ${
+                  currentPage === page
+                    ? 'bg-yellow-600 text-white'
+                    : 'bg-gray-200 text-gray-700 hover:bg-gray-300 dark:bg-gray-700 dark:text-gray-200 hover:dark:bg-gray-600'
+                }`}
+                aria-label={`Página ${page}`}
+              >
+                {page}
+              </button>
+            ))
+          ) : (
+            <>
+              {Array.from({ length: 3 }, (_, i) => i + 1).map((page) => (
+                <button
+                  key={page}
+                  onClick={() => handlePageChange(page)}
+                  className={`px-3 py-1 rounded-md transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-yellow-400 ${
+                    currentPage === page
+                      ? 'bg-yellow-600 text-white'
+                      : 'bg-gray-200 text-gray-700 hover:bg-gray-300 dark:bg-gray-700 dark:text-gray-200 hover:dark:bg-gray-600'
+                  }`}
+                  aria-label={`Página ${page}`}
+                >
+                  {page}
+                </button>
+              ))}
+              {currentPage > 4 && (
+                <span className="px-3 py-1 text-gray-700 dark:text-gray-300">
+                  ...
+                </span>
+              )}
+              {currentPage > 3 && currentPage < totalPages - 2 && (
+                <button
+                  onClick={() => handlePageChange(currentPage)}
+                  className="px-3 py-1 rounded-md bg-yellow-600 text-white"
+                  aria-label={`Página ${currentPage}`}
+                >
+                  {currentPage}
+                </button>
+              )}
+              {currentPage < totalPages - 2 && (
+                <span className="px-3 py-1 text-gray-700 dark:text-gray-300">
+                  ...
+                </span>
+              )}
+              {Array.from({ length: 3 }, (_, i) => totalPages - 2 + i).map(
+                (page) => (
+                  <button
+                    key={page}
+                    onClick={() => handlePageChange(page)}
+                    className={`px-3 py-1 rounded-md transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-yellow-400 ${
+                      currentPage === page
+                        ? 'bg-yellow-600 text-white'
+                        : 'bg-gray-200 text-gray-700 hover:bg-gray-300 dark:bg-gray-700 dark:text-gray-200 hover:dark:bg-gray-600'
+                    }`}
+                    aria-label={`Página ${page}`}
+                  >
+                    {page}
+                  </button>
+                )
+              )}
+            </>
+          )}
           <button
-            onClick={() => handlePageChange(currentPage)}
-            className="px-3 py-1 rounded-md bg-yellow-600 text-white"
-            aria-label={`Página ${currentPage}`}
-          >
-            {currentPage}
-          </button>
-        )}
-        {currentPage < totalPages - 2 && <span className="px-3 py-1 text-gray-700 dark:text-gray-300">...</span>}
-        {Array.from({ length: 3 }, (_, i) => totalPages - 2 + i).map((page) => (
-          <button
-            key={page}
-            onClick={() => handlePageChange(page)}
-            className={`px-3 py-1 rounded-md transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-yellow-400 ${
-              currentPage === page
-                ? "bg-yellow-600 text-white"
-                : "bg-gray-200 text-gray-700 hover:bg-gray-300 dark:bg-gray-700 dark:text-gray-200 hover:dark:bg-gray-600"
+            onClick={() => handlePageChange(currentPage + 1)}
+            disabled={currentPage === totalPages}
+            className={`px-3 py-1 rounded-r-md transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-yellow-400 ${
+              currentPage === totalPages
+                ? 'bg-gray-300 text-gray-500 cursor-not-allowed dark:bg-gray-600'
+                : 'bg-yellow-500 text-white hover:bg-yellow-600'
             }`}
-            aria-label={`Página ${page}`}
+            aria-label="Página siguiente"
           >
-            {page}
+            <FontAwesomeIcon icon={faChevronRight} />
           </button>
-        ))}
-      </>
-    )}
-    <button
-      onClick={() => handlePageChange(currentPage + 1)}
-      disabled={currentPage === totalPages}
-      className={`px-3 py-1 rounded-r-md transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-yellow-400 ${
-        currentPage === totalPages
-          ? "bg-gray-300 text-gray-500 cursor-not-allowed dark:bg-gray-600"
-          : "bg-yellow-500 text-white hover:bg-yellow-600"
-      }`}
-      aria-label="Página siguiente"
-    >
-      <FontAwesomeIcon icon={faChevronRight} />
-    </button>
-  </div>
-</div>
+        </div>
+      </div>
 
       <div className="flex justify-center mt-6">
         <button
-          onClick={() => onNavigate("pedidos-calendario")}
+          onClick={() => onNavigate('pedidos-calendario')}
           className="flex items-center px-4 py-2 bg-teal-600 text-white rounded-lg shadow-md hover:bg-teal-700 transition duration-300 focus:outline-none focus:ring-2 focus:ring-teal-400"
         >
           <FontAwesomeIcon icon={faCalendar} className="mr-2" />
@@ -917,28 +927,31 @@ function WizardAlquiler({ onNavigate, setPedidos }) {
   );
 
   const renderTicketModal = () => (
-   <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-2">
-    <div className="bg-white dark:bg-gray-900 w-full max-w-3xl rounded-xl shadow-lg max-h-[90vh] overflow-hidden relative border border-gray-300 dark:border-gray-700 text-sm">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-2">
+      <div className="bg-white dark:bg-gray-900 w-full max-w-3xl rounded-xl shadow-lg max-h-[90vh] overflow-hidden relative border border-gray-300 dark:border-gray-700 text-sm">
         {/* Header */}
         <div className="bg-gradient-to-r from-amber-400 to-orange-500 dark:from-amber-600 dark:to-orange-600 px-3 py-2 flex justify-between items-center sticky top-0 z-10 rounded-t-xl">
-        <div className="flex items-center space-x-2">
-          <div className="bg-white/20 rounded-full p-1.5">
-            <FontAwesomeIcon icon={faClipboardCheck} className="text-white text-sm" />
+          <div className="flex items-center space-x-2">
+            <div className="bg-white/20 rounded-full p-1.5">
+              <FontAwesomeIcon
+                icon={faClipboardCheck}
+                className="text-white text-sm"
+              />
+            </div>
+            <h2 className="text-lg font-bold text-white">Ticket del Pedido</h2>
           </div>
-          <h2 className="text-lg font-bold text-white">Ticket del Pedido</h2>
+          <button
+            onClick={() => setShowTicketModal(false)}
+            className="bg-white/20 hover:bg-white/30 rounded-full p-1.5 text-white"
+            aria-label="Cerrar modal ticket"
+          >
+            <FontAwesomeIcon icon={faTimes} />
+          </button>
         </div>
-        <button
-          onClick={() => setShowTicketModal(false)}
-          className="bg-white/20 hover:bg-white/30 rounded-full p-1.5 text-white"
-          aria-label="Cerrar modal ticket"
-        >
-          <FontAwesomeIcon icon={faTimes} />
-        </button>
-      </div>
 
         {/* Contenido con scroll */}
         <div className="overflow-y-auto max-h-[calc(90vh-48px)] p-4 space-y-4 scrollbar-thin scrollbar-thumb-yellow-500 dark:scrollbar-thumb-yellow-600">
-             <div className="p-5 space-y-6">
+          <div className="p-5 space-y-6">
             {selectedOrder && (
               <>
                 {/* Status Cards */}
@@ -963,25 +976,25 @@ function WizardAlquiler({ onNavigate, setPedidos }) {
                   <div className="bg-green-100 rounded-xl p-4 border border-green-300 dark:bg-green-900/20 dark:border-green-700 flex items-center space-x-3 shadow-md">
                     <div
                       className={`rounded-full p-2 sm:p-3 transition-colors duration-300 ${
-                        selectedOrder.estado === "Procesando"
-                          ? "bg-orange-500"
-                          : selectedOrder.estado === "Confirmado"
-                          ? "bg-green-500"
-                          : selectedOrder.estado === "Enviando"
-                          ? "bg-blue-500"
-                          : selectedOrder.estado === "En alquiler"
-                          ? "bg-purple-500"
-                          : selectedOrder.estado === "Devuelto"
-                          ? "bg-gray-500"
-                          : selectedOrder.estado === "Incompleto"
-                          ? "bg-yellow-500"
-                          : selectedOrder.estado === "Incidente"
-                          ? "bg-red-500"
-                          : selectedOrder.estado === "Cancelado"
-                          ? "bg-black"
-                          : selectedOrder.estado === "Finalizado"
-                          ? "bg-green-800"
-                          : "bg-gray-400"
+                        selectedOrder.estado === 'Procesando'
+                          ? 'bg-orange-500'
+                          : selectedOrder.estado === 'Confirmado'
+                            ? 'bg-green-500'
+                            : selectedOrder.estado === 'Enviando'
+                              ? 'bg-blue-500'
+                              : selectedOrder.estado === 'En alquiler'
+                                ? 'bg-purple-500'
+                                : selectedOrder.estado === 'Devuelto'
+                                  ? 'bg-gray-500'
+                                  : selectedOrder.estado === 'Incompleto'
+                                    ? 'bg-yellow-500'
+                                    : selectedOrder.estado === 'Incidente'
+                                      ? 'bg-red-500'
+                                      : selectedOrder.estado === 'Cancelado'
+                                        ? 'bg-black'
+                                        : selectedOrder.estado === 'Finalizado'
+                                          ? 'bg-green-800'
+                                          : 'bg-gray-400'
                       }`}
                     >
                       <FontAwesomeIcon
@@ -995,25 +1008,26 @@ function WizardAlquiler({ onNavigate, setPedidos }) {
                       </p>
                       <p
                         className={`font-bold text-lg select-text transition-colors duration-300 ${
-                          selectedOrder.estado === "Procesando"
-                            ? "text-orange-600 dark:text-orange-400"
-                            : selectedOrder.estado === "Confirmado"
-                            ? "text-green-600 dark:text-green-400"
-                            : selectedOrder.estado === "Enviando"
-                            ? "text-blue-600 dark:text-blue-400"
-                            : selectedOrder.estado === "En alquiler"
-                            ? "text-purple-600 dark:text-purple-400"
-                            : selectedOrder.estado === "Devuelto"
-                            ? "text-gray-600 dark:text-gray-400"
-                            : selectedOrder.estado === "Incompleto"
-                            ? "text-yellow-600 dark:text-yellow-400"
-                            : selectedOrder.estado === "Incidente"
-                            ? "text-red-600 dark:text-red-400"
-                            : selectedOrder.estado === "Cancelado"
-                            ? "text-black dark:text-gray-300"
-                            : selectedOrder.estado === "Finalizado"
-                            ? "text-green-800 dark:text-green-600"
-                            : "text-gray-600 dark:text-gray-400"
+                          selectedOrder.estado === 'Procesando'
+                            ? 'text-orange-600 dark:text-orange-400'
+                            : selectedOrder.estado === 'Confirmado'
+                              ? 'text-green-600 dark:text-green-400'
+                              : selectedOrder.estado === 'Enviando'
+                                ? 'text-blue-600 dark:text-blue-400'
+                                : selectedOrder.estado === 'En alquiler'
+                                  ? 'text-purple-600 dark:text-purple-400'
+                                  : selectedOrder.estado === 'Devuelto'
+                                    ? 'text-gray-600 dark:text-gray-400'
+                                    : selectedOrder.estado === 'Incompleto'
+                                      ? 'text-yellow-600 dark:text-yellow-400'
+                                      : selectedOrder.estado === 'Incidente'
+                                        ? 'text-red-600 dark:text-red-400'
+                                        : selectedOrder.estado === 'Cancelado'
+                                          ? 'text-black dark:text-gray-300'
+                                          : selectedOrder.estado ===
+                                              'Finalizado'
+                                            ? 'text-green-800 dark:text-green-600'
+                                            : 'text-gray-600 dark:text-gray-400'
                         }`}
                       >
                         {selectedOrder.estado}
@@ -1066,7 +1080,7 @@ function WizardAlquiler({ onNavigate, setPedidos }) {
                       </p>
                       <p className="font-semibold text-sm sm:text-base text-gray-900 dark:text-white break-words leading-relaxed">
                         {selectedOrder.cliente.direccion ||
-                          "Cliente sin dirección"}
+                          'Cliente sin dirección'}
                       </p>
                     </div>
                   </div>
@@ -1093,11 +1107,11 @@ function WizardAlquiler({ onNavigate, setPedidos }) {
                       <p className="font-bold text-gray-900 dark:text-white text-sm">
                         {new Date(
                           selectedOrder.fechas.inicio
-                        ).toLocaleDateString("es-ES", {
-                          weekday: "short",
-                          year: "numeric",
-                          month: "short",
-                          day: "numeric",
+                        ).toLocaleDateString('es-ES', {
+                          weekday: 'short',
+                          year: 'numeric',
+                          month: 'short',
+                          day: 'numeric',
                         })}
                       </p>
                     </div>
@@ -1108,11 +1122,11 @@ function WizardAlquiler({ onNavigate, setPedidos }) {
                       <p className="font-bold text-gray-900 dark:text-white text-sm">
                         {new Date(
                           selectedOrder.fechas.entrega
-                        ).toLocaleDateString("es-ES", {
-                          weekday: "short",
-                          year: "numeric",
-                          month: "short",
-                          day: "numeric",
+                        ).toLocaleDateString('es-ES', {
+                          weekday: 'short',
+                          year: 'numeric',
+                          month: 'short',
+                          day: 'numeric',
                         })}
                       </p>
                     </div>
@@ -1180,8 +1194,8 @@ function WizardAlquiler({ onNavigate, setPedidos }) {
                             key={index}
                             className={`${
                               index % 2 === 0
-                                ? "bg-white dark:bg-gray-900"
-                                : "bg-gray-50 dark:bg-gray-800"
+                                ? 'bg-white dark:bg-gray-900'
+                                : 'bg-gray-50 dark:bg-gray-800'
                             }`}
                           >
                             <td className="px-4 py-3 text-gray-900 dark:text-white">
@@ -1297,14 +1311,14 @@ function WizardAlquiler({ onNavigate, setPedidos }) {
                         </p>
                         <p
                           className={`text-lg font-bold capitalize ${
-                            selectedOrder.pago.estadoPago === "completado"
-                              ? "text-green-600 dark:text-green-400"
-                              : selectedOrder.pago.estadoPago === "parcial"
-                              ? "text-yellow-600 dark:text-yellow-400"
-                              : "text-red-600 dark:text-red-400"
+                            selectedOrder.pago.estadoPago === 'completado'
+                              ? 'text-green-600 dark:text-green-400'
+                              : selectedOrder.pago.estadoPago === 'parcial'
+                                ? 'text-yellow-600 dark:text-yellow-400'
+                                : 'text-red-600 dark:text-red-400'
                           }`}
                         >
-                          {selectedOrder.pago.estadoPago || "pendiente"}
+                          {selectedOrder.pago.estadoPago || 'pendiente'}
                         </p>
                       </div>
                     </div>
@@ -1314,7 +1328,6 @@ function WizardAlquiler({ onNavigate, setPedidos }) {
             )}
           </div>
         </div>
-        
       </div>
     </div>
   );
@@ -1351,15 +1364,15 @@ function WizardAlquiler({ onNavigate, setPedidos }) {
                       key={step}
                       className={`flex flex-col items-center ${
                         currentStep === step
-                          ? "text-yellow-600 dark:text-yellow-400"
-                          : "text-gray-400 dark:text-gray-300"
+                          ? 'text-yellow-600 dark:text-yellow-400'
+                          : 'text-gray-400 dark:text-gray-300'
                       }`}
                     >
                       <div
                         className={`h-8 w-8 flex items-center justify-center rounded-full border-2 ${
                           currentStep >= step
-                            ? "border-yellow-500 dark:border-yellow-400"
-                            : "border-gray-400 dark:border-gray-600"
+                            ? 'border-yellow-500 dark:border-yellow-400'
+                            : 'border-gray-400 dark:border-gray-600'
                         }`}
                       >
                         {step === 1 && (
@@ -1377,12 +1390,12 @@ function WizardAlquiler({ onNavigate, setPedidos }) {
                       </div>
                       <span className="text-xs mt-1">
                         {step === 1
-                          ? "Datos"
+                          ? 'Datos'
                           : step === 2
-                          ? "Ubicación"
-                          : step === 3
-                          ? "Producto"
-                          : "Confirmación"}
+                            ? 'Ubicación'
+                            : step === 3
+                              ? 'Producto'
+                              : 'Confirmación'}
                       </span>
                     </div>
                   ))}
@@ -1413,8 +1426,8 @@ function WizardAlquiler({ onNavigate, setPedidos }) {
                       disabled={!canGoNext()}
                       className={`px-4 py-2 rounded transition ${
                         canGoNext()
-                          ? "bg-yellow-500 text-white hover:bg-yellow-600 dark:bg-yellow-500 dark:hover:bg-yellow-600"
-                          : "bg-gray-400 text-gray-200 cursor-not-allowed dark:bg-gray-600"
+                          ? 'bg-yellow-500 text-white hover:bg-yellow-600 dark:bg-yellow-500 dark:hover:bg-yellow-600'
+                          : 'bg-gray-400 text-gray-200 cursor-not-allowed dark:bg-gray-600'
                       }`}
                     >
                       Siguiente
@@ -1427,8 +1440,8 @@ function WizardAlquiler({ onNavigate, setPedidos }) {
                       disabled={isSubmitting}
                       className={`px-4 py-2 rounded transition flex items-center justify-center ${
                         isSubmitting
-                          ? "bg-green-400 cursor-not-allowed dark:bg-green-500"
-                          : "bg-green-600 text-white hover:bg-green-700 dark:bg-green-600 dark:hover:bg-green-700"
+                          ? 'bg-green-400 cursor-not-allowed dark:bg-green-500'
+                          : 'bg-green-600 text-white hover:bg-green-700 dark:bg-green-600 dark:hover:bg-green-700'
                       }`}
                     >
                       {isSubmitting ? (
@@ -1456,7 +1469,7 @@ function WizardAlquiler({ onNavigate, setPedidos }) {
                           Procesando...
                         </>
                       ) : (
-                        "Finalizar"
+                        'Finalizar'
                       )}
                     </button>
                   )}
@@ -1503,8 +1516,8 @@ function WizardAlquiler({ onNavigate, setPedidos }) {
                   disabled={!emailParaVerificar.trim()}
                   className={`px-4 py-2 rounded transition ${
                     emailParaVerificar.trim()
-                      ? "bg-yellow-500 text-white hover:bg-yellow-600 dark:bg-yellow-500 dark:hover:bg-yellow-600"
-                      : "bg-gray-400 text-gray-200 cursor-not-allowed dark:bg-gray-600"
+                      ? 'bg-yellow-500 text-white hover:bg-yellow-600 dark:bg-yellow-500 dark:hover:bg-yellow-600'
+                      : 'bg-gray-400 text-gray-200 cursor-not-allowed dark:bg-gray-600'
                   }`}
                 >
                   {cargandoVerificacion ? (
@@ -1513,7 +1526,7 @@ function WizardAlquiler({ onNavigate, setPedidos }) {
                       <span>Validando...</span>
                     </div>
                   ) : (
-                    "Validar"
+                    'Validar'
                   )}
                 </button>
               </div>

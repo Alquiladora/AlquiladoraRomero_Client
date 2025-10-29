@@ -1,5 +1,4 @@
-
-jest.mock("react-toastify", () => ({
+jest.mock('react-toastify', () => ({
   toast: {
     success: jest.fn(),
     error: jest.fn(),
@@ -8,17 +7,16 @@ jest.mock("react-toastify", () => ({
   },
 }));
 
-jest.mock("../../../utils/AxiosConfig", () => ({
+jest.mock('../../../utils/AxiosConfig', () => ({
   get: jest.fn(),
   post: jest.fn(),
 }));
 
-jest.mock("../../../hooks/ContextAuth", () => ({
+jest.mock('../../../hooks/ContextAuth', () => ({
   useAuth: jest.fn(),
 }));
 
-
-jest.mock("@fortawesome/react-fontawesome", () => ({
+jest.mock('@fortawesome/react-fontawesome', () => ({
   FontAwesomeIcon: (props) => {
     return <i data-testid="fa-icon" className={`fa-${props.icon.iconName}`} />;
   },

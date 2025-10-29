@@ -1,5 +1,5 @@
-import React from "react";
-import Logo from "../../img/Logos/LogoOriginal.png";
+import React from 'react';
+import Logo from '../../img/Logos/LogoOriginal.png';
 
 const CustomLoading = ({ progress = 0 }) => {
   return (

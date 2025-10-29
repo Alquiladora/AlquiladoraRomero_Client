@@ -1,8 +1,12 @@
-import React, { useState } from "react";
-import Swal from "sweetalert2";
-import withReactContent from "sweetalert2-react-content";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faCheckCircle, faExclamationCircle, faInfoCircle } from "@fortawesome/free-solid-svg-icons";
+import React, { useState } from 'react';
+import Swal from 'sweetalert2';
+import withReactContent from 'sweetalert2-react-content';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import {
+  faCheckCircle,
+  faExclamationCircle,
+  faInfoCircle,
+} from '@fortawesome/free-solid-svg-icons';
 
 // Componente para alertas de éxito
 export const AlertSuccess = ({ message, onClose }) => {
@@ -17,8 +21,8 @@ export const AlertSuccess = ({ message, onClose }) => {
     customClass: {
       popup: 'small-alert',
       title: 'alert-icon',
-      content: 'alert-content'
-    }
+      content: 'alert-content',
+    },
   });
   return null;
 };
@@ -28,7 +32,9 @@ export const AlertError = ({ message, onClose }) => {
   const MySwal = withReactContent(Swal);
   MySwal.fire({
     icon: 'error',
-    title: <FontAwesomeIcon icon={faExclamationCircle} className="text-red-500" />,
+    title: (
+      <FontAwesomeIcon icon={faExclamationCircle} className="text-red-500" />
+    ),
     text: message,
     showConfirmButton: false,
     timer: 3000,
@@ -36,8 +42,8 @@ export const AlertError = ({ message, onClose }) => {
     customClass: {
       popup: 'small-alert',
       title: 'alert-icon',
-      content: 'alert-content'
-    }
+      content: 'alert-content',
+    },
   });
   return null;
 };
@@ -55,8 +61,8 @@ export const AlertInfo = ({ message, onClose }) => {
     customClass: {
       popup: 'small-alert',
       title: 'alert-icon',
-      content: 'alert-content'
-    }
+      content: 'alert-content',
+    },
   });
   return null;
 };
@@ -72,13 +78,13 @@ export const useAlert = () => {
 
     let alertComponent;
     switch (type) {
-      case "success":
+      case 'success':
         alertComponent = <AlertSuccess message={message} onClose={onClose} />;
         break;
-      case "error":
+      case 'error':
         alertComponent = <AlertError message={message} onClose={onClose} />;
         break;
-      case "info":
+      case 'info':
         alertComponent = <AlertInfo message={message} onClose={onClose} />;
         break;
       default:
@@ -95,7 +101,7 @@ export const useAlert = () => {
 
   return {
     alert,
-    showAlert
+    showAlert,
   };
 };
 
@@ -128,7 +134,7 @@ const styles = `
 `;
 
 // Inserta los estilos en el documento
-const styleSheet = document.createElement("style");
-styleSheet.type = "text/css";
+const styleSheet = document.createElement('style');
+styleSheet.type = 'text/css';
 styleSheet.innerText = styles;
 document.head.appendChild(styleSheet);

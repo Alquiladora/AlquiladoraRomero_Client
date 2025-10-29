@@ -1,11 +1,11 @@
-import React, { useContext } from "react";
-import { ThemeContext } from "../../hooks/ContextThem";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faMoon, faSun } from "@fortawesome/free-solid-svg-icons";
+import React, { useContext } from 'react';
+import { ThemeContext } from '../../hooks/ContextThem';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faMoon, faSun } from '@fortawesome/free-solid-svg-icons';
 
 const ToggleThemeButton = () => {
   const { theme, toggleTheme } = useContext(ThemeContext);
-  const isLight = theme === "light"; 
+  const isLight = theme === 'light';
 
   return (
     <button
@@ -18,11 +18,7 @@ const ToggleThemeButton = () => {
         focus:ring-4 focus:ring-yellow-300
         transition-all duration-300
         hover:scale-105 hover:shadow-md active:scale-95
-        ${
-          isLight
-            ? "bg-gray-200 text-gray-800"
-            : "bg-gray-700 text-yellow-300"
-        }
+        ${isLight ? 'bg-gray-200 text-gray-800' : 'bg-gray-700 text-yellow-300'}
       `}
     >
       <FontAwesomeIcon
@@ -32,7 +28,7 @@ const ToggleThemeButton = () => {
           transform
           transition-transform
           duration-300
-          ${isLight ? "rotate-0" : "rotate-180"}
+          ${isLight ? 'rotate-0' : 'rotate-180'}
         `}
       />
     </button>

@@ -1,24 +1,30 @@
-import React from "react";
-import { useNavigate } from "react-router-dom";
-import { FaCheckCircle, FaHome } from "react-icons/fa"; // Cambiado FaArrowLeft por FaHome para un sentido más claro
-import { motion } from "framer-motion"; // Para añadir animaciones sutiles
+import React from 'react';
+import { useNavigate } from 'react-router-dom';
+import { FaCheckCircle, FaHome } from 'react-icons/fa'; // Cambiado FaArrowLeft por FaHome para un sentido más claro
+import { motion } from 'framer-motion'; // Para añadir animaciones sutiles
 
 const MensajeCompraExitosa = () => {
-
   const navigate = useNavigate();
 
   const handleVolverInicio = () => {
-    navigate("/"); // Redirigir a la página principal
+    navigate('/'); // Redirigir a la página principal
   };
 
   const containerVariants = {
     hidden: { opacity: 0, scale: 0.9 },
-    visible: { opacity: 1, scale: 1, transition: { duration: 0.5, ease: "easeOut" } },
+    visible: {
+      opacity: 1,
+      scale: 1,
+      transition: { duration: 0.5, ease: 'easeOut' },
+    },
   };
 
   const iconVariants = {
     hidden: { scale: 0 },
-    visible: { scale: 1, transition: { duration: 0.6, type: "spring", stiffness: 100 } },
+    visible: {
+      scale: 1,
+      transition: { duration: 0.6, type: 'spring', stiffness: 100 },
+    },
   };
 
   return (
@@ -32,7 +38,10 @@ const MensajeCompraExitosa = () => {
       >
         {/* Icono de éxito con animación */}
         <motion.div variants={iconVariants}>
-          <FaCheckCircle size={80} className="text-yellow-500 dark:text-yellow-400 mx-auto mb-6 drop-shadow-lg" />
+          <FaCheckCircle
+            size={80}
+            className="text-yellow-500 dark:text-yellow-400 mx-auto mb-6 drop-shadow-lg"
+          />
         </motion.div>
 
         {/* Título */}
@@ -43,9 +52,8 @@ const MensajeCompraExitosa = () => {
         {/* Mensaje principal */}
         <p className="text-lg sm:text-xl text-gray-700 dark:text-gray-300 mb-8 leading-relaxed">
           Tu alquiler ha sido procesado con éxito.
-         
         </p>
-        
+
         <p className="text-base sm:text-lg text-gray-600 dark:text-gray-400 mb-8">
           ¡Gracias por elegirnos para tus eventos! Esperamos verte pronto.
         </p>

@@ -1,6 +1,6 @@
-import React from "react";
-import { motion } from "framer-motion";
-import { RefreshCw, ServerCrash } from "lucide-react";
+import React from 'react';
+import { motion } from 'framer-motion';
+import { RefreshCw, ServerCrash } from 'lucide-react';
 
 // --- Variantes de Animación Refinadas ---
 const containerVariants = {
@@ -19,12 +19,12 @@ const itemVariants = {
   visible: {
     opacity: 1,
     y: 0,
-    transition: { type: "spring", stiffness: 100, damping: 12 },
+    transition: { type: 'spring', stiffness: 100, damping: 12 },
   },
 };
 
 const Error500 = () => {
-  const handleReload = () => window.location.replace("/");
+  const handleReload = () => window.location.replace('/');
 
   return (
     <div className="relative flex items-center justify-center min-h-screen px-4 sm:px-6 lg:px-8 py-10 sm:py-16 bg-slate-100 dark:bg-slate-900 overflow-hidden">
@@ -47,7 +47,10 @@ const Error500 = () => {
         >
           <div className="absolute inset-0 bg-red-500/10 rounded-full blur-xl animate-pulse-slow"></div>
           <div className="relative flex items-center justify-center w-20 h-20 sm:w-24 sm:h-24 bg-white dark:bg-slate-800 rounded-full shadow-inner ring-1 ring-slate-200 dark:ring-slate-700">
-            <ServerCrash className="w-10 h-10 sm:w-12 sm:h-12 text-red-500" strokeWidth={1.5} />
+            <ServerCrash
+              className="w-10 h-10 sm:w-12 sm:h-12 text-red-500"
+              strokeWidth={1.5}
+            />
           </div>
         </motion.div>
 
@@ -70,8 +73,8 @@ const Error500 = () => {
           className="max-w-md text-sm sm:text-base md:text-lg text-slate-600 dark:text-slate-300 mb-6 sm:mb-8"
           variants={itemVariants}
         >
-          Nuestro equipo ha sido notificado y estamos trabajando para solucionarlo. 
-          Por favor, intenta regresar al inicio.
+          Nuestro equipo ha sido notificado y estamos trabajando para
+          solucionarlo. Por favor, intenta regresar al inicio.
         </motion.p>
 
         {/* Botón */}

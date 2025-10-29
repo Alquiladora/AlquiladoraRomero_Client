@@ -16,16 +16,18 @@ const ReportGenerator = ({ inventory }) => {
     if (inventory.length > 0) {
       // Agrupar productos por nombre para evitar duplicados y combinar colores
       const uniqueProducts = [];
-      inventory.forEach(item => {
-        const existingProduct = uniqueProducts.find(p => p.nombre === item.nombre && item.es_principal === 1);
+      inventory.forEach((item) => {
+        const existingProduct = uniqueProducts.find(
+          (p) => p.nombre === item.nombre && item.es_principal === 1
+        );
         if (!existingProduct) {
           uniqueProducts.push({
             ...item,
             colores: inventory
-              .filter(i => i.nombre === item.nombre && i.es_principal === 1)
-              .map(i => i.estado) // Suponiendo que 'estado' contiene el color
-              .filter(color => color && color !== 'N/A')
-              .join(', ')
+              .filter((i) => i.nombre === item.nombre && i.es_principal === 1)
+              .map((i) => i.estado) // Suponiendo que 'estado' contiene el color
+              .filter((color) => color && color !== 'N/A')
+              .join(', '),
           });
         }
       });
@@ -57,7 +59,8 @@ const ReportGenerator = ({ inventory }) => {
             </thead>
             <tbody>
               ${uniqueProducts
-                .map((item, index) => `
+                .map(
+                  (item, index) => `
                   <tr style="background-color: ${index % 2 === 0 ? '#ffffff' : '#f7fafc'};">
                     <td style="border: 1px solid #cbd5e0; padding: 4px; text-align: center; color: #4a5568;">${item.stock}</td>
                     <td style="border: 1px solid #cbd5e0; padding: 4px; text-align: left; color: #4a5568;">${item.nombre}</td>
@@ -65,19 +68,30 @@ const ReportGenerator = ({ inventory }) => {
                     <td style="border: 1px solid #cbd5e0; padding: 4px; text-align: center; color: #4a5568;">${item.stock * (item.precioAlquiler || 0)}</td>
                     <td style="border: 1px solid #cbd5e0; padding: 4px; text-align: center; color: #4a5568;">${item.colores || 'N/A'}</td>
                   </tr>
-                `).join('')}
+                `
+                )
+                .join('')}
               <tr style="background-color: #edf2f7;">
                 <td colspan="4" style="border: 1px solid #cbd5e0; padding: 6px; text-align: right; color: #1a202c; font-weight: bold;">Total</td>
                 <td style="border: 1px solid #cbd5e0; padding: 6px; text-align: center; color: #1a202c; font-weight: bold;">${uniqueProducts
-                  .reduce((sum, item) => sum + (item.stock * (item.precioAlquiler || 0)), 0)
+                  .reduce(
+                    (sum, item) =>
+                      sum + item.stock * (item.precioAlquiler || 0),
+                    0
+                  )
                   .toFixed(2)}</td>
               </tr>
             </tbody>
           </table>
           <p style="margin-top: 15px; font-size: 12px; color: #4a5568; text-align: left;"><strong style="color: #1a202c;">Notas:</strong> Este reporte refleja el estado del inventario al ${new Date().toLocaleString('es-MX', { timeZone: 'America/Mexico_City', hour12: true }).replace(/,/g, '')}.</p>
-          <p style="font-size: 12px; color: #4a5568; text-align: left; word-wrap: break-word; max-width: 100%;"><strong style="color: #1a202c;">Importe con letra:</strong> ${numberToWords(uniqueProducts
-            .reduce((sum, item) => sum + (item.stock * (item.precioAlquiler || 0)), 0)
-            .toFixed(2))} pesos.</p>
+          <p style="font-size: 12px; color: #4a5568; text-align: left; word-wrap: break-word; max-width: 100%;"><strong style="color: #1a202c;">Importe con letra:</strong> ${numberToWords(
+            uniqueProducts
+              .reduce(
+                (sum, item) => sum + item.stock * (item.precioAlquiler || 0),
+                0
+              )
+              .toFixed(2)
+          )} pesos.</p>
         </div>
       `;
       setPreviewData(preview);
@@ -89,7 +103,7 @@ const ReportGenerator = ({ inventory }) => {
     setLoading(true);
     try {
       const doc = new jsPDF();
-      
+
       // Encabezado con imagen y texto en la misma línea
       const imgWidth = 35;
       const imgHeight = 35;
@@ -100,46 +114,59 @@ const ReportGenerator = ({ inventory }) => {
       doc.setFontSize(12);
       doc.setTextColor(74, 85, 104);
       doc.text('Tel: 771 300 0849 | 709 600 5949', 130, 35, { align: 'left' });
-      doc.text('Av. San Luis Potosí 58, Col. Tahui, Huajuapan de Reyes, Oaxaca, México', 130, 42, { align: 'left' });
+      doc.text(
+        'Av. San Luis Potosí 58, Col. Tahui, Huajuapan de Reyes, Oaxaca, México',
+        130,
+        42,
+        { align: 'left' }
+      );
       doc.setLineWidth(1);
       doc.setDrawColor(226, 232, 240);
       doc.line(20, 50, 190, 50);
       doc.setFontSize(18);
       doc.setTextColor(26, 32, 44);
-      doc.text('Reporte de Inventario - No. 0600', 105, 60, { align: 'center' });
+      doc.text('Reporte de Inventario - No. 0600', 105, 60, {
+        align: 'center',
+      });
       doc.line(20, 65, 190, 65);
 
       // Datos del cliente y fecha
       doc.setFontSize(12);
       doc.setTextColor(74, 85, 104);
       doc.text('Cliente: Inventario General', 20, 75);
-      doc.text(`Fecha: ${new Date().toLocaleString('es-MX', { timeZone: 'America/Mexico_City', hour12: true }).replace(/,/g, '')}`, 20, 82);
+      doc.text(
+        `Fecha: ${new Date().toLocaleString('es-MX', { timeZone: 'America/Mexico_City', hour12: true }).replace(/,/g, '')}`,
+        20,
+        82
+      );
 
       // Datos de la tabla
       const uniqueProducts = [];
-      inventory.forEach(item => {
-        const existingProduct = uniqueProducts.find(p => p.nombre === item.nombre && item.es_principal === 1);
+      inventory.forEach((item) => {
+        const existingProduct = uniqueProducts.find(
+          (p) => p.nombre === item.nombre && item.es_principal === 1
+        );
         if (!existingProduct) {
           uniqueProducts.push({
             ...item,
             colores: inventory
-              .filter(i => i.nombre === item.nombre && i.es_principal === 1)
-              .map(i => i.estado)
-              .filter(color => color && color !== 'N/A')
-              .join(', ')
+              .filter((i) => i.nombre === item.nombre && i.es_principal === 1)
+              .map((i) => i.estado)
+              .filter((color) => color && color !== 'N/A')
+              .join(', '),
           });
         }
       });
 
-      const tableData = uniqueProducts.map(item => [
+      const tableData = uniqueProducts.map((item) => [
         item.stock,
         item.nombre,
         item.precioAlquiler ? `$${item.precioAlquiler}` : 'N/A',
         item.stock * (item.precioAlquiler || 0),
-        item.colores || 'N/A'
+        item.colores || 'N/A',
       ]);
       const total = uniqueProducts
-        .reduce((sum, item) => sum + (item.stock * (item.precioAlquiler || 0)), 0)
+        .reduce((sum, item) => sum + item.stock * (item.precioAlquiler || 0), 0)
         .toFixed(2);
 
       autoTable(doc, {
@@ -147,24 +174,56 @@ const ReportGenerator = ({ inventory }) => {
         head: [['Cant.', 'Producto', 'Precio', 'Importe', 'Colores']],
         body: tableData,
         theme: 'grid',
-        headStyles: { fillColor: [237, 242, 247], textColor: [26, 32, 44], fontSize: 10, halign: 'center', fontStyle: 'bold' },
-        bodyStyles: { textColor: [74, 85, 104], fontSize: 8, halign: 'center', fillColor: [item => item.index % 2 === 0 ? 255 : 247, 250, 252] },
+        headStyles: {
+          fillColor: [237, 242, 247],
+          textColor: [26, 32, 44],
+          fontSize: 10,
+          halign: 'center',
+          fontStyle: 'bold',
+        },
+        bodyStyles: {
+          textColor: [74, 85, 104],
+          fontSize: 8,
+          halign: 'center',
+          fillColor: [(item) => (item.index % 2 === 0 ? 255 : 247), 250, 252],
+        },
         foot: [['', '', '', 'Total', total]],
-        footStyles: { fillColor: [237, 242, 247], textColor: [26, 32, 44], fontStyle: 'bold', halign: 'right' },
-        styles: { cellPadding: 4, fontSize: 8, lineWidth: 0.5, lineColor: [203, 213, 224] },
+        footStyles: {
+          fillColor: [237, 242, 247],
+          textColor: [26, 32, 44],
+          fontStyle: 'bold',
+          halign: 'right',
+        },
+        styles: {
+          cellPadding: 4,
+          fontSize: 8,
+          lineWidth: 0.5,
+          lineColor: [203, 213, 224],
+        },
         columnStyles: {
           0: { halign: 'center' },
           1: { halign: 'left' },
           2: { halign: 'center' },
           3: { halign: 'center' },
-          4: { halign: 'left' } // Alineación izquierda para colores
-        }
+          4: { halign: 'left' }, // Alineación izquierda para colores
+        },
       });
 
       // Notas e importe con letra
       doc.setFontSize(10);
       doc.setTextColor(74, 85, 104);
-      doc.text('Notas: Este reporte refleja el estado del inventario al ' + new Date().toLocaleString('es-MX', { timeZone: 'America/Mexico_City', hour12: true }).replace(/,/g, '') + '.', 20, doc.lastAutoTable.finalY + 10);
+      doc.text(
+        'Notas: Este reporte refleja el estado del inventario al ' +
+          new Date()
+            .toLocaleString('es-MX', {
+              timeZone: 'America/Mexico_City',
+              hour12: true,
+            })
+            .replace(/,/g, '') +
+          '.',
+        20,
+        doc.lastAutoTable.finalY + 10
+      );
       const importText = `Importe con letra: ${numberToWords(total)} pesos.`;
       const textWidth = doc.getTextWidth(importText);
       const maxWidth = 170;
@@ -175,7 +234,9 @@ const ReportGenerator = ({ inventory }) => {
         doc.text(importText, 20, doc.lastAutoTable.finalY + 18);
       }
 
-      doc.save(`Reporte_Inventario_${new Date().toISOString().split('T')[0]}.pdf`);
+      doc.save(
+        `Reporte_Inventario_${new Date().toISOString().split('T')[0]}.pdf`
+      );
       toast.success('PDF generado y descargado correctamente.');
       setShowPreview(false);
     } catch (error) {
@@ -187,9 +248,42 @@ const ReportGenerator = ({ inventory }) => {
   };
 
   const numberToWords = (number) => {
-    const units = ['', 'uno', 'dos', 'tres', 'cuatro', 'cinco', 'seis', 'siete', 'ocho', 'nueve'];
-    const teens = ['diez', 'once', 'doce', 'trece', 'catorce', 'quince', 'dieciséis', 'diecisiete', 'dieciocho', 'diecinueve'];
-    const tens = ['', '', 'veinte', 'treinta', 'cuarenta', 'cincuenta', 'sesenta', 'setenta', 'ochenta', 'noventa'];
+    const units = [
+      '',
+      'uno',
+      'dos',
+      'tres',
+      'cuatro',
+      'cinco',
+      'seis',
+      'siete',
+      'ocho',
+      'nueve',
+    ];
+    const teens = [
+      'diez',
+      'once',
+      'doce',
+      'trece',
+      'catorce',
+      'quince',
+      'dieciséis',
+      'diecisiete',
+      'dieciocho',
+      'diecinueve',
+    ];
+    const tens = [
+      '',
+      '',
+      'veinte',
+      'treinta',
+      'cuarenta',
+      'cincuenta',
+      'sesenta',
+      'setenta',
+      'ochenta',
+      'noventa',
+    ];
 
     const num = Math.floor(number);
     if (num === 0) return 'cero';
@@ -203,7 +297,9 @@ const ReportGenerator = ({ inventory }) => {
     if (num < 1000) {
       const hundred = Math.floor(num / 100);
       const rest = num % 100;
-      return units[hundred] + ' cien' + (rest > 0 ? ' ' + numberToWords(rest) : '');
+      return (
+        units[hundred] + ' cien' + (rest > 0 ? ' ' + numberToWords(rest) : '')
+      );
     }
     return num.toString();
   };
@@ -220,7 +316,9 @@ const ReportGenerator = ({ inventory }) => {
             onClick={generatePreview}
             disabled={loading || inventory.length === 0}
             className={`group flex items-center gap-2 text-sm font-semibold text-white bg-gradient-to-r from-yellow-500 to-yellow-600 hover:from-yellow-600 hover:to-yellow-700 px-6 py-3 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 ${
-              loading || inventory.length === 0 ? 'opacity-50 cursor-not-allowed' : ''
+              loading || inventory.length === 0
+                ? 'opacity-50 cursor-not-allowed'
+                : ''
             }`}
           >
             {loading ? (
@@ -241,7 +339,9 @@ const ReportGenerator = ({ inventory }) => {
       {showPreview && previewData && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg max-h-[80vh] overflow-y-auto w-full max-w-4xl">
-            <h3 className="text-2xl font-bold mb-4 text-yellow-600">Previsualización del Reporte</h3>
+            <h3 className="text-2xl font-bold mb-4 text-yellow-600">
+              Previsualización del Reporte
+            </h3>
             <div dangerouslySetInnerHTML={{ __html: previewData }} />
             <div className="mt-4 flex justify-end gap-4">
               <button

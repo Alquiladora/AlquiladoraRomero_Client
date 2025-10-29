@@ -1,5 +1,5 @@
 /* eslint-disable */
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef } from 'react';
 import {
   TextField,
   Box,
@@ -9,26 +9,26 @@ import {
   InputAdornment,
   IconButton,
   CircularProgress,
-} from "@mui/material";
-import zxcvbn from "zxcvbn";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faEye, faEyeSlash } from "@fortawesome/free-solid-svg-icons";
-import Swal from "sweetalert2";
-import { useNavigate } from "react-router-dom";
-import CryptoJS from "crypto-js";
-import anime from "animejs";
-import { useAuth } from "../../hooks/ContextAuth";
-import api from "../../utils/AxiosConfig";
-import axios from "axios";
+} from '@mui/material';
+import zxcvbn from 'zxcvbn';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faEye, faEyeSlash } from '@fortawesome/free-solid-svg-icons';
+import Swal from 'sweetalert2';
+import { useNavigate } from 'react-router-dom';
+import CryptoJS from 'crypto-js';
+import anime from 'animejs';
+import { useAuth } from '../../hooks/ContextAuth';
+import api from '../../utils/AxiosConfig';
+import axios from 'axios';
 
 const Paso3 = ({ guardarCorreo }) => {
   const [formData, setFormData] = useState({
-    nombre: "",
-    apellidoPaterno: "",
-    apellidoMaterno: "",
-    telefono: "",
-    contrasena: "",
-    confirmarContrasena: "",
+    nombre: '',
+    apellidoPaterno: '',
+    apellidoMaterno: '',
+    telefono: '',
+    contrasena: '',
+    confirmarContrasena: '',
   });
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -41,25 +41,23 @@ const Paso3 = ({ guardarCorreo }) => {
   const passwordStrengthBarRef = useRef(null);
   const [isLoading, setIsLoading] = useState(false);
 
-  const {csrfToken} = useAuth() ;
+  const { csrfToken } = useAuth();
   const [isCompromised, setIsCompromised] = useState(false);
 
-  const BASE_URL = "http://localhost:3001";
+  const BASE_URL = 'http://localhost:3001';
 
   useEffect(() => {
     const fetchUsuariosYCsrf = async () => {
       try {
         const response = await api.get(`/api/usuarios`);
         setUsuarios(response.data);
-      
       } catch (error) {
-        console.error("Error al cargar los usuarios o el token CSRF", error);
+        console.error('Error al cargar los usuarios o el token CSRF', error);
       }
     };
 
     fetchUsuariosYCsrf();
   }, [csrfToken]);
-
 
   useEffect(() => {
     if (passwordStrengthBarRef.current) {
@@ -68,7 +66,7 @@ const Paso3 = ({ guardarCorreo }) => {
         width: `${(passwordStrengthScore / 4) * 100}%`,
         backgroundColor: getPasswordStrengthColor(passwordStrengthScore),
         duration: 800,
-        easing: "easeOutQuad",
+        easing: 'easeOutQuad',
       });
     }
   }, [passwordStrengthScore]);
@@ -77,65 +75,65 @@ const Paso3 = ({ guardarCorreo }) => {
   useEffect(() => {
     anime({
       targets:
-        ".registro-form1 .MuiTextField-root, .registro-form1 .MuiButton-root",
+        '.registro-form1 .MuiTextField-root, .registro-form1 .MuiButton-root',
       opacity: [0, 1],
       translateY: [20, 0],
       delay: anime.stagger(100),
       duration: 800,
-      easing: "easeOutQuad",
+      easing: 'easeOutQuad',
     });
   }, []);
 
   const validateField = (name, value) => {
-    let error = "";
+    let error = '';
     if (
-      name === "nombre" ||
-      name === "apellidoPaterno" ||
-      name === "apellidoMaterno"
+      name === 'nombre' ||
+      name === 'apellidoPaterno' ||
+      name === 'apellidoMaterno'
     ) {
       if (!value.trim()) {
-        error = "El dato es requerido";
+        error = 'El dato es requerido';
       } else if (!/^[a-zA-Z\u00C0-\u00FF\s]+$/.test(value)) {
         error =
-          "Por favor, use solo letras (incluidos acentos y ü) y espacios.";
+          'Por favor, use solo letras (incluidos acentos y ü) y espacios.';
       } else if (value.length < 3) {
-        error = "El dato debe tener al menos 3 caracteres";
+        error = 'El dato debe tener al menos 3 caracteres';
       } else if (value.length > 30) {
-        error = "El dato no puede tener más de 30 caracteres";
+        error = 'El dato no puede tener más de 30 caracteres';
       }
-    } else if (name === "telefono") {
+    } else if (name === 'telefono') {
       if (!/^\d{10}$/.test(value)) {
-        error = "El teléfono debe tener 10 dígitos.";
+        error = 'El teléfono debe tener 10 dígitos.';
       }
-    } 
-    else if (name === "contrasena") {
+    } else if (name === 'contrasena') {
       if (!value) {
-        error = "La contraseña es requerida.";
+        error = 'La contraseña es requerida.';
       } else if (value.length < 8) {
-        error = "La contraseña debe tener al menos 8 caracteres.";
+        error = 'La contraseña debe tener al menos 8 caracteres.';
       }
       const missing = [];
       if (!/(?=.*[a-z])/.test(value)) {
-        missing.push("una letra minúscula");
+        missing.push('una letra minúscula');
       }
       if (!/(?=.*[A-Z])/.test(value)) {
-        missing.push("una letra mayúscula");
+        missing.push('una letra mayúscula');
       }
       if (!/(?=.*\d)/.test(value)) {
-        missing.push("un número");
+        missing.push('un número');
       }
       // eslint-disable-next-line no-useless-escape
       if (!/(?=.*[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?])/.test(value)) {
-        missing.push("un carácter especial");
+        missing.push('un carácter especial');
       }
       if (missing.length > 0) {
-        error = "La contraseña debe contener al menos " + missing.join(", ") + ".";
+        error =
+          'La contraseña debe contener al menos ' + missing.join(', ') + '.';
       }
       const passwordScore = zxcvbn(value).score;
       setPasswordStrengthScore(passwordScore);
-    } else if (name === "confirmarContrasena") {
+    } else if (name === 'confirmarContrasena') {
       if (value !== formData.contrasena) {
-        error = "Las contraseñas no coinciden.";
+        error = 'Las contraseñas no coinciden.';
       }
     }
     return error;
@@ -143,31 +141,32 @@ const Paso3 = ({ guardarCorreo }) => {
 
   const checkPassword = async (password) => {
     try {
-      
       const sha1Hash = CryptoJS.SHA1(password).toString().toUpperCase();
-      
+
       const prefix = sha1Hash.slice(0, 5);
       const suffix = sha1Hash.slice(5);
-  
-      
-      const { data } = await axios.get(`https://api.pwnedpasswords.com/range/${prefix}`);
-  
-      const compromisedList = data.split("\r\n");
-  
-      
+
+      const { data } = await axios.get(
+        `https://api.pwnedpasswords.com/range/${prefix}`
+      );
+
+      const compromisedList = data.split('\r\n');
+
       for (const line of compromisedList) {
-        const [returnedSuffix, count] = line.split(":");
+        const [returnedSuffix, count] = line.split(':');
         if (returnedSuffix === suffix) {
           return true;
         }
       }
       return false;
     } catch (error) {
-      console.error("Error al verificar la contraseña en Have I Been Pwned:", error);
+      console.error(
+        'Error al verificar la contraseña en Have I Been Pwned:',
+        error
+      );
       return false;
     }
   };
-  
 
   const validateForm = () => {
     const newErrors = {};
@@ -186,10 +185,9 @@ const Paso3 = ({ guardarCorreo }) => {
       [name]: value,
     });
 
-    if (name === "contrasena" && value) {
+    if (name === 'contrasena' && value) {
       const compromised = await checkPassword(value);
       setIsCompromised(compromised);
-    
     }
 
     if (touchedFields[name]) {
@@ -226,15 +224,15 @@ const Paso3 = ({ guardarCorreo }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-     setIsLoading(true);
+    setIsLoading(true);
 
     if (validateForm()) {
       if (isCompromised) {
         setErrors({
           ...errors,
-          contrasena: "Esta contraseña ha sido comprometida. Elige otra.",
+          contrasena: 'Esta contraseña ha sido comprometida. Elige otra.',
         });
-           setIsLoading(false);
+        setIsLoading(false);
         return;
       }
 
@@ -242,11 +240,11 @@ const Paso3 = ({ guardarCorreo }) => {
       const usuarioCorreo = usuariosArray.some(
         (usuario) => usuario && usuario.Correo === guardarCorreo
       );
-      console.log("usuarios correo repetido", usuarioCorreo)
+      console.log('usuarios correo repetido', usuarioCorreo);
 
       if (usuarioCorreo) {
-        setErrors("Correo ya existe");
-          setIsLoading(false);
+        setErrors('Correo ya existe');
+        setIsLoading(false);
       } else {
         try {
           const response = await api.post(
@@ -259,33 +257,33 @@ const Paso3 = ({ guardarCorreo }) => {
               telefono: formData.telefono,
               password: formData.contrasena,
             },
-          
+
             {
               headers: {
-                "X-CSRF-Token": csrfToken,
+                'X-CSRF-Token': csrfToken,
               },
               withCredentials: true,
             }
           );
-          console.log("respuesta del servidor", response)
+          console.log('respuesta del servidor', response);
 
           if (response.status == 201) {
             Swal.fire({
-              title: "¡Registro Correcto!",
-              text: "Gracias por ser parte de la familia alquiladora romero.",
-              icon: "success",
+              title: '¡Registro Correcto!',
+              text: 'Gracias por ser parte de la familia alquiladora romero.',
+              icon: 'success',
               timer: 2000,
               showConfirmButton: false,
             });
-            navigate("/login");
+            navigate('/login');
           }
         } catch (error) {
-          console.error("Error en el registro:", error);
+          console.error('Error en el registro:', error);
           setErrors({
-            api: "Hubo un error al registrar el usuario, intente más tarde.",
+            api: 'Hubo un error al registrar el usuario, intente más tarde.',
           });
         } finally {
-          setIsLoading(false); 
+          setIsLoading(false);
         }
       }
     } else {
@@ -293,38 +291,37 @@ const Paso3 = ({ guardarCorreo }) => {
     }
   };
 
-
   const getPasswordStrengthColor = (score) => {
     switch (score) {
       case 0:
-        return "#ef4444";
+        return '#ef4444';
       case 1:
-        return "#f97316";
+        return '#f97316';
       case 2:
-        return "#eab308";
+        return '#eab308';
       case 3:
-        return "#84cc16";
+        return '#84cc16';
       case 4:
-        return "#22c55e";
+        return '#22c55e';
       default:
-        return "#d1d5db";
+        return '#d1d5db';
     }
   };
 
   const getPasswordStrengthText = (score) => {
     switch (score) {
       case 0:
-        return "Muy débil";
+        return 'Muy débil';
       case 1:
-        return "Débil";
+        return 'Débil';
       case 2:
-        return "Regular";
+        return 'Regular';
       case 3:
-        return "Fuerte";
+        return 'Fuerte';
       case 4:
-        return "Muy fuerte";
+        return 'Muy fuerte';
       default:
-        return "No disponible";
+        return 'No disponible';
     }
   };
 
@@ -335,14 +332,14 @@ const Paso3 = ({ guardarCorreo }) => {
         className="login-title"
         textAlign="center"
         marginBottom="15px"
-        sx={{  color:"dark:text-white"}}
+        sx={{ color: 'dark:text-white' }}
       >
         Paso 4: Completa tu registro
       </Typography>
 
       <Alert
         severity="info"
-        sx={{ marginBottom: "15px", textAlign: "left", fontSize: "0.875rem" }}
+        sx={{ marginBottom: '15px', textAlign: 'left', fontSize: '0.875rem' }}
       >
         El número de teléfono proporcionado será utilizado para recuperar o
         cambiar la contraseña. Asegúrate de que sea un número real y accesible.
@@ -352,22 +349,22 @@ const Paso3 = ({ guardarCorreo }) => {
         component="form"
         onSubmit={handleSubmit}
         sx={{
-          display: "flex",
-          flexDirection: "column",
+          display: 'flex',
+          flexDirection: 'column',
           gap: 2,
-          maxWidth: "600px",
-          margin: "0 auto",
+          maxWidth: '600px',
+          margin: '0 auto',
         }}
-          className=" dark:text-white [&_input]:dark:text-white"
+        className=" dark:text-white [&_input]:dark:text-white"
       >
         <Box
           sx={{
-            display: "flex",
-            flexDirection: "column",
+            display: 'flex',
+            flexDirection: 'column',
             gap: 1.5,
-            width: "100%",
+            width: '100%',
           }}
-           className=" dark:text-white [&_input]:dark:text-white"
+          className=" dark:text-white [&_input]:dark:text-white"
         >
           <TextField
             label="Nombre *"
@@ -391,7 +388,7 @@ const Paso3 = ({ guardarCorreo }) => {
             fullWidth
             error={!!errors.apellidoPaterno && touchedFields.apellidoPaterno}
             helperText={touchedFields.apellidoPaterno && errors.apellidoPaterno}
-             className="[&_input]:dark:text-white  [&_label]:dark:text-[#fcb900]"   
+            className="[&_input]:dark:text-white  [&_label]:dark:text-[#fcb900]"
           />
           <TextField
             label="Apellido Materno"
@@ -409,7 +406,7 @@ const Paso3 = ({ guardarCorreo }) => {
             name="telefono"
             value={formData.telefono}
             onChange={(e) => {
-              const onlyNums = e.target.value.replace(/[^0-9]/g, "");
+              const onlyNums = e.target.value.replace(/[^0-9]/g, '');
               setFormData({
                 ...formData,
                 telefono: onlyNums.slice(0, 10),
@@ -421,8 +418,8 @@ const Paso3 = ({ guardarCorreo }) => {
             type="tel"
             inputProps={{
               maxLength: 10,
-              pattern: "[0-9]{10}",
-              title: "Ingresa un número de teléfono válido de 10 dígitos",
+              pattern: '[0-9]{10}',
+              title: 'Ingresa un número de teléfono válido de 10 dígitos',
             }}
             error={!!errors.telefono && touchedFields.telefono}
             helperText={touchedFields.telefono && errors.telefono}
@@ -431,7 +428,7 @@ const Paso3 = ({ guardarCorreo }) => {
           <TextField
             label="Contraseña *"
             name="contrasena"
-            type={showPassword ? "text" : "password"}
+            type={showPassword ? 'text' : 'password'}
             value={formData.contrasena}
             onChange={handleChange}
             onBlur={handleBlur}
@@ -457,12 +454,12 @@ const Paso3 = ({ guardarCorreo }) => {
           <TextField
             label="Confirmar Contraseña *"
             name="confirmarContrasena"
-            type={showConfirmPassword ? "text" : "password"}
+            type={showConfirmPassword ? 'text' : 'password'}
             value={formData.confirmarContrasena}
             onChange={handleChange}
             onBlur={handleBlur}
             required
-            className=" dark:text-white [&_input]:dark:text-white [&_label]:dark:text-[#fcb900]" 
+            className=" dark:text-white [&_input]:dark:text-white [&_label]:dark:text-[#fcb900]"
             fullWidth
             error={
               !!errors.confirmarContrasena && touchedFields.confirmarContrasena
@@ -476,7 +473,7 @@ const Paso3 = ({ guardarCorreo }) => {
                   <IconButton
                     onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                     edge="end"
-                    className=" dark:text-white [&_input]:dark:text-white" 
+                    className=" dark:text-white [&_input]:dark:text-white"
                   >
                     <FontAwesomeIcon
                       icon={showConfirmPassword ? faEye : faEyeSlash}
@@ -485,7 +482,6 @@ const Paso3 = ({ guardarCorreo }) => {
                 </InputAdornment>
               ),
             }}
-           
           />
         </Box>
 
@@ -493,9 +489,9 @@ const Paso3 = ({ guardarCorreo }) => {
         {isCompromised && (
           <Typography
             sx={{
-              color: "red",
-              fontSize: "0.8rem",
-              fontStyle: "italic",
+              color: 'red',
+              fontSize: '0.8rem',
+              fontStyle: 'italic',
             }}
           >
             Error: Contraseña comprometida
@@ -504,14 +500,14 @@ const Paso3 = ({ guardarCorreo }) => {
 
         {/* Medidor de seguridad de la contraseña */}
         {formData.contrasena && (
-          <Box sx={{ marginBottom: "1px", textAlign: "center" }}>
+          <Box sx={{ marginBottom: '1px', textAlign: 'center' }}>
             {passwordStrengthScore < 4 && (
               <Typography
                 sx={{
-                  color: "red",
-                  fontSize: "0.8rem",
-                  fontStyle: "italic",
-                  marginBottom: "8px",
+                  color: 'red',
+                  fontSize: '0.8rem',
+                  fontStyle: 'italic',
+                  marginBottom: '8px',
                 }}
               >
                 La contraseña debe ser "Muy fuerte" para poder registrarte.
@@ -519,17 +515,17 @@ const Paso3 = ({ guardarCorreo }) => {
             )}
             <Typography
               sx={{
-                fontWeight: "bold",
-                fontSize: "0.9rem",
-                marginBottom: "8px",
-                color: "inherit",
+                fontWeight: 'bold',
+                fontSize: '0.9rem',
+                marginBottom: '8px',
+                color: 'inherit',
               }}
             >
               Seguridad de la contraseña:
               <span
                 style={{
                   color: getPasswordStrengthColor(passwordStrengthScore),
-                  marginLeft: "6px",
+                  marginLeft: '6px',
                 }}
               >
                 {getPasswordStrengthText(passwordStrengthScore)}
@@ -537,31 +533,31 @@ const Paso3 = ({ guardarCorreo }) => {
             </Typography>
             <Box
               sx={{
-                position: "relative",
-                height: "8px",
-                borderRadius: "8px",
-                backgroundColor: "#f0f0f0",
-                overflow: "hidden",
+                position: 'relative',
+                height: '8px',
+                borderRadius: '8px',
+                backgroundColor: '#f0f0f0',
+                overflow: 'hidden',
               }}
             >
               <Box
                 ref={passwordStrengthBarRef}
                 sx={{
-                  position: "absolute",
-                  height: "100%",
+                  position: 'absolute',
+                  height: '100%',
                   width: `${(passwordStrengthScore / 4) * 100}%`,
-                  transition: "width 0.4s ease",
+                  transition: 'width 0.4s ease',
                   backgroundImage: `linear-gradient(to right, ${getPasswordStrengthColor(
                     passwordStrengthScore
                   )}, ${getPasswordStrengthColor(passwordStrengthScore)})`,
-                  borderRadius: "8px",
+                  borderRadius: '8px',
                 }}
               />
             </Box>
           </Box>
         )}
 
-          <Button
+        <Button
           type="submit"
           variant="contained"
           color="primary"
@@ -572,7 +568,7 @@ const Paso3 = ({ guardarCorreo }) => {
           {isLoading ? (
             <CircularProgress size={24} color="inherit" />
           ) : (
-            "Completar Registro"
+            'Completar Registro'
           )}
         </Button>
       </Box>

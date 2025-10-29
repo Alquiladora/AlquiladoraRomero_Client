@@ -1,5 +1,5 @@
 /* eslint-disable */
-import React, { useMemo, useState, useEffect, useReducer } from "react";
+import React, { useMemo, useState, useEffect, useReducer } from 'react';
 import {
   Search,
   Package,
@@ -24,12 +24,12 @@ import {
   AlertTriangle,
   Truck,
   Navigation,
-} from "lucide-react";
-import api from "../../../utils/AxiosConfig";
-import { useAuth } from "../../../hooks/ContextAuth";
-import { toast } from "react-toastify";
-import DatePicker from "react-datepicker";
-import "react-datepicker/dist/react-datepicker.css";
+} from 'lucide-react';
+import api from '../../../utils/AxiosConfig';
+import { useAuth } from '../../../hooks/ContextAuth';
+import { toast } from 'react-toastify';
+import DatePicker from 'react-datepicker';
+import 'react-datepicker/dist/react-datepicker.css';
 import {
   AiFillCheckCircle,
   AiOutlineCar,
@@ -39,8 +39,8 @@ import {
   AiFillExclamationCircle,
   AiOutlineCloseCircle,
   AiOutlineQuestionCircle,
-} from "react-icons/ai";
-import CustomLoading from "../../../components/spiner/SpinerGlobal";
+} from 'react-icons/ai';
+import CustomLoading from '../../../components/spiner/SpinerGlobal';
 
 // Tooltip Component
 const Tooltip = ({ content, children }) => {
@@ -76,9 +76,9 @@ const Loading = () => (
 const Notification = ({ message, type, onClose }) => (
   <div
     className={`fixed top-4 right-4 p-4 rounded-lg shadow-lg ${
-      type === "success"
-        ? "bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200"
-        : "bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200"
+      type === 'success'
+        ? 'bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200'
+        : 'bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200'
     }`}
   >
     <div className="flex justify-between items-center">
@@ -126,7 +126,7 @@ const StatCard = ({ icon: Icon, label, value, color }) => (
 );
 
 const SummaryCard = ({ totalPedidos, totalRepartidores, assignedPedidos }) => {
-  const accentColor = "#ffb300";
+  const accentColor = '#ffb300';
 
   return (
     <div className="bg-white dark:bg-gray-800 p-4 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm mb-6">
@@ -156,7 +156,7 @@ const SummaryCard = ({ totalPedidos, totalRepartidores, assignedPedidos }) => {
 
 // FilterPanel Component
 const FilterPanel = ({ onFilterChange, totalsByLocation }) => {
-  const initialFilterState = { estado: "", municipio: "", localidad: "" };
+  const initialFilterState = { estado: '', municipio: '', localidad: '' };
   const [filters, setFilters] = useState(initialFilterState);
   const [availableMunicipios, setAvailableMunicipios] = useState([]);
   const [availableLocalidades, setAvailableLocalidades] = useState([]);
@@ -174,16 +174,16 @@ const FilterPanel = ({ onFilterChange, totalsByLocation }) => {
       setAvailableLocalidades([]);
       setFilters((prevFilters) => ({
         ...prevFilters,
-        municipio: "",
-        localidad: "",
+        municipio: '',
+        localidad: '',
       }));
     } else {
       setAvailableMunicipios([]);
       setAvailableLocalidades([]);
       setFilters((prevFilters) => ({
         ...prevFilters,
-        municipio: "",
-        localidad: "",
+        municipio: '',
+        localidad: '',
       }));
     }
   }, [filters.estado, totalsByLocation]);
@@ -202,10 +202,10 @@ const FilterPanel = ({ onFilterChange, totalsByLocation }) => {
         ),
       ].sort();
       setAvailableLocalidades(localidades);
-      setFilters((prevFilters) => ({ ...prevFilters, localidad: "" }));
+      setFilters((prevFilters) => ({ ...prevFilters, localidad: '' }));
     } else {
       setAvailableLocalidades([]);
-      setFilters((prevFilters) => ({ ...prevFilters, localidad: "" }));
+      setFilters((prevFilters) => ({ ...prevFilters, localidad: '' }));
     }
   }, [filters.municipio, totalsByLocation]);
 
@@ -218,7 +218,7 @@ const FilterPanel = ({ onFilterChange, totalsByLocation }) => {
     onFilterChange(initialFilterState);
   };
 
-  const accentColor = "#ffb300";
+  const accentColor = '#ffb300';
 
   const estados = totalsByLocation
     ? [...new Set(totalsByLocation.map((loc) => loc.estado))].sort()
@@ -245,7 +245,7 @@ const FilterPanel = ({ onFilterChange, totalsByLocation }) => {
           value={filters.estado}
           onChange={(e) => setFilters({ ...filters, estado: e.target.value })}
           className="w-full p-3 border rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-gray-100 border-gray-300 dark:border-gray-600 focus:ring-2 focus:border-transparent transition"
-          style={{ "--tw-ring-color": accentColor }}
+          style={{ '--tw-ring-color': accentColor }}
         >
           <option value="">Seleccionar Estado</option>
           {estados.map((estado) => (
@@ -262,7 +262,7 @@ const FilterPanel = ({ onFilterChange, totalsByLocation }) => {
           }
           disabled={!filters.estado}
           className="w-full p-3 border rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-gray-100 border-gray-300 dark:border-gray-600 focus:ring-2 focus:border-transparent transition disabled:opacity-50 disabled:cursor-not-allowed"
-          style={{ "--tw-ring-color": accentColor }}
+          style={{ '--tw-ring-color': accentColor }}
         >
           <option value="">Seleccionar Municipio</option>
           {availableMunicipios.map((municipio) => (
@@ -279,7 +279,7 @@ const FilterPanel = ({ onFilterChange, totalsByLocation }) => {
           }
           disabled={!filters.municipio}
           className="w-full p-3 border rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-gray-100 border-gray-300 dark:border-gray-600 focus:ring-2 focus:border-transparent transition disabled:opacity-50 disabled:cursor-not-allowed"
-          style={{ "--tw-ring-color": accentColor }}
+          style={{ '--tw-ring-color': accentColor }}
         >
           <option value="">Seleccionar Localidad</option>
           {availableLocalidades.map((localidad) => (
@@ -320,8 +320,8 @@ const RepartidorCard = ({
       className={`flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-colors duration-200
         ${
           seleccionado
-            ? "bg-[#F5B800]/20 border-[#F5B800]"
-            : "bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700"
+            ? 'bg-[#F5B800]/20 border-[#F5B800]'
+            : 'bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700'
         }`}
     >
       <div className="w-10 h-10 rounded-full overflow-hidden border border-gray-300 dark:border-gray-600 flex items-center justify-center bg-gray-100 dark:bg-gray-700">
@@ -341,7 +341,7 @@ const RepartidorCard = ({
           {repartidor.nombre}
         </p>
         <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
-          {repartidor.correo || "Sin correo"}
+          {repartidor.correo || 'Sin correo'}
         </p>
         <p className="text-xs text-gray-400 dark:text-gray-500">
           {pedidosAsignados?.length || 0} pedidos asignados
@@ -353,17 +353,17 @@ const RepartidorCard = ({
 
 // Format Date Function
 const formatDate = (dateString) => {
-  if (!dateString) return "Fecha no disponible";
-  const options = { year: "numeric", month: "short", day: "numeric" };
-  return new Date(dateString).toLocaleDateString("es-MX", options);
+  if (!dateString) return 'Fecha no disponible';
+  const options = { year: 'numeric', month: 'short', day: 'numeric' };
+  return new Date(dateString).toLocaleDateString('es-MX', options);
 };
 
 // Format Phone Number for WhatsApp
 const formatPhoneNumberForWhatsApp = (phone) => {
   if (!phone) return null;
-  let cleanPhone = phone.toString().replace(/\D/g, "");
+  let cleanPhone = phone.toString().replace(/\D/g, '');
   if (cleanPhone.length === 10) {
-    cleanPhone = "52" + cleanPhone;
+    cleanPhone = '52' + cleanPhone;
   }
   return cleanPhone;
 };
@@ -374,7 +374,7 @@ const PedidoCard = ({ pedido, seleccionado, onToggle }) => {
   const totalPagado = parseFloat(pedido.totalPagado) || 0;
   const isFullyPaid = totalAPagar > 0 && totalAPagar === totalPagado;
   const displayDate = formatDate(
-    pedido.tipo === "entrega"
+    pedido.tipo === 'entrega'
       ? pedido.fechaEntrega
       : pedido.entregaReal || pedido.fechaInicio
   );
@@ -395,22 +395,22 @@ const PedidoCard = ({ pedido, seleccionado, onToggle }) => {
     try {
       const response = await api.put(
         `/api/repartidor/pedidos/${pedido.id}`,
-        { estadoActual: "Cancelado" },
+        { estadoActual: 'Cancelado' },
         {
-          headers: { "X-CSRF-Token": csrfToken },
+          headers: { 'X-CSRF-Token': csrfToken },
           withCredentials: true,
         }
       );
-      toast.success(response.data.message || "Pedido cancelado exitosamente.");
+      toast.success(response.data.message || 'Pedido cancelado exitosamente.');
       onToggle(pedido.id);
       window.dispatchEvent(
-        new CustomEvent("updatePedidos", { detail: { id: pedido.id } })
+        new CustomEvent('updatePedidos', { detail: { id: pedido.id } })
       );
     } catch (error) {
       const errorMessage =
         error.response?.data?.message ||
-        "Error al cancelar el pedido. Inténtalo de nuevo.";
-      console.error("Error al cancelar el pedido:", error);
+        'Error al cancelar el pedido. Inténtalo de nuevo.';
+      console.error('Error al cancelar el pedido:', error);
       toast.error(errorMessage);
     } finally {
       setIsCanceling(false);
@@ -426,19 +426,19 @@ const PedidoCard = ({ pedido, seleccionado, onToggle }) => {
         min-h-[120px] sm:min-h-[140px] hover:shadow-lg hover:scale-[1.01]
         ${
           seleccionado
-            ? "border-amber-400 ring-2 ring-amber-100 dark:ring-amber-900/50 shadow-lg bg-gradient-to-br from-amber-50 to-white dark:from-amber-900/10 dark:to-gray-800"
-            : "border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600"
+            ? 'border-amber-400 ring-2 ring-amber-100 dark:ring-amber-900/50 shadow-lg bg-gradient-to-br from-amber-50 to-white dark:from-amber-900/10 dark:to-gray-800'
+            : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'
         }
-        ${pedido.atrasado ? "border-red-200 dark:border-red-800" : ""}
+        ${pedido.atrasado ? 'border-red-200 dark:border-red-800' : ''}
       `}
     >
       <div
         className={`absolute left-0 top-0 bottom-0 w-2 ${
           pedido.atrasado
-            ? "bg-gradient-to-b from-red-400 to-red-600"
-            : pedido.tipo === "entrega"
-            ? "bg-gradient-to-b from-green-400 to-green-600"
-            : "bg-gradient-to-b from-orange-400 to-orange-600"
+            ? 'bg-gradient-to-b from-red-400 to-red-600'
+            : pedido.tipo === 'entrega'
+              ? 'bg-gradient-to-b from-green-400 to-green-600'
+              : 'bg-gradient-to-b from-orange-400 to-orange-600'
         }`}
       />
 
@@ -446,10 +446,10 @@ const PedidoCard = ({ pedido, seleccionado, onToggle }) => {
         <div className="absolute -top-1 -right-1 z-10">
           <div
             className={`bg-${
-              pedido.atrasado ? "red" : "red"
+              pedido.atrasado ? 'red' : 'red'
             }-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow-md animate-pulse`}
           >
-            {pedido.atrasado ? "ATRASADO" : "URGENTE"}
+            {pedido.atrasado ? 'ATRASADO' : 'URGENTE'}
           </div>
         </div>
       )}
@@ -481,10 +481,10 @@ const PedidoCard = ({ pedido, seleccionado, onToggle }) => {
                 className={`inline-flex items-center px-2 py-1 rounded-full text-[11px] font-semibold
                 ${
                   pedido.atrasado
-                    ? "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400"
-                    : pedido.tipo === "entrega"
-                    ? "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400"
-                    : "bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-400"
+                    ? 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400'
+                    : pedido.tipo === 'entrega'
+                      ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400'
+                      : 'bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-400'
                 }`}
               >
                 {pedido.atrasado ? (
@@ -492,7 +492,7 @@ const PedidoCard = ({ pedido, seleccionado, onToggle }) => {
                     <AlertTriangle className="h-3 w-3 mr-1" />
                     Atrasado
                   </>
-                ) : pedido.tipo === "entrega" ? (
+                ) : pedido.tipo === 'entrega' ? (
                   <>
                     <Truck className="h-3 w-3 mr-1" />
                     Entrega
@@ -588,7 +588,7 @@ const PedidoCard = ({ pedido, seleccionado, onToggle }) => {
                 e.stopPropagation();
                 handleCancel();
               }}
-              disabled={isCanceling || pedido.status === "Cancelado"}
+              disabled={isCanceling || pedido.status === 'Cancelado'}
               className="inline-flex items-center gap-1 px-2 py-0.5 bg-red-500 hover:bg-red-600 text-white text-[11px] font-semibold rounded-full transition-all duration-200 hover:scale-105 disabled:bg-gray-400 disabled:cursor-not-allowed"
             >
               {isCanceling ? (
@@ -647,8 +647,8 @@ const Pagination = ({ currentPage, totalPages, onPageChange, localityKey }) => {
         disabled={currentPage === 1}
         className={`px-3 py-1 rounded-lg text-sm font-medium transition-colors duration-200 ${
           currentPage === 1
-            ? "bg-gray-300 dark:bg-gray-700 text-gray-500 dark:text-gray-400 cursor-not-allowed"
-            : "bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100 hover:bg-gray-200 dark:hover:bg-gray-700"
+            ? 'bg-gray-300 dark:bg-gray-700 text-gray-500 dark:text-gray-400 cursor-not-allowed'
+            : 'bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100 hover:bg-gray-200 dark:hover:bg-gray-700'
         }`}
       >
         Anterior
@@ -664,8 +664,8 @@ const Pagination = ({ currentPage, totalPages, onPageChange, localityKey }) => {
           onClick={() => onPageChange(localityKey, page)}
           className={`px-3 py-1 rounded-lg text-sm font-medium transition-colors duration-200 ${
             currentPage === page
-              ? "bg-indigo-600 dark:bg-indigo-700 text-white"
-              : "bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100 hover:bg-gray-200 dark:hover:bg-gray-700"
+              ? 'bg-indigo-600 dark:bg-indigo-700 text-white'
+              : 'bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100 hover:bg-gray-200 dark:hover:bg-gray-700'
           }`}
         >
           {page}
@@ -681,8 +681,8 @@ const Pagination = ({ currentPage, totalPages, onPageChange, localityKey }) => {
         disabled={currentPage === totalPages}
         className={`px-3 py-1 rounded-lg text-sm font-medium transition-colors duration-200 ${
           currentPage === totalPages
-            ? "bg-gray-300 dark:bg-gray-700 text-gray-500 dark:text-gray-400 cursor-not-allowed"
-            : "bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100 hover:bg-gray-200 dark:hover:bg-gray-700"
+            ? 'bg-gray-300 dark:bg-gray-700 text-gray-500 dark:text-gray-400 cursor-not-allowed'
+            : 'bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100 hover:bg-gray-200 dark:hover:bg-gray-700'
         }`}
       >
         Siguiente
@@ -693,58 +693,58 @@ const Pagination = ({ currentPage, totalPages, onPageChange, localityKey }) => {
 
 const HistorialCard = ({ repartidor, pedidos, onViewDetails }) => {
   const entregaCount = pedidos.filter(
-    (p) => p.tipoPedidoEstado === "Enviando"
+    (p) => p.tipoPedidoEstado === 'Enviando'
   ).length;
   const recogidaCount = pedidos.filter(
-    (p) => p.tipoPedidoEstado === "Recogiendo"
+    (p) => p.tipoPedidoEstado === 'Recogiendo'
   ).length;
   const tipos = [];
-  if (entregaCount > 0) tipos.push("Enviando");
-  if (recogidaCount > 0) tipos.push("Recogiendo");
+  if (entregaCount > 0) tipos.push('Enviando');
+  if (recogidaCount > 0) tipos.push('Recogiendo');
 
   const stateStyles = {
     confirmado: {
-      color: "text-green-500",
+      color: 'text-green-500',
       icon: <AiFillCheckCircle className="h-4 w-4" />,
     },
     enviando: {
-      color: "text-blue-500",
+      color: 'text-blue-500',
       icon: <AiOutlineCar className="h-4 w-4" />,
     },
-    "en alquiler": {
-      color: "text-purple-500",
+    'en alquiler': {
+      color: 'text-purple-500',
       icon: <AiOutlineCar className="h-4 w-4" />,
     },
     recogiendo: {
-      color: "text-yellow-500",
+      color: 'text-yellow-500',
       icon: <AiOutlineShoppingCart className="h-4 w-4" />,
     },
     devuelto: {
-      color: "text-gray-300",
+      color: 'text-gray-300',
       icon: <AiOutlineUndo className="h-4 w-4" />,
     },
     incompleto: {
-      color: "text-yellow-600",
+      color: 'text-yellow-600',
       icon: <AiOutlineWarning className="h-4 w-4" />,
     },
     incidente: {
-      color: "text-red-500",
+      color: 'text-red-500',
       icon: <AiFillExclamationCircle className="h-4 w-4" />,
     },
     cancelado: {
-      color: "text-gray-800",
+      color: 'text-gray-800',
       icon: <AiOutlineCloseCircle className="h-4 w-4" />,
     },
     finalizado: {
-      color: "text-green-800",
+      color: 'text-green-800',
       icon: <AiFillCheckCircle className="h-4 w-4" />,
     },
   };
 
   const firstPedidoState =
-    pedidos?.[0]?.tipoPedidoEstado?.toLowerCase() || "desconocido";
+    pedidos?.[0]?.tipoPedidoEstado?.toLowerCase() || 'desconocido';
   const stateStyle = stateStyles[firstPedidoState] || {
-    color: "text-gray-500",
+    color: 'text-gray-500',
     icon: <AiOutlineQuestionCircle className="h-4 w-4" />,
   };
   const avatarSrc = pedidos?.[0]?.repartidor?.fotoPerfil || null;
@@ -767,13 +767,13 @@ const HistorialCard = ({ repartidor, pedidos, onViewDetails }) => {
           </div>
           <div className="text-sm overflow-hidden">
             <p className={`font-semibold ${stateStyle.color} truncate`}>
-              {pedidos[0]?.repartidor?.nombre || "Desconocido"}
+              {pedidos[0]?.repartidor?.nombre || 'Desconocido'}
             </p>
             <p className="text-gray-500 text-xs truncate">
-              {pedidos[0]?.repartidor?.correo || "Sin correo"}
+              {pedidos[0]?.repartidor?.correo || 'Sin correo'}
             </p>
             <p className="text-gray-500 text-xs truncate">
-              {tipos.join(" y ") || "Sin asignación"} (
+              {tipos.join(' y ') || 'Sin asignación'} (
               {entregaCount + recogidaCount})
             </p>
           </div>
@@ -815,14 +815,14 @@ const Modal = ({
     pedidos.length > 0
       ? pedidos[0].repartidor
       : {
-          nombre: "Desconocido",
-          correo: "Sin correo",
+          nombre: 'Desconocido',
+          correo: 'Sin correo',
         };
 
   const formatPhoneNumberForWhatsApp = (phone) => {
     if (!phone) return null;
-    let cleanPhone = phone.toString().replace(/\D/g, "");
-    if (cleanPhone.length === 10) cleanPhone = "52" + cleanPhone;
+    let cleanPhone = phone.toString().replace(/\D/g, '');
+    if (cleanPhone.length === 10) cleanPhone = '52' + cleanPhone;
     return cleanPhone;
   };
 
@@ -834,26 +834,25 @@ const Modal = ({
     ? `https://wa.me/${whatsappNumber}?text=${whatsappMessage}`
     : null;
 
-  
   const handlePrint = () => window.print();
 
   const handleExportCSV = () => {
     const csv = [
       [
-        "ID",
-        "Rastreo",
-        "Fecha Asignación",
-        "Estado",
-        "Municipio",
-        "Total a Pagar",
-        "Monto Pagado",
-        "Productos",
+        'ID',
+        'Rastreo',
+        'Fecha Asignación',
+        'Estado',
+        'Municipio',
+        'Total a Pagar',
+        'Monto Pagado',
+        'Productos',
       ],
       ...pedidos.map((p) => {
         const detalles = pedidoDetalles[p.idPedido] || {
           productos: [],
-          montoPagado: "0.00",
-          totalPagar: p.totalPagar || "0.00",
+          montoPagado: '0.00',
+          totalPagar: p.totalPagar || '0.00',
         };
         return [
           p.idPedido,
@@ -868,80 +867,79 @@ const Modal = ({
               (prod) =>
                 `${prod.nombreProducto} (${prod.cantidad} x $${prod.precioUnitario}, Subtotal: $${prod.subtotal}, Color: ${prod.color})`
             )
-            .join(", ") || "Sin productos",
+            .join(', ') || 'Sin productos',
         ];
       }),
     ]
-      .map((row) => row.join(","))
-      .join("\n");
-    const blob = new Blob([csv], { type: "text/csv" });
+      .map((row) => row.join(','))
+      .join('\n');
+    const blob = new Blob([csv], { type: 'text/csv' });
     const url = window.URL.createObjectURL(blob);
-    const a = document.createElement("a");
+    const a = document.createElement('a');
     a.href = url;
     a.download = `repartidor_${repartidorData.nombre.replace(
-      " ",
-      "_"
+      ' ',
+      '_'
     )}_pedidos.csv`;
     a.click();
     window.URL.revokeObjectURL(url);
   };
 
-
   const totalGeneral = pedidos.reduce((sum, p) => {
-    const detalles = pedidoDetalles[p.idPedido] || { totalPagar: "0.00" };
+    const detalles = pedidoDetalles[p.idPedido] || { totalPagar: '0.00' };
     return sum + (parseFloat(detalles.totalPagar) || 0);
   }, 0);
 
   const totalPagado = pedidos.reduce((sum, p) => {
-    const detalles = pedidoDetalles[p.idPedido] || { montoPagado: "0.00" };
+    const detalles = pedidoDetalles[p.idPedido] || { montoPagado: '0.00' };
     return sum + (parseFloat(detalles.montoPagado) || 0);
   }, 0);
 
   // 4. Estilos y Íconos por Estado
   const stateStyles = {
     confirmado: {
-      color: "text-emerald-700",
-      bg: "bg-emerald-50",
+      color: 'text-emerald-700',
+      bg: 'bg-emerald-50',
       icon: <AiFillCheckCircle className="h-4 w-4" />,
     },
     enviando: {
-      color: "text-blue-700",
-      bg: "bg-blue-50",
+      color: 'text-blue-700',
+      bg: 'bg-blue-50',
       icon: <AiOutlineCar className="h-4 w-4" />,
     },
-    "en alquiler": {
-      color: "text-purple-700",
-      bg: "bg-purple-50",
+    'en alquiler': {
+      color: 'text-purple-700',
+      bg: 'bg-purple-50',
       icon: <AiOutlineCar className="h-4 w-4" />,
     },
     recogiendo: {
-      color: "text-amber-700",
-      bg: "bg-amber-50",
+      color: 'text-amber-700',
+      bg: 'bg-amber-50',
       icon: <AiOutlineShoppingCart className="h-4 w-4" />,
     },
     devuelto: {
-      color: "text-gray-700",
-      bg: "bg-gray-50",
+      color: 'text-gray-700',
+      bg: 'bg-gray-50',
       icon: <AiOutlineUndo className="h-4 w-4" />,
     },
     incompleto: {
-      color: "text-orange-700",
-      bg: "bg-orange-50",
+      color: 'text-orange-700',
+      bg: 'bg-orange-50',
       icon: <AiOutlineWarning className="h-4 w-4" />,
     },
     incidente: {
-      color: "text-red-700",
-      bg: "bg-red-50",
+      color: 'text-red-700',
+      bg: 'bg-red-50',
       icon: <AiFillExclamationCircle className="h-4 w-4" />,
     },
     cancelado: {
-      color: "text-gray-700",
-      bg: "bg-gray-100",
+      color: 'text-gray-700',
+      bg: 'bg-gray-100',
       icon: <AiOutlineCloseCircle className="h-4 w-4" />,
     },
     finalizado: {
-      color: "text-emerald-700",
-      bg: "bg-emerald-100",
+      color: 'text-emerald-700',
+      bg: 'bg-emerald-100',
       icon: <AiFillCheckCircle className="h-4 w-4" />,
     },
   };
@@ -1033,8 +1031,8 @@ const Modal = ({
                 {pedidos.map((p) => {
                   const detalles = pedidoDetalles[p.idPedido] || {
                     productos: [],
-                    montoPagado: "0.00",
-                    totalPagar: p.totalPagar || "0.00",
+                    montoPagado: '0.00',
+                    totalPagar: p.totalPagar || '0.00',
                   };
                   const totalAPagar = parseFloat(detalles.totalPagar) || 0;
                   const totalPagado = parseFloat(detalles.montoPagado) || 0;
@@ -1045,8 +1043,8 @@ const Modal = ({
                   const stateStyle = stateStyles[
                     p.tipoPedidoEstado.toLowerCase()
                   ] || {
-                    color: "text-gray-500",
-                    bg: "bg-gray-50",
+                    color: 'text-gray-500',
+                    bg: 'bg-gray-50',
                     icon: <AiOutlineQuestionCircle className="h-4 w-4" />,
                   };
 
@@ -1096,7 +1094,7 @@ const Modal = ({
                               Tipo
                             </p>
                             <p className="text-sm font-semibold text-gray-900 dark:text-gray-100">
-                              {detalles.tipoPedido || "N/A"}
+                              {detalles.tipoPedido || 'N/A'}
                             </p>
                           </div>
                           <div className="bg-gray-50 dark:bg-gray-700 p-3 rounded-lg">
@@ -1104,7 +1102,7 @@ const Modal = ({
                               Días Alquiler
                             </p>
                             <p className="text-sm font-semibold text-gray-900 dark:text-gray-100">
-                              {detalles.diasAlquiler || "N/A"}
+                              {detalles.diasAlquiler || 'N/A'}
                             </p>
                           </div>
                         </div>
@@ -1192,13 +1190,13 @@ const Modal = ({
                                     <div className="mt-2 pt-2 border-t border-gray-200 dark:border-gray-600 text-sm text-gray-600 dark:text-gray-400 space-y-1">
                                       {prod.observaciones && (
                                         <p>
-                                          <strong>Observaciones:</strong>{" "}
+                                          <strong>Observaciones:</strong>{' '}
                                           {prod.observaciones}
                                         </p>
                                       )}
                                       {prod.estadoProducto && (
                                         <p>
-                                          <strong>Estado:</strong>{" "}
+                                          <strong>Estado:</strong>{' '}
                                           {prod.estadoProducto}
                                         </p>
                                       )}
@@ -1269,14 +1267,14 @@ const initialState = {
   repartidoresEmpty: false,
   repartidorSel: null,
   pedidosSel: [],
-  busquedaRep: "",
-  filtroDia: "hoy",
+  busquedaRep: '',
+  filtroDia: 'hoy',
   pagination: {},
   modalOpen: false,
   selectedRepartidorId: null,
   historialPage: 1,
   isLoading: true,
-  filters: { estado: "", municipio: "", localidad: "" },
+  filters: { estado: '', municipio: '', localidad: '' },
   notification: null,
   days: [],
   totals: { totalPedidos: 0, totalRepartidores: 0, totalPedidosAsignados: 0 },
@@ -1287,7 +1285,7 @@ const initialState = {
 
 const reducer = (state, action) => {
   switch (action.type) {
-    case "SET_DATA":
+    case 'SET_DATA':
       return {
         ...state,
         pedidos: action.pedidos || [],
@@ -1305,16 +1303,16 @@ const reducer = (state, action) => {
         totalsByLocation: action.totalsByLocation || [],
         isLoading: false,
       };
-    case "SET_REPARTIDOR_SEL":
+    case 'SET_REPARTIDOR_SEL':
       return { ...state, repartidorSel: action.id };
-    case "TOGGLE_PEDIDO":
+    case 'TOGGLE_PEDIDO':
       return {
         ...state,
         pedidosSel: state.pedidosSel.includes(action.id)
           ? state.pedidosSel.filter((x) => x !== action.id)
           : [...state.pedidosSel, action.id],
       };
-    case "ASIGNAR_PEDIDOS":
+    case 'ASIGNAR_PEDIDOS':
       return {
         ...state,
         pedidos: state.pedidos.map((p) =>
@@ -1330,44 +1328,44 @@ const reducer = (state, action) => {
             state.totals.totalPedidosAsignados + state.pedidosSel.length,
         },
       };
-    case "SET_BUSQUEDA_REP":
+    case 'SET_BUSQUEDA_REP':
       return { ...state, busquedaRep: action.value };
-    case "SET_FILTRO_DIA":
-      console.log("Reductor: Actualizando filtroDia a", action.filtroDia);
+    case 'SET_FILTRO_DIA':
+      console.log('Reductor: Actualizando filtroDia a', action.filtroDia);
       return { ...state, filtroDia: action.filtroDia };
-    case "SET_PAGINATION":
+    case 'SET_PAGINATION':
       return {
         ...state,
         pagination: { ...state.pagination, [action.key]: action.page },
       };
-    case "SET_MODAL":
+    case 'SET_MODAL':
       return {
         ...state,
         modalOpen: action.open,
         selectedRepartidorId: action.id || null,
         selectedLocation: action.selectedLocation || null,
-        filteredPedidos: action.filteredPedidos || [], 
+        filteredPedidos: action.filteredPedidos || [],
       };
-    case "SET_HISTORIAL_PAGE":
+    case 'SET_HISTORIAL_PAGE':
       return { ...state, historialPage: action.page };
-    case "SET_FILTERS":
+    case 'SET_FILTERS':
       return { ...state, filters: action.filters };
-    case "CLEAR_FILTERS":
+    case 'CLEAR_FILTERS':
       return {
         ...state,
         repartidorSel: null,
         pedidosSel: [],
-        busquedaRep: "",
-        filtroDia: "hoy",
+        busquedaRep: '',
+        filtroDia: 'hoy',
         pagination: {},
         historialPage: 1,
-        filters: { estado: "", municipio: "", localidad: "" },
+        filters: { estado: '', municipio: '', localidad: '' },
       };
-    case "SET_NOTIFICATION":
+    case 'SET_NOTIFICATION':
       return { ...state, notification: action.notification };
-    case "SET_HISTORIAL":
+    case 'SET_HISTORIAL':
       return { ...state, historialPedidos: action.historial || [] };
-    case "SET_DETALLES_PEDIDO":
+    case 'SET_DETALLES_PEDIDO':
       return {
         ...state,
         pedidoDetalles: {
@@ -1375,7 +1373,7 @@ const reducer = (state, action) => {
           [action.idPedido]: action.detalles,
         },
       };
-    case "UPDATE_PEDIDO":
+    case 'UPDATE_PEDIDO':
       return {
         ...state,
         pedidos: state.pedidos.filter((p) => p.id !== action.id),
@@ -1387,10 +1385,10 @@ const reducer = (state, action) => {
 
 const now = new Date();
 now.setHours(0, 0, 0, 0);
-const today = now.toISOString().split("T")[0];
+const today = now.toISOString().split('T')[0];
 const tomorrow = new Date(now);
 tomorrow.setDate(now.getDate() + 1);
-const tomorrowStr = tomorrow.toISOString().split("T")[0];
+const tomorrowStr = tomorrow.toISOString().split('T')[0];
 
 const AsignacionPedidosGeo = () => {
   const [state, dispatch] = useReducer(reducer, initialState);
@@ -1417,42 +1415,42 @@ const AsignacionPedidosGeo = () => {
 
       try {
         const repartidoresRes = await api.get(
-          "/api/repartidor/administrar/activos/repartidores",
+          '/api/repartidor/administrar/activos/repartidores',
           {
-            headers: { "X-CSRF-Token": csrfToken },
+            headers: { 'X-CSRF-Token': csrfToken },
             withCredentials: true,
           }
         );
 
-        console.log("repar", repartidoresRes);
+        console.log('repar', repartidoresRes);
 
         repartidores = repartidoresRes.data.data.map((r) => ({
           id: r.idRepartidor || null,
-          nombre: r.nombre || "Desconocido",
-          correo: r.correo || "Sin correo",
-          estado: r.estado || "activo",
-          foto: r.fotoPerfil || "",
+          nombre: r.nombre || 'Desconocido',
+          correo: r.correo || 'Sin correo',
+          estado: r.estado || 'activo',
+          foto: r.fotoPerfil || '',
         }));
 
-        console.log("Datos oh", repartidores);
+        console.log('Datos oh', repartidores);
         if (repartidores.length === 0) {
           repartidoresEmpty = true;
         }
       } catch (error) {
-        console.error("Error al obtener repartidores:", error);
+        console.error('Error al obtener repartidores:', error);
         repartidoresError =
-          "Error al cargar repartidores. Se está corrigiendo este error.";
+          'Error al cargar repartidores. Se está corrigiendo este error.';
       }
 
       try {
-        const pedidosRes = await api.get("/api/repartidor/pedidos", {
-          headers: { "X-CSRF-Token": csrfToken },
+        const pedidosRes = await api.get('/api/repartidor/pedidos', {
+          headers: { 'X-CSRF-Token': csrfToken },
           withCredentials: true,
         });
-        console.log("Resultado de pedidos desde API---", pedidosRes.data);
+        console.log('Resultado de pedidos desde API---', pedidosRes.data);
 
         if (!pedidosRes.data.success) {
-          throw new Error("API returned success: false");
+          throw new Error('API returned success: false');
         }
 
         days = pedidosRes.data.days || [];
@@ -1467,27 +1465,27 @@ const AsignacionPedidosGeo = () => {
           ...(pedidosRes.data.deliveries || []).map((p) => ({
             id: p.idPedido || null,
             descripcion: p.nombre
-              ? `${p.nombre} ${p.apellido || ""}`
-              : `Pedido #${p.idPedido || "Desconocido"}`,
+              ? `${p.nombre} ${p.apellido || ''}`
+              : `Pedido #${p.idPedido || 'Desconocido'}`,
             fechaInicio: p.fechaInicio
-              ? new Date(p.fechaInicio).toISOString().split("T")[0]
-              : new Date().toISOString().split("T")[0],
+              ? new Date(p.fechaInicio).toISOString().split('T')[0]
+              : new Date().toISOString().split('T')[0],
             fechaEntrega: p.fechaEntrega
-              ? new Date(p.fechaEntrega).toISOString().split("T")[0]
-              : new Date().toISOString().split("T")[0],
-            estado: p.direccionEstado || "Desconocido",
-            idRastreo: p.idRastreo || "null",
-            municipio: p.municipio || "Desconocido",
-            localidad: p.localidad || "Desconocido",
+              ? new Date(p.fechaEntrega).toISOString().split('T')[0]
+              : new Date().toISOString().split('T')[0],
+            estado: p.direccionEstado || 'Desconocido',
+            idRastreo: p.idRastreo || 'null',
+            municipio: p.municipio || 'Desconocido',
+            localidad: p.localidad || 'Desconocido',
             repartidorId: null,
             idUsuarios: p.idUsuarios === null ? p.idNoClientes : p.idUsuarios,
-            tipo: "entrega",
-            status: p.estadoActual || "Confirmado",
-            direccion: p.direccion || "",
-            telefono: p.telefono || "",
-            referencias: p.referencias || "",
-            totalPagar: p.totalPagar || "0.00",
-            totalPagado: p.totalPagado || "0.00",
+            tipo: 'entrega',
+            status: p.estadoActual || 'Confirmado',
+            direccion: p.direccion || '',
+            telefono: p.telefono || '',
+            referencias: p.referencias || '',
+            totalPagar: p.totalPagar || '0.00',
+            totalPagado: p.totalPagado || '0.00',
             entregaReal: p.entregaReal || null,
             isUrgent: p.isUrgent || false,
             sameDay: p.sameDay || false,
@@ -1496,26 +1494,26 @@ const AsignacionPedidosGeo = () => {
           ...(pedidosRes.data.lateDeliveries || []).map((p) => ({
             id: p.idPedido || null,
             descripcion: p.nombre
-              ? `${p.nombre} ${p.apellido || ""}`
-              : `Pedido #${p.idPedido || "Desconocido"}`,
+              ? `${p.nombre} ${p.apellido || ''}`
+              : `Pedido #${p.idPedido || 'Desconocido'}`,
             fechaInicio: p.fechaInicio
-              ? new Date(p.fechaInicio).toISOString().split("T")[0]
-              : new Date().toISOString().split("T")[0],
+              ? new Date(p.fechaInicio).toISOString().split('T')[0]
+              : new Date().toISOString().split('T')[0],
             fechaEntrega: p.fechaEntrega
-              ? new Date(p.fechaEntrega).toISOString().split("T")[0]
-              : new Date().toISOString().split("T")[0],
-            estado: p.direccionEstado || "Desconocido",
-            municipio: p.municipio || "Desconocido",
-            localidad: p.localidad || "Desconocido",
+              ? new Date(p.fechaEntrega).toISOString().split('T')[0]
+              : new Date().toISOString().split('T')[0],
+            estado: p.direccionEstado || 'Desconocido',
+            municipio: p.municipio || 'Desconocido',
+            localidad: p.localidad || 'Desconocido',
             repartidorId: null,
-            totalPagado: p.totalPagado || "0.00",
-            idRastreo: p.idRastreo || "null",
-            tipo: "entrega",
-            telefono: p.telefono || "",
-            status: p.estadoActual || "Confirmado",
-            direccion: p.direccion || "",
-            referencias: p.referencias || "",
-            totalPagar: p.totalPagar || "0.00",
+            totalPagado: p.totalPagado || '0.00',
+            idRastreo: p.idRastreo || 'null',
+            tipo: 'entrega',
+            telefono: p.telefono || '',
+            status: p.estadoActual || 'Confirmado',
+            direccion: p.direccion || '',
+            referencias: p.referencias || '',
+            totalPagar: p.totalPagar || '0.00',
             entregaReal: p.entregaReal || null,
             isUrgent: p.isUrgent || false,
             sameDay: p.sameDay || false,
@@ -1524,71 +1522,71 @@ const AsignacionPedidosGeo = () => {
           ...(pedidosRes.data.pickups || []).map((p) => ({
             id: p.idPedido || null,
             descripcion: p.nombre
-              ? `${p.nombre} ${p.apellido || ""}`
-              : `Pedido #${p.idPedido || "Desconocido"}`,
+              ? `${p.nombre} ${p.apellido || ''}`
+              : `Pedido #${p.idPedido || 'Desconocido'}`,
             fechaInicio: p.fechaInicio
-              ? new Date(p.fechaInicio).toISOString().split("T")[0]
-              : new Date().toISOString().split("T")[0],
+              ? new Date(p.fechaInicio).toISOString().split('T')[0]
+              : new Date().toISOString().split('T')[0],
             fechaEntrega: p.fechaEntrega
-              ? new Date(p.fechaEntrega).toISOString().split("T")[0]
-              : new Date().toISOString().split("T")[0],
-            estado: p.direccionEstado || "Desconocido",
-            municipio: p.municipio || "Desconocido",
-            localidad: p.localidad || "Desconocido",
+              ? new Date(p.fechaEntrega).toISOString().split('T')[0]
+              : new Date().toISOString().split('T')[0],
+            estado: p.direccionEstado || 'Desconocido',
+            municipio: p.municipio || 'Desconocido',
+            localidad: p.localidad || 'Desconocido',
             repartidorId: null,
-            totalPagado: p.totalPagado || "0.00",
-            idRastreo: p.idRastreo || "null",
-            tipo: "recogida",
-            telefono: p.telefono || "",
-            status: p.estadoActual || "Confirmado",
-            direccion: p.direccion || "",
-            referencias: p.referencias || "",
-            totalPagar: p.totalPagar || "0.00",
+            totalPagado: p.totalPagado || '0.00',
+            idRastreo: p.idRastreo || 'null',
+            tipo: 'recogida',
+            telefono: p.telefono || '',
+            status: p.estadoActual || 'Confirmado',
+            direccion: p.direccion || '',
+            referencias: p.referencias || '',
+            totalPagar: p.totalPagar || '0.00',
             entregaReal: p.fechaRecogidaReal || null,
             isUrgent: p.isUrgent || false,
             sameDay: p.sameDay || false,
           })),
         ];
 
-        console.log("Pedidos procesados---", pedidos);
+        console.log('Pedidos procesados---', pedidos);
         if (pedidos.length === 0) {
           pedidosEmpty = true;
         }
       } catch (error) {
-        console.error("Error al obtener pedidos:", error);
+        console.error('Error al obtener pedidos:', error);
         pedidosError =
-          "Error al cargar pedidos. Se está corrigiendo este error.";
+          'Error al cargar pedidos. Se está corrigiendo este error.';
       }
 
       // Fetch historial de pedidos asignados con la fecha seleccionada
       try {
         setIsLoadingHistorial(true);
-        const dateStr = selectedDate.toISOString().split("T")[0];
-        console.log("Fecha seleccionada para historial:", dateStr);
+        const dateStr = selectedDate.toISOString().split('T')[0];
+        console.log('Fecha seleccionada para historial:', dateStr);
         const historialRes = await api.get(
-          "/api/repartidor/repartidores/historial",
+          '/api/repartidor/repartidores/historial',
           {
-            headers: { "X-CSRF-Token": csrfToken },
+            headers: { 'X-CSRF-Token': csrfToken },
             withCredentials: true,
             params: { fecha: dateStr },
           }
         );
-        console.log("datos de historialres", historialRes);
+        console.log('datos de historialres', historialRes);
 
         if (historialRes.data.success) {
           dispatch({
-            type: "SET_HISTORIAL",
+            type: 'SET_HISTORIAL',
             historial: historialRes.data.data,
           });
         }
       } catch (error) {
-        console.error("Error al obtener historial:", error);
+        console.error('Error al obtener historial:', error);
       } finally {
         setIsLoadingHistorial(false);
       }
 
       dispatch({
-        type: "SET_DATA",
+        type: 'SET_DATA',
         pedidos,
         repartidores,
         pedidosError,
@@ -1604,12 +1602,12 @@ const AsignacionPedidosGeo = () => {
     fetchData();
 
     const handleUpdatePedidos = (event) => {
-      dispatch({ type: "UPDATE_PEDIDO", id: event.detail.id });
+      dispatch({ type: 'UPDATE_PEDIDO', id: event.detail.id });
     };
 
-    window.addEventListener("updatePedidos", handleUpdatePedidos);
+    window.addEventListener('updatePedidos', handleUpdatePedidos);
     return () =>
-      window.removeEventListener("updatePedidos", handleUpdatePedidos);
+      window.removeEventListener('updatePedidos', handleUpdatePedidos);
   }, [csrfToken, selectedDate]);
 
   const dayLabels = useMemo(() => {
@@ -1619,13 +1617,13 @@ const AsignacionPedidosGeo = () => {
     for (let i = 0; i < 6; i++) {
       const date = new Date(startOfWeek);
       date.setDate(startOfWeek.getDate() + i);
-      const dateStr = date.toISOString().split("T")[0];
+      const dateStr = date.toISOString().split('T')[0];
       labels.push({
         date: dateStr,
         label:
           dateStr === today
-            ? "Hoy"
-            : date.toLocaleDateString("es-MX", { weekday: "long" }),
+            ? 'Hoy'
+            : date.toLocaleDateString('es-MX', { weekday: 'long' }),
         dayOfWeek: date.getDay(),
       });
     }
@@ -1647,43 +1645,43 @@ const AsignacionPedidosGeo = () => {
   const pedidosEntrega = useMemo(() => {
     let filterDate = today;
 
-    if (state.filtroDia === "hoy") {
+    if (state.filtroDia === 'hoy') {
       filterDate = today;
-    } else if (state.filtroDia === "mañana") {
+    } else if (state.filtroDia === 'mañana') {
       filterDate = tomorrowStr;
     } else {
       const index = parseInt(state.filtroDia, 10);
       filterDate = dayLabels[index]?.date || today;
     }
 
-    console.log("Filtro aplicado:", state.filtroDia, "Fecha:", filterDate);
+    console.log('Filtro aplicado:', state.filtroDia, 'Fecha:', filterDate);
 
     const filtered = filteredPedidos
       .filter(
         (p) =>
-          p.tipo === "entrega" &&
+          p.tipo === 'entrega' &&
           (p.repartidorId === null || p.repartidorId === undefined) &&
-          ((p.entregaReal && p.entregaReal.split("T")[0] === filterDate) ||
-            (p.atrasado && p.fechaInicio.split("T")[0] === filterDate))
+          ((p.entregaReal && p.entregaReal.split('T')[0] === filterDate) ||
+            (p.atrasado && p.fechaInicio.split('T')[0] === filterDate))
       )
       .sort((a, b) => a.descripcion.localeCompare(b.descripcion));
 
-    console.log("Pedidos entrega filtrados:", filtered);
+    console.log('Pedidos entrega filtrados:', filtered);
     return filtered;
   }, [filteredPedidos, state.filtroDia, dayLabels, today, tomorrowStr]);
 
   const pedidosRecogida = useMemo(() => {
-    const todayDate = new Date(today + "T00:00:00-06:00");
-    console.log("Today Date for Recogida:", todayDate);
+    const todayDate = new Date(today + 'T00:00:00-06:00');
+    console.log('Today Date for Recogida:', todayDate);
 
     const recogida = filteredPedidos
       .filter(
         (p) =>
-          p.tipo === "recogida" &&
+          p.tipo === 'recogida' &&
           (p.repartidorId === null || p.repartidorId === undefined)
       )
       .map((p) => {
-        const entregaDate = new Date(p.entregaReal + "T00:00:00-06:00");
+        const entregaDate = new Date(p.entregaReal + 'T00:00:00-06:00');
         console.log(
           `Pedido ${p.id} - entregaReal: ${
             p.entregaReal
@@ -1693,11 +1691,11 @@ const AsignacionPedidosGeo = () => {
       })
       .sort(
         (a, b) =>
-          new Date(b.entregaReal + "T00:00:00-06:00") -
-          new Date(a.entregaReal + "T00:00:00-06:00")
+          new Date(b.entregaReal + 'T00:00:00-06:00') -
+          new Date(a.entregaReal + 'T00:00:00-06:00')
       );
 
-    console.log("Pedidos Recogida filtrados:", recogida);
+    console.log('Pedidos Recogida filtrados:', recogida);
     return recogida;
   }, [filteredPedidos, today]);
 
@@ -1705,7 +1703,7 @@ const AsignacionPedidosGeo = () => {
     return filteredPedidos
       .filter(
         (p) =>
-          p.tipo === "entrega" &&
+          p.tipo === 'entrega' &&
           p.atrasado &&
           (p.repartidorId === null || p.repartidorId === undefined)
       )
@@ -1735,7 +1733,7 @@ const AsignacionPedidosGeo = () => {
         atrasados: [],
       };
       acc[p.estado][p.municipio][p.localidad][
-        p.atrasado ? "atrasados" : p.tipo
+        p.atrasado ? 'atrasados' : p.tipo
       ].push(p);
       return acc;
     }, {});
@@ -1745,7 +1743,7 @@ const AsignacionPedidosGeo = () => {
     () =>
       Array.isArray(state.repartidores)
         ? state.repartidores
-            .filter((r) => r.estado === "activo")
+            .filter((r) => r.estado === 'activo')
             .filter(
               (r) =>
                 (r.nombre
@@ -1774,8 +1772,8 @@ const AsignacionPedidosGeo = () => {
       state.historialPedidos.forEach((p) => {
         const repartidor = p.repartidor || {
           id: null,
-          nombre: "Desconocido",
-          correo: "Sin correo",
+          nombre: 'Desconocido',
+          correo: 'Sin correo',
         };
         const repartidorId = repartidor.id;
         if (repartidorId) {
@@ -1788,14 +1786,14 @@ const AsignacionPedidosGeo = () => {
             tipoPedidoEstado: p.tipoPedidoEstado,
             estado: p.estado,
             municipio: p.municipio,
-            totalPagar: p.totalPagar || "0.00",
-            estadoActual: p.estadoActual || "Desconocido",
+            totalPagar: p.totalPagar || '0.00',
+            estadoActual: p.estadoActual || 'Desconocido',
             repartidor, // Incluimos el objeto repartidor completo
           });
         }
       });
     }
-    console.log("Historial de repartidor:", historial);
+    console.log('Historial de repartidor:', historial);
     return historial;
   }, [state.historialPedidos]);
 
@@ -1805,8 +1803,8 @@ const AsignacionPedidosGeo = () => {
       pedidos.forEach((p) => {
         const repartidor = p.repartidor || {
           id: null,
-          nombre: "Desconocido",
-          correo: "Sin correo",
+          nombre: 'Desconocido',
+          correo: 'Sin correo',
         };
         historial[p.estado] = historial[p.estado] || {};
         historial[p.estado][p.municipio] =
@@ -1818,15 +1816,13 @@ const AsignacionPedidosGeo = () => {
         historial[p.estado][p.municipio][p.localidad][repartidor.id].push(p);
       });
     });
-    console.log("Tree Historial:", historial);
+    console.log('Tree Historial:', historial);
     return historial;
   }, [historialRepartidor]);
 
- 
-
   const asignarPedidos = async () => {
     if (!state.repartidorSel || state.pedidosSel.length === 0) {
-      toast.error("Seleccione un repartidor y pedidos");
+      toast.error('Seleccione un repartidor y pedidos');
       return;
     }
 
@@ -1834,26 +1830,26 @@ const AsignacionPedidosGeo = () => {
 
     try {
       await api.post(
-        "/api/repartidor/pedidos/asignar",
+        '/api/repartidor/pedidos/asignar',
         {
           repartidorId: state.repartidorSel,
           pedidosIds: state.pedidosSel,
         },
         {
-          headers: { "X-CSRF-Token": csrfToken },
+          headers: { 'X-CSRF-Token': csrfToken },
           withCredentials: true,
         }
       );
-      dispatch({ type: "ASIGNAR_PEDIDOS" });
-      toast.success("Pedidos asignados con éxito");
+      dispatch({ type: 'ASIGNAR_PEDIDOS' });
+      toast.success('Pedidos asignados con éxito');
 
       // Actualizar el historial después de asignar
       setIsLoadingHistorial(true);
-      const dateStr = selectedDate.toISOString().split("T")[0];
+      const dateStr = selectedDate.toISOString().split('T')[0];
       const historialRes = await api.get(
-        "/api/repartidor/repartidores/historial",
+        '/api/repartidor/repartidores/historial',
         {
-          headers: { "X-CSRF-Token": csrfToken },
+          headers: { 'X-CSRF-Token': csrfToken },
           withCredentials: true,
           params: { fecha: dateStr },
         }
@@ -1861,13 +1857,13 @@ const AsignacionPedidosGeo = () => {
 
       if (historialRes.data.success) {
         dispatch({
-          type: "SET_HISTORIAL",
+          type: 'SET_HISTORIAL',
           historial: historialRes.data.data,
         });
       }
     } catch (error) {
-      console.error("Error al asignar pedidos:", error);
-      toast.error("Error al asignar pedidos. Se está corrigiendo este error.");
+      console.error('Error al asignar pedidos:', error);
+      toast.error('Error al asignar pedidos. Se está corrigiendo este error.');
     } finally {
       setIsAssigning(false);
       setIsLoadingHistorial(false);
@@ -1875,11 +1871,11 @@ const AsignacionPedidosGeo = () => {
   };
 
   const togglePedido = (id) => {
-    dispatch({ type: "TOGGLE_PEDIDO", id });
+    dispatch({ type: 'TOGGLE_PEDIDO', id });
   };
 
   const handlePageChange = (key, page) => {
-    dispatch({ type: "SET_PAGINATION", key, page });
+    dispatch({ type: 'SET_PAGINATION', key, page });
   };
 
   const handleViewDetails = async (
@@ -1888,7 +1884,7 @@ const AsignacionPedidosGeo = () => {
     municipio,
     localidad
   ) => {
-    console.log("view", repartidorId, estado, municipio, localidad);
+    console.log('view', repartidorId, estado, municipio, localidad);
 
     const pedidos =
       treeHistorial[estado]?.[municipio]?.[localidad]?.[repartidorId] || [];
@@ -1898,7 +1894,7 @@ const AsignacionPedidosGeo = () => {
     }
 
     dispatch({
-      type: "SET_MODAL",
+      type: 'SET_MODAL',
       open: true,
       id: repartidorId,
       selectedLocation: { estado, municipio, localidad },
@@ -1907,15 +1903,15 @@ const AsignacionPedidosGeo = () => {
   };
 
   const handleCloseModal = () => {
-    dispatch({ type: "SET_MODAL", open: false });
+    dispatch({ type: 'SET_MODAL', open: false });
   };
 
   const resetFilters = () => {
-    dispatch({ type: "CLEAR_FILTERS" });
+    dispatch({ type: 'CLEAR_FILTERS' });
   };
 
   const handleFilterChange = (filters) => {
-    dispatch({ type: "SET_FILTERS", filters });
+    dispatch({ type: 'SET_FILTERS', filters });
   };
 
   const fetchPedidoDetalles = async (idPedido) => {
@@ -1923,21 +1919,21 @@ const AsignacionPedidosGeo = () => {
       const response = await api.get(
         `/api/repartidor/repartidores/historial/${idPedido}/detalles`,
         {
-          headers: { "X-CSRF-Token": csrfToken },
+          headers: { 'X-CSRF-Token': csrfToken },
           withCredentials: true,
         }
       );
 
-      console.log("Datos recibidos de pedidos detalles", response);
+      console.log('Datos recibidos de pedidos detalles', response);
       if (response.data.success) {
         dispatch({
-          type: "SET_DETALLES_PEDIDO",
+          type: 'SET_DETALLES_PEDIDO',
           idPedido,
           detalles: response.data.data,
         });
       }
     } catch (error) {
-      console.error("Error al obtener detalles del pedido:", error);
+      console.error('Error al obtener detalles del pedido:', error);
     }
   };
 
@@ -1945,8 +1941,8 @@ const AsignacionPedidosGeo = () => {
   const totalRepartidoresActivos = state.totals.totalRepartidores;
   const assignedPedidos = state.totals.totalPedidosAsignados;
 
-  if (state.isLoading) return < CustomLoading />;
-  console.log("State completo:", state);
+  if (state.isLoading) return <CustomLoading />;
+  console.log('State completo:', state);
 
   // Paginación del historial
   const itemsPerPageHistorial = 2;
@@ -1965,562 +1961,577 @@ const AsignacionPedidosGeo = () => {
     endHistorialIndex
   );
 
- return (
-  <div className="max-w-7xl mx-auto p-4 sm:p-6 bg-gray-50 dark:bg-gray-900 min-h-screen">
-    {(state.pedidos.length > 0 || state.repartidores.length > 0) && (
-      <SummaryCard
-        totalPedidos={totalPedidos}
-        totalRepartidores={totalRepartidoresActivos}
-        assignedPedidos={assignedPedidos}
-        className="mb-6 shadow-lg border border-gray-200 dark:border-gray-700 rounded-xl"
+  return (
+    <div className="max-w-7xl mx-auto p-4 sm:p-6 bg-gray-50 dark:bg-gray-900 min-h-screen">
+      {(state.pedidos.length > 0 || state.repartidores.length > 0) && (
+        <SummaryCard
+          totalPedidos={totalPedidos}
+          totalRepartidores={totalRepartidoresActivos}
+          assignedPedidos={assignedPedidos}
+          className="mb-6 shadow-lg border border-gray-200 dark:border-gray-700 rounded-xl"
+        />
+      )}
+      <FilterPanel
+        onFilterChange={handleFilterChange}
+        totalsByLocation={state.totalsByLocation}
+        className="mb-6 bg-white dark:bg-gray-800 p-4 rounded-xl shadow-md border border-gray-200 dark:border-gray-700"
       />
-    )}
-    <FilterPanel
-      onFilterChange={handleFilterChange}
-      totalsByLocation={state.totalsByLocation}
-      className="mb-6 bg-white dark:bg-gray-800 p-4 rounded-xl shadow-md border border-gray-200 dark:border-gray-700"
-    />
-    {state.notification && (
-      <Notification
-        message={state.notification.message}
-        type={state.notification.type}
-        onClose={() =>
-          dispatch({ type: "SET_NOTIFICATION", notification: null })
-        }
-      />
-    )}
+      {state.notification && (
+        <Notification
+          message={state.notification.message}
+          type={state.notification.type}
+          onClose={() =>
+            dispatch({ type: 'SET_NOTIFICATION', notification: null })
+          }
+        />
+      )}
 
-    <div className="flex flex-col lg:flex-row gap-6">
-      {/* Panel de Repartidores */}
-      <div className="w-full lg:w-1/3 bg-white dark:bg-gray-800 rounded-xl p-5 shadow-lg border border-gray-200 dark:border-gray-700 transition-all duration-300 hover:shadow-xl">
-        <div className="flex justify-between items-center mb-6 border-b border-gray-200 dark:border-gray-700 pb-4">
-          <h2 className="text-2xl font-semibold flex items-center text-gray-900 dark:text-gray-100">
-            <User className="h-6 w-6 mr-3 text-[#ffb300] dark:text-[#ffca4b]" />
-            Repartidores Activos
-          </h2>
-          <Tooltip content="Restablecer todos los filtros">
-            <button
-              onClick={resetFilters}
-              className="px-3 py-2 bg-[#ffb300]/20 dark:bg-[#ffca4b]/20 text-[#ffb300] dark:text-[#ffca4b] rounded-full hover:bg-[#ffb300]/30 dark:hover:bg-[#ffca4b]/30 transition-colors duration-200"
-            >
-              <RefreshCw className="h-5 w-5" />
-            </button>
-          </Tooltip>
-        </div>
-
-        <div className="relative mb-5">
-          <Search className="h-5 w-5 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500" />
-          <input
-            value={state.busquedaRep}
-            onChange={(e) =>
-              dispatch({ type: "SET_BUSQUEDA_REP", value: e.target.value })
-            }
-            placeholder="Buscar por nombre o correo..."
-            className="w-full pl-10 pr-4 py-2 border rounded-xl focus:ring-2 focus:ring-indigo-500 dark:focus:ring-indigo-400 focus:outline-none text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 border-gray-200 dark:border-gray-600"
-          />
-        </div>
-        {state.repartidoresError ? (
-          <ErrorDisplay message={state.repartidoresError} />
-        ) : state.repartidoresEmpty ? (
-          <NoDataDisplay message="Sin repartidores disponibles" />
-        ) : (
-          <div className="space-y-4 max-h-[calc(50vh-120px)] overflow-y-auto">
-            {repartidoresActivos.map((r) => (
-              <RepartidorCard
-                key={r.id}
-                repartidor={r}
-                seleccionado={state.repartidorSel === r.id}
-                onSelect={(id) => dispatch({ type: "SET_REPARTIDOR_SEL", id })}
-                pedidosAsignados={r.pedidosAsignados}
-              />
-            ))}
-          </div>
-        )}
-        {state.repartidorSel &&
-          !state.repartidoresError &&
-          !state.repartidoresEmpty && <></>}
-      </div>
-
-      {/* Panel de Pedidos (Separado) */}
-      <div className="w-full lg:w-2/3 bg-white dark:bg-gray-800 rounded-xl p-5 shadow-lg border border-gray-200 dark:border-gray-700 transition-all duration-300 hover:shadow-xl mb-6 lg:mb-0">
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 border-b border-gray-200 dark:border-gray-700 pb-4">
-          <h2 className="text-2xl font-semibold flex items-center text-gray-900 dark:text-gray-100">
-            <Package className="h-6 w-6 mr-3 text-[#ffb300] dark:text-[#ffca4b]" />
-            Pedidos
-          </h2>
-          {state.repartidorSel &&
-            state.pedidosSel.length > 0 &&
-            !state.pedidosError &&
-            !state.pedidosEmpty && (
+      <div className="flex flex-col lg:flex-row gap-6">
+        {/* Panel de Repartidores */}
+        <div className="w-full lg:w-1/3 bg-white dark:bg-gray-800 rounded-xl p-5 shadow-lg border border-gray-200 dark:border-gray-700 transition-all duration-300 hover:shadow-xl">
+          <div className="flex justify-between items-center mb-6 border-b border-gray-200 dark:border-gray-700 pb-4">
+            <h2 className="text-2xl font-semibold flex items-center text-gray-900 dark:text-gray-100">
+              <User className="h-6 w-6 mr-3 text-[#ffb300] dark:text-[#ffca4b]" />
+              Repartidores Activos
+            </h2>
+            <Tooltip content="Restablecer todos los filtros">
               <button
-                onClick={asignarPedidos}
-                className="w-full sm:w-auto px-3 sm:px-2 py-2 sm:py-1.5 bg-gradient-to-r from-[#ffb300] to-[#ffca4b] dark:from-[#e59400] text-white text-sm sm:text-base font-medium rounded-lg hover:from-[#e59400] hover:to-[#ffca4b] dark:hover:from-[#d07d00] dark:hover:to-[#ffca4b] transition-all duration-300 shadow-md hover:shadow-lg transform hover:scale-105 active:scale-95 focus:outline-none focus:ring-2 focus:ring-[#ffb300]/50 focus:ring-offset-2 dark:focus:ring-offset-gray-900"
+                onClick={resetFilters}
+                className="px-3 py-2 bg-[#ffb300]/20 dark:bg-[#ffca4b]/20 text-[#ffb300] dark:text-[#ffca4b] rounded-full hover:bg-[#ffb300]/30 dark:hover:bg-[#ffca4b]/30 transition-colors duration-200"
               >
-                <span className="flex items-center justify-center gap-1 sm:gap-2 whitespace-nowrap">
-                  {isAssigning ? (
-                    <Loader2 className="h-4 w-4 sm:h-5 sm:w-5 animate-spin" />
-                  ) : (
-                    <>
-                      <svg
-                        className="h-4 w-4 sm:h-5 sm:w-5 flex-shrink-0"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                        aria-hidden="true"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M12 6v6m0 0v6m0-6h6m-6 0H6"
-                        />
-                      </svg>
-                      <span className="hidden sm:inline">Asignar</span>
-                      <span className="font-semibold">
-                        ({state.pedidosSel.length})
-                      </span>
-                      <span className="hidden sm:inline">
-                        {state.pedidosSel.length === 1 ? "Pedido" : "Pedidos"}
-                      </span>
-                    </>
-                  )}
-                </span>
+                <RefreshCw className="h-5 w-5" />
               </button>
-            )}
+            </Tooltip>
+          </div>
+
+          <div className="relative mb-5">
+            <Search className="h-5 w-5 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500" />
+            <input
+              value={state.busquedaRep}
+              onChange={(e) =>
+                dispatch({ type: 'SET_BUSQUEDA_REP', value: e.target.value })
+              }
+              placeholder="Buscar por nombre o correo..."
+              className="w-full pl-10 pr-4 py-2 border rounded-xl focus:ring-2 focus:ring-indigo-500 dark:focus:ring-indigo-400 focus:outline-none text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 border-gray-200 dark:border-gray-600"
+            />
+          </div>
+          {state.repartidoresError ? (
+            <ErrorDisplay message={state.repartidoresError} />
+          ) : state.repartidoresEmpty ? (
+            <NoDataDisplay message="Sin repartidores disponibles" />
+          ) : (
+            <div className="space-y-4 max-h-[calc(50vh-120px)] overflow-y-auto">
+              {repartidoresActivos.map((r) => (
+                <RepartidorCard
+                  key={r.id}
+                  repartidor={r}
+                  seleccionado={state.repartidorSel === r.id}
+                  onSelect={(id) =>
+                    dispatch({ type: 'SET_REPARTIDOR_SEL', id })
+                  }
+                  pedidosAsignados={r.pedidosAsignados}
+                />
+              ))}
+            </div>
+          )}
+          {state.repartidorSel &&
+            !state.repartidoresError &&
+            !state.repartidoresEmpty && <></>}
         </div>
 
-        <div className="flex flex-wrap gap-3 mb-4 sm:mb-6">
-          <div className="flex items-center">
-            <div className="w-3 h-3 sm:w-4 sm:h-4 bg-gradient-to-br from-green-400 to-green-600 dark:from-green-500 dark:to-green-700 rounded-full mr-1 sm:mr-2"></div>
-            <span className="text-xs sm:text-sm text-gray-900 dark:text-gray-100 font-medium">
-              Entrega
-            </span>
+        {/* Panel de Pedidos (Separado) */}
+        <div className="w-full lg:w-2/3 bg-white dark:bg-gray-800 rounded-xl p-5 shadow-lg border border-gray-200 dark:border-gray-700 transition-all duration-300 hover:shadow-xl mb-6 lg:mb-0">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 border-b border-gray-200 dark:border-gray-700 pb-4">
+            <h2 className="text-2xl font-semibold flex items-center text-gray-900 dark:text-gray-100">
+              <Package className="h-6 w-6 mr-3 text-[#ffb300] dark:text-[#ffca4b]" />
+              Pedidos
+            </h2>
+            {state.repartidorSel &&
+              state.pedidosSel.length > 0 &&
+              !state.pedidosError &&
+              !state.pedidosEmpty && (
+                <button
+                  onClick={asignarPedidos}
+                  className="w-full sm:w-auto px-3 sm:px-2 py-2 sm:py-1.5 bg-gradient-to-r from-[#ffb300] to-[#ffca4b] dark:from-[#e59400] text-white text-sm sm:text-base font-medium rounded-lg hover:from-[#e59400] hover:to-[#ffca4b] dark:hover:from-[#d07d00] dark:hover:to-[#ffca4b] transition-all duration-300 shadow-md hover:shadow-lg transform hover:scale-105 active:scale-95 focus:outline-none focus:ring-2 focus:ring-[#ffb300]/50 focus:ring-offset-2 dark:focus:ring-offset-gray-900"
+                >
+                  <span className="flex items-center justify-center gap-1 sm:gap-2 whitespace-nowrap">
+                    {isAssigning ? (
+                      <Loader2 className="h-4 w-4 sm:h-5 sm:w-5 animate-spin" />
+                    ) : (
+                      <>
+                        <svg
+                          className="h-4 w-4 sm:h-5 sm:w-5 flex-shrink-0"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                          aria-hidden="true"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M12 6v6m0 0v6m0-6h6m-6 0H6"
+                          />
+                        </svg>
+                        <span className="hidden sm:inline">Asignar</span>
+                        <span className="font-semibold">
+                          ({state.pedidosSel.length})
+                        </span>
+                        <span className="hidden sm:inline">
+                          {state.pedidosSel.length === 1 ? 'Pedido' : 'Pedidos'}
+                        </span>
+                      </>
+                    )}
+                  </span>
+                </button>
+              )}
           </div>
-          <div className="flex items-center">
-            <div className="w-3 h-3 sm:w-4 sm:h-4 bg-gradient-to-br from-orange-400 to-orange-600 dark:from-orange-500 dark:to-orange-700 rounded-full mr-1 sm:mr-2"></div>
-            <span className="text-xs sm:text-sm text-gray-900 dark:text-gray-100 font-medium">
-              Recogida
-            </span>
-          </div>
-          <div className="flex items-center">
-            <div className="w-3 h-3 sm:w-4 sm:h-4 bg-gradient-to-br from-red-400 to-red-600 dark:from-red-500 dark:to-red-700 rounded-full mr-1 sm:mr-2"></div>
-            <span className="text-xs sm:text-sm text-gray-900 dark:text-gray-100 font-medium">
-              Atrasados
-            </span>
-          </div>
-        </div>
 
-        <div className="flex gap-1.5 sm:gap-2 mb-4 sm:mb-5 overflow-x-auto pb-2 scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-600">
-          {dayLabels.map((dia, idx) => (
-            <button
-              key={idx}
-              onClick={() => {
-                console.log("Botón pulsado, filtroDia:", idx.toString());
-                dispatch({
-                  type: "SET_FILTRO_DIA",
-                  filtroDia: idx.toString(),
-                });
-              }}
-              className={`
+          <div className="flex flex-wrap gap-3 mb-4 sm:mb-6">
+            <div className="flex items-center">
+              <div className="w-3 h-3 sm:w-4 sm:h-4 bg-gradient-to-br from-green-400 to-green-600 dark:from-green-500 dark:to-green-700 rounded-full mr-1 sm:mr-2"></div>
+              <span className="text-xs sm:text-sm text-gray-900 dark:text-gray-100 font-medium">
+                Entrega
+              </span>
+            </div>
+            <div className="flex items-center">
+              <div className="w-3 h-3 sm:w-4 sm:h-4 bg-gradient-to-br from-orange-400 to-orange-600 dark:from-orange-500 dark:to-orange-700 rounded-full mr-1 sm:mr-2"></div>
+              <span className="text-xs sm:text-sm text-gray-900 dark:text-gray-100 font-medium">
+                Recogida
+              </span>
+            </div>
+            <div className="flex items-center">
+              <div className="w-3 h-3 sm:w-4 sm:h-4 bg-gradient-to-br from-red-400 to-red-600 dark:from-red-500 dark:to-red-700 rounded-full mr-1 sm:mr-2"></div>
+              <span className="text-xs sm:text-sm text-gray-900 dark:text-gray-100 font-medium">
+                Atrasados
+              </span>
+            </div>
+          </div>
+
+          <div className="flex gap-1.5 sm:gap-2 mb-4 sm:mb-5 overflow-x-auto pb-2 scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-600">
+            {dayLabels.map((dia, idx) => (
+              <button
+                key={idx}
+                onClick={() => {
+                  console.log('Botón pulsado, filtroDia:', idx.toString());
+                  dispatch({
+                    type: 'SET_FILTRO_DIA',
+                    filtroDia: idx.toString(),
+                  });
+                }}
+                className={`
                 flex-shrink-0 px-2.5 sm:px-3 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-medium 
                 transition-all duration-200 whitespace-nowrap border
                 ${
                   state.filtroDia === idx.toString()
-                    ? "bg-blue-600 text-white border-blue-600 shadow-sm"
-                    : "bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border-gray-200 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 hover:border-gray-300 dark:hover:border-gray-500"
+                    ? 'bg-blue-600 text-white border-blue-600 shadow-sm'
+                    : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border-gray-200 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 hover:border-gray-300 dark:hover:border-gray-500'
                 }
               `}
-            >
-              {dia.label}
-            </button>
-          ))}
+              >
+                {dia.label}
+              </button>
+            ))}
+          </div>
+
+          {state.pedidosError ? (
+            <ErrorDisplay message={state.pedidosError} />
+          ) : state.pedidosEmpty ? (
+            <NoDataDisplay message="Sin pedidos disponibles" />
+          ) : (
+            <div className="space-y-3">
+              {Object.keys(treePedidos).length === 0 ? (
+                <NoDataDisplay message="No hay pedidos de entrega para esta fecha." />
+              ) : (
+                Object.entries(treePedidos).map(([estado, municipios]) => (
+                  <details
+                    key={estado}
+                    className="group dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700"
+                  >
+                    <summary className="list-none cursor-pointer flex justify-between items-center font-semibold text-base text-gray-900 dark:text-gray-100 p-4 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-lg transition-colors">
+                      <span>
+                        {estado} (
+                        {Object.values(municipios)
+                          .flatMap(Object.values)
+                          .flat()
+                          .reduce(
+                            (sum, loc) =>
+                              sum +
+                              loc.entrega.length +
+                              loc.recogida.length +
+                              loc.atrasados.length,
+                            0
+                          )}
+                        )
+                      </span>
+                      <span className="text-indigo-600 dark:text-indigo-400 transition-transform duration-200 group-open:rotate-180 ml-2">
+                        ▼
+                      </span>
+                    </summary>
+
+                    <div className="px-4 pb-4 space-y-3 dark:bg-gray-750 dark:border-gray-600">
+                      {Object.entries(municipios).map(
+                        ([municipio, localidades]) => (
+                          <details
+                            key={municipio}
+                            className="group dark:bg-gray-750 rounded-lg border border-gray-100 dark:border-gray-600"
+                          >
+                            <summary className="list-none cursor-pointer flex justify-between items-center font-medium text-sm text-gray-700 dark:text-gray-300 p-3 hover:bg-gray-100 dark:hover:bg-gray-600 rounded-lg transition-colors">
+                              <span>
+                                {municipio} (
+                                {Object.values(localidades)
+                                  .flat()
+                                  .reduce(
+                                    (sum, loc) =>
+                                      sum +
+                                      loc.entrega.length +
+                                      loc.recogida.length +
+                                      loc.atrasados.length,
+                                    0
+                                  )}
+                                )
+                              </span>
+                              <span className="text-indigo-600 dark:text-indigo-400 transition-transform duration-200 group-open:rotate-180 ml-2">
+                                ▼
+                              </span>
+                            </summary>
+
+                            <div className="px-3 pb-3 space-y-2">
+                              {Object.entries(localidades).map(
+                                ([
+                                  localidad,
+                                  { entrega, recogida, atrasados },
+                                ]) => {
+                                  const itemsPerPage = 6;
+                                  const totalEntregaPages = Math.ceil(
+                                    entrega.length / itemsPerPage
+                                  );
+                                  const totalRecogidaPages = Math.ceil(
+                                    recogida.length / itemsPerPage
+                                  );
+                                  const totalAtrasadosPages = Math.ceil(
+                                    atrasados.length / itemsPerPage
+                                  );
+
+                                  const currentEntregaPage =
+                                    state.pagination[
+                                      `${estado}-${municipio}-${localidad}-entrega`
+                                    ] || 1;
+                                  const currentRecogidaPage =
+                                    state.pagination[
+                                      `${estado}-${municipio}-${localidad}-recogida`
+                                    ] || 1;
+                                  const currentAtrasadosPage =
+                                    state.pagination[
+                                      `${estado}-${municipio}-${localidad}-atrasados`
+                                    ] || 1;
+
+                                  const startEntregaIndex =
+                                    (currentEntregaPage - 1) * itemsPerPage;
+                                  const startRecogidaIndex =
+                                    (currentRecogidaPage - 1) * itemsPerPage;
+                                  const startAtrasadosIndex =
+                                    (currentAtrasadosPage - 1) * itemsPerPage;
+
+                                  const paginatedEntrega = entrega
+                                    .slice(
+                                      startEntregaIndex,
+                                      startEntregaIndex + itemsPerPage
+                                    )
+                                    .sort((a, b) =>
+                                      a.descripcion.localeCompare(b.descripcion)
+                                    );
+                                  const paginatedRecogida = recogida
+                                    .slice(
+                                      startRecogidaIndex,
+                                      startRecogidaIndex + itemsPerPage
+                                    )
+                                    .sort((a, b) =>
+                                      a.descripcion.localeCompare(b.descripcion)
+                                    );
+                                  const paginatedAtrasados = atrasados
+                                    .slice(
+                                      startAtrasadosIndex,
+                                      startAtrasadosIndex + itemsPerPage
+                                    )
+                                    .sort((a, b) =>
+                                      a.descripcion.localeCompare(b.descripcion)
+                                    );
+
+                                  return (
+                                    <div key={localidad} className="space-y-3">
+                                      {(paginatedEntrega.length > 0 ||
+                                        paginatedRecogida.length > 0 ||
+                                        paginatedAtrasados.length > 0) && (
+                                        <h3 className="text-md font-semibold text-gray-900 dark:text-gray-100 px-2">
+                                          {localidad} (
+                                          {entrega.length +
+                                            recogida.length +
+                                            atrasados.length}
+                                          )
+                                        </h3>
+                                      )}
+
+                                      {paginatedEntrega.length > 0 && (
+                                        <div>
+                                          <h4 className="text-sm font-medium text-green-700 dark:text-green-400 px-2 mb-1">
+                                            Entregas
+                                          </h4>
+                                          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
+                                            {paginatedEntrega.map((p) => (
+                                              <PedidoCard
+                                                key={p.id}
+                                                pedido={p}
+                                                seleccionado={state.pedidosSel.includes(
+                                                  p.id
+                                                )}
+                                                onToggle={togglePedido}
+                                              />
+                                            ))}
+                                          </div>
+                                          {totalEntregaPages > 1 && (
+                                            <Pagination
+                                              currentPage={currentEntregaPage}
+                                              totalPages={totalEntregaPages}
+                                              onPageChange={(page) =>
+                                                handlePageChange(
+                                                  `${estado}-${municipio}-${localidad}-entrega`,
+                                                  page
+                                                )
+                                              }
+                                              localityKey={`${estado}-${municipio}-${localidad}-entrega`}
+                                            />
+                                          )}
+                                        </div>
+                                      )}
+
+                                      {paginatedRecogida.length > 0 && (
+                                        <div>
+                                          <h4 className="text-sm font-medium text-orange-700 dark:text-orange-400 px-2 mb-1">
+                                            Recogidas
+                                          </h4>
+                                          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
+                                            {paginatedRecogida.map((p) => (
+                                              <PedidoCard
+                                                key={p.id}
+                                                pedido={p}
+                                                seleccionado={state.pedidosSel.includes(
+                                                  p.id
+                                                )}
+                                                onToggle={togglePedido}
+                                              />
+                                            ))}
+                                          </div>
+                                          {totalRecogidaPages > 1 && (
+                                            <Pagination
+                                              currentPage={currentRecogidaPage}
+                                              totalPages={totalRecogidaPages}
+                                              onPageChange={(page) =>
+                                                handlePageChange(
+                                                  `${estado}-${municipio}-${localidad}-recogida`,
+                                                  page
+                                                )
+                                              }
+                                              localityKey={`${estado}-${municipio}-${localidad}-recogida`}
+                                            />
+                                          )}
+                                        </div>
+                                      )}
+
+                                      {paginatedAtrasados.length > 0 && (
+                                        <div>
+                                          <h4 className="text-sm font-medium text-red-700 dark:text-red-400 px-2 mb-1">
+                                            Atrasados
+                                          </h4>
+                                          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
+                                            {paginatedAtrasados.map((p) => (
+                                              <PedidoCard
+                                                key={p.id}
+                                                pedido={p}
+                                                seleccionado={state.pedidosSel.includes(
+                                                  p.id
+                                                )}
+                                                onToggle={togglePedido}
+                                              />
+                                            ))}
+                                          </div>
+                                          {totalAtrasadosPages > 1 && (
+                                            <Pagination
+                                              currentPage={currentAtrasadosPage}
+                                              totalPages={totalAtrasadosPages}
+                                              onPageChange={(page) =>
+                                                handlePageChange(
+                                                  `${estado}-${municipio}-${localidad}-atrasados`,
+                                                  page
+                                                )
+                                              }
+                                              localityKey={`${estado}-${municipio}-${localidad}-atrasados`}
+                                            />
+                                          )}
+                                        </div>
+                                      )}
+                                    </div>
+                                  );
+                                }
+                              )}
+                            </div>
+                          </details>
+                        )
+                      )}
+                    </div>
+                  </details>
+                ))
+              )}
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Panel de Historial de Asignaciones (Separado) */}
+      <div className="mt-8 bg-white dark:bg-gray-800 rounded-xl p-5 shadow-lg border border-gray-200 dark:border-gray-700 transition-all duration-300 hover:shadow-xl">
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-4 gap-2">
+          <h2 className="text-xl font-bold flex items-center text-gray-900 dark:text-gray-100">
+            <Clock className="h-5 w-5 mr-2 text-indigo-600 dark:text-indigo-400" />
+            Historial de Asignaciones
+          </h2>
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="text-sm text-gray-600 dark:text-gray-400">
+              Selecciona fecha:
+            </span>
+            <DatePicker
+              selected={selectedDate}
+              onChange={(date) => setSelectedDate(date)}
+              dateFormat="dd/MM/yyyy"
+              className="p-2 border rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 border-gray-200 dark:border-gray-600 focus:ring-2 focus:ring-indigo-500 dark:focus:ring-indigo-400 text-sm w-full sm:w-auto"
+              minDate={new Date('2023-01-01')}
+              maxDate={new Date()}
+            />
+          </div>
         </div>
 
-        {state.pedidosError ? (
-          <ErrorDisplay message={state.pedidosError} />
-        ) : state.pedidosEmpty ? (
-          <NoDataDisplay message="Sin pedidos disponibles" />
-        ) : (
+        {isLoadingHistorial ? (
+          <Loading />
+        ) : state.historialPedidos.length > 0 ? (
           <div className="space-y-3">
-            {Object.keys(treePedidos).length === 0 ? (
-              <NoDataDisplay message="No hay pedidos de entrega para esta fecha." />
-            ) : (
-              Object.entries(treePedidos).map(([estado, municipios]) => (
+            {Object.entries(treeHistorial).map(([estado, municipios]) => {
+              const total = Object.values(municipios)
+                .flatMap(Object.values)
+                .flatMap(Object.values)
+                .reduce(
+                  (sum, loc) => sum + Object.values(loc).flat().length,
+                  0
+                );
+              const itemsPerPage = 3; // Número de municipios por página
+              const totalMunicipios = Object.keys(municipios).length;
+              const totalPages = Math.ceil(totalMunicipios / itemsPerPage);
+              const currentPage = state.pagination[`${estado}`] || 1;
+              const startIndex = (currentPage - 1) * itemsPerPage;
+              const endIndex = startIndex + itemsPerPage;
+              const paginatedMunicipios = Object.entries(municipios)
+                .slice(startIndex, endIndex)
+                .reduce((acc, [key, value]) => {
+                  acc[key] = value;
+                  return acc;
+                }, {});
+
+              return (
                 <details
                   key={estado}
-                  className="group dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700"
+                  className="group rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden"
                 >
-                  <summary className="list-none cursor-pointer flex justify-between items-center font-semibold text-base text-gray-900 dark:text-gray-100 p-4 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-lg transition-colors">
-                    <span>
-                      {estado} (
-                      {Object.values(municipios)
-                        .flatMap(Object.values)
-                        .flat()
-                        .reduce(
-                          (sum, loc) =>
-                            sum +
-                            loc.entrega.length +
-                            loc.recogida.length +
-                            loc.atrasados.length,
-                          0
-                        )}
-                      )
+                  <summary className="list-none cursor-pointer flex justify-between items-center font-semibold text-base text-gray-900 dark:text-gray-100 px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                    <span className="truncate max-w-[80%]">
+                      {estado} ({total})
                     </span>
                     <span className="text-indigo-600 dark:text-indigo-400 transition-transform duration-200 group-open:rotate-180 ml-2">
                       ▼
                     </span>
                   </summary>
 
-                  <div className="px-4 pb-4 space-y-3 dark:bg-gray-750 dark:border-gray-600">
+                  <div className="px-4 pb-4 space-y-3">
                     {Object.entries(municipios).map(
-                      ([municipio, localidades]) => (
-                        <details
-                          key={municipio}
-                          className="group dark:bg-gray-750 rounded-lg border border-gray-100 dark:border-gray-600"
-                        >
-                          <summary className="list-none cursor-pointer flex justify-between items-center font-medium text-sm text-gray-700 dark:text-gray-300 p-3 hover:bg-gray-100 dark:hover:bg-gray-600 rounded-lg transition-colors">
-                            <span>
-                              {municipio} (
-                              {Object.values(localidades)
-                                .flat()
-                                .reduce(
-                                  (sum, loc) =>
-                                    sum +
-                                    loc.entrega.length +
-                                    loc.recogida.length +
-                                    loc.atrasados.length,
-                                  0
-                                )}
-                              )
-                            </span>
-                            <span className="text-indigo-600 dark:text-indigo-400 transition-transform duration-200 group-open:rotate-180 ml-2">
-                              ▼
-                            </span>
-                          </summary>
+                      ([municipio, localidades]) => {
+                        const totalMunicipio = Object.values(localidades)
+                          .flat()
+                          .reduce(
+                            (sum, loc) =>
+                              sum + Object.values(loc).flat().length,
+                            0
+                          );
 
-                          <div className="px-3 pb-3 space-y-2">
-                            {Object.entries(localidades).map(
-                              ([
-                                localidad,
-                                { entrega, recogida, atrasados },
-                              ]) => {
-                                const itemsPerPage = 6;
-                                const totalEntregaPages = Math.ceil(
-                                  entrega.length / itemsPerPage
-                                );
-                                const totalRecogidaPages = Math.ceil(
-                                  recogida.length / itemsPerPage
-                                );
-                                const totalAtrasadosPages = Math.ceil(
-                                  atrasados.length / itemsPerPage
-                                );
+                        return (
+                          <details
+                            key={municipio}
+                            className="group rounded-md border border-gray-100 dark:border-gray-600 bg-white dark:bg-gray-750 overflow-hidden"
+                          >
+                            <summary className="list-none cursor-pointer flex justify-between items-center font-medium text-sm text-gray-700 dark:text-gray-300 px-3 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors">
+                              <span className="truncate max-w-[80%]">
+                                {municipio} ({totalMunicipio})
+                              </span>
+                              <span className="text-indigo-600 dark:text-indigo-400 transition-transform duration-200 group-open:rotate-180 ml-2">
+                                ▼
+                              </span>
+                            </summary>
 
-                                const currentEntregaPage =
-                                  state.pagination[
-                                    `${estado}-${municipio}-${localidad}-entrega`
-                                  ] || 1;
-                                const currentRecogidaPage =
-                                  state.pagination[
-                                    `${estado}-${municipio}-${localidad}-recogida`
-                                  ] || 1;
-                                const currentAtrasadosPage =
-                                  state.pagination[
-                                    `${estado}-${municipio}-${localidad}-atrasados`
-                                  ] || 1;
-
-                                const startEntregaIndex =
-                                  (currentEntregaPage - 1) * itemsPerPage;
-                                const startRecogidaIndex =
-                                  (currentRecogidaPage - 1) * itemsPerPage;
-                                const startAtrasadosIndex =
-                                  (currentAtrasadosPage - 1) * itemsPerPage;
-
-                                const paginatedEntrega = entrega
-                                  .slice(
-                                    startEntregaIndex,
-                                    startEntregaIndex + itemsPerPage
-                                  )
-                                  .sort((a, b) =>
-                                    a.descripcion.localeCompare(b.descripcion)
-                                  );
-                                const paginatedRecogida = recogida
-                                  .slice(
-                                    startRecogidaIndex,
-                                    startRecogidaIndex + itemsPerPage
-                                  )
-                                  .sort((a, b) =>
-                                    a.descripcion.localeCompare(b.descripcion)
-                                  );
-                                const paginatedAtrasados = atrasados
-                                  .slice(
-                                    startAtrasadosIndex,
-                                    startAtrasadosIndex + itemsPerPage
-                                  )
-                                  .sort((a, b) =>
-                                    a.descripcion.localeCompare(b.descripcion)
-                                  );
-
-                                return (
-                                  <div key={localidad} className="space-y-3">
-                                    {(paginatedEntrega.length > 0 ||
-                                      paginatedRecogida.length > 0 ||
-                                      paginatedAtrasados.length > 0) && (
-                                      <h3 className="text-md font-semibold text-gray-900 dark:text-gray-100 px-2">
-                                        {localidad} (
-                                        {entrega.length +
-                                          recogida.length +
-                                          atrasados.length}
-                                        )
-                                      </h3>
-                                    )}
-
-                                    {paginatedEntrega.length > 0 && (
-                                      <div>
-                                        <h4 className="text-sm font-medium text-green-700 dark:text-green-400 px-2 mb-1">
-                                          Entregas
-                                        </h4>
-                                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
-                                          {paginatedEntrega.map((p) => (
-                                            <PedidoCard
-                                              key={p.id}
-                                              pedido={p}
-                                              seleccionado={state.pedidosSel.includes(
-                                                p.id
-                                              )}
-                                              onToggle={togglePedido}
-                                            />
-                                          ))}
-                                        </div>
-                                        {totalEntregaPages > 1 && (
-                                          <Pagination
-                                            currentPage={currentEntregaPage}
-                                            totalPages={totalEntregaPages}
-                                            onPageChange={(page) =>
-                                              handlePageChange(
-                                                `${estado}-${municipio}-${localidad}-entrega`,
-                                                page
-                                              )
-                                            }
-                                            localityKey={`${estado}-${municipio}-${localidad}-entrega`}
-                                          />
-                                        )}
-                                      </div>
-                                    )}
-
-                                    {paginatedRecogida.length > 0 && (
-                                      <div>
-                                        <h4 className="text-sm font-medium text-orange-700 dark:text-orange-400 px-2 mb-1">
-                                          Recogidas
-                                        </h4>
-                                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
-                                          {paginatedRecogida.map((p) => (
-                                            <PedidoCard
-                                              key={p.id}
-                                              pedido={p}
-                                              seleccionado={state.pedidosSel.includes(
-                                                p.id
-                                              )}
-                                              onToggle={togglePedido}
-                                            />
-                                          ))}
-                                        </div>
-                                        {totalRecogidaPages > 1 && (
-                                          <Pagination
-                                            currentPage={currentRecogidaPage}
-                                            totalPages={totalRecogidaPages}
-                                            onPageChange={(page) =>
-                                              handlePageChange(
-                                                `${estado}-${municipio}-${localidad}-recogida`,
-                                                page
-                                              )
-                                            }
-                                            localityKey={`${estado}-${municipio}-${localidad}-recogida`}
-                                          />
-                                        )}
-                                      </div>
-                                    )}
-
-                                    {paginatedAtrasados.length > 0 && (
-                                      <div>
-                                        <h4 className="text-sm font-medium text-red-700 dark:text-red-400 px-2 mb-1">
-                                          Atrasados
-                                        </h4>
-                                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
-                                          {paginatedAtrasados.map((p) => (
-                                            <PedidoCard
-                                              key={p.id}
-                                              pedido={p}
-                                              seleccionado={state.pedidosSel.includes(
-                                                p.id
-                                              )}
-                                              onToggle={togglePedido}
-                                            />
-                                          ))}
-                                        </div>
-                                        {totalAtrasadosPages > 1 && (
-                                          <Pagination
-                                            currentPage={currentAtrasadosPage}
-                                            totalPages={totalAtrasadosPages}
-                                            onPageChange={(page) =>
-                                              handlePageChange(
-                                                `${estado}-${municipio}-${localidad}-atrasados`,
-                                                page
-                                              )
-                                            }
-                                            localityKey={`${estado}-${municipio}-${localidad}-atrasados`}
-                                          />
-                                        )}
-                                      </div>
-                                    )}
+                            <div className="px-3 pb-3 space-y-3">
+                              {Object.entries(localidades).map(
+                                ([localidad, repartidores]) => (
+                                  <div
+                                    key={localidad}
+                                    className="space-y-2 px-2"
+                                  >
+                                    <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100 truncate">
+                                      {localidad} (
+                                      {
+                                        Object.values(repartidores).flat()
+                                          .length
+                                      }
+                                      )
+                                    </h3>
+                                    <div className="space-y-2">
+                                      {Object.entries(repartidores).map(
+                                        ([repartidorId, pedidos]) => {
+                                          const repartidor =
+                                            state.repartidores.find(
+                                              (r) =>
+                                                r.id === parseInt(repartidorId)
+                                            ) || {
+                                              id: repartidorId,
+                                              nombre: 'Desconocido',
+                                              correo: 'Sin correo',
+                                            };
+                                          return (
+                                            <div
+                                              className="w-full overflow-hidden"
+                                              key={repartidorId}
+                                            >
+                                              <HistorialCard
+                                                repartidor={repartidor}
+                                                pedidos={pedidos}
+                                                onViewDetails={() =>
+                                                  handleViewDetails(
+                                                    repartidor.id,
+                                                    estado,
+                                                    municipio,
+                                                    localidad
+                                                  )
+                                                }
+                                              />
+                                            </div>
+                                          );
+                                        }
+                                      )}
+                                    </div>
                                   </div>
-                                );
-                              }
-                            )}
-                          </div>
-                        </details>
-                      )
+                                )
+                              )}
+                            </div>
+                          </details>
+                        );
+                      }
                     )}
-                  </div>
-                </details>
-              ))
-            )}
-          </div>
-        )}
-      </div>
-    </div>
 
-    {/* Panel de Historial de Asignaciones (Separado) */}
-    <div className="mt-8 bg-white dark:bg-gray-800 rounded-xl p-5 shadow-lg border border-gray-200 dark:border-gray-700 transition-all duration-300 hover:shadow-xl">
-      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-4 gap-2">
-        <h2 className="text-xl font-bold flex items-center text-gray-900 dark:text-gray-100">
-          <Clock className="h-5 w-5 mr-2 text-indigo-600 dark:text-indigo-400" />
-          Historial de Asignaciones
-        </h2>
-        <div className="flex flex-wrap items-center gap-2">
-          <span className="text-sm text-gray-600 dark:text-gray-400">
-            Selecciona fecha:
-          </span>
-          <DatePicker
-            selected={selectedDate}
-            onChange={(date) => setSelectedDate(date)}
-            dateFormat="dd/MM/yyyy"
-            className="p-2 border rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 border-gray-200 dark:border-gray-600 focus:ring-2 focus:ring-indigo-500 dark:focus:ring-indigo-400 text-sm w-full sm:w-auto"
-            minDate={new Date("2023-01-01")}
-            maxDate={new Date()}
-          />
-        </div>
-      </div>
-
-      {isLoadingHistorial ? (
-        <Loading />
-      ) : state.historialPedidos.length > 0 ? (
-        <div className="space-y-3">
-          {Object.entries(treeHistorial).map(([estado, municipios]) => {
-            const total = Object.values(municipios)
-              .flatMap(Object.values)
-              .flatMap(Object.values)
-              .reduce((sum, loc) => sum + Object.values(loc).flat().length, 0);
-            const itemsPerPage = 3; // Número de municipios por página
-            const totalMunicipios = Object.keys(municipios).length;
-            const totalPages = Math.ceil(totalMunicipios / itemsPerPage);
-            const currentPage = state.pagination[`${estado}`] || 1;
-            const startIndex = (currentPage - 1) * itemsPerPage;
-            const endIndex = startIndex + itemsPerPage;
-            const paginatedMunicipios = Object.entries(municipios)
-              .slice(startIndex, endIndex)
-              .reduce((acc, [key, value]) => {
-                acc[key] = value;
-                return acc;
-              }, {});
-
-            return (
-              <details
-                key={estado}
-                className="group rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden"
-              >
-                <summary className="list-none cursor-pointer flex justify-between items-center font-semibold text-base text-gray-900 dark:text-gray-100 px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
-                  <span className="truncate max-w-[80%]">
-                    {estado} ({total})
-                  </span>
-                  <span className="text-indigo-600 dark:text-indigo-400 transition-transform duration-200 group-open:rotate-180 ml-2">
-                    ▼
-                  </span>
-                </summary>
-
-                <div className="px-4 pb-4 space-y-3">
-                  {Object.entries(municipios).map(([municipio, localidades]) => {
-                    const totalMunicipio = Object.values(localidades)
-                      .flat()
-                      .reduce(
-                        (sum, loc) => sum + Object.values(loc).flat().length,
-                        0
-                      );
-
-                    return (
-                      <details
-                        key={municipio}
-                        className="group rounded-md border border-gray-100 dark:border-gray-600 bg-white dark:bg-gray-750 overflow-hidden"
-                      >
-                        <summary className="list-none cursor-pointer flex justify-between items-center font-medium text-sm text-gray-700 dark:text-gray-300 px-3 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors">
-                          <span className="truncate max-w-[80%]">
-                            {municipio} ({totalMunicipio})
-                          </span>
-                          <span className="text-indigo-600 dark:text-indigo-400 transition-transform duration-200 group-open:rotate-180 ml-2">
-                            ▼
-                          </span>
-                        </summary>
-
-                        <div className="px-3 pb-3 space-y-3">
-                          {Object.entries(localidades).map(
-                            ([localidad, repartidores]) => (
-                              <div key={localidad} className="space-y-2 px-2">
-                                <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100 truncate">
-                                  {localidad} (
-                                  {Object.values(repartidores).flat().length})
-                                </h3>
-                                <div className="space-y-2">
-                                  {Object.entries(repartidores).map(
-                                    ([repartidorId, pedidos]) => {
-                                      const repartidor =
-                                        state.repartidores.find(
-                                          (r) =>
-                                            r.id === parseInt(repartidorId)
-                                        ) || {
-                                          id: repartidorId,
-                                          nombre: "Desconocido",
-                                          correo: "Sin correo",
-                                        };
-                                      return (
-                                        <div
-                                          className="w-full overflow-hidden"
-                                          key={repartidorId}
-                                        >
-                                          <HistorialCard
-                                            repartidor={repartidor}
-                                            pedidos={pedidos}
-                                            onViewDetails={() =>
-                                              handleViewDetails(
-                                                repartidor.id,
-                                                estado,
-                                                municipio,
-                                                localidad
-                                              )
-                                            }
-                                          />
-                                        </div>
-                                      );
-                                    }
-                                  )}
-                                </div>
-                              </div>
-                            )
-                          )}
-                        </div>
-                      </details>
-                    );
-                  })}
-
-                  {/* {totalPages > 1 && (
+                    {/* {totalPages > 1 && (
                     <Pagination
                       currentPage={currentPage}
                       totalPages={totalPages}
@@ -2534,27 +2545,25 @@ const AsignacionPedidosGeo = () => {
                       localityKey={`${estado}`}
                     />
                   )} */}
-                </div>
-              </details>
-            );
-          })}
-        </div>
-      ) : (
-        <NoDataDisplay message="No hay historial para la fecha seleccionada." />
-      )}
+                  </div>
+                </details>
+              );
+            })}
+          </div>
+        ) : (
+          <NoDataDisplay message="No hay historial para la fecha seleccionada." />
+        )}
+      </div>
+
+      <Modal
+        isOpen={state.modalOpen}
+        onClose={handleCloseModal}
+        pedidos={state.filteredPedidos}
+        pedidoDetalles={state.pedidoDetalles}
+        selectedLocation={state.selectedLocation}
+      />
     </div>
-
-    <Modal
-      isOpen={state.modalOpen}
-      onClose={handleCloseModal}
-      pedidos={state.filteredPedidos}
-      pedidoDetalles={state.pedidoDetalles}
-      selectedLocation={state.selectedLocation}
-    />
-  </div>
-);
-
-
+  );
 };
 
 export default AsignacionPedidosGeo;

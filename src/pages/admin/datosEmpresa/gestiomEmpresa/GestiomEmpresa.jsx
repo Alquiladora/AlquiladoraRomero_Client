@@ -1,5 +1,5 @@
 /* eslint-disable */
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect } from 'react';
 import {
   Box,
   Grid,
@@ -18,14 +18,14 @@ import {
   ListItem,
   CircularProgress,
   ListItemText,
-} from "@mui/material";
+} from '@mui/material';
 import {
   Edit as EditIcon,
   CameraAlt as CameraAltIcon,
   Add as AddIcon,
-} from "@mui/icons-material";
-import { motion } from "framer-motion";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+} from '@mui/icons-material';
+import { motion } from 'framer-motion';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faFacebook,
   faInstagram,
@@ -38,16 +38,16 @@ import {
   faDiscord,
   faWhatsapp,
   faTelegramPlane,
-} from "@fortawesome/free-brands-svg-icons";
-import { FaGlobe,  FaTimes } from "react-icons/fa";
-import { toast } from "react-toastify";
-import api from "../../../../utils/AxiosConfig";
-import { useAuth } from "../../../../hooks/ContextAuth";
+} from '@fortawesome/free-brands-svg-icons';
+import { FaGlobe, FaTimes } from 'react-icons/fa';
+import { toast } from 'react-toastify';
+import api from '../../../../utils/AxiosConfig';
+import { useAuth } from '../../../../hooks/ContextAuth';
 import {
   faDatabase,
   faUser,
   faHandPointer,
-} from "@fortawesome/free-solid-svg-icons";
+} from '@fortawesome/free-solid-svg-icons';
 
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const phoneRegex = /^\d{10}$/;
@@ -57,66 +57,66 @@ const direccionRegex =
 
 const CrudEmpresa = ({ setFotoEmpresa }) => {
   const [empresaData, setEmpresaData] = useState({
-    nombreEmpresa: "",
-    logoUrl: "",
-    slogan: "",
-    telefono: "",
-    correo: "",
-    ubicacion: "",
+    nombreEmpresa: '',
+    logoUrl: '',
+    slogan: '',
+    telefono: '',
+    correo: '',
+    ubicacion: '',
     redesSociales: {},
   });
-  const {  csrfToken } = useAuth();
+  const { csrfToken } = useAuth();
   const [uploading, setUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [openModal, setOpenModal] = useState(false);
-  const [currentField, setCurrentField] = useState("");
-  const [newValue, setNewValue] = useState("");
-  const [errorMessage, setErrorMessage] = useState("");
+  const [currentField, setCurrentField] = useState('');
+  const [newValue, setNewValue] = useState('');
+  const [errorMessage, setErrorMessage] = useState('');
   const [selectedIcon, setSelectedIcon] = useState(FaGlobe);
-  const [currentSocialKey, setCurrentSocialKey] = useState("");
-  const [fechaA, setFechaA] = useState("");
+  const [currentSocialKey, setCurrentSocialKey] = useState('');
+  const [fechaA, setFechaA] = useState('');
   const [saving, setSaving] = useState(false);
   const [dataLoading, setDataLoading] = useState(true);
-  const [dataError, setDataError] = useState("");
+  const [dataError, setDataError] = useState('');
 
   const iconOptions = [
-    { name: "Facebook", icon: faFacebook },
-    { name: "Instagram", icon: faInstagram },
-    { name: "Twitter", icon: faTwitter },
-    { name: "LinkedIn", icon: faLinkedin },
-    { name: "YouTube", icon: faYoutube },
-    { name: "Pinterest", icon: faPinterest },
-    { name: "Snapchat", icon: faSnapchatGhost },
-    { name: "TikTok", icon: faTiktok },
-    { name: "Discord", icon: faDiscord },
-    { name: "WhatsApp", icon: faWhatsapp },
-    { name: "Telegram", icon: faTelegramPlane },
-    { name: "Other", icon: FaGlobe },
+    { name: 'Facebook', icon: faFacebook },
+    { name: 'Instagram', icon: faInstagram },
+    { name: 'Twitter', icon: faTwitter },
+    { name: 'LinkedIn', icon: faLinkedin },
+    { name: 'YouTube', icon: faYoutube },
+    { name: 'Pinterest', icon: faPinterest },
+    { name: 'Snapchat', icon: faSnapchatGhost },
+    { name: 'TikTok', icon: faTiktok },
+    { name: 'Discord', icon: faDiscord },
+    { name: 'WhatsApp', icon: faWhatsapp },
+    { name: 'Telegram', icon: faTelegramPlane },
+    { name: 'Other', icon: FaGlobe },
   ];
 
   // Fetch company data
   const fetchEmpresaData = async () => {
     setDataLoading(true);
-    setDataError("");
+    setDataError('');
     try {
-      const response = await api.get("/api/empresa", {
-        headers: { "X-CSRF-Token": csrfToken },
+      const response = await api.get('/api/empresa', {
+        headers: { 'X-CSRF-Token': csrfToken },
         withCredentials: true,
       });
       setEmpresaData({
-        nombreEmpresa: response.data.nombreEmpresa || "",
-        ubicacion: response.data.ubicacion || "",
-        correo: response.data.correo || "",
-        telefono: response.data.telefono || "",
-        slogan: response.data.slogan || "",
-        logoUrl: response.data.logoUrl || "",
-        redesSociales: JSON.parse(response.data.redesSociales || "{}"),
+        nombreEmpresa: response.data.nombreEmpresa || '',
+        ubicacion: response.data.ubicacion || '',
+        correo: response.data.correo || '',
+        telefono: response.data.telefono || '',
+        slogan: response.data.slogan || '',
+        logoUrl: response.data.logoUrl || '',
+        redesSociales: JSON.parse(response.data.redesSociales || '{}'),
       });
-      setFechaA(response.data.actualizadoEn || "{}");
+      setFechaA(response.data.actualizadoEn || '{}');
       setFotoEmpresa(response.data.logoUrl);
     } catch (error) {
-      console.error("Error al obtener datos de la empresa", error);
-      setDataError("No se pudieron cargar los datos de la empresa.");
+      console.error('Error al obtener datos de la empresa', error);
+      setDataError('No se pudieron cargar los datos de la empresa.');
     } finally {
       setDataLoading(false);
     }
@@ -130,22 +130,22 @@ const CrudEmpresa = ({ setFotoEmpresa }) => {
 
   const validateFile = (file) => {
     const allowedTypes = [
-      "image/jpeg",
-      "image/png",
-      "image/jpg",
-      "image/gif",
-      "image/webp",
-      "image/svg+xml",
+      'image/jpeg',
+      'image/png',
+      'image/jpg',
+      'image/gif',
+      'image/webp',
+      'image/svg+xml',
     ];
     const maxSize = 5 * 1024 * 1024;
     if (!allowedTypes.includes(file.type)) {
       toast.error(
-        "Formato inválido. Solo se permiten imágenes JPG, PNG, JPEG, GIF, WEBP o SVG."
+        'Formato inválido. Solo se permiten imágenes JPG, PNG, JPEG, GIF, WEBP o SVG.'
       );
       return false;
     }
     if (file.size > maxSize) {
-      toast.error("El tamaño máximo permitido es de 5 MB.");
+      toast.error('El tamaño máximo permitido es de 5 MB.');
       return false;
     }
     return true;
@@ -155,15 +155,15 @@ const CrudEmpresa = ({ setFotoEmpresa }) => {
     const file = e.target.files[0];
     if (!file || !validateFile(file)) return;
     const formData = new FormData();
-    formData.append("imagen", file);
+    formData.append('imagen', file);
     setUploading(true);
     setUploadProgress(0);
-    toast.info("Espera mientras se sube la imagen...");
+    toast.info('Espera mientras se sube la imagen...');
     try {
-      const response = await api.post("/api/imagenes/upload", formData, {
+      const response = await api.post('/api/imagenes/upload', formData, {
         headers: {
-          "Content-Type": "multipart/form-data",
-          "X-CSRF-Token": csrfToken,
+          'Content-Type': 'multipart/form-data',
+          'X-CSRF-Token': csrfToken,
         },
         withCredentials: true,
         onUploadProgress: (progressEvent) => {
@@ -175,23 +175,23 @@ const CrudEmpresa = ({ setFotoEmpresa }) => {
       });
       const imageUrl = response.data.url;
       const updatedData = { ...empresaData, logoUrl: imageUrl };
-      await api.post("/api/empresa/actualizar", updatedData, {
-        headers: { "X-CSRF-Token": csrfToken },
+      await api.post('/api/empresa/actualizar', updatedData, {
+        headers: { 'X-CSRF-Token': csrfToken },
         withCredentials: true,
       });
       setEmpresaData(updatedData);
-      toast.success("El logo se ha subido correctamente.");
+      toast.success('El logo se ha subido correctamente.');
       setUploading(false);
       setOpenModal(false);
       fetchEmpresaData();
     } catch (error) {
-      toast.error("No se pudo subir la imagen, intenta de nuevo.");
+      toast.error('No se pudo subir la imagen, intenta de nuevo.');
       setUploading(false);
-      console.error("Error al subir la imagen:", error);
+      console.error('Error al subir la imagen:', error);
     }
   };
 
-  const handleOpenModal = (field, socialKey = "") => {
+  const handleOpenModal = (field, socialKey = '') => {
     setCurrentField(field);
     setNewValue(
       socialKey ? empresaData.redesSociales[socialKey] : empresaData[field]
@@ -202,7 +202,7 @@ const CrudEmpresa = ({ setFotoEmpresa }) => {
         socialKey ? empresaData.redesSociales[socialKey] : empresaData[field]
       )
     );
-    setErrorMessage("");
+    setErrorMessage('');
     setOpenModal(true);
   };
 
@@ -221,22 +221,22 @@ const CrudEmpresa = ({ setFotoEmpresa }) => {
   };
 
   const validateField = () => {
-    if (currentField === "correo") {
+    if (currentField === 'correo') {
       if (!emailRegex.test(newValue)) {
-        setErrorMessage("Por favor, ingresa un correo electrónico válido.");
+        setErrorMessage('Por favor, ingresa un correo electrónico válido.');
         return false;
       }
-    } else if (currentField === "telefono") {
+    } else if (currentField === 'telefono') {
       if (!phoneRegex.test(newValue)) {
         setErrorMessage(
-          "El teléfono debe contener exactamente 10 dígitos numéricos."
+          'El teléfono debe contener exactamente 10 dígitos numéricos.'
         );
         return false;
       }
-    } else if (currentField === "redesSociales") {
+    } else if (currentField === 'redesSociales') {
       if (!urlRegex.test(newValue)) {
         setErrorMessage(
-          "Ingresa una URL válida que comience con http o https."
+          'Ingresa una URL válida que comience con http o https.'
         );
         return false;
       }
@@ -245,29 +245,29 @@ const CrudEmpresa = ({ setFotoEmpresa }) => {
         (key) => key !== currentSocialKey && redes[key] === newValue.trim()
       );
       if (duplicate) {
-        setErrorMessage("Esta red social ya está registrada.");
+        setErrorMessage('Esta red social ya está registrada.');
         return false;
       }
-    } else if (currentField === "ubicacion") {
+    } else if (currentField === 'ubicacion') {
       if (!validateDireccion(newValue)) {
         return false;
       }
-    } else if (currentField === "slogan") {
+    } else if (currentField === 'slogan') {
       if (newValue.trim().length < 4 || newValue.trim().length > 30) {
-        setErrorMessage("El slogan debe tener entre 4 y 30 caracteres.");
+        setErrorMessage('El slogan debe tener entre 4 y 30 caracteres.');
         return false;
       }
-    } else if (currentField === "nombreEmpresa") {
+    } else if (currentField === 'nombreEmpresa') {
       if (!/^[A-Za-z]/.test(newValue)) {
-        setErrorMessage("El nombre de la empresa debe comenzar con una letra.");
+        setErrorMessage('El nombre de la empresa debe comenzar con una letra.');
         return false;
       }
       if (newValue.trim().length < 2) {
-        setErrorMessage("El nombre de la empresa es demasiado corto.");
+        setErrorMessage('El nombre de la empresa es demasiado corto.');
         return false;
       }
     }
-    setErrorMessage("");
+    setErrorMessage('');
     return true;
   };
 
@@ -275,10 +275,10 @@ const CrudEmpresa = ({ setFotoEmpresa }) => {
     if (!validateField()) return;
     const updatedData = { ...empresaData };
 
-    if (currentField === "redesSociales") {
-      if (newValue.trim() === "") {
+    if (currentField === 'redesSociales') {
+      if (newValue.trim() === '') {
         setErrorMessage(
-          "Por favor, introduce una URL válida antes de guardar."
+          'Por favor, introduce una URL válida antes de guardar.'
         );
         return;
       }
@@ -290,10 +290,10 @@ const CrudEmpresa = ({ setFotoEmpresa }) => {
 
     try {
       setSaving(true);
-      await api.post("/api/empresa/actualizar", updatedData, {
+      await api.post('/api/empresa/actualizar', updatedData, {
         headers: {
-          "Content-Type": "application/json",
-          "X-CSRF-Token": csrfToken,
+          'Content-Type': 'application/json',
+          'X-CSRF-Token': csrfToken,
         },
         withCredentials: true,
       });
@@ -312,22 +312,22 @@ const CrudEmpresa = ({ setFotoEmpresa }) => {
   const addNewSocial = () => {
     const socialObj = empresaData.redesSociales || {};
     const newSocialKey = `Red_Social_${Object.keys(socialObj).length + 1}`;
-    handleOpenModal("redesSociales", newSocialKey);
+    handleOpenModal('redesSociales', newSocialKey);
   };
 
-  const getSocialIcon = (url = "") => {
-    if (!url || typeof url !== "string") return FaGlobe;
-    if (url.includes("facebook.com")) return faFacebook;
-    if (url.includes("instagram.com")) return faInstagram;
-    if (url.includes("x.com") || url.includes("twitter.com")) return faTwitter;
-    if (url.includes("linkedin.com")) return faLinkedin;
-    if (url.includes("youtube.com")) return faYoutube;
-    if (url.includes("pinterest.com")) return faPinterest;
-    if (url.includes("snapchat.com")) return faSnapchatGhost;
-    if (url.includes("tiktok.com")) return faTiktok;
-    if (url.includes("discord.com")) return faDiscord;
-    if (url.includes("whatsapp.com")) return faWhatsapp;
-    if (url.includes("telegram.org") || url.includes("t.me"))
+  const getSocialIcon = (url = '') => {
+    if (!url || typeof url !== 'string') return FaGlobe;
+    if (url.includes('facebook.com')) return faFacebook;
+    if (url.includes('instagram.com')) return faInstagram;
+    if (url.includes('x.com') || url.includes('twitter.com')) return faTwitter;
+    if (url.includes('linkedin.com')) return faLinkedin;
+    if (url.includes('youtube.com')) return faYoutube;
+    if (url.includes('pinterest.com')) return faPinterest;
+    if (url.includes('snapchat.com')) return faSnapchatGhost;
+    if (url.includes('tiktok.com')) return faTiktok;
+    if (url.includes('discord.com')) return faDiscord;
+    if (url.includes('whatsapp.com')) return faWhatsapp;
+    if (url.includes('telegram.org') || url.includes('t.me'))
       return faTelegramPlane;
     return FaGlobe;
   };
@@ -355,7 +355,7 @@ const CrudEmpresa = ({ setFotoEmpresa }) => {
       <Box className="flex flex-col items-center justify-center min-h-screen bg-white dark:bg-gray-900 p-4 sm:p-8">
         <motion.div
           animate={{ y: [0, -10, 0] }}
-          transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+          transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
           className="mb-4"
         >
           <FontAwesomeIcon
@@ -399,65 +399,65 @@ const CrudEmpresa = ({ setFotoEmpresa }) => {
         <Typography
           variant="body2"
           sx={{
-            position: "absolute",
+            position: 'absolute',
             top: { xs: 8, sm: 12 },
             right: { xs: 8, sm: 16 },
-            fontSize: { xs: "0.75rem", sm: "0.875rem" },
-            color: "text.secondary",
+            fontSize: { xs: '0.75rem', sm: '0.875rem' },
+            color: 'text.secondary',
           }}
           className="dark:text-gray-300"
         >
-          Actualizado el:{" "}
+          Actualizado el:{' '}
           {fechaA
-            ? new Date(fechaA).toLocaleString("es-ES", {
-                day: "2-digit",
-                month: "long",
+            ? new Date(fechaA).toLocaleString('es-ES', {
+                day: '2-digit',
+                month: 'long',
               })
-            : ""}
+            : ''}
         </Typography>
 
         <Box
           sx={{
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
             mt: 2,
           }}
         >
-          <Box sx={{ position: "relative" }}>
+          <Box sx={{ position: 'relative' }}>
             <Avatar
               alt="Logo de la empresa"
               src={
                 empresaData.logoUrl ||
                 `https://ui-avatars.com/api/?name=${encodeURIComponent(
-                  empresaData.nombreEmpresa.charAt(0) || "U"
+                  empresaData.nombreEmpresa.charAt(0) || 'U'
                 )}&background=0D6EFD&color=fff`
               }
               sx={{
                 width: { xs: 80, sm: 100 },
                 height: { xs: 80, sm: 100 },
                 boxShadow: 3,
-                transition: "transform 0.3s ease",
-                "&:hover": { transform: "scale(1.05)" },
+                transition: 'transform 0.3s ease',
+                '&:hover': { transform: 'scale(1.05)' },
               }}
             />
             <IconButton
               component="label"
               sx={{
-                position: "absolute",
+                position: 'absolute',
                 bottom: 0,
-                left: "50%",
-                transform: "translateX(-50%)",
-                bgcolor: "background.paper",
+                left: '50%',
+                transform: 'translateX(-50%)',
+                bgcolor: 'background.paper',
                 boxShadow: 2,
-                "&:hover": {
-                  transform: "translateX(-50%) scale(1.1)",
-                  bgcolor: "background.default",
+                '&:hover': {
+                  transform: 'translateX(-50%) scale(1.1)',
+                  bgcolor: 'background.default',
                 },
               }}
               className="dark:bg-gray-700 dark:hover:bg-gray-600"
             >
-              <CameraAltIcon sx={{ color: "primary.main" }} />
+              <CameraAltIcon sx={{ color: 'primary.main' }} />
               <input
                 type="file"
                 hidden
@@ -470,30 +470,30 @@ const CrudEmpresa = ({ setFotoEmpresa }) => {
           <Box
             sx={{
               mt: 2,
-              position: "relative",
-              width: "100%",
-              maxWidth: { xs: "250px", sm: "300px" },
-              textAlign: "center",
+              position: 'relative',
+              width: '100%',
+              maxWidth: { xs: '250px', sm: '300px' },
+              textAlign: 'center',
             }}
           >
             <Typography
               variant="h5"
               fontWeight="bold"
               sx={{
-                fontSize: { xs: "1.25rem", sm: "1.5rem" },
-                color: "text.primary",
+                fontSize: { xs: '1.25rem', sm: '1.5rem' },
+                color: 'text.primary',
               }}
               className="dark:text-white"
             >
-              {empresaData.nombreEmpresa || "Nombre de la Empresa"}
+              {empresaData.nombreEmpresa || 'Nombre de la Empresa'}
             </Typography>
             <IconButton
-              onClick={() => handleOpenModal("nombreEmpresa")}
+              onClick={() => handleOpenModal('nombreEmpresa')}
               sx={{
-                position: "absolute",
+                position: 'absolute',
                 top: 0,
                 right: 0,
-                color: "primary.main",
+                color: 'primary.main',
               }}
               className="dark:text-white"
             >
@@ -504,18 +504,18 @@ const CrudEmpresa = ({ setFotoEmpresa }) => {
       </Paper>
 
       <Grid container spacing={{ xs: 1, sm: 2, md: 3 }} justifyContent="center">
-        {["correo", "ubicacion", "telefono", "slogan"].map((field, index) => (
+        {['correo', 'ubicacion', 'telefono', 'slogan'].map((field, index) => (
           <Grid item xs={12} sm={6} md={3} key={index}>
             <Paper
               elevation={2}
               sx={{
                 p: { xs: 1, sm: 2 },
-                textAlign: "center",
-                position: "relative",
-                bgcolor: "background.paper",
+                textAlign: 'center',
+                position: 'relative',
+                bgcolor: 'background.paper',
                 borderRadius: 2,
-                transition: "box-shadow 0.3s ease, transform 0.3s ease",
-                "&:hover": { boxShadow: 6, transform: "translateY(-2px)" },
+                transition: 'box-shadow 0.3s ease, transform 0.3s ease',
+                '&:hover': { boxShadow: 6, transform: 'translateY(-2px)' },
               }}
               className="dark:bg-gray-800"
             >
@@ -524,8 +524,8 @@ const CrudEmpresa = ({ setFotoEmpresa }) => {
                 fontWeight="medium"
                 sx={{
                   mb: 1,
-                  fontSize: { xs: "0.9rem", sm: "1rem" },
-                  color: "text.primary",
+                  fontSize: { xs: '0.9rem', sm: '1rem' },
+                  color: 'text.primary',
                 }}
                 className="dark:text-white"
               >
@@ -533,21 +533,21 @@ const CrudEmpresa = ({ setFotoEmpresa }) => {
               </Typography>
               <Typography
                 sx={{
-                  color: "text.secondary",
-                  wordWrap: "break-word",
+                  color: 'text.secondary',
+                  wordWrap: 'break-word',
                   px: 1,
-                  fontSize: { xs: "0.85rem", sm: "0.95rem" },
+                  fontSize: { xs: '0.85rem', sm: '0.95rem' },
                 }}
                 className="dark:text-gray-300"
               >
-                {empresaData[field] || "N/A"}
+                {empresaData[field] || 'N/A'}
               </Typography>
               <IconButton
                 sx={{
-                  position: "absolute",
+                  position: 'absolute',
                   top: 8,
                   right: 8,
-                  color: "primary.main",
+                  color: 'primary.main',
                 }}
                 className="dark:text-white"
                 onClick={() => handleOpenModal(field)}
@@ -563,55 +563,55 @@ const CrudEmpresa = ({ setFotoEmpresa }) => {
             elevation={2}
             sx={{
               p: { xs: 1, sm: 2, md: 3 },
-              textAlign: "center",
-              bgcolor: "background.paper",
+              textAlign: 'center',
+              bgcolor: 'background.paper',
               borderRadius: 2,
-              transition: "box-shadow 0.3s ease, transform 0.3s ease",
-              "&:hover": { boxShadow: 6, transform: "translateY(-2px)" },
+              transition: 'box-shadow 0.3s ease, transform 0.3s ease',
+              '&:hover': { boxShadow: 6, transform: 'translateY(-2px)' },
             }}
             className="dark:bg-gray-800 dark:text-white"
           >
             <Typography
               variant="h6"
               fontWeight="medium"
-              sx={{ mb: 2, fontSize: { xs: "1rem", sm: "1.25rem" } }}
+              sx={{ mb: 2, fontSize: { xs: '1rem', sm: '1.25rem' } }}
             >
               Redes Sociales
             </Typography>
             {Object.keys(empresaData.redesSociales || {}).length > 0 ? (
-              <List sx={{ maxHeight: "300px", overflowY: "auto" }}>
+              <List sx={{ maxHeight: '300px', overflowY: 'auto' }}>
                 {Object.keys(empresaData.redesSociales || {}).map(
                   (socialKey, index) => (
                     <ListItem
                       key={index}
                       sx={{
-                        display: "flex",
-                        justifyContent: "space-between",
-                        alignItems: "center",
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
                         bgcolor:
                           index % 2 === 0
-                            ? "background.paper"
-                            : "background.default",
+                            ? 'background.paper'
+                            : 'background.default',
                         borderRadius: 1,
                         mb: 0.5,
                       }}
                       className="dark:bg-gray-700"
                     >
-                      <Box sx={{ display: "flex", alignItems: "center" }}>
+                      <Box sx={{ display: 'flex', alignItems: 'center' }}>
                         <FontAwesomeIcon
                           icon={getSocialIcon(
                             empresaData.redesSociales[socialKey]
                           )}
                           className="dark:text-gray-300"
-                          style={{ marginRight: 10, fontSize: "1.2rem" }}
+                          style={{ marginRight: 10, fontSize: '1.2rem' }}
                         />
                         <ListItemText
                           primary={
                             <Typography
                               sx={{
-                                fontSize: { xs: "0.85rem", sm: "0.95rem" },
-                                color: "text.primary",
-                                wordBreak: "break-word",
+                                fontSize: { xs: '0.85rem', sm: '0.95rem' },
+                                color: 'text.primary',
+                                wordBreak: 'break-word',
                               }}
                               className="dark:text-white"
                             >
@@ -622,9 +622,9 @@ const CrudEmpresa = ({ setFotoEmpresa }) => {
                       </Box>
                       <IconButton
                         onClick={() =>
-                          handleOpenModal("redesSociales", socialKey)
+                          handleOpenModal('redesSociales', socialKey)
                         }
-                        sx={{ color: "primary.main" }}
+                        sx={{ color: 'primary.main' }}
                       >
                         <EditIcon className="dark:text-white" />
                       </IconButton>
@@ -635,7 +635,7 @@ const CrudEmpresa = ({ setFotoEmpresa }) => {
             ) : (
               <Typography
                 className="dark:text-gray-300"
-                sx={{ color: "text.secondary", mb: 2 }}
+                sx={{ color: 'text.secondary', mb: 2 }}
               >
                 No se han agregado redes sociales.
               </Typography>
@@ -646,16 +646,16 @@ const CrudEmpresa = ({ setFotoEmpresa }) => {
               onClick={addNewSocial}
               sx={{
                 mt: 2,
-                bgcolor: "primary.main",
-                color: "white",
-                "&:hover": {
-                  bgcolor: "primary.dark",
-                  transform: "scale(1.05)",
+                bgcolor: 'primary.main',
+                color: 'white',
+                '&:hover': {
+                  bgcolor: 'primary.dark',
+                  transform: 'scale(1.05)',
                 },
-                transition: "transform 0.3s ease",
+                transition: 'transform 0.3s ease',
                 borderRadius: 2,
-                fontWeight: "bold",
-                fontSize: { xs: "0.75rem", sm: "0.875rem" },
+                fontWeight: 'bold',
+                fontSize: { xs: '0.75rem', sm: '0.875rem' },
                 px: { xs: 2, sm: 3 },
               }}
               className="dark:bg-blue-600 dark:hover:bg-blue-700"
@@ -669,29 +669,29 @@ const CrudEmpresa = ({ setFotoEmpresa }) => {
       <Modal open={openModal} onClose={handleCloseModal}>
         <Box
           sx={{
-            position: "absolute",
-            left: "50%",
-            top: "50%",
-            transform: "translate(-50%, -50%)",
-            width: { xs: "90%", sm: "400px" },
-            bgcolor: "background.paper",
+            position: 'absolute',
+            left: '50%',
+            top: '50%',
+            transform: 'translate(-50%, -50%)',
+            width: { xs: '90%', sm: '400px' },
+            bgcolor: 'background.paper',
             p: { xs: 2, sm: 3 },
             borderRadius: 2,
             boxShadow: 24,
-            outline: "none",
-            maxHeight: "90vh",
-            overflowY: "auto",
+            outline: 'none',
+            maxHeight: '90vh',
+            overflowY: 'auto',
           }}
           className="dark:bg-gray-800"
         >
           <IconButton
             onClick={handleCloseModal}
             sx={{
-              position: "absolute",
+              position: 'absolute',
               top: 8,
               right: 8,
-              color: "text.secondary",
-              "&:hover": { color: "text.primary" },
+              color: 'text.secondary',
+              '&:hover': { color: 'text.primary' },
             }}
             className="dark:text-white"
           >
@@ -701,15 +701,15 @@ const CrudEmpresa = ({ setFotoEmpresa }) => {
             variant="h6"
             sx={{
               mb: 2,
-              color: "text.primary",
-              fontSize: { xs: "1rem", sm: "1.25rem" },
+              color: 'text.primary',
+              fontSize: { xs: '1rem', sm: '1.25rem' },
             }}
             className="dark:text-white"
           >
-            Editar{" "}
-            {typeof currentField === "string"
+            Editar{' '}
+            {typeof currentField === 'string'
               ? currentField.charAt(0).toUpperCase() + currentField.slice(1)
-              : ""}
+              : ''}
           </Typography>
           <TextField
             fullWidth
@@ -718,33 +718,33 @@ const CrudEmpresa = ({ setFotoEmpresa }) => {
             onChange={(e) => setNewValue(e.target.value)}
             margin="normal"
             sx={{
-              "& .MuiInputBase-root": { bgcolor: "background.default" },
-              "& .MuiInputLabel-root": { color: "text.secondary" },
-              "& .MuiInputBase-input": { color: "text.primary" },
+              '& .MuiInputBase-root': { bgcolor: 'background.default' },
+              '& .MuiInputLabel-root': { color: 'text.secondary' },
+              '& .MuiInputBase-input': { color: 'text.primary' },
             }}
             className="dark:bg-gray-700 dark:text-white"
             error={!!errorMessage}
             helperText={errorMessage}
           />
-          {currentField === "redesSociales" && (
+          {currentField === 'redesSociales' && (
             <FormControl fullWidth margin="normal">
               <InputLabel
-                sx={{ color: "text.secondary" }}
+                sx={{ color: 'text.secondary' }}
                 className="dark:text-gray-300"
               >
                 Selecciona un icono
               </InputLabel>
               <Select
-                value={selectedIcon ? selectedIcon.icon : ""}
+                value={selectedIcon ? selectedIcon.icon : ''}
                 onChange={(e) =>
                   setSelectedIcon(
                     iconOptions.find((option) => option.icon === e.target.value)
                   )
                 }
                 sx={{
-                  bgcolor: "background.default",
-                  color: "text.primary",
-                  "& .MuiSvgIcon-root": { color: "text.secondary" },
+                  bgcolor: 'background.default',
+                  color: 'text.primary',
+                  '& .MuiSvgIcon-root': { color: 'text.secondary' },
                 }}
                 className="dark:bg-gray-700 dark:text-white"
                 label="Selecciona un icono"
@@ -757,7 +757,7 @@ const CrudEmpresa = ({ setFotoEmpresa }) => {
                   >
                     <FontAwesomeIcon
                       icon={option.icon}
-                      style={{ marginRight: 10, color: "text.secondary" }}
+                      style={{ marginRight: 10, color: 'text.secondary' }}
                       className="dark:text-gray-300"
                     />
                     {option.name}
@@ -773,23 +773,23 @@ const CrudEmpresa = ({ setFotoEmpresa }) => {
             disabled={saving}
             sx={{
               mt: 2,
-              bgcolor: "primary.main",
-              color: "white",
-              "&:hover": {
-                bgcolor: "primary.dark",
-                transform: "scale(1.02)",
+              bgcolor: 'primary.main',
+              color: 'white',
+              '&:hover': {
+                bgcolor: 'primary.dark',
+                transform: 'scale(1.02)',
               },
-              transition: "transform 0.3s ease",
-              fontWeight: "bold",
-              fontSize: { xs: "0.75rem", sm: "0.875rem" },
+              transition: 'transform 0.3s ease',
+              fontWeight: 'bold',
+              fontSize: { xs: '0.75rem', sm: '0.875rem' },
               py: 1,
             }}
             className="dark:bg-blue-600 dark:hover:bg-blue-700"
           >
             {saving ? (
-              <CircularProgress size={24} sx={{ color: "white" }} />
+              <CircularProgress size={24} sx={{ color: 'white' }} />
             ) : (
-              "Guardar"
+              'Guardar'
             )}
           </Button>
         </Box>

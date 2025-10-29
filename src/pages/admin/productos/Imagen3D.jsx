@@ -1,8 +1,8 @@
 /* eslint-disable */
-import React, { useRef, useEffect } from "react";
-import VanillaTilt from "vanilla-tilt";
+import React, { useRef, useEffect } from 'react';
+import VanillaTilt from 'vanilla-tilt';
 
-function TiltImage({ src, alt, options = {}, className = "" }) {
+function TiltImage({ src, alt, options = {}, className = '' }) {
   const tiltRef = useRef(null);
 
   useEffect(() => {
@@ -13,7 +13,7 @@ function TiltImage({ src, alt, options = {}, className = "" }) {
       max: 15,
       speed: 400,
       glare: true,
-      "max-glare": 0.4,
+      'max-glare': 0.4,
       ...options,
     });
 

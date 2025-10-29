@@ -1,7 +1,7 @@
-import React, { useState, useEffect, useRef } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { motion, useAnimation } from "framer-motion";
+import React, { useState, useEffect, useRef } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { motion, useAnimation } from 'framer-motion';
 import {
   Avatar,
   Menu,
@@ -9,16 +9,15 @@ import {
   Divider,
   IconButton,
   CircularProgress,
-} from "@mui/material";
+} from '@mui/material';
 import {
   faUser,
   faSignOutAlt,
-  faHistory
-} from "@fortawesome/free-solid-svg-icons";
-import Swal from "sweetalert2";
-import { useAuth } from "../../../hooks/ContextAuth";
-import { UserIcon } from "@heroicons/react/outline";
-
+  faHistory,
+} from '@fortawesome/free-solid-svg-icons';
+import Swal from 'sweetalert2';
+import { useAuth } from '../../../hooks/ContextAuth';
+import { UserIcon } from '@heroicons/react/outline';
 
 const LoginLink = () => (
   <Link
@@ -32,13 +31,10 @@ const LoginLink = () => (
   </Link>
 );
 
-
-
-
 const IconoPerfil = () => {
   const { user, isLoading, logout } = useAuth();
   const [anchorEl, setAnchorEl] = useState(null);
-  const [foto, setFoto] = useState("");
+  const [foto, setFoto] = useState('');
   const navigate = useNavigate();
   const isMounted = useRef(false);
   const controls = useAnimation();
@@ -49,19 +45,19 @@ const IconoPerfil = () => {
     const fetchProfileData = async () => {
       try {
         if (isMounted.current && user) {
-          setFoto(user.fotoPerfil || "");
+          setFoto(user.fotoPerfil || '');
           controls.start({ opacity: 1, scale: 1 });
         }
       } catch (error) {
-        console.error("⚠️ Error al obtener los datos del perfil:", error);
-        if (isMounted.current) navigate("/error500");
+        console.error('⚠️ Error al obtener los datos del perfil:', error);
+        if (isMounted.current) navigate('/error500');
       }
     };
 
     if (user) {
       fetchProfileData();
     } else {
-      navigate("/login");
+      navigate('/login');
     }
 
     return () => {
@@ -73,32 +69,32 @@ const IconoPerfil = () => {
     try {
       await logout();
       Swal.fire({
-        title: "Sesión cerrada",
-        text: "Has cerrado sesión correctamente.",
-        icon: "success",
-        confirmButtonText: "OK",
-        width: "350px",
+        title: 'Sesión cerrada',
+        text: 'Has cerrado sesión correctamente.',
+        icon: 'success',
+        confirmButtonText: 'OK',
+        width: '350px',
         customClass: {
-          popup: "small-swal",
-          title: "text-lg font-semibold",
-          content: "text-sm",
-          confirm肆Button: "bg-blue-500 text-white px-4 py-2 rounded-lg",
+          popup: 'small-swal',
+          title: 'text-lg font-semibold',
+          content: 'text-sm',
+          confirm肆Button: 'bg-blue-500 text-white px-4 py-2 rounded-lg',
         },
         buttonsStyling: false,
-      }).then(() => navigate("/login"));
+      }).then(() => navigate('/login'));
     } catch (error) {
-      console.error("❌ Error al cerrar sesión:", error);
+      console.error('❌ Error al cerrar sesión:', error);
       Swal.fire({
-        title: "Error",
-        text: "No se pudo cerrar sesión. Intenta de nuevo.",
-        icon: "error",
-        confirmButtonText: "OK",
+        title: 'Error',
+        text: 'No se pudo cerrar sesión. Intenta de nuevo.',
+        icon: 'error',
+        confirmButtonText: 'OK',
       });
     }
   };
 
-  const username = user?.nombre ? user.nombre.charAt(0).toUpperCase() : "U";
-  const fotoPerfil = foto || "";
+  const username = user?.nombre ? user.nombre.charAt(0).toUpperCase() : 'U';
+  const fotoPerfil = foto || '';
 
   const handleMenuOpen = (event) => setAnchorEl(event.currentTarget);
   const handleMenuClose = () => setAnchorEl(null);
@@ -130,12 +126,12 @@ const IconoPerfil = () => {
             alt={username}
             className="shadow-md border-2 border-blue-500 dark:border-blue-400 transition-all duration-200"
             sx={{
-              bgcolor: !fotoPerfil ? "#3B82F6" : "transparent",
-              color: "white",
+              bgcolor: !fotoPerfil ? '#3B82F6' : 'transparent',
+              color: 'white',
               width: { xs: 36, sm: 40 },
               height: { xs: 36, sm: 40 },
-              fontSize: { xs: "1rem", sm: "1.2rem" },
-              fontWeight: "bold",
+              fontSize: { xs: '1rem', sm: '1.2rem' },
+              fontWeight: 'bold',
             }}
           >
             {!fotoPerfil && username}
@@ -149,11 +145,11 @@ const IconoPerfil = () => {
         onClose={handleMenuClose}
         PaperProps={{
           className:
-            "mt-2 bg-white dark:bg-gray-900 shadow-xl rounded-xl p-2 w-56 max-w-[90vw] transition-all duration-300",
+            'mt-2 bg-white dark:bg-gray-900 shadow-xl rounded-xl p-2 w-56 max-w-[90vw] transition-all duration-300',
           elevation: 0,
         }}
-        anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
-        transformOrigin={{ vertical: "top", horizontal: "right" }}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+        transformOrigin={{ vertical: 'top', horizontal: 'right' }}
       >
         <MenuItem
           onClick={handleMenuClose}
@@ -167,7 +163,7 @@ const IconoPerfil = () => {
           </span>
         </MenuItem>
 
-          <MenuItem
+        <MenuItem
           onClick={handleMenuClose}
           component={Link}
           to="/cliente/nivel/logros"
@@ -202,7 +198,7 @@ const IconoPerfil = () => {
             Notificaciones
           </span>
         </MenuItem> */}
-{/* 
+        {/* 
         <MenuItem
           onClick={handleMenuClose}
           component={Link}
@@ -222,7 +218,10 @@ const IconoPerfil = () => {
             onClick={handleLogout}
             className="hover:bg-red-50 dark:hover:bg-red-900/20 p-3 rounded-lg flex items-center transition-all duration-200"
           >
-            <FontAwesomeIcon icon={faSignOutAlt} className="mr-3 text-red-500" />
+            <FontAwesomeIcon
+              icon={faSignOutAlt}
+              className="mr-3 text-red-500"
+            />
             <span className="text-red-600 dark:text-red-400 font-medium text-sm">
               Cerrar Sesión
             </span>
@@ -232,7 +231,5 @@ const IconoPerfil = () => {
     </div>
   );
 };
-
-
 
 export { LoginLink, IconoPerfil };

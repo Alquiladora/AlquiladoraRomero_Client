@@ -1,18 +1,27 @@
 /* eslint-disable */
-import React, { useEffect, useState } from "react";
-import { Plus, Edit, Trash, Search, Eye, X, ChevronLeft, ChevronRight } from "lucide-react";
-import { toast } from "react-toastify";
-import api from "../../../utils/AxiosConfig";
-import apiImagen from "../../../utils/AxiosImagen";
-import { useAuth } from "../../../hooks/ContextAuth";
-import { validateProduct } from "./ValidateProducts";
-import TiltImage from "./Imagen3D";
-import CustomLoading from "../../../components/spiner/SpinerGlobal";
+import React, { useEffect, useState } from 'react';
+import {
+  Plus,
+  Edit,
+  Trash,
+  Search,
+  Eye,
+  X,
+  ChevronLeft,
+  ChevronRight,
+} from 'lucide-react';
+import { toast } from 'react-toastify';
+import api from '../../../utils/AxiosConfig';
+import apiImagen from '../../../utils/AxiosImagen';
+import { useAuth } from '../../../hooks/ContextAuth';
+import { validateProduct } from './ValidateProducts';
+import TiltImage from './Imagen3D';
+import CustomLoading from '../../../components/spiner/SpinerGlobal';
 
 function ProductTable() {
   const { csrfToken, user } = useAuth();
-  const [search, setSearch] = useState("");
-  const [filterCategory, setFilterCategory] = useState("");
+  const [search, setSearch] = useState('');
+  const [filterCategory, setFilterCategory] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
@@ -22,11 +31,11 @@ function ProductTable() {
   const [coloresObtenidos, setColoresObtenidos] = useState([]);
   const [bodegas, setBodegas] = useState([]);
   const [uploadProgress, setUploadProgress] = useState(0);
-  const [uploadStatus, setUploadStatus] = useState("");
+  const [uploadStatus, setUploadStatus] = useState('');
   const [isUploading, setIsUploading] = useState(false);
   const [formErrors, setFormErrors] = useState({});
   const [imagenesEliminar, setImagenesEliminar] = useState([]);
-  const [uploadError, setUploadError] = useState("");
+  const [uploadError, setUploadError] = useState('');
   const [nuevasImagenes, setNuevasImagenes] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -38,7 +47,7 @@ function ProductTable() {
 
   // Para manejo de múltiples colores
   const [selectedColorsArray, setSelectedColorsArray] = useState([]);
-  const [tempColor, setTempColor] = useState("");
+  const [tempColor, setTempColor] = useState('');
   const idUser = user?.id || user?.idUsuarios;
 
   useEffect(() => {
@@ -67,10 +76,10 @@ function ProductTable() {
       if (search) params.search = search;
       if (filterCategory) params.category = filterCategory;
 
-      const response = await api.get("/api/productos/products", {
+      const response = await api.get('/api/productos/products', {
         params,
         withCredentials: true,
-        headers: { "X-CSRF-Token": csrfToken },
+        headers: { 'X-CSRF-Token': csrfToken },
       });
       const productosConImagenes = response.data.products.map((prod) => ({
         idProducto: prod.idProducto,
@@ -80,7 +89,7 @@ function ProductTable() {
         color: prod.ColorProducto,
         material: prod.MaterialProducto,
         ImagenesProducto: prod.ImagenesProducto
-          ? prod.ImagenesProducto.split(",").filter((img) => img !== "")
+          ? prod.ImagenesProducto.split(',').filter((img) => img !== '')
           : [],
         FechaCreacionProducto: prod.FechaCreacionProducto,
         NombreSubCategoria: prod.NombreSubCategoria,
@@ -92,9 +101,9 @@ function ProductTable() {
       setTotalPages(response.data.pagination.totalPages);
       setTotalRecords(response.data.pagination.totalRecords);
       setCurrentPage(response.data.pagination.currentPage);
-      console.log("Obtenemos productos", productosConImagenes);
+      console.log('Obtenemos productos', productosConImagenes);
     } catch (error) {
-      console.error("Error al obtener productos:", error);
+      console.error('Error al obtener productos:', error);
       // toast.error("Error al cargar productos");
     }
   };
@@ -102,13 +111,13 @@ function ProductTable() {
   // ===================== OBTENER SUBCATEGORÍAS =====================
   const fetchSubcategorias = async () => {
     try {
-      const response = await api.get("/api/productos/subcategorias", {
+      const response = await api.get('/api/productos/subcategorias', {
         withCredentials: true,
-        headers: { "X-CSRF-Token": csrfToken },
+        headers: { 'X-CSRF-Token': csrfToken },
       });
       setSubcategorias(response.data.subcategories);
     } catch (error) {
-      console.error("Error al obtener subcategorías:", error);
+      console.error('Error al obtener subcategorías:', error);
       // toast.error("Error al cargar subcategorías");
     }
   };
@@ -116,14 +125,14 @@ function ProductTable() {
   // ===================== OBTENER COLORES =====================
   const fetchColors = async () => {
     try {
-      const response = await api.get("/api/productos/colores", {
+      const response = await api.get('/api/productos/colores', {
         withCredentials: true,
-        headers: { "X-CSRF-Token": csrfToken },
+        headers: { 'X-CSRF-Token': csrfToken },
       });
       setColoresObtenidos(response.data.colores);
-      console.log("Colores ", response.data.colores);
+      console.log('Colores ', response.data.colores);
     } catch (error) {
-      console.error("Error al obtener colores:", error);
+      console.error('Error al obtener colores:', error);
       // toast.error("Error al cargar Colores");
     }
   };
@@ -139,12 +148,12 @@ function ProductTable() {
     for (let file of files) {
       if (
         ![
-          "image/png",
-          "image/jpeg",
-          "image/jpg",
-          "image/gif",
-          "image/webp",
-          "image/svg+xml",
+          'image/png',
+          'image/jpeg',
+          'image/jpg',
+          'image/gif',
+          'image/webp',
+          'image/svg+xml',
         ].includes(file.type)
       ) {
         toast.error(
@@ -166,7 +175,7 @@ function ProductTable() {
       const totalImagesCount =
         selectedProduct.ImagenesProducto.length + validatedFiles.length;
       if (totalImagesCount > 6) {
-        toast.error("No puedes agregar más de 6 imágenes a un producto.");
+        toast.error('No puedes agregar más de 6 imágenes a un producto.');
         break;
       }
       validatedFiles.push(file);
@@ -180,56 +189,60 @@ function ProductTable() {
   const subirImagen = async (files) => {
     setIsUploading(true);
     setUploadProgress(0);
-    setUploadStatus("Subiendo imagen: 0%");
-    setUploadError("");
+    setUploadStatus('Subiendo imagen: 0%');
+    setUploadError('');
 
     const formData = new FormData();
-    files.forEach((file) => formData.append("imagenes", file));
+    files.forEach((file) => formData.append('imagenes', file));
 
     try {
-      const response = await apiImagen.post("/api/imagenes/upload-multiple", formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-          "X-CSRF-Token": csrfToken,
-        },
-        withCredentials: true,
+      const response = await apiImagen.post(
+        '/api/imagenes/upload-multiple',
+        formData,
+        {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+            'X-CSRF-Token': csrfToken,
+          },
+          withCredentials: true,
 
-        onUploadProgress: (progressEvent) => {
-          const percent = Math.round(
-            (progressEvent.loaded * 100) / progressEvent.total
-          );
-          setUploadProgress(percent);
-          setUploadStatus(`Subiendo: ${percent}%`);
-          console.log("Progreso de la subida de la imagen", percent);
-        },
-      });
+          onUploadProgress: (progressEvent) => {
+            const percent = Math.round(
+              (progressEvent.loaded * 100) / progressEvent.total
+            );
+            setUploadProgress(percent);
+            setUploadStatus(`Subiendo: ${percent}%`);
+            console.log('Progreso de la subida de la imagen', percent);
+          },
+        }
+      );
 
       setUploadProgress(100);
-      console.log("Progreso de la subida de la imagen", 100);
-      setUploadStatus("Subiendo: 100% (procesando en servidor...)");
+      console.log('Progreso de la subida de la imagen', 100);
+      setUploadStatus('Subiendo: 100% (procesando en servidor...)');
       const newUrls = response.data.urls;
-      toast.success("Imágenes subidas correctamente");
+      toast.success('Imágenes subidas correctamente');
       setNuevasImagenes((prev) => [...prev, ...newUrls]);
-      console.log("Nuevas URLs obtenidas:", newUrls);
+      console.log('Nuevas URLs obtenidas:', newUrls);
     } catch (error) {
-      console.error("Error subiendo imagen:", error);
+      console.error('Error subiendo imagen:', error);
 
-      if (error.code === "ECONNABORTED") {
+      if (error.code === 'ECONNABORTED') {
         setUploadError(
-          "La conexión está muy lenta o el servidor tardó demasiado. Verifica tu conexión e inténtalo de nuevo."
+          'La conexión está muy lenta o el servidor tardó demasiado. Verifica tu conexión e inténtalo de nuevo.'
         );
       } else {
-        setUploadError("Error al subir la imagen. Intenta nuevamente.");
+        setUploadError('Error al subir la imagen. Intenta nuevamente.');
       }
     } finally {
       setIsUploading(false);
-      setUploadStatus("");
+      setUploadStatus('');
     }
   };
 
   // ================== ELIMINAR UNA IMAGEN DEL ESTADO ==================
   const handleDeleteImage = (url) => {
-    if (!window.confirm("¿Deseas eliminar esta imagen?")) return;
+    if (!window.confirm('¿Deseas eliminar esta imagen?')) return;
     setImagenesEliminar((prev) => [...prev, url]);
     setSelectedProduct((prev) => ({
       ...prev,
@@ -242,7 +255,7 @@ function ProductTable() {
     setSelectedProduct((prev) => ({ ...prev, [field]: value }));
     const tempProduct = { ...selectedProduct, [field]: value };
     const allErrors = validateProduct(tempProduct);
-    let newErrors = { ...formErrors, [field]: allErrors[field] || "" };
+    let newErrors = { ...formErrors, [field]: allErrors[field] || '' };
     if (!allErrors[field]) delete newErrors[field];
     setFormErrors(newErrors);
   };
@@ -250,15 +263,15 @@ function ProductTable() {
   // ===================== ABRIR MODAL PARA AGREGAR =====================
   const handleOpenAddModal = () => {
     setSelectedProduct({
-      idProducto: "",
-      nombre: "",
-      detalles: "",
-      categoria: "",
-      color: "",
-      material: "",
+      idProducto: '',
+      nombre: '',
+      detalles: '',
+      categoria: '',
+      color: '',
+      material: '',
       ImagenesProducto: [],
-      foto: "",
-      idSubcategoria: "",
+      foto: '',
+      idSubcategoria: '',
     });
     setFormErrors({});
     setImagenesEliminar([]);
@@ -269,7 +282,7 @@ function ProductTable() {
 
     // Inicializamos array de colores y el tempColor
     setSelectedColorsArray([]);
-    setTempColor("");
+    setTempColor('');
   };
 
   // ===================== EDITAR =====================
@@ -284,10 +297,10 @@ function ProductTable() {
 
     // Si el producto ya tiene colores, los separamos por comas
     const existingColors = product.color
-      ? product.color.split(",").map((c) => c.trim())
+      ? product.color.split(',').map((c) => c.trim())
       : [];
     setSelectedColorsArray(existingColors);
-    setTempColor("");
+    setTempColor('');
   };
 
   // ===================== VER DETALLES =====================
@@ -300,26 +313,30 @@ function ProductTable() {
 
   // ===================== ELIMINAR =====================
   const handleDelete = async (id) => {
-    if (!window.confirm("¿Deseas eliminar este producto?")) return;
+    if (!window.confirm('¿Deseas eliminar este producto?')) return;
     try {
-      const response = await api.delete(`/api/productos/products/delete/${id}`, {
-        withCredentials: true,
-        headers: { "X-CSRF-Token": csrfToken },
-      });
+      const response = await api.delete(
+        `/api/productos/products/delete/${id}`,
+        {
+          withCredentials: true,
+          headers: { 'X-CSRF-Token': csrfToken },
+        }
+      );
 
       if (response.data.success) {
         fetchProductos(currentPage); // Refresh current page
         handleCloseModal();
-        toast.success("Producto eliminado correctamente");
+        toast.success('Producto eliminado correctamente');
       } else {
-        const msg = response.data.message || "Error desconocido al eliminar el producto";
+        const msg =
+          response.data.message || 'Error desconocido al eliminar el producto';
         toast.error(msg);
       }
     } catch (error) {
       if (error.response && error.response.status === 400) {
         toast.error(error.response.data.message);
       } else {
-        toast.error("Error interno al eliminar producto");
+        toast.error('Error interno al eliminar producto');
       }
     }
   };
@@ -332,11 +349,11 @@ function ProductTable() {
 
       setSelectedProduct((prev) => ({
         ...prev,
-        color: updatedArray.join(", "),
+        color: updatedArray.join(', '),
       }));
 
       // Limpiamos el select temporal
-      setTempColor("");
+      setTempColor('');
     }
   };
 
@@ -347,7 +364,7 @@ function ProductTable() {
 
     setSelectedProduct((prev) => ({
       ...prev,
-      color: updatedArray.join(", "),
+      color: updatedArray.join(', '),
     }));
   };
 
@@ -359,14 +376,14 @@ function ProductTable() {
     const allErrors = validateProduct(selectedProduct, totalImagesCount);
     if (Object.keys(allErrors).length > 0) {
       setFormErrors(allErrors);
-      toast.error("Corrige los errores antes de guardar");
+      toast.error('Corrige los errores antes de guardar');
       return;
     }
 
     const updateData = {
       ...selectedProduct,
       idUsuarios: idUser || null,
-      imagenes: nuevasImagenes.length > 0 ? nuevasImagenes.join(",") : "",
+      imagenes: nuevasImagenes.length > 0 ? nuevasImagenes.join(',') : '',
       imagenesEliminar,
     };
 
@@ -375,20 +392,20 @@ function ProductTable() {
         `/api/productos/products/${selectedProduct.idProducto}`,
         updateData,
         {
-          headers: { "X-CSRF-Token": csrfToken },
+          headers: { 'X-CSRF-Token': csrfToken },
           withCredentials: true,
         }
       );
       if (response.data.success) {
-        toast.success("Producto actualizado correctamente");
+        toast.success('Producto actualizado correctamente');
         handleCloseModal();
         fetchProductos(currentPage);
       } else {
-        toast.error(response.data.message || "Error al actualizar producto");
+        toast.error(response.data.message || 'Error al actualizar producto');
       }
     } catch (error) {
-      console.error("Error al actualizar producto:", error);
-      toast.error("Error interno al actualizar producto");
+      console.error('Error al actualizar producto:', error);
+      toast.error('Error interno al actualizar producto');
     }
   };
 
@@ -401,12 +418,12 @@ function ProductTable() {
 
     if (Object.keys(allErrors).length > 0) {
       setFormErrors(allErrors);
-      toast.error("Corrige los errores antes de agregar");
+      toast.error('Corrige los errores antes de agregar');
       return;
     }
 
     if (isUploading) {
-      toast.warning("Espera a que termine la subida de la imagen");
+      toast.warning('Espera a que termine la subida de la imagen');
       return;
     }
 
@@ -415,35 +432,42 @@ function ProductTable() {
         nombre: selectedProduct.nombre,
         detalles: selectedProduct.detalles,
         idSubcategoria: selectedProduct.idSubcategoria,
-        foto: selectedProduct.ImagenesProducto[0] || "",
-        imagenes: [
-          ...selectedProduct.ImagenesProducto,
-          ...nuevasImagenes,
-        ].join(","),
+        foto: selectedProduct.ImagenesProducto[0] || '',
+        imagenes: [...selectedProduct.ImagenesProducto, ...nuevasImagenes].join(
+          ','
+        ),
         color: selectedProduct.color,
         material: selectedProduct.material,
         idUsuarios: idUser || null,
       };
 
-      const response = await api.post("/api/productos/products", newProductData, {
-        withCredentials: true,
-        headers: { "X-CSRF-Token": csrfToken },
-      });
+      const response = await api.post(
+        '/api/productos/products',
+        newProductData,
+        {
+          withCredentials: true,
+          headers: { 'X-CSRF-Token': csrfToken },
+        }
+      );
 
       if (response.data.success) {
-        toast.success("Producto agregado con éxito");
+        toast.success('Producto agregado con éxito');
         handleCloseModal();
         fetchProductos(1); // Go to first page after add
       } else {
-        console.error("Error al insertar producto:", response.data.message);
-        toast.error(response.data.message || "Error al insertar producto");
+        console.error('Error al insertar producto:', response.data.message);
+        toast.error(response.data.message || 'Error al insertar producto');
       }
     } catch (error) {
-      console.error("Error al insertar producto:", error);
-      if (error.response && error.response.data && error.response.data.message) {
+      console.error('Error al insertar producto:', error);
+      if (
+        error.response &&
+        error.response.data &&
+        error.response.data.message
+      ) {
         toast.error(error.response.data.message);
       } else {
-        toast.error("Error interno al insertar producto");
+        toast.error('Error interno al insertar producto');
       }
     }
   };
@@ -457,12 +481,12 @@ function ProductTable() {
     setImagenesEliminar([]);
     setFormErrors({});
     setUploadProgress(0);
-    setUploadStatus("");
+    setUploadStatus('');
     setIsUploading(false);
-    setUploadError("");
+    setUploadError('');
     setNuevasImagenes([]);
     setSelectedColorsArray([]);
-    setTempColor("");
+    setTempColor('');
   };
 
   // Pagination handlers
@@ -503,9 +527,18 @@ function ProductTable() {
                 setCurrentPage(1); // Reset to page 1 on filter change
               }}
             >
-              <option value="" className="bg-white dark:bg-gray-800 text-gray-900 dark:text-white">Todas las Categorías</option>
+              <option
+                value=""
+                className="bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+              >
+                Todas las Categorías
+              </option>
               {subcategorias.map((group) => (
-                <option key={group.categoryName} value={group.categoryName} className="bg-white dark:bg-gray-800 text-gray-900 dark:text-white">
+                <option
+                  key={group.categoryName}
+                  value={group.categoryName}
+                  className="bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+                >
                   {group.categoryName}
                 </option>
               ))}
@@ -579,11 +612,15 @@ function ProductTable() {
               {/* COLOR Y MATERIAL */}
               <div className="px-4 text-center text-gray-700 dark:text-gray-300">
                 <p className="mb-1 text-sm">
-                  <strong className="text-gray-800 dark:text-gray-200">Color:</strong>{" "}
+                  <strong className="text-gray-800 dark:text-gray-200">
+                    Color:
+                  </strong>{' '}
                   {product.color}
                 </p>
                 <p className="mb-3 text-sm">
-                  <strong className="text-gray-800 dark:text-gray-200">Material:</strong>{" "}
+                  <strong className="text-gray-800 dark:text-gray-200">
+                    Material:
+                  </strong>{' '}
                   {product.material}
                 </p>
               </div>
@@ -636,12 +673,17 @@ function ProductTable() {
               strokeWidth={2}
               d="M3 7l9-4 9 4v10a2 2 0 01-2 2H5a2 2 0 01-2-2V7z"
             />
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 22V12h6v10" />
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M9 22V12h6v10"
+            />
           </svg>
           <p className="mt-4 text-xl text-yellow-600 dark:text-yellow-400 font-semibold">
             {search
-              ? "Lo sentimos, no existe ningún producto con ese nombre."
-              : "Lo sentimos, no se ha registrado ningún producto."}
+              ? 'Lo sentimos, no existe ningún producto con ese nombre.'
+              : 'Lo sentimos, no se ha registrado ningún producto.'}
           </p>
         </div>
       )}
@@ -676,9 +718,9 @@ function ProductTable() {
             <h3 className="text-3xl font-bold mb-6 text-gray-800 dark:text-white">
               {isEditMode
                 ? isAddModalOpen
-                  ? "Agregar Producto"
-                  : "Editar Producto"
-                : "Detalles del Producto"}
+                  ? 'Agregar Producto'
+                  : 'Editar Producto'
+                : 'Detalles del Producto'}
             </h3>
             <div className="space-y-6 max-h-[60vh] overflow-auto pr-3">
               {/* NOMBRE */}
@@ -691,7 +733,9 @@ function ProductTable() {
                     <input
                       type="text"
                       value={selectedProduct.nombre}
-                      onChange={(e) => handleChangeField("nombre", e.target.value)}
+                      onChange={(e) =>
+                        handleChangeField('nombre', e.target.value)
+                      }
                       className="w-full border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 transition-all"
                       placeholder="Nombre del producto"
                     />
@@ -717,7 +761,9 @@ function ProductTable() {
                   <>
                     <textarea
                       value={selectedProduct.detalles}
-                      onChange={(e) => handleChangeField("detalles", e.target.value)}
+                      onChange={(e) =>
+                        handleChangeField('detalles', e.target.value)
+                      }
                       className="w-full border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 transition-all"
                       rows={3}
                       maxLength={500}
@@ -747,13 +793,18 @@ function ProductTable() {
                 {isEditMode ? (
                   <>
                     <select
-                      value={selectedProduct.idSubcategoria || ""}
+                      value={selectedProduct.idSubcategoria || ''}
                       onChange={(e) =>
-                        handleChangeField("idSubcategoria", e.target.value)
+                        handleChangeField('idSubcategoria', e.target.value)
                       }
                       className="w-full border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 transition-all"
                     >
-                      <option value="" className="bg-white dark:bg-gray-800 text-gray-900 dark:text-white">-- Seleccionar Subcategoría --</option>
+                      <option
+                        value=""
+                        className="bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+                      >
+                        -- Seleccionar Subcategoría --
+                      </option>
                       {subcategorias.map((group) => (
                         <optgroup
                           key={group.categoryName}
@@ -761,7 +812,11 @@ function ProductTable() {
                           className="bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
                         >
                           {group.subcats.map((subcat) => (
-                            <option key={subcat.id} value={subcat.id} className="bg-white dark:bg-gray-800 text-gray-900 dark:text-white">
+                            <option
+                              key={subcat.id}
+                              value={subcat.id}
+                              className="bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+                            >
                               {subcat.label}
                             </option>
                           ))}
@@ -844,7 +899,9 @@ function ProductTable() {
                       className="mt-2 block w-full border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 transition-all"
                     />
                     {uploadError && (
-                      <p className="text-red-500 dark:text-red-400 text-sm mt-1">{uploadError}</p>
+                      <p className="text-red-500 dark:text-red-400 text-sm mt-1">
+                        {uploadError}
+                      </p>
                     )}
                     {selectedProduct.ImagenesProducto.length +
                       nuevasImagenes.length >=
@@ -854,7 +911,9 @@ function ProductTable() {
                       </p>
                     )}
                     {isUploading && (
-                      <p className="text-blue-600 dark:text-blue-400 text-sm">{uploadStatus}</p>
+                      <p className="text-blue-600 dark:text-blue-400 text-sm">
+                        {uploadStatus}
+                      </p>
                     )}
                   </>
                 ) : (
@@ -899,7 +958,9 @@ function ProductTable() {
                             key={col}
                             className="bg-gray-200 dark:bg-gray-700 rounded-full px-3 py-1 flex items-center gap-2"
                           >
-                            <span className="text-gray-800 dark:text-gray-200 text-sm">{col}</span>
+                            <span className="text-gray-800 dark:text-gray-200 text-sm">
+                              {col}
+                            </span>
                             {isAddModalOpen && (
                               <button
                                 type="button"
@@ -919,7 +980,12 @@ function ProductTable() {
                           value={tempColor}
                           onChange={(e) => setTempColor(e.target.value)}
                         >
-                          <option value="" className="bg-white dark:bg-gray-800 text-gray-900 dark:text-white">-- Selecciona un color --</option>
+                          <option
+                            value=""
+                            className="bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+                          >
+                            -- Selecciona un color --
+                          </option>
                           {coloresObtenidos
                             .filter(
                               (c) => !selectedColorsArray.includes(c.color)
@@ -968,7 +1034,9 @@ function ProductTable() {
                       <input
                         type="text"
                         value={selectedProduct.material}
-                        onChange={(e) => handleChangeField("material", e.target.value)}
+                        onChange={(e) =>
+                          handleChangeField('material', e.target.value)
+                        }
                         className="w-full border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 transition-all"
                         placeholder="Material del producto"
                       />
@@ -994,11 +1062,11 @@ function ProductTable() {
                 disabled={isUploading}
                 className={`px-6 py-2 rounded-lg transition-all duration-200 ${
                   isUploading
-                    ? "bg-gray-300 dark:bg-gray-600 text-white cursor-not-allowed"
-                    : "bg-gray-300 dark:bg-gray-600 hover:bg-gray-400 dark:hover:bg-gray-700 text-gray-900 dark:text-white"
+                    ? 'bg-gray-300 dark:bg-gray-600 text-white cursor-not-allowed'
+                    : 'bg-gray-300 dark:bg-gray-600 hover:bg-gray-400 dark:hover:bg-gray-700 text-gray-900 dark:text-white'
                 }`}
               >
-                {isEditMode ? "Cancelar" : "Cerrar"}
+                {isEditMode ? 'Cancelar' : 'Cerrar'}
               </button>
               {isEditMode && (
                 <button
@@ -1006,11 +1074,11 @@ function ProductTable() {
                   onClick={isAddModalOpen ? handleAddProduct : handleSave}
                   className={`px-6 py-2 rounded-lg text-white transition-all duration-200 ${
                     isUploading
-                      ? "bg-gray-400 dark:bg-gray-500 cursor-not-allowed"
-                      : "bg-blue-600 dark:bg-blue-500 hover:bg-blue-700 dark:hover:bg-blue-600"
+                      ? 'bg-gray-400 dark:bg-gray-500 cursor-not-allowed'
+                      : 'bg-blue-600 dark:bg-blue-500 hover:bg-blue-700 dark:hover:bg-blue-600'
                   }`}
                 >
-                  {isAddModalOpen ? "Agregar" : "Guardar Cambios"}
+                  {isAddModalOpen ? 'Agregar' : 'Guardar Cambios'}
                 </button>
               )}
             </div>
@@ -1069,7 +1137,7 @@ function ProductTable() {
                   <strong>Categoría:</strong> {selectedProduct.categoria}
                 </p>
                 <p>
-                  <strong>Subcategoría:</strong>{" "}
+                  <strong>Subcategoría:</strong>{' '}
                   {selectedProduct.NombreSubCategoria}
                 </p>
                 <p>
@@ -1082,23 +1150,21 @@ function ProductTable() {
                   <strong>Bodega:</strong> {selectedProduct.BodegasProducto}
                 </p>
                 <p>
-                  <strong>Creado por:</strong>{" "}
-                  {selectedProduct.NombreUsuario}
+                  <strong>Creado por:</strong> {selectedProduct.NombreUsuario}
                 </p>
                 <p>
-                  <strong>Correo del creador:</strong>{" "}
+                  <strong>Correo del creador:</strong>{' '}
                   {selectedProduct.EmailUsuario}
                 </p>
                 <p>
-                  <strong>Fecha Creación:</strong>{" "}
-                  {new Date(selectedProduct.FechaCreacionProducto).toLocaleDateString(
-                    "es-ES",
-                    {
-                      day: "numeric",
-                      month: "long",
-                      year: "numeric",
-                    }
-                  )}
+                  <strong>Fecha Creación:</strong>{' '}
+                  {new Date(
+                    selectedProduct.FechaCreacionProducto
+                  ).toLocaleDateString('es-ES', {
+                    day: 'numeric',
+                    month: 'long',
+                    year: 'numeric',
+                  })}
                 </p>
               </div>
             </div>

@@ -1,13 +1,13 @@
-import React, { useState, useEffect } from "react";
-import { KeyRound, Loader2, Copy, RefreshCw } from "lucide-react";
-import api from "../../utils/AxiosConfig";
+import React, { useState, useEffect } from 'react';
+import { KeyRound, Loader2, Copy, RefreshCw } from 'lucide-react';
+import api from '../../utils/AxiosConfig';
 
 const Notification = ({ message, type, onClose }) => (
   <div
     className={`fixed top-4 right-4 p-4 rounded-lg shadow-lg z-50 max-w-xs animate-slide-in ${
-      type === "success"
-        ? "bg-green-50 dark:bg-green-800 text-green-800 dark:text-green-100"
-        : "bg-red-50 dark:bg-red-800 text-red-800 dark:text-red-100"
+      type === 'success'
+        ? 'bg-green-50 dark:bg-green-800 text-green-800 dark:text-green-100'
+        : 'bg-red-50 dark:bg-red-800 text-red-800 dark:text-red-100'
     }`}
   >
     <div className="flex justify-between items-center">
@@ -24,7 +24,7 @@ const Notification = ({ message, type, onClose }) => (
 );
 
 const WearOsTokenView = () => {
-  const [token, setToken] = useState("");
+  const [token, setToken] = useState('');
   const [loading, setLoading] = useState(true);
   const [notification, setNotification] = useState(null);
   const [spinning, setSpinning] = useState(false);
@@ -33,11 +33,16 @@ const WearOsTokenView = () => {
   const fetchToken = async () => {
     setLoading(true);
     try {
-      const res = await api.get("/api/wearos/wearos/token", { withCredentials: true });
-      setToken(res.data?.token || "");
-      setNotification({ message: "Token retrieved successfully", type: "success" });
+      const res = await api.get('/api/wearos/wearos/token', {
+        withCredentials: true,
+      });
+      setToken(res.data?.token || '');
+      setNotification({
+        message: 'Token retrieved successfully',
+        type: 'success',
+      });
     } catch (err) {
-      setNotification({ message: "Failed to retrieve token", type: "error" });
+      setNotification({ message: 'Failed to retrieve token', type: 'error' });
     } finally {
       setLoading(false);
     }
@@ -48,11 +53,18 @@ const WearOsTokenView = () => {
     setLoading(true);
     setSpinning(true);
     try {
-      const res = await api.post("/api/wearos/wearos/token/update", {}, { withCredentials: true });
-      setToken(res.data?.token || "");
-      setNotification({ message: "Token refreshed successfully", type: "success" });
+      const res = await api.post(
+        '/api/wearos/wearos/token/update',
+        {},
+        { withCredentials: true }
+      );
+      setToken(res.data?.token || '');
+      setNotification({
+        message: 'Token refreshed successfully',
+        type: 'success',
+      });
     } catch (err) {
-      setNotification({ message: "Failed to refresh token", type: "error" });
+      setNotification({ message: 'Failed to refresh token', type: 'error' });
     } finally {
       setLoading(false);
       setTimeout(() => setSpinning(false), 900);
@@ -67,7 +79,10 @@ const WearOsTokenView = () => {
   const handleCopyToken = () => {
     if (token) {
       navigator.clipboard.writeText(token);
-      setNotification({ message: "Token copied to clipboard", type: "success" });
+      setNotification({
+        message: 'Token copied to clipboard',
+        type: 'success',
+      });
       setTimeout(() => setNotification(null), 2000);
     }
   };
@@ -90,7 +105,7 @@ const WearOsTokenView = () => {
             Wear OS Token
           </h2>
           <span className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 text-center">
-           Inicia sesion con el token
+            Inicia sesion con el token
           </span>
         </div>
 
@@ -98,7 +113,7 @@ const WearOsTokenView = () => {
           <div className="flex items-center border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 bg-gray-50 dark:bg-gray-700 transition-all duration-300 shadow-sm">
             <input
               type="text"
-              value={loading ? "Fetching token..." : token}
+              value={loading ? 'Fetching token...' : token}
               className="w-full bg-transparent outline-none text-sm text-gray-800 dark:text-gray-200 font-mono truncate"
               readOnly
               aria-label="Wear OS token"
@@ -125,10 +140,10 @@ const WearOsTokenView = () => {
             <Loader2 className="w-5 h-5 animate-spin mr-2" />
           ) : (
             <RefreshCw
-              className={`w-5 h-5 mr-2 transition-transform duration-500 ${spinning ? "animate-spin" : ""}`}
+              className={`w-5 h-5 mr-2 transition-transform duration-500 ${spinning ? 'animate-spin' : ''}`}
             />
           )}
-          {loading ? "Refreshing..." : "Refresh Token"}
+          {loading ? 'Refreshing...' : 'Refresh Token'}
         </button>
       </div>
       {/* Custom Animations */}

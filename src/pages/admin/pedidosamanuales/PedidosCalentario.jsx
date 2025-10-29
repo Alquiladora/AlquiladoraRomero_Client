@@ -1,10 +1,17 @@
 /* eslint-disable */
-import React, { useState, useEffect } from "react";
-import Calendar from "react-calendar";
-import "react-calendar/dist/Calendar.css";
-import { format, isSameDay, startOfMonth, endOfMonth, isBefore, addYears } from "date-fns";
-import { toZonedTime } from "date-fns-tz";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import React, { useState, useEffect } from 'react';
+import Calendar from 'react-calendar';
+import 'react-calendar/dist/Calendar.css';
+import {
+  format,
+  isSameDay,
+  startOfMonth,
+  endOfMonth,
+  isBefore,
+  addYears,
+} from 'date-fns';
+import { toZonedTime } from 'date-fns-tz';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faTruck,
   faUser,
@@ -26,28 +33,28 @@ import {
   faExclamationTriangle,
   faExclamationCircle,
   faBan,
-  faQuestionCircle
-} from "@fortawesome/free-solid-svg-icons";
-import api from "../../../utils/AxiosConfig";
-import { useAuth } from "../../../hooks/ContextAuth";
-import { toast } from "react-toastify";
-import "./CalendarCustom.css";
+  faQuestionCircle,
+} from '@fortawesome/free-solid-svg-icons';
+import api from '../../../utils/AxiosConfig';
+import { useAuth } from '../../../hooks/ContextAuth';
+import { toast } from 'react-toastify';
+import './CalendarCustom.css';
 
 function PedidosCalendario({ onNavigate }) {
   const { csrfToken } = useAuth();
   const [selectedDate, setSelectedDate] = useState(() => {
     const now = new Date();
-    return toZonedTime(now, "America/Mexico_City");
+    return toZonedTime(now, 'America/Mexico_City');
   });
   const [orders, setOrders] = useState([]);
   const [filteredOrders, setFilteredOrders] = useState([]);
-  const [viewMode, setViewMode] = useState("day");
+  const [viewMode, setViewMode] = useState('day');
   const [currentPage, setCurrentPage] = useState(1);
   const [showTicketModal, setShowTicketModal] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState(null);
   const ordersPerPage = 5;
 
-  const currentDateMexico = toZonedTime(new Date(), "America/Mexico_City");
+  const currentDateMexico = toZonedTime(new Date(), 'America/Mexico_City');
   const minDate = currentDateMexico;
   const maxDate = addYears(currentDateMexico, 1);
 
@@ -57,27 +64,27 @@ function PedidosCalendario({ onNavigate }) {
 
   const fetchOrders = async () => {
     try {
-      const response = await api.get("/api/pedidos/pedidos-manuales", {
+      const response = await api.get('/api/pedidos/pedidos-manuales', {
         withCredentials: true,
-        headers: { "X-CSRF-Token": csrfToken },
+        headers: { 'X-CSRF-Token': csrfToken },
       });
       if (response.data.success) {
         setOrders(response.data.data);
         filterOrdersByDate(selectedDate, viewMode);
       }
     } catch (error) {
-      console.error("Error fetching orders:", error);
-      toast.error("Error al cargar los pedidos");
+      console.error('Error fetching orders:', error);
+      toast.error('Error al cargar los pedidos');
     }
   };
 
   const filterOrdersByDate = (date, mode) => {
     let filtered = [];
-    if (mode === "day") {
+    if (mode === 'day') {
       filtered = orders.filter((order) =>
         isSameDay(new Date(order.fechas.entrega), date)
       );
-    } else if (mode === "month") {
+    } else if (mode === 'month') {
       const start = startOfMonth(date);
       const end = endOfMonth(date);
       filtered = orders.filter((order) => {
@@ -90,7 +97,7 @@ function PedidosCalendario({ onNavigate }) {
   };
 
   const handleDateChange = (date) => {
-    const zonedDate = toZonedTime(date, "America/Mexico_City");
+    const zonedDate = toZonedTime(date, 'America/Mexico_City');
     setSelectedDate(zonedDate);
     filterOrdersByDate(zonedDate, viewMode);
   };
@@ -102,7 +109,10 @@ function PedidosCalendario({ onNavigate }) {
 
   const indexOfLastOrder = currentPage * ordersPerPage;
   const indexOfFirstOrder = indexOfLastOrder - ordersPerPage;
-  const currentOrders = filteredOrders.slice(indexOfFirstOrder, indexOfLastOrder);
+  const currentOrders = filteredOrders.slice(
+    indexOfFirstOrder,
+    indexOfLastOrder
+  );
   const totalPages = Math.ceil(filteredOrders.length / ordersPerPage);
 
   const handlePageChange = (page) => {
@@ -115,7 +125,7 @@ function PedidosCalendario({ onNavigate }) {
   };
 
   const tileContent = ({ date, view }) => {
-    if (view === "month") {
+    if (view === 'month') {
       const hasOrders = orders.some((order) =>
         isSameDay(new Date(order.fechas.entrega), date)
       );
@@ -128,14 +138,13 @@ function PedidosCalendario({ onNavigate }) {
     return null;
   };
 
- const tileDisabled = ({ date, view }) => {
-  if (view === "month") {
-    const zonedDate = toZonedTime(date, "America/Mexico_City");
-    return isBefore(zonedDate, currentDateMexico); 
-  }
-  return false;
-};
-
+  const tileDisabled = ({ date, view }) => {
+    if (view === 'month') {
+      const zonedDate = toZonedTime(date, 'America/Mexico_City');
+      return isBefore(zonedDate, currentDateMexico);
+    }
+    return false;
+  };
 
   const renderTicketModal = () => (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60 p-4 animate-fade-in">
@@ -183,15 +192,15 @@ function PedidosCalendario({ onNavigate }) {
                     </p>
                     <p
                       className={`text-lg font-semibold flex items-center gap-2 ${
-                        selectedOrder.estado === "Confirmado"
-                          ? "text-green-600 dark:text-green-400"
-                          : selectedOrder.estado === "Pendiente"
-                          ? "text-yellow-600 dark:text-yellow-400"
-                          : "text-red-600 dark:text-red-400"
+                        selectedOrder.estado === 'Confirmado'
+                          ? 'text-green-600 dark:text-green-400'
+                          : selectedOrder.estado === 'Pendiente'
+                            ? 'text-yellow-600 dark:text-yellow-400'
+                            : 'text-red-600 dark:text-red-400'
                       }`}
                     >
                       {selectedOrder.estado}
-                      {selectedOrder.estado === "En alquiler" && (
+                      {selectedOrder.estado === 'En alquiler' && (
                         <FontAwesomeIcon
                           icon={faShippingFast}
                           className="text-blue-600 dark:text-blue-400"
@@ -237,7 +246,7 @@ function PedidosCalendario({ onNavigate }) {
                     Dirección
                   </p>
                   <p className="font-semibold dark:text-white break-words">
-                    {selectedOrder.cliente.direccion || "Cliente sin dirección"}
+                    {selectedOrder.cliente.direccion || 'Cliente sin dirección'}
                   </p>
                 </div>
               </div>
@@ -265,7 +274,9 @@ function PedidosCalendario({ onNavigate }) {
                     Fecha Entrega
                   </p>
                   <p className="font-semibold dark:text-white">
-                    {new Date(selectedOrder.fechas.entrega).toLocaleDateString()}
+                    {new Date(
+                      selectedOrder.fechas.entrega
+                    ).toLocaleDateString()}
                   </p>
                 </div>
                 <div>
@@ -306,7 +317,9 @@ function PedidosCalendario({ onNavigate }) {
                 <ul className="list-disc list-inside dark:text-white space-y-1">
                   {selectedOrder.productos.map((producto, index) => (
                     <li key={index} className="text-sm">
-                      {producto.nombre} - {producto.cantidad} ({producto.color}) - ${producto.precioUnitario} c/u - Subtotal: ${producto.subtotal}
+                      {producto.nombre} - {producto.cantidad} ({producto.color})
+                      - ${producto.precioUnitario} c/u - Subtotal: $
+                      {producto.subtotal}
                     </li>
                   ))}
                 </ul>
@@ -323,7 +336,7 @@ function PedidosCalendario({ onNavigate }) {
                     Forma de Pago
                   </p>
                   <p className="font-semibold dark:text-white">
-                    {selectedOrder.pago.formaPago || "No especificado"}
+                    {selectedOrder.pago.formaPago || 'No especificado'}
                   </p>
                 </div>
                 <div>
@@ -359,7 +372,10 @@ function PedidosCalendario({ onNavigate }) {
         {/* Calendar Section */}
         <div className="w-full lg:w-1/3 bg-white dark:bg-gray-800 rounded-2xl p-6 sm:p-8 transition-all duration-300">
           <h2 className="text-xl sm:text-2xl font-semibold mb-6 flex items-center text-gray-800 dark:text-white">
-            <FontAwesomeIcon icon={faCalendarAlt} className="mr-3 text-yellow-500" />
+            <FontAwesomeIcon
+              icon={faCalendarAlt}
+              className="mr-3 text-yellow-500"
+            />
             Seleccionar Fecha
           </h2>
           <div className="relative">
@@ -372,33 +388,33 @@ function PedidosCalendario({ onNavigate }) {
               tileContent={tileContent}
               className="border-none rounded-xl dark:bg-gray-800 dark:text-white w-full calendar-smaller"
               tileClassName={({ date, view }) =>
-                view === "month" &&
+                view === 'month' &&
                 orders.some((order) =>
                   isSameDay(new Date(order.fechas.entrega), date)
                 )
-                  ? "relative bg-yellow-100 dark:bg-yellow-700 rounded-full"
-                  : ""
+                  ? 'relative bg-yellow-100 dark:bg-yellow-700 rounded-full'
+                  : ''
               }
             />
           </div>
 
           <div className="mt-6 flex justify-center space-x-4">
             <button
-              onClick={() => handleViewModeChange("day")}
+              onClick={() => handleViewModeChange('day')}
               className={`px-4 sm:px-6 py-2 sm:py-3 rounded-lg font-medium transition-all duration-300 ${
-                viewMode === "day"
-                  ? "bg-yellow-500 text-white shadow-lg"
-                  : "bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-300 dark:hover:bg-gray-600"
+                viewMode === 'day'
+                  ? 'bg-yellow-500 text-white shadow-lg'
+                  : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-300 dark:hover:bg-gray-600'
               }`}
             >
               Por Día
             </button>
             <button
-              onClick={() => handleViewModeChange("month")}
+              onClick={() => handleViewModeChange('month')}
               className={`px-4 sm:px-6 py-2 sm:py-3 rounded-lg font-medium transition-all duration-300 ${
-                viewMode === "month"
-                  ? "bg-yellow-500 text-white shadow-lg"
-                  : "bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-300 dark:hover:bg-gray-600"
+                viewMode === 'month'
+                  ? 'bg-yellow-500 text-white shadow-lg'
+                  : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-300 dark:hover:bg-gray-600'
               }`}
             >
               Por Mes
@@ -410,10 +426,10 @@ function PedidosCalendario({ onNavigate }) {
         <div className="w-full lg:w-2/3 bg-white dark:bg-gray-800 shadow-xl p-6 sm:p-8 overflow-x-auto transition-all duration-300">
           <h2 className="text-xl sm:text-2xl font-semibold mb-6 flex items-center text-gray-800 dark:text-white">
             <FontAwesomeIcon icon={faTruck} className="mr-3 text-yellow-500" />
-            Pedidos para{" "}
-            {viewMode === "day"
-              ? format(selectedDate, "dd/MM/yyyy")
-              : format(selectedDate, "MMMM yyyy")}
+            Pedidos para{' '}
+            {viewMode === 'day'
+              ? format(selectedDate, 'dd/MM/yyyy')
+              : format(selectedDate, 'MMMM yyyy')}
           </h2>
           {filteredOrders.length === 0 ? (
             <p className="text-gray-500 dark:text-gray-400 text-center py-6 text-lg">
@@ -456,7 +472,6 @@ function PedidosCalendario({ onNavigate }) {
                       <FontAwesomeIcon icon={faCheckCircle} className="mr-2" />
                       Estado
                     </th>
-                 
                   </tr>
                 </thead>
                 <tbody>
@@ -465,8 +480,8 @@ function PedidosCalendario({ onNavigate }) {
                       key={order.idPedido}
                       className={`border-b dark:border-gray-700 transition-all duration-300 ${
                         index % 2 === 0
-                          ? "bg-gray-50 dark:bg-gray-900"
-                          : "bg-white dark:bg-gray-800"
+                          ? 'bg-gray-50 dark:bg-gray-900'
+                          : 'bg-white dark:bg-gray-800'
                       } hover:bg-gray-100 dark:hover:bg-gray-700`}
                     >
                       <td className="px-4 sm:px-6 py-4 text-sm font-medium dark:text-gray-200">
@@ -481,7 +496,7 @@ function PedidosCalendario({ onNavigate }) {
                       <td className="px-4 sm:px-6 py-4 text-sm font-medium dark:text-gray-200">
                         {order.cliente.direccion
                           ? order.cliente.direccion.slice(0, 30)
-                          : "Sin dirección"}
+                          : 'Sin dirección'}
                         ...
                       </td>
                       <td className="px-4 sm:px-6 py-4 text-sm font-medium dark:text-gray-200">
@@ -498,60 +513,58 @@ function PedidosCalendario({ onNavigate }) {
                       <td className="px-4 sm:px-6 py-4 text-sm dark:text-gray-200">
                         <span
                           className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold shadow-sm ${
-                            order.estado === "Procesando"
-                              ? "bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-300"
-                              : order.estado === "Enviando"
-                              ? "bg-indigo-100 text-indigo-800 dark:bg-indigo-900 dark:text-indigo-300"
-                              : order.estado === "Confirmado"
-                              ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300"
-                              : order.estado === "En alquiler"
-                              ? "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300"
-                              : order.estado === "Entregado"
-                              ? "bg-teal-100 text-teal-800 dark:bg-teal-900 dark:text-teal-300"
-                              : order.estado === "Devuelto"
-                              ? "bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-300"
-                              : order.estado === "Incompleto"
-                              ? "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300"
-                              : order.estado === "Incidente"
-                              ? "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300"
-                              : order.estado === "Finalizado"
-                              ? "bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-300"
-                              : order.estado === "Cancelado"
-                              ? "bg-gray-200 text-gray-800 dark:bg-gray-800 dark:text-gray-300"
-                              : "bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-300"
+                            order.estado === 'Procesando'
+                              ? 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-300'
+                              : order.estado === 'Enviando'
+                                ? 'bg-indigo-100 text-indigo-800 dark:bg-indigo-900 dark:text-indigo-300'
+                                : order.estado === 'Confirmado'
+                                  ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300'
+                                  : order.estado === 'En alquiler'
+                                    ? 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300'
+                                    : order.estado === 'Entregado'
+                                      ? 'bg-teal-100 text-teal-800 dark:bg-teal-900 dark:text-teal-300'
+                                      : order.estado === 'Devuelto'
+                                        ? 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-300'
+                                        : order.estado === 'Incompleto'
+                                          ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300'
+                                          : order.estado === 'Incidente'
+                                            ? 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300'
+                                            : order.estado === 'Finalizado'
+                                              ? 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-300'
+                                              : order.estado === 'Cancelado'
+                                                ? 'bg-gray-200 text-gray-800 dark:bg-gray-800 dark:text-gray-300'
+                                                : 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-300'
                           }`}
                         >
                           <FontAwesomeIcon
                             icon={
-                              order.estado === "Procesando"
+                              order.estado === 'Procesando'
                                 ? faHourglassStart
-                                : order.estado === "Enviando"
-                                ? faShippingFast
-                                : order.estado === "Confirmado"
-                                ? faCheckCircle
-                                : order.estado === "En alquiler"
-                                ? faTruck
-                                : order.estado === "Entregado"
-                                ? faBoxOpen
-                                : order.estado === "Devuelto"
-                                ? faUndo
-                                : order.estado === "Incompleto"
-                                ? faExclamationTriangle
-                                : order.estado === "Incidente"
-                                ? faExclamationCircle
-                                : order.estado === "Finalizado"
-                                ? faCheckCircle
-                                : order.estado === "Cancelado"
-                                ? faBan
-                                : faQuestionCircle
+                                : order.estado === 'Enviando'
+                                  ? faShippingFast
+                                  : order.estado === 'Confirmado'
+                                    ? faCheckCircle
+                                    : order.estado === 'En alquiler'
+                                      ? faTruck
+                                      : order.estado === 'Entregado'
+                                        ? faBoxOpen
+                                        : order.estado === 'Devuelto'
+                                          ? faUndo
+                                          : order.estado === 'Incompleto'
+                                            ? faExclamationTriangle
+                                            : order.estado === 'Incidente'
+                                              ? faExclamationCircle
+                                              : order.estado === 'Finalizado'
+                                                ? faCheckCircle
+                                                : order.estado === 'Cancelado'
+                                                  ? faBan
+                                                  : faQuestionCircle
                             }
                             className="mr-1"
                           />
                           {order.estado}
                         </span>
                       </td>
-                   
-                   
                     </tr>
                   ))}
                 </tbody>
@@ -560,8 +573,8 @@ function PedidosCalendario({ onNavigate }) {
               {/* Pagination */}
               <div className="flex flex-col sm:flex-row justify-between items-center mt-6 space-y-4 sm:space-y-0">
                 <p className="text-sm dark:text-gray-300">
-                  Mostrando {indexOfFirstOrder + 1} -{" "}
-                  {Math.min(indexOfLastOrder, filteredOrders.length)} de{" "}
+                  Mostrando {indexOfFirstOrder + 1} -{' '}
+                  {Math.min(indexOfLastOrder, filteredOrders.length)} de{' '}
                   {filteredOrders.length} pedidos
                 </p>
                 <div className="flex space-x-2">
@@ -570,8 +583,8 @@ function PedidosCalendario({ onNavigate }) {
                     disabled={currentPage === 1}
                     className={`px-4 py-2 rounded-lg font-medium transition-all duration-300 ${
                       currentPage === 1
-                        ? "bg-gray-300 text-gray-500 cursor-not-allowed dark:bg-gray-600"
-                        : "bg-yellow-500 text-white hover:bg-yellow-600 dark:bg-yellow-500 dark:hover:bg-yellow-600 shadow-md"
+                        ? 'bg-gray-300 text-gray-500 cursor-not-allowed dark:bg-gray-600'
+                        : 'bg-yellow-500 text-white hover:bg-yellow-600 dark:bg-yellow-500 dark:hover:bg-yellow-600 shadow-md'
                     }`}
                   >
                     Anterior
@@ -583,8 +596,8 @@ function PedidosCalendario({ onNavigate }) {
                         onClick={() => handlePageChange(page)}
                         className={`px-4 py-2 rounded-lg font-medium transition-all duration-300 ${
                           currentPage === page
-                            ? "bg-yellow-600 text-white dark:bg-yellow-600 shadow-lg"
-                            : "bg-gray-200 text-gray-700 hover:bg-gray-300 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600"
+                            ? 'bg-yellow-600 text-white dark:bg-yellow-600 shadow-lg'
+                            : 'bg-gray-200 text-gray-700 hover:bg-gray-300 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600'
                         }`}
                       >
                         {page}
@@ -596,8 +609,8 @@ function PedidosCalendario({ onNavigate }) {
                     disabled={currentPage === totalPages}
                     className={`px-4 py-2 rounded-lg font-medium transition-all duration-300 ${
                       currentPage === totalPages
-                        ? "bg-gray-300 text-gray-500 cursor-not-allowed dark:bg-gray-600"
-                        : "bg-yellow-500 text-white hover:bg-yellow-600 dark:bg-yellow-500 dark:hover:bg-yellow-600 shadow-md"
+                        ? 'bg-gray-300 text-gray-500 cursor-not-allowed dark:bg-gray-600'
+                        : 'bg-yellow-500 text-white hover:bg-yellow-600 dark:bg-yellow-500 dark:hover:bg-yellow-600 shadow-md'
                     }`}
                   >
                     Siguiente
