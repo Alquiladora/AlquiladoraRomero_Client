@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import axios from "axios";
+
 import { Plus, Edit2, Trash, X, Loader2 } from "lucide-react";
 import api from "../../../utils/AxiosConfig";
 import { useAuth } from "../../../hooks/ContextAuth";

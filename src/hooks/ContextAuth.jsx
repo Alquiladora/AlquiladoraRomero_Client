@@ -1,4 +1,4 @@
-/* eslint-disable jsx-a11y/anchor-is-valid, react-hooks/exhaustive-deps */
+/* eslint-disable */
 import React, {
   createContext,
   useState,

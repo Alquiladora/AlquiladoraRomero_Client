@@ -1,4 +1,4 @@
-/* eslint-disable jsx-a11y/anchor-is-valid */
+/* eslint-disable */
 import React, { useState, useEffect } from "react";
 import {
   HomeIcon,

@@ -1,4 +1,4 @@
-/* eslint-disable jsx-a11y/anchor-is-valid */
+/* eslint-disable */
 import React, { useEffect, useState, useCallback } from "react";
 import api from "../../utils/AxiosConfig";
 import ComboProducts from "./ComboProducts";

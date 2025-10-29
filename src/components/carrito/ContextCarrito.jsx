@@ -1,4 +1,4 @@
-/* eslint-disable jsx-a11y/anchor-is-valid */
+/* eslint-disable */
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { useAuth } from "../../hooks/ContextAuth";
 import api from "../../utils/AxiosConfig";

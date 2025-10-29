@@ -1,8 +1,8 @@
-import React, { useEffect, useState, useContext } from 'react';
+
+import React, { useEffect, useState } from 'react';
 import { useFormik, FieldArray, FormikProvider } from 'formik';
 import * as yup from 'yup';
-import Swal from 'sweetalert2';
-import withReactContent from 'sweetalert2-react-content';
+
 import {
   Box,
   CircularProgress,
@@ -57,7 +57,7 @@ const DeslindeLegal = ({ onNavigate}) => {
   const [editMode, setEditMode] = useState(false);
   const [currentVersion, setCurrentVersion] = useState(null);
   const [page, setPage] = useState(0);
-  const [rowsPerPage, setRowsPerPage] = useState(5);
+  const [rowsPerPage] = useState(5);
    const {  csrfToken } = useAuth();
 
 

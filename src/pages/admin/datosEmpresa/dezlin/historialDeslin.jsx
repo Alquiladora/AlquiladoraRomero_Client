@@ -28,7 +28,7 @@ import {
 } from '@mui/material';
 import { Visibility, ArrowBack} from '@mui/icons-material';
 import api from '../../../../utils/AxiosConfig';
-import { useNavigate } from 'react-router-dom';
+
 
 const HistorialDeslindeLegal = ({ onNavigate}) => {
   const [deslindes, setDeslindes] = useState([]);

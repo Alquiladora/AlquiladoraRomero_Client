@@ -1,6 +1,5 @@
 
 import React, { useEffect, useState} from 'react';
-import DetalleProducto from '../../../../components/productosCategoria/productosDetalles';
 import { useFormik, FieldArray, FormikProvider } from 'formik';
 import * as yup from 'yup';
 import {
@@ -12,7 +11,6 @@ import {
 import api from '../../../../utils/AxiosConfig';
 
 import { toast } from "react-toastify";
-import { useNavigate } from 'react-router-dom'; 
 import { useAuth } from '../../../../hooks/ContextAuth';
 
 

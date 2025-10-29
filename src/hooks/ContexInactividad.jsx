@@ -13,7 +13,7 @@ const InactivityHandler = ({ children }) => {
   const TIMEOUT_INACTIVIDAD = 10 * 60 * 1000;
   const AVISO_ANTES_MS = 50 * 1000;
   const { user, isLoading, logout } = useAuth();
-  const [showWarning, setShowWarning] = useState(false);
+  const [ setShowWarning] = useState(false);
 
   const handleOnIdle = async () => {
     if (!user || isLoading) return;
