@@ -1,33 +1,33 @@
-import React from "react";
+import React from 'react';
 
 const Alert = ({ type, message, onClose }) => {
   let bgColor, textColor, borderColor;
 
   switch (type) {
-    case "success":
-      bgColor = "bg-green-100";
-      textColor = "text-green-700";
-      borderColor = "border-green-400";
+    case 'success':
+      bgColor = 'bg-green-100';
+      textColor = 'text-green-700';
+      borderColor = 'border-green-400';
       break;
-    case "error":
-      bgColor = "bg-red-100";
-      textColor = "text-red-700";
-      borderColor = "border-red-400";
+    case 'error':
+      bgColor = 'bg-red-100';
+      textColor = 'text-red-700';
+      borderColor = 'border-red-400';
       break;
-    case "warning":
-      bgColor = "bg-yellow-100";
-      textColor = "text-yellow-700";
-      borderColor = "border-yellow-400";
+    case 'warning':
+      bgColor = 'bg-yellow-100';
+      textColor = 'text-yellow-700';
+      borderColor = 'border-yellow-400';
       break;
-    case "info":
-      bgColor = "bg-blue-100";
-      textColor = "text-blue-700";
-      borderColor = "border-blue-400";
+    case 'info':
+      bgColor = 'bg-blue-100';
+      textColor = 'text-blue-700';
+      borderColor = 'border-blue-400';
       break;
     default:
-      bgColor = "bg-gray-100";
-      textColor = "text-gray-700";
-      borderColor = "border-gray-400";
+      bgColor = 'bg-gray-100';
+      textColor = 'text-gray-700';
+      borderColor = 'border-gray-400';
   }
 
   return (

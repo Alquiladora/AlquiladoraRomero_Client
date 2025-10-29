@@ -27,6 +27,7 @@
     "color-namer": "^1.4.0",
     "cookie": "^1.0.2",
     "cra-template": "1.2.0",
+    "crypto-js": "^4.2.0",
     "date-fns-tz": "^3.2.0",
     "file-saver": "^2.0.5",
     "formik": "^2.4.6",
@@ -36,6 +37,8 @@
     "jspdf-autotable": "^5.0.2",
     "lucide-react": "^0.474.0",
     "mapbox-gl": "^3.9.4",
+    "primeicons": "^6.0.1",
+    "primereact": "^9.6.5",
     "prop-types": "^15.8.1",
     "react": "^18.0.0",
     "react-apexcharts": "^1.7.0",
@@ -69,6 +72,8 @@
     "recharts": "^2.15.3",
     "slick-carousel": "^1.8.1",
     "socket.io-client": "^4.8.1",
+    "sweetalert2": "^11.23.0",
+    "sweetalert2-react-content": "^5.1.0",
     "tsparticles": "^3.8.0",
     "typewriter-effect": "^2.21.0",
     "vanilla-tilt": "^1.8.1",
@@ -80,7 +85,13 @@
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "lint": "eslint src --ext .js,.jsx",
+    "format": "prettier --write src/**/*.js",
+    "format:check": "prettier --check 'src/**/*.{js,jsx}'",
+    "cy:open": "cypress open",
+    "cy:run": "cypress run",
+    "cy:run:record": "cypress run --record --key=tu-key-de-cypress-dashboard"
   },
   "eslintConfig": {
     "extends": [
@@ -99,5 +110,21 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "jest": {
+    "transformIgnorePatterns": [
+      "/node_modules/(?!(axios|react-router-dom))/"
+    ]
+  },
+  "devDependencies": {
+    "@babel/plugin-proposal-private-property-in-object": "^7.21.11",
+    "@commitlint/cli": "^20.1.0",
+    "@commitlint/config-conventional": "^20.0.0",
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.0",
+    "cypress": "^15.5.0",
+    "eslint": "^8.57.1",
+    "husky": "^9.1.7",
+    "prettier": "^3.6.2"
   }
 }

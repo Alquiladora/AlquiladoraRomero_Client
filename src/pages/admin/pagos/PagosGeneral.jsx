@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from "react";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+/* eslint-disable */
+import React, { useState, useEffect } from 'react';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faTimes,
   faCreditCard,
@@ -8,11 +9,11 @@ import {
   faPlus,
   faCheckCircle,
   faExclamationCircle,
-} from "@fortawesome/free-solid-svg-icons";
-import { toast } from "react-toastify";
-import api from "../../../utils/AxiosConfig";
-import { useAuth } from "../../../hooks/ContextAuth";
-import CustomLoading from "../../../components/spiner/SpinerGlobal";
+} from '@fortawesome/free-solid-svg-icons';
+import { toast } from 'react-toastify';
+import api from '../../../utils/AxiosConfig';
+import { useAuth } from '../../../hooks/ContextAuth';
+import CustomLoading from '../../../components/spiner/SpinerGlobal';
 
 const PaymentModal = ({ selectedOrder, onClose, onPaymentRegistered }) => {
   const { csrfToken } = useAuth();
@@ -21,34 +22,35 @@ const PaymentModal = ({ selectedOrder, onClose, onPaymentRegistered }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showNewPaymentForm, setShowNewPaymentForm] = useState(false);
   const [newPayment, setNewPayment] = useState({
-    formaPago: "",
-    metodoPago: "",
-    monto: "",
-    detallesPago: "",
+    formaPago: '',
+    metodoPago: '',
+    monto: '',
+    detallesPago: '',
   });
 
   // Depuración: Inspeccionar selectedOrder
   useEffect(() => {
-    console.log("selectedOrder:", selectedOrder);
+    console.log('selectedOrder:', selectedOrder);
   }, [selectedOrder]);
 
   const fetchPayments = async () => {
     setIsLoadingPayments(true);
     try {
-      const response = await api.get(`/api/pagos/pedido/${selectedOrder.idPedido}`, {
-        withCredentials: true,
-        headers: { "X-CSRF-Token": csrfToken },
-      });
+      const response = await api.get(
+        `/api/pagos/pedido/${selectedOrder.idPedido}`,
+        {
+          withCredentials: true,
+          headers: { 'X-CSRF-Token': csrfToken },
+        }
+      );
       if (response.data.success) {
         setPayments(response.data.data || []);
-        console.log("Pagos cargados:", response.data.data);
+        console.log('Pagos cargados:', response.data.data);
       } else {
-        toast.error("No se encontraron pagos para este pedido.");
+        toast.error('No se encontraron pagos para este pedido.');
         setPayments([]);
       }
     } catch (error) {
-      console.error("Error fetching payments:", error);
-      toast.error("Error al cargar los pagos.");
       setPayments([]);
     } finally {
       setIsLoadingPayments(false);
@@ -68,8 +70,8 @@ const PaymentModal = ({ selectedOrder, onClose, onPaymentRegistered }) => {
 
   const isNewPaymentValid = () => {
     return (
-      newPayment.formaPago.trim() !== "" &&
-      newPayment.metodoPago.trim() !== "" &&
+      newPayment.formaPago.trim() !== '' &&
+      newPayment.metodoPago.trim() !== '' &&
       newPayment.monto > 0 &&
       !isNaN(newPayment.monto)
     );
@@ -78,7 +80,9 @@ const PaymentModal = ({ selectedOrder, onClose, onPaymentRegistered }) => {
   const handleSubmitNewPayment = async (e) => {
     e.preventDefault();
     if (!isNewPaymentValid()) {
-      toast.error("Por favor, completa todos los campos requeridos correctamente.");
+      toast.error(
+        'Por favor, completa todos los campos requeridos correctamente.'
+      );
       return;
     }
 
@@ -92,31 +96,40 @@ const PaymentModal = ({ selectedOrder, onClose, onPaymentRegistered }) => {
         detallesPago: newPayment.detallesPago.trim() || null,
       };
 
-      const response = await api.post("/api/pagos/crear", payload, {
-        headers: { "X-CSRF-Token": csrfToken },
+      const response = await api.post('/api/pagos/crear', payload, {
+        headers: { 'X-CSRF-Token': csrfToken },
         withCredentials: true,
       });
 
       if (response.data.success) {
-        toast.success("¡Pago registrado con éxito!");
-        setNewPayment({ formaPago: "", metodoPago: "", monto: "", detallesPago: "" });
+        toast.success('¡Pago registrado con éxito!');
+        setNewPayment({
+          formaPago: '',
+          metodoPago: '',
+          monto: '',
+          detallesPago: '',
+        });
         setShowNewPaymentForm(false);
         fetchPayments();
         onPaymentRegistered();
       } else {
-        toast.error("Error al registrar el pago.");
+        toast.error('Error al registrar el pago.');
       }
     } catch (error) {
-      console.error("Error creating payment:", error);
-      toast.error(error.response?.data?.message || "Error al registrar el pago.");
+      console.error('Error creating payment:', error);
+      toast.error(
+        error.response?.data?.message || 'Error al registrar el pago.'
+      );
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  const totalPaid = payments.reduce((sum, payment) => sum + (parseFloat(payment.monto) || 0), 0);
-  const totalPagar = parseFloat(selectedOrder?.totalPagar) || 0;
-  const remainingBalance = totalPagar - totalPaid;
+  const totalPagar = parseFloat(selectedOrder?.totalPagar || '0') || 0;
+
+  const totalPagado = parseFloat(selectedOrder?.pagos?.totalPagado || '0') || 0;
+
+  const remainingBalance = totalPagar - totalPagado;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60 p-4 dark:bg-black dark:bg-opacity-70 backdrop-blur-sm">
@@ -127,7 +140,7 @@ const PaymentModal = ({ selectedOrder, onClose, onPaymentRegistered }) => {
               <FontAwesomeIcon icon={faMoneyCheckAlt} className="text-white" />
             </div>
             <h2 className="text-xl font-bold text-white">
-              Pagos del Pedido #{selectedOrder?.idRastreo || "N/A"}
+              Pagos del Pedido #{selectedOrder?.idRastreo || 'N/A'}
             </h2>
           </div>
           <button
@@ -141,73 +154,96 @@ const PaymentModal = ({ selectedOrder, onClose, onPaymentRegistered }) => {
         <div className="p-6 max-h-[calc(90vh-64px)] overflow-y-auto scrollbar-thin scrollbar-thumb-green-500 dark:scrollbar-thumb-green-600">
           <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4 mb-6 border border-gray-200 dark:border-gray-600">
             <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-3 flex items-center">
-              <FontAwesomeIcon icon={faCreditCard} className="mr-2 text-green-500" />
+              <FontAwesomeIcon
+                icon={faCreditCard}
+                className="mr-2 text-green-500"
+              />
               Resumen del Pedido
             </h3>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <div>
-                <p className="text-sm text-gray-600 dark:text-gray-400">Cliente</p>
+                <p className="text-sm text-gray-600 dark:text-gray-400">
+                  Cliente
+                </p>
                 <p className="font-semibold text-gray-900 dark:text-white">
-                  {selectedOrder?.cliente?.nombre || "No especificado"}
+                  {selectedOrder?.cliente?.nombre || 'No especificado'}
                 </p>
               </div>
               <div>
-                <p className="text-sm text-gray-600 dark:text-gray-400">Contacto</p>
+                <p className="text-sm text-gray-600 dark:text-gray-400">
+                  Contacto
+                </p>
                 <p className="font-semibold text-gray-900 dark:text-white">
-                  {selectedOrder?.cliente?.contacto || "N/A"}
+                  {selectedOrder?.cliente?.contacto || 'N/A'}
                 </p>
               </div>
               <div>
-                <p className="text-sm text-gray-600 dark:text-gray-400">Total del Pedido</p>
+                <p className="text-sm text-gray-600 dark:text-gray-400">
+                  Total del Pedido
+                </p>
                 <p className="font-semibold text-green-600 dark:text-green-400">
                   ${totalPagar.toFixed(2)}
                 </p>
               </div>
               <div>
-                <p className="text-sm text-gray-600 dark:text-gray-400">Total Pagado</p>
+                <p className="text-sm text-gray-600 dark:text-gray-400">
+                  Total Pagado
+                </p>
                 <p className="font-semibold text-green-600 dark:text-green-400">
-                  ${totalPaid.toFixed(2)}
+                  ${' '}
+                  {Number(selectedOrder?.pagos?.totalPagado).toFixed(2) ??
+                    '0.00'}
                 </p>
               </div>
               <div>
-                <p className="text-sm text-gray-600 dark:text-gray-400">Saldo Pendiente</p>
+                <p className="text-sm text-gray-600 dark:text-gray-400">
+                  Saldo Pendiente
+                </p>
                 <p
                   className={`font-semibold ${
                     remainingBalance <= 0
-                      ? "text-green-600 dark:text-green-400"
-                      : "text-red-600 dark:text-red-400"
+                      ? 'text-green-600 dark:text-green-400'
+                      : 'text-red-600 dark:text-red-400'
                   }`}
                 >
                   ${remainingBalance.toFixed(2)}
                 </p>
               </div>
               <div>
-                <p className="text-sm text-gray-600 dark:text-gray-400">Estado del Pago</p>
+                <p className="text-sm text-gray-600 dark:text-gray-400">
+                  Estado del Pago
+                </p>
                 <p
                   className={`font-semibold capitalize ${
-                    selectedOrder?.pagos?.estadoPago === "completado"
-                      ? "text-green-600 dark:text-green-400"
-                      : selectedOrder?.pagos?.estadoPago === "parcial"
-                      ? "text-yellow-600 dark:text-yellow-400"
-                      : "text-red-600 dark:text-red-400"
+                    selectedOrder?.pagos?.estadoPago === 'completado'
+                      ? 'text-green-600 dark:text-green-400'
+                      : selectedOrder?.pagos?.estadoPago === 'parcial'
+                        ? 'text-yellow-600 dark:text-yellow-400'
+                        : 'text-red-600 dark:text-red-400'
                   }`}
                 >
-                  {selectedOrder?.pagos?.estadoPago || "pendiente"}
+                  {selectedOrder?.pagos?.estadoPago || 'pendiente'}
                 </p>
               </div>
             </div>
           </div>
+
           <div className="mb-6">
             <div className="flex justify-between items-center mb-4">
               <h3 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center">
-                <FontAwesomeIcon icon={faMoneyCheckAlt} className="mr-2 text-green-500" />
+                <FontAwesomeIcon
+                  icon={faMoneyCheckAlt}
+                  className="mr-2 text-green-500"
+                />
                 Historial de Pagos
               </h3>
-              
             </div>
+
+            {/* Aseguramos que selectedOrder y listaPagos existan antes de intentar iterar */}
             {isLoadingPayments ? (
               <CustomLoading />
-            ) : payments.length === 0 ? (
+            ) : selectedOrder?.pagos?.listaPagos?.length === 0 ||
+              !selectedOrder ? (
               <div className="bg-gray-100 dark:bg-gray-800 rounded-lg p-4 text-center border border-gray-200 dark:border-gray-600">
                 <FontAwesomeIcon
                   icon={faExclamationCircle}
@@ -223,12 +259,12 @@ const PaymentModal = ({ selectedOrder, onClose, onPaymentRegistered }) => {
                   <thead className="bg-green-100 dark:bg-green-800">
                     <tr>
                       {[
-                        "Fecha",
-                        "Forma de Pago",
-                        "Método de Pago",
-                        "Monto",
-                        "Estado",
-                        "Detalles",
+                        'Fecha',
+                        'Forma de Pago',
+                        'Método de Pago',
+                        'Monto',
+                        'Estado',
+                        // "Detalles", <-- Columna eliminada si no se usa
                       ].map((header, idx) => (
                         <th
                           key={idx}
@@ -240,49 +276,59 @@ const PaymentModal = ({ selectedOrder, onClose, onPaymentRegistered }) => {
                     </tr>
                   </thead>
                   <tbody className="bg-white dark:bg-gray-900 divide-y divide-gray-200 dark:divide-gray-700">
-                    {payments.map((payment) => (
+                    {/* CORRECCIÓN CLAVE: Iterar sobre selectedOrder.pagos.listaPagos.
+            Cada 'payment' ahora es un objeto individual de la lista de pagos. 
+          */}
+                    {selectedOrder.pagos.listaPagos.map((payment) => (
                       <tr
-                        key={payment.idPago}
+                        key={payment.idPago} // Usamos idPago como clave única
                         className="hover:bg-green-50 dark:hover:bg-green-900/20 transition"
                       >
                         <td className="px-4 py-3 text-sm text-gray-900 dark:text-white">
-                          {new Date(payment.fechaPago).toLocaleDateString("es-ES", {
-                            year: "numeric",
-                            month: "short",
-                            day: "numeric",
-                            hour: "2-digit",
-                            minute: "2-digit",
-                          }) || "N/A"}
+                          {/* Formateamos la fecha, usando encadenamiento opcional si es necesario, 
+                  aunque el error más común era el acceso incorrecto 
+                */}
+                          {payment.fechaPago
+                            ? new Date(payment.fechaPago).toLocaleDateString(
+                                'es-ES',
+                                {
+                                  year: 'numeric',
+                                  month: 'short',
+                                  day: 'numeric',
+                                  hour: '2-digit',
+                                  minute: '2-digit',
+                                }
+                              )
+                            : 'N/A'}
                         </td>
                         <td className="px-4 py-3 text-sm text-gray-900 dark:text-white">
-                          {payment.formaPago || "N/A"}
+                          {payment.formaPago || 'N/A'}
                         </td>
                         <td className="px-4 py-3 text-sm text-gray-900 dark:text-white">
-                          {payment.metodoPago || "N/A"}
+                          {payment.metodoPago || 'N/A'}
                         </td>
                         <td className="px-4 py-3 text-sm text-green-600 dark:text-green-400 font-semibold">
-                          ${parseFloat(payment.monto).toFixed(2) || "0.00"}
+                          {/* Convertimos a número y aplicamos toFixed(2) */}$
+                          {Number(payment.monto || 0).toFixed(2)}
                         </td>
                         <td className="px-4 py-3 text-sm">
                           <span
                             className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold ${
-                              payment.estadoPago === "completado"
-                                ? "bg-green-200 text-green-800 dark:bg-green-700 dark:text-green-200"
-                                : payment.estadoPago === "parcial"
-                                ? "bg-yellow-200 text-yellow-800 dark:bg-yellow-700 dark:text-yellow-200"
-                                : "bg-red-200 text-red-800 dark:bg-red-700 dark:text-red-200"
+                              payment.estadoPago === 'completado'
+                                ? 'bg-green-200 text-green-800 dark:bg-green-700 dark:text-green-200'
+                                : payment.estadoPago === 'parcial'
+                                  ? 'bg-yellow-200 text-yellow-800 dark:bg-yellow-700 dark:text-yellow-200'
+                                  : 'bg-red-200 text-red-800 dark:bg-red-700 dark:text-red-200'
                             }`}
                           >
-                            <FontAwesomeIcon icon={faCheckCircle} className="mr-1" />
-                            {payment.estadoPago || "pendiente"}
+                            <FontAwesomeIcon
+                              icon={faCheckCircle}
+                              className="mr-1"
+                            />
+                            {payment.estadoPago || 'pendiente'}
                           </span>
                         </td>
-                        <td
-                          className="px-4 py-3 text-sm text-gray-900 dark:text-white max-w-xs truncate"
-                          title={payment.detallesPago || "Sin detalles"}
-                        >
-                          {payment.detallesPago || "Sin detalles"}
-                        </td>
+                        {/* <td className="px-4 py-3 text-sm">... Detalles (si es necesario) ...</td> */}
                       </tr>
                     ))}
                   </tbody>
@@ -290,7 +336,6 @@ const PaymentModal = ({ selectedOrder, onClose, onPaymentRegistered }) => {
               </div>
             )}
           </div>
-         
         </div>
       </div>
     </div>

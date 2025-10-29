@@ -1,7 +1,5 @@
-// src/components/admin/deslin/HistorialDeslindeLegal.jsx
+import React, { useEffect, useState } from 'react';
 
-import React, { useEffect, useState, useContext } from 'react';
-import axios from 'axios';
 import {
   Container,
   Typography,
@@ -18,7 +16,6 @@ import {
   TablePagination,
   Dialog,
   Grid,
-  DialogTitle,
   DialogContent,
   Chip,
   DialogActions,
@@ -26,17 +23,14 @@ import {
   List,
   ListItem,
   ListItemText,
-  Tooltip,
 } from '@mui/material';
-import { Visibility, ArrowBack, History } from '@mui/icons-material';
+import { Visibility, ArrowBack } from '@mui/icons-material';
 import api from '../../../../utils/AxiosConfig';
-import { useNavigate } from 'react-router-dom';
 
-const HistorialDeslindeLegal = ({ onNavigate}) => {
+const HistorialDeslindeLegal = ({ onNavigate }) => {
   const [deslindes, setDeslindes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const navigate = useNavigate();
 
   // Estados para la paginación
   const [page, setPage] = useState(0);
@@ -46,16 +40,13 @@ const HistorialDeslindeLegal = ({ onNavigate}) => {
   const [openModal, setOpenModal] = useState(false);
   const [selectedDeslinde, setSelectedDeslinde] = useState(null);
 
-
-
   useEffect(() => {
     fetchDocumentos();
-   
   }, []);
 
   const fetchDocumentos = async () => {
     try {
-      const response = await api.get("/api/deslin", { withCredentials: true });
+      const response = await api.get('/api/deslin', { withCredentials: true });
       setDeslindes(response.data);
       setLoading(false);
     } catch (err) {
@@ -65,7 +56,6 @@ const HistorialDeslindeLegal = ({ onNavigate}) => {
     }
   };
 
- 
   const handleChangePage = (event, newPage) => {
     setPage(newPage);
   };
@@ -90,7 +80,10 @@ const HistorialDeslindeLegal = ({ onNavigate}) => {
   };
 
   // Datos a mostrar según la paginación
-  const paginatedDeslindes = deslindes.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
+  const paginatedDeslindes = deslindes.slice(
+    page * rowsPerPage,
+    page * rowsPerPage + rowsPerPage
+  );
 
   // Funciones para manejar el modal
   const handleOpenModal = (deslinde) => {
@@ -121,7 +114,7 @@ const HistorialDeslindeLegal = ({ onNavigate}) => {
         <IconButton
           onClick={(e) => {
             e.stopPropagation();
-            onNavigate("Deslin");
+            onNavigate('Deslin');
           }}
           color="primary"
           aria-label="Regresar a la página principal"
@@ -189,16 +182,17 @@ const HistorialDeslindeLegal = ({ onNavigate}) => {
                     className="font-bold"
                     sx={{
                       color:
-                        deslinde.estado === "vigente"
-                          ? "green"
-                          : deslinde.estado === "no vigente"
-                          ? "orange"
-                          : deslinde.estado === "eliminado"
-                          ? "red"
-                          : "grey",
+                        deslinde.estado === 'vigente'
+                          ? 'green'
+                          : deslinde.estado === 'no vigente'
+                            ? 'orange'
+                            : deslinde.estado === 'eliminado'
+                              ? 'red'
+                              : 'grey',
                     }}
                   >
-                    {deslinde.estado.charAt(0).toUpperCase() + deslinde.estado.slice(1)}
+                    {deslinde.estado.charAt(0).toUpperCase() +
+                      deslinde.estado.slice(1)}
                   </Typography>
                 </TableCell>
                 <TableCell className="text-gray-800 dark:text-gray-100">
@@ -257,11 +251,11 @@ const HistorialDeslindeLegal = ({ onNavigate}) => {
         <Box
           className="bg-yellow-500 text-white"
           sx={{
-            display: "flex",
-            alignItems: "center",
+            display: 'flex',
+            alignItems: 'center',
             padding: 2,
-            borderTopLeftRadius: "8px",
-            borderTopRightRadius: "8px",
+            borderTopLeftRadius: '8px',
+            borderTopRightRadius: '8px',
           }}
         >
           <Visibility sx={{ marginRight: 1 }} />
@@ -336,13 +330,13 @@ const HistorialDeslindeLegal = ({ onNavigate}) => {
                       selectedDeslinde.estado.slice(1)
                     }
                     color={
-                      selectedDeslinde.estado === "vigente"
-                        ? "success"
-                        : selectedDeslinde.estado === "no vigente"
-                        ? "warning"
-                        : selectedDeslinde.estado === "eliminado"
-                        ? "error"
-                        : "default"
+                      selectedDeslinde.estado === 'vigente'
+                        ? 'success'
+                        : selectedDeslinde.estado === 'no vigente'
+                          ? 'warning'
+                          : selectedDeslinde.estado === 'eliminado'
+                            ? 'error'
+                            : 'default'
                     }
                     variant="outlined"
                   />
@@ -451,12 +445,16 @@ const HistorialDeslindeLegal = ({ onNavigate}) => {
         </DialogContent>
 
         <DialogActions className="bg-gray-50 dark:bg-gray-800 transition-colors duration-300">
-          <Button onClick={handleCloseModal} variant="contained" color="primary">
+          <Button
+            onClick={handleCloseModal}
+            variant="contained"
+            color="primary"
+          >
             Cerrar
           </Button>
         </DialogActions>
       </Dialog>
     </Container>
   );
-}
+};
 export default HistorialDeslindeLegal;

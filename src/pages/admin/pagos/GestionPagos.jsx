@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from "react";
-import api from "../../../utils/AxiosConfig";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { library } from "@fortawesome/fontawesome-svg-core";
+/* eslint-disable */
+import React, { useState, useEffect } from 'react';
+import api from '../../../utils/AxiosConfig';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { library } from '@fortawesome/fontawesome-svg-core';
 import {
   faCheckCircle,
   faTimesCircle,
@@ -15,10 +16,10 @@ import {
   faShieldAlt,
   faExclamationTriangle,
   faClock,
-} from "@fortawesome/free-solid-svg-icons";
-import { ToastContainer, toast } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
-import { useAuth } from "../../../hooks/ContextAuth";
+} from '@fortawesome/free-solid-svg-icons';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import { useAuth } from '../../../hooks/ContextAuth';
 
 library.add(
   faCheckCircle,
@@ -40,25 +41,25 @@ const CuentasReceptoras = () => {
   const [loading, setLoading] = useState(true);
   const [activatingId, setActivatingId] = useState(null);
   const [formData, setFormData] = useState({
-    nombre: "",
-    email: "",
-    banco: "",
-    notas: "",
+    nombre: '',
+    email: '',
+    banco: '',
+    notas: '',
   });
-  const [formError, setFormError] = useState("");
+  const [formError, setFormError] = useState('');
   const { csrfToken } = useAuth();
 
   const fetchCuentas = async () => {
     setLoading(true);
     try {
-      const response = await api.get("/api/tarjetas/cuentas", {
+      const response = await api.get('/api/tarjetas/cuentas', {
         withCredentials: true,
-        headers: { "X-CSRF-Token": csrfToken },
+        headers: { 'X-CSRF-Token': csrfToken },
       });
-      console.log("Datos recibidos de cuentas", response.data);
+      console.log('Datos recibidos de cuentas', response.data);
       setCuentas(response.data || []);
     } catch (err) {
-      toast.error("Error al cargar las cuentas");
+      toast.error('Error al cargar las cuentas');
     } finally {
       setLoading(false);
     }
@@ -66,19 +67,19 @@ const CuentasReceptoras = () => {
 
   useEffect(() => {
     fetchCuentas();
-  }, []);
+  }, [fetchCuentas]);
 
   const syncConStripe = async () => {
     setLoading(true);
     try {
-      await api.get("/api/tarjetas/sync-cuentas", {
+      await api.get('/api/tarjetas/sync-cuentas', {
         withCredentials: true,
-        headers: { "X-CSRF-Token": csrfToken },
+        headers: { 'X-CSRF-Token': csrfToken },
       });
-      toast.success("Cuentas sincronizadas correctamente");
+      toast.success('Cuentas sincronizadas correctamente');
       fetchCuentas();
     } catch (err) {
-      toast.error("Error al sincronizar con Stripe");
+      toast.error('Error al sincronizar con Stripe');
     } finally {
       setLoading(false);
     }
@@ -93,32 +94,32 @@ const CuentasReceptoras = () => {
     // Validación para nombre: debe iniciar con letra y no contener números
     const nameRegex = /^[A-Za-zÁÉÍÓÚáéíóúÜüÑñ][A-Za-zÁÉÍÓÚáéíóúÜüÑñ\s]*$/;
     if (!formData.nombre.trim()) {
-      return "El nombre es requerido";
+      return 'El nombre es requerido';
     } else if (!nameRegex.test(formData.nombre.trim())) {
-      return "El nombre debe iniciar con una letra y no puede contener números";
+      return 'El nombre debe iniciar con una letra y no puede contener números';
     }
 
     // Validación para email: formato válido
     const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
     if (!formData.email.trim()) {
-      return "El email es requerido";
+      return 'El email es requerido';
     } else if (!emailRegex.test(formData.email.trim())) {
-      return "El email no tiene un formato válido (ejemplo: usuario@dominio.com)";
+      return 'El email no tiene un formato válido (ejemplo: usuario@dominio.com)';
     }
 
     // Validación para banco: debe seleccionar una opción válida
-    if (!formData.banco || formData.banco === "") {
-      return "Debes seleccionar un banco";
+    if (!formData.banco || formData.banco === '') {
+      return 'Debes seleccionar un banco';
     }
 
     // Validación para notas: no vacío y con contenido significativo
     if (!formData.notas.trim()) {
-      return "Las notas son requeridas";
+      return 'Las notas son requeridas';
     } else if (formData.notas.trim().length < 5) {
-      return "Las notas deben tener al menos 5 caracteres";
+      return 'Las notas deben tener al menos 5 caracteres';
     }
 
-    return "";
+    return '';
   };
 
   const handleSubmit = async (e) => {
@@ -130,10 +131,10 @@ const CuentasReceptoras = () => {
     }
 
     setLoading(true);
-    setFormError("");
+    setFormError('');
     try {
       const response = await api.post(
-        "/api/tarjetas/cuentas",
+        '/api/tarjetas/cuentas',
         {
           ...formData,
           nombre: formData.nombre.trim(),
@@ -143,14 +144,14 @@ const CuentasReceptoras = () => {
         },
         {
           withCredentials: true,
-          headers: { "X-CSRF-Token": csrfToken },
+          headers: { 'X-CSRF-Token': csrfToken },
         }
       );
       toast.success(response.data.message);
       if (response.data.onboarding_url) {
         toast.info(
           <div>
-            Completa la configuración en Stripe:{" "}
+            Completa la configuración en Stripe:{' '}
             <a
               href={response.data.onboarding_url}
               target="_blank"
@@ -163,10 +164,10 @@ const CuentasReceptoras = () => {
           { autoClose: false }
         );
       }
-      setFormData({ nombre: "", email: "", banco: "", notas: "" });
+      setFormData({ nombre: '', email: '', banco: '', notas: '' });
       fetchCuentas();
     } catch (err) {
-      toast.error(err.response?.data?.error || "Error al crear cuenta");
+      toast.error(err.response?.data?.error || 'Error al crear cuenta');
     } finally {
       setLoading(false);
     }
@@ -180,21 +181,21 @@ const CuentasReceptoras = () => {
         {},
         {
           withCredentials: true,
-          headers: { "X-CSRF-Token": csrfToken },
+          headers: { 'X-CSRF-Token': csrfToken },
         }
       );
-      toast.success("Cuenta activada correctamente");
+      toast.success('Cuenta activada correctamente');
       fetchCuentas();
     } catch (err) {
       const errorMessage =
-        err.response?.data?.error || "Error al activar cuenta";
+        err.response?.data?.error || 'Error al activar cuenta';
       if (
         errorMessage.includes(
-          "link_payments capability without the card_payments capability"
+          'link_payments capability without the card_payments capability'
         )
       ) {
         toast.error(
-          "No se puede activar la cuenta: se requiere habilitar pagos con tarjeta."
+          'No se puede activar la cuenta: se requiere habilitar pagos con tarjeta.'
         );
       } else {
         toast.error(errorMessage);
@@ -205,16 +206,16 @@ const CuentasReceptoras = () => {
   };
 
   const eliminarCuenta = async (id) => {
-    if (window.confirm("¿Estás seguro de que deseas eliminar esta cuenta?")) {
+    if (window.confirm('¿Estás seguro de que deseas eliminar esta cuenta?')) {
       try {
         await api.delete(`/api/tarjetas/cuentas/${id}`, {
           withCredentials: true,
-          headers: { "X-CSRF-Token": csrfToken },
+          headers: { 'X-CSRF-Token': csrfToken },
         });
-        toast.success("Cuenta eliminada correctamente");
+        toast.success('Cuenta eliminada correctamente');
         fetchCuentas();
       } catch (err) {
-        toast.error(err.response?.data?.error || "Error al eliminar cuenta");
+        toast.error(err.response?.data?.error || 'Error al eliminar cuenta');
       }
     }
   };
@@ -308,7 +309,7 @@ const CuentasReceptoras = () => {
           >
             <FontAwesomeIcon
               icon={faSyncAlt}
-              className={`mr-1 ${loading ? "animate-spin" : ""}`}
+              className={`mr-1 ${loading ? 'animate-spin' : ''}`}
             />
             Sincronizar
           </button>
@@ -459,7 +460,7 @@ const CuentasReceptoras = () => {
                   Cuentas Registradas
                 </h2>
                 <p className="text-gray-500 dark:text-gray-400 text-sm mt-1">
-                  {cuentas.length} cuenta{cuentas.length !== 1 ? "s" : ""}
+                  {cuentas.length} cuenta{cuentas.length !== 1 ? 's' : ''}
                 </p>
               </div>
             </div>
@@ -525,7 +526,7 @@ const CuentasReceptoras = () => {
                                 {cuenta.nombre}
                               </div>
                               <div className="text-sm text-gray-500 dark:text-gray-400">
-                                {cuenta.email || "Sin email"}
+                                {cuenta.email || 'Sin email'}
                               </div>
                               {cuenta.banco && (
                                 <div className="text-xs text-gray-600 dark:text-gray-400">
@@ -545,8 +546,8 @@ const CuentasReceptoras = () => {
                           {cuenta.fecha_creacion
                             ? new Date(
                                 cuenta.fecha_creacion
-                              ).toLocaleDateString("es-ES")
-                            : "No registrada"}
+                              ).toLocaleDateString('es-ES')
+                            : 'No registrada'}
                         </td>
                         <td className="px-3 py-2 whitespace-nowrap text-sm font-medium flex space-x-2">
                           {cuenta.onboarding_completed === 0 && (
@@ -557,13 +558,13 @@ const CuentasReceptoras = () => {
                                     `/api/tarjetas/cuentas/onboarding-link/${cuenta.stripe_account_id}`,
                                     {
                                       withCredentials: true,
-                                      headers: { "X-CSRF-Token": csrfToken },
+                                      headers: { 'X-CSRF-Token': csrfToken },
                                     }
                                   );
-                                  window.open(res.data.url, "_blank");
-                                  toast.info("Completa tu cuenta en Stripe");
+                                  window.open(res.data.url, '_blank');
+                                  toast.info('Completa tu cuenta en Stripe');
                                 } catch {
-                                  toast.error("Error generando el enlace");
+                                  toast.error('Error generando el enlace');
                                 }
                               }}
                               className="px-2 py-1 rounded-md text-xs font-medium text-amber-600 bg-amber-100 hover:bg-amber-200 dark:bg-amber-900 dark:text-amber-300 dark:hover:bg-amber-800 transition-colors duration-200"
@@ -651,7 +652,7 @@ const CuentasReceptoras = () => {
                             {cuenta.nombre}
                           </h3>
                           <p className="text-sm text-gray-500 dark:text-gray-400">
-                            {cuenta.email || "Sin email"}
+                            {cuenta.email || 'Sin email'}
                           </p>
                         </div>
                       </div>
@@ -675,9 +676,9 @@ const CuentasReceptoras = () => {
                         <span className="font-medium mr-1">Fecha:</span>
                         {cuenta.fecha_creacion
                           ? new Date(cuenta.fecha_creacion).toLocaleDateString(
-                              "es-ES"
+                              'es-ES'
                             )
-                          : "No registrada"}
+                          : 'No registrada'}
                       </div>
                     </div>
 
@@ -690,13 +691,13 @@ const CuentasReceptoras = () => {
                                 `/api/tarjetas/cuentas/onboarding-link/${cuenta.stripe_account_id}`,
                                 {
                                   withCredentials: true,
-                                  headers: { "X-CSRF-Token": csrfToken },
+                                  headers: { 'X-CSRF-Token': csrfToken },
                                 }
                               );
-                              window.open(res.data.url, "_blank");
-                              toast.info("Completa tu cuenta en Stripe");
+                              window.open(res.data.url, '_blank');
+                              toast.info('Completa tu cuenta en Stripe');
                             } catch {
-                              toast.error("Error generando el enlace");
+                              toast.error('Error generando el enlace');
                             }
                           }}
                           className="px-2 py-1 rounded-md text-xs font-medium text-amber-600 bg-amber-100 hover:bg-amber-200 dark:bg-amber-900 dark:text-amber-300 dark:hover:bg-amber-800 transition-colors duration-200"

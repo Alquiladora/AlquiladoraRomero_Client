@@ -1,13 +1,12 @@
-import React, { useState, useEffect } from "react";
-import Swal from "sweetalert2";
-import { useLocation, useNavigate } from "react-router-dom";
-import zxcvbn from "zxcvbn";
-import CryptoJS from "crypto-js";
-import api from "../../../../utils/AxiosConfig";
-import { useAuth } from "../../../../hooks/ContextAuth";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faEye, faEyeSlash, faTimes } from "@fortawesome/free-solid-svg-icons";
-
+import React, { useState, useEffect } from 'react';
+import Swal from 'sweetalert2';
+import { useLocation, useNavigate } from 'react-router-dom';
+import zxcvbn from 'zxcvbn';
+import CryptoJS from 'crypto-js';
+import api from '../../../../utils/AxiosConfig';
+import { useAuth } from '../../../../hooks/ContextAuth';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faEye, faEyeSlash, faTimes } from '@fortawesome/free-solid-svg-icons';
 
 const passwordRegex =
   /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9])(?!.*\s).{8,}$/;
@@ -19,10 +18,10 @@ export default function ChangePassword() {
   const { idUsuario } = location.state || {};
   const { csrfToken, user } = useAuth();
 
-  const [currentPassword, setCurrentPassword] = useState("");
-  const [newPassword, setNewPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-  const [error, setError] = useState("");
+  const [currentPassword, setCurrentPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [error, setError] = useState('');
   const [passwordStrengthScore, setPasswordStrengthScore] = useState(0);
   const [isVerified, setIsVerified] = useState(false);
   const [isButtonDisabled, setIsButtonDisabled] = useState(true);
@@ -39,29 +38,29 @@ export default function ChangePassword() {
     setIsVerifying(true);
     try {
       const response = await api.post(
-        "/api/usuarios/verify-password",
+        '/api/usuarios/verify-password',
         { currentPassword, idUsuario },
         {
-          headers: { "X-CSRF-Token": csrfToken },
+          headers: { 'X-CSRF-Token': csrfToken },
           withCredentials: true,
         }
       );
       if (response.data.valid) {
         setIsVerified(true);
-        setError("");
+        setError('');
         Swal.fire({
-          icon: "success",
-          title: "Contraseña actual verificada",
+          icon: 'success',
+          title: 'Contraseña actual verificada',
           timer: 1200,
           showConfirmButton: false,
         });
       } else {
         setIsVerified(false);
-        setError("La contraseña actual es incorrecta.");
+        setError('La contraseña actual es incorrecta.');
       }
     } catch (err) {
       setIsVerified(false);
-      setError("La contraseña actual es incorrecta");
+      setError('La contraseña actual es incorrecta');
     }
     setIsVerifying(false);
   };
@@ -74,42 +73,40 @@ export default function ChangePassword() {
       const response = await api.get(
         `https://api.pwnedpasswords.com/range/${prefix}`
       );
-      const hashes = response.data.split("\n");
+      const hashes = response.data.split('\n');
       const isFound = hashes.some((line) => {
-        const [returnedHash] = line.split(":");
+        const [returnedHash] = line.split(':');
         return returnedHash.toLowerCase() === suffix;
       });
       setIsCompromised(isFound);
       return isFound;
     } catch (error) {
-      console.error("Error verificando la contraseña comprometida:", error);
+      console.error('Error verificando la contraseña comprometida:', error);
       setIsCompromised(false);
       return false;
     }
   };
 
- 
   useEffect(() => {
-    let validationError = "";
+    let validationError = '';
     let isValid = true;
 
     if (!newPassword) {
-      validationError = "";
+      validationError = '';
       isValid = false;
     } else if (!passwordRegex.test(newPassword)) {
       validationError =
-        "La contraseña debe tener mínimo 8 caracteres, incluir mayúsculas, minúsculas, dígitos y símbolos.";
+        'La contraseña debe tener mínimo 8 caracteres, incluir mayúsculas, minúsculas, dígitos y símbolos.';
       isValid = false;
     } else {
-
       if (passwordStrengthScore < 4) {
-        validationError = "La contraseña debe ser muy fuerte.";
+        validationError = 'La contraseña debe ser muy fuerte.';
         isValid = false;
       }
     }
 
     if (newPassword && confirmPassword && newPassword !== confirmPassword) {
-      validationError = "Las contraseñas no coinciden.";
+      validationError = 'Las contraseñas no coinciden.';
       isValid = false;
     }
 
@@ -128,7 +125,6 @@ export default function ChangePassword() {
     checkCompromised();
   }, [newPassword]);
 
-  
   const handleNewPasswordChange = (e) => {
     const value = e.target.value;
     setNewPassword(value);
@@ -140,22 +136,21 @@ export default function ChangePassword() {
       setPasswordStrengthScore(0);
     }
 
-  
-    let validationError = "";
+    let validationError = '';
     let isValid = true;
     if (!value) {
       isValid = false;
     } else if (!passwordRegex.test(value)) {
       validationError =
-        "La contraseña debe tener mínimo 8 caracteres, incluir mayúsculas, minúsculas, dígitos y símbolos.";
+        'La contraseña debe tener mínimo 8 caracteres, incluir mayúsculas, minúsculas, dígitos y símbolos.';
       isValid = false;
     } else if (zxcvbn(value).score < 4) {
-      validationError = "La contraseña debe ser muy fuerte.";
+      validationError = 'La contraseña debe ser muy fuerte.';
       isValid = false;
     }
 
     if (value && confirmPassword && value !== confirmPassword) {
-      validationError = "Las contraseñas no coinciden.";
+      validationError = 'Las contraseñas no coinciden.';
       isValid = false;
     }
     setError(validationError);
@@ -164,59 +159,58 @@ export default function ChangePassword() {
 
   const handlePasswordChange = async () => {
     if (!isVerified) {
-      setError("Debes verificar primero la contraseña actual.");
+      setError('Debes verificar primero la contraseña actual.');
       return;
     }
 
     setIsLoading(true);
     try {
       const response = await api.post(
-        "/api/usuarios/change-password",
+        '/api/usuarios/change-password',
         { idUsuario, newPassword },
         {
-          headers: { "X-CSRF-Token": csrfToken },
+          headers: { 'X-CSRF-Token': csrfToken },
           withCredentials: true,
         }
       );
 
       if (response.data.success) {
         Swal.fire({
-          icon: "success",
-          title: "¡Contraseña actualizada!",
-          text: "Tu contraseña ha sido cambiada correctamente. Se cerrarán tus sesiones.",
+          icon: 'success',
+          title: '¡Contraseña actualizada!',
+          text: 'Tu contraseña ha sido cambiada correctamente. Se cerrarán tus sesiones.',
           timer: 2000,
           showConfirmButton: false,
         });
         setIsLoading(false);
 
-
         if (user) {
           switch (user.rol) {
-            case "cliente":
-              navigate("/cliente/perfil");
+            case 'cliente':
+              navigate('/cliente/perfil');
               break;
-            case "administrador":
-              navigate("/administrador?tab=Perfil");
+            case 'administrador':
+              navigate('/administrador?tab=Perfil');
               break;
-            case "repartidor":
-              navigate("/repartidor/perfil");
+            case 'repartidor':
+              navigate('/repartidor/perfil');
               break;
             default:
-              navigate("/login");
+              navigate('/login');
               break;
           }
         } else {
-          navigate("/login");
+          navigate('/login');
         }
       } else if (response.data.usedBefore) {
-        setError("Ya has utilizado esta contraseña anteriormente.");
+        setError('Ya has utilizado esta contraseña anteriormente.');
         setIsLoading(false);
       } else {
-        setError("Error al cambiar la contraseña.");
+        setError('Error al cambiar la contraseña.');
         setIsLoading(false);
       }
     } catch (err) {
-      setError("Error al cambiar la contraseña.");
+      setError('Error al cambiar la contraseña.');
       setIsLoading(false);
     }
   };
@@ -224,26 +218,26 @@ export default function ChangePassword() {
   const getStrengthColor = (score) => {
     switch (score) {
       case 0:
-        return "bg-red-500 text-red-500";
+        return 'bg-red-500 text-red-500';
       case 1:
-        return "bg-orange-500 text-orange-500";
+        return 'bg-orange-500 text-orange-500';
       case 2:
-        return "bg-yellow-400 text-yellow-400";
+        return 'bg-yellow-400 text-yellow-400';
       case 3:
-        return "bg-green-400 text-green-400";
+        return 'bg-green-400 text-green-400';
       case 4:
-        return "bg-green-600 text-green-600";
+        return 'bg-green-600 text-green-600';
       default:
-        return "bg-gray-300 text-gray-300";
+        return 'bg-gray-300 text-gray-300';
     }
   };
 
   const strengthTexts = [
-    "Muy débil",
-    "Débil",
-    "Aceptable",
-    "Fuerte",
-    "Muy fuerte",
+    'Muy débil',
+    'Débil',
+    'Aceptable',
+    'Fuerte',
+    'Muy fuerte',
   ];
 
   return (
@@ -269,7 +263,7 @@ export default function ChangePassword() {
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-xl font-semibold">Cambiar Contraseña</h2>
         <button
-          onClick={() => navigate("/cliente/perfil")}
+          onClick={() => navigate('/cliente/perfil')}
           className="
             text-gray-500 
             dark:text-gray-300
@@ -283,7 +277,6 @@ export default function ChangePassword() {
         </button>
       </div>
 
-
       {error && <p className="text-red-600 mb-2">{error}</p>}
 
       {!isVerified ? (
@@ -295,7 +288,7 @@ export default function ChangePassword() {
               Contraseña Actual
             </label>
             <input
-              type={showCurrentPassword ? "text" : "password"}
+              type={showCurrentPassword ? 'text' : 'password'}
               value={currentPassword}
               onChange={(e) => setCurrentPassword(e.target.value)}
               className="
@@ -316,9 +309,7 @@ export default function ChangePassword() {
             />
             <button
               type="button"
-              onClick={() =>
-                setShowCurrentPassword(!showCurrentPassword)
-              }
+              onClick={() => setShowCurrentPassword(!showCurrentPassword)}
               className="
                 absolute 
                 right-3 
@@ -380,7 +371,7 @@ export default function ChangePassword() {
                 ></path>
               </svg>
             ) : (
-              "Verificar Contraseña Actual"
+              'Verificar Contraseña Actual'
             )}
           </button>
         </>
@@ -393,7 +384,7 @@ export default function ChangePassword() {
               Nueva Contraseña
             </label>
             <input
-              type={showNewPassword ? "text" : "password"}
+              type={showNewPassword ? 'text' : 'password'}
               value={newPassword}
               onChange={handleNewPasswordChange}
               className="
@@ -436,7 +427,7 @@ export default function ChangePassword() {
                 h-full 
                 transition-all 
                 duration-300
-                ${getStrengthColor(passwordStrengthScore).split(" ")[0]}
+                ${getStrengthColor(passwordStrengthScore).split(' ')[0]}
               `}
               style={{
                 width: `${(passwordStrengthScore / 4) * 100}%`,
@@ -447,13 +438,12 @@ export default function ChangePassword() {
           <p
             className={`
               text-sm mb-2 
-              ${getStrengthColor(passwordStrengthScore).split(" ")[1]}
+              ${getStrengthColor(passwordStrengthScore).split(' ')[1]}
             `}
           >
-            Fortaleza de contraseña:{" "}
-            {strengthTexts[passwordStrengthScore] || "—"}
+            Fortaleza de contraseña:{' '}
+            {strengthTexts[passwordStrengthScore] || '—'}
           </p>
-
 
           {isCompromised && (
             <p className="text-red-500 text-sm mt-1">
@@ -466,7 +456,7 @@ export default function ChangePassword() {
               Confirmar Nueva Contraseña
             </label>
             <input
-              type={showConfirmPassword ? "text" : "password"}
+              type={showConfirmPassword ? 'text' : 'password'}
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
               className="
@@ -553,7 +543,7 @@ export default function ChangePassword() {
                 ></path>
               </svg>
             ) : (
-              "Cambiar Contraseña"
+              'Cambiar Contraseña'
             )}
           </button>
         </>

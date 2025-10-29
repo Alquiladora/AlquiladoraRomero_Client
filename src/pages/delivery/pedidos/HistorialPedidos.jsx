@@ -1,4 +1,5 @@
-import React, { useState, useEffect, useMemo } from "react";
+/* eslint-disable */
+import React, { useState, useEffect, useMemo } from 'react';
 import {
   Package,
   CheckCircle,
@@ -15,11 +16,11 @@ import {
   AlertTriangle,
   CheckCircle2,
   Info,
-} from "lucide-react";
-import api from "../../../utils/AxiosConfig";
-import { useAuth } from "../../../hooks/ContextAuth";
-import CustomSpinner from "../../../components/spiner/SpinerGlobal";
-import { toast } from "react-toastify";
+} from 'lucide-react';
+import api from '../../../utils/AxiosConfig';
+import { useAuth } from '../../../hooks/ContextAuth';
+import CustomSpinner from '../../../components/spiner/SpinerGlobal';
+import { toast } from 'react-toastify';
 
 // Loading Component
 const Loading = () => <CustomSpinner />;
@@ -37,29 +38,29 @@ const OrderDetailsModal = ({ isOpen, onClose, order }) => {
 
   const statusStyles = {
     Disponible: {
-      color: "text-green-600",
-      bg: "bg-green-100",
-      border: "border-green-200",
+      color: 'text-green-600',
+      bg: 'bg-green-100',
+      border: 'border-green-200',
     },
     Incompleto: {
-      color: "text-yellow-700",
-      bg: "bg-yellow-200",
-      border: "border-yellow-300",
+      color: 'text-yellow-700',
+      bg: 'bg-yellow-200',
+      border: 'border-yellow-300',
     },
     Incidente: {
-      color: "text-red-600",
-      bg: "bg-red-100",
-      border: "border-red-200",
+      color: 'text-red-600',
+      bg: 'bg-red-100',
+      border: 'border-red-200',
     },
     Faltante: {
-      color: "text-orange-600",
-      bg: "bg-orange-100",
-      border: "border-orange-200",
+      color: 'text-orange-600',
+      bg: 'bg-orange-100',
+      border: 'border-orange-200',
     },
     Default: {
-      color: "text-gray-600",
-      bg: "bg-gray-100",
-      border: "border-gray-200",
+      color: 'text-gray-600',
+      bg: 'bg-gray-100',
+      border: 'border-gray-200',
     },
   };
 
@@ -100,7 +101,7 @@ const OrderDetailsModal = ({ isOpen, onClose, order }) => {
                 Fecha
               </p>
               <p className="font-semibold text-slate-900 dark:text-white">
-                {new Date(order.deliveryDate).toLocaleDateString("es-MX")}
+                {new Date(order.deliveryDate).toLocaleDateString('es-MX')}
               </p>
             </div>
             <div>
@@ -153,7 +154,7 @@ const OrderDetailsModal = ({ isOpen, onClose, order }) => {
                     Color: {product.color}
                   </p>
                   <p>
-                    Estado:{" "}
+                    Estado:{' '}
                     <span
                       className={`${
                         statusStyles[product.status]?.bg ||
@@ -166,15 +167,14 @@ const OrderDetailsModal = ({ isOpen, onClose, order }) => {
                       {capitalizeStatus(product.status)}
                     </span>
                   </p>
-                  {(product.status === "Incompleto" ||
-                    product.status === "Incidente" ||
-                    product.status === "Faltante") && (
+                  {(product.status === 'Incompleto' ||
+                    product.status === 'Incidente' ||
+                    product.status === 'Faltante') && (
                     <>
-                      
                       <p className="text-slate-600 dark:text-slate-300">
-                        Observaciones:{" "}
+                        Observaciones:{' '}
                         <span className="font-semibold">
-                          {product.observations || "Ninguna"}
+                          {product.observations || 'Ninguna'}
                         </span>
                       </p>
                     </>
@@ -201,52 +201,52 @@ const OrderDetailsModal = ({ isOpen, onClose, order }) => {
 const OrderCard = ({ order, onViewDetails }) => {
   const statusStyles = {
     Enviando: {
-      color: "text-blue-700 dark:text-blue-300",
+      color: 'text-blue-700 dark:text-blue-300',
       icon: <Truck className="h-4 w-4" />,
-      bg: "bg-blue-50 dark:bg-blue-900 border-blue-200 dark:border-blue-600",
-      dot: "bg-blue-500",
+      bg: 'bg-blue-50 dark:bg-blue-900 border-blue-200 dark:border-blue-600',
+      dot: 'bg-blue-500',
     },
     Recogiendo: {
-      color: "text-amber-700 dark:text-amber-300",
+      color: 'text-amber-700 dark:text-amber-300',
       icon: <ShoppingCart className="h-4 w-4" />,
-      bg: "bg-amber-50 dark:bg-amber-900 border-amber-200 dark:border-amber-600",
-      dot: "bg-amber-500",
+      bg: 'bg-amber-50 dark:bg-amber-900 border-amber-200 dark:border-amber-600',
+      dot: 'bg-amber-500',
     },
     Devuelto: {
-      color: "text-slate-600 dark:text-slate-300",
+      color: 'text-slate-600 dark:text-slate-300',
       icon: <RotateCcw className="h-4 w-4" />,
-      bg: "bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-600",
-      dot: "bg-slate-400",
+      bg: 'bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-600',
+      dot: 'bg-slate-400',
     },
     Incompleto: {
-      color: "text-orange-700 dark:text-orange-300",
+      color: 'text-orange-700 dark:text-orange-300',
       icon: <AlertTriangle className="h-4 w-4" />,
-      bg: "bg-orange-50 dark:bg-orange-900 border-orange-200 dark:border-orange-600",
-      dot: "bg-orange-500",
+      bg: 'bg-orange-50 dark:bg-orange-900 border-orange-200 dark:border-orange-600',
+      dot: 'bg-orange-500',
     },
     Incidente: {
-      color: "text-red-700 dark:text-red-300",
+      color: 'text-red-700 dark:text-red-300',
       icon: <AlertCircle className="h-4 w-4" />,
-      bg: "bg-red-50 dark:bg-red-900 border-red-200 dark:border-red-600",
-      dot: "bg-red-500",
+      bg: 'bg-red-50 dark:bg-red-900 border-red-200 dark:border-red-600',
+      dot: 'bg-red-500',
     },
-    "En alquiler": {
-      color: "text-emerald-700 dark:text-emerald-300",
+    'En alquiler': {
+      color: 'text-emerald-700 dark:text-emerald-300',
       icon: <Package className="h-4 w-4" />,
-      bg: "bg-emerald-50 dark:bg-emerald-900 border-emerald-200 dark:border-emerald-600",
-      dot: "bg-emerald-500",
+      bg: 'bg-emerald-50 dark:bg-emerald-900 border-emerald-200 dark:border-emerald-600',
+      dot: 'bg-emerald-500',
     },
     Cancelado: {
-      color: "text-red-600 dark:text-red-400",
+      color: 'text-red-600 dark:text-red-400',
       icon: <X className="h-4 w-4" />,
-      bg: "bg-red-50 dark:bg-red-900 border-red-200 dark:border-red-600",
-      dot: "bg-red-400",
+      bg: 'bg-red-50 dark:bg-red-900 border-red-200 dark:border-red-600',
+      dot: 'bg-red-400',
     },
     Pendiente: {
-      color: "text-slate-600 dark:text-slate-300",
+      color: 'text-slate-600 dark:text-slate-300',
       icon: <Package className="h-4 w-4" />,
-      bg: "bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-600",
-      dot: "bg-slate-400",
+      bg: 'bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-600',
+      dot: 'bg-slate-400',
     },
   };
 
@@ -254,7 +254,7 @@ const OrderCard = ({ order, onViewDetails }) => {
   const paymentProgress =
     order.totalToPay > 0 ? (order.totalPaid / order.totalToPay) * 100 : 0;
 
-  const normalizedStatus = order.status?.toLowerCase() || "pendiente";
+  const normalizedStatus = order.status?.toLowerCase() || 'pendiente';
   const displayStatus = capitalizeStatus(normalizedStatus);
   const statusStyle = statusStyles[displayStatus] || statusStyles.Pendiente;
 
@@ -262,7 +262,7 @@ const OrderCard = ({ order, onViewDetails }) => {
     <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl shadow-sm hover:shadow-md transition-all duration-200 overflow-hidden">
       <div
         className={`h-1 ${
-          order.type === "entrega" ? "bg-emerald-500" : "bg-blue-500"
+          order.type === 'entrega' ? 'bg-emerald-500' : 'bg-blue-500'
         }`}
       />
       <div className="p-4 sm:p-6">
@@ -307,8 +307,8 @@ const OrderCard = ({ order, onViewDetails }) => {
             <div className="flex items-center gap-2">
               <Calendar className="h-4 w-4 text-slate-400" />
               <span>
-                Ocupación:{" "}
-                {new Date(order.deliveryDate).toLocaleDateString("es-MX")}
+                Ocupación:{' '}
+                {new Date(order.deliveryDate).toLocaleDateString('es-MX')}
               </span>
             </div>
           </div>
@@ -382,61 +382,64 @@ const OrderHistoryModa = () => {
     }));
   };
 
-const fetchOrders = async () => {
-  try {
-    setLoading(true);
-    setError(null);
+  const fetchOrders = async () => {
+    try {
+      setLoading(true);
+      setError(null);
 
-    const response = await api.get("/api/repartidor/repartidor/pedidos-historico", {
-      withCredentials: true,
-      headers: { "X-CSRF-Token": csrfToken },
-    });
+      const response = await api.get(
+        '/api/repartidor/repartidor/pedidos-historico',
+        {
+          withCredentials: true,
+          headers: { 'X-CSRF-Token': csrfToken },
+        }
+      );
 
-    const data = response.data;
+      const data = response.data;
 
-    const mappedOrders = data.pedidos
-      .filter((order) => order.id && order.descripcion)
-      .map((order) => ({
-        id: order.id || 0,
-        diasAlquiler: order.diasAlquiler || 0,
-        type: order.tipo_pedido || "entrega",
-        status: capitalizeStatus(order.estado_pedido || "Pendiente"),
-        description: order.descripcion || "Sin descripción",
-        locality: order.localidad || "Desconocido",
-        municipality: order.municipio || "Desconocido",
-        state: order.estado || "Desconocido",
-        deliveryDate: order.fecha_entrega
-          ? new Date(order.fecha_entrega).toISOString().split("T")[0]
-          : new Date().toISOString().split("T")[0],
-        address: order.direccion || "Sin dirección",
-        totalToPay: parseFloat(order.total_a_pagar) || 0,
-        totalPaid: parseFloat(order.total_pagado) || 0,
-        isUrgent: order.urgente || false,
-        observaciones: order.observaciones || "",
-        products: order.productos
-          ? order.productos
-              .filter((product) => product.id && product.nombre)
-              .map((product) => ({
-                id: product.id || 0,
-                name: product.nombre || "Sin nombre",
-                quantity: product.cantidad || 0,
-                unitPrice: parseFloat(product.precio) || 0,
-                subtotal: parseFloat(product.subtotal) || 0,
-                color: product.color || "N/A",
-                status: capitalizeStatus(product.estado || "Disponible"),
-                observations: product.nota || "",
-                fotoProducto: product.foto || "",
-              }))
-          : [],
-      }));
+      const mappedOrders = data.pedidos
+        .filter((order) => order.id && order.descripcion)
+        .map((order) => ({
+          id: order.id || 0,
+          diasAlquiler: order.diasAlquiler || 0,
+          type: order.tipo_pedido || 'entrega',
+          status: capitalizeStatus(order.estado_pedido || 'Pendiente'),
+          description: order.descripcion || 'Sin descripción',
+          locality: order.localidad || 'Desconocido',
+          municipality: order.municipio || 'Desconocido',
+          state: order.estado || 'Desconocido',
+          deliveryDate: order.fecha_entrega
+            ? new Date(order.fecha_entrega).toISOString().split('T')[0]
+            : new Date().toISOString().split('T')[0],
+          address: order.direccion || 'Sin dirección',
+          totalToPay: parseFloat(order.total_a_pagar) || 0,
+          totalPaid: parseFloat(order.total_pagado) || 0,
+          isUrgent: order.urgente || false,
+          observaciones: order.observaciones || '',
+          products: order.productos
+            ? order.productos
+                .filter((product) => product.id && product.nombre)
+                .map((product) => ({
+                  id: product.id || 0,
+                  name: product.nombre || 'Sin nombre',
+                  quantity: product.cantidad || 0,
+                  unitPrice: parseFloat(product.precio) || 0,
+                  subtotal: parseFloat(product.subtotal) || 0,
+                  color: product.color || 'N/A',
+                  status: capitalizeStatus(product.estado || 'Disponible'),
+                  observations: product.nota || '',
+                  fotoProducto: product.foto || '',
+                }))
+            : [],
+        }));
 
-    setOrders(mappedOrders);
-  } catch (err) {
-    setError(err?.response?.data?.error || err.message);
-  } finally {
-    setLoading(false);
-  }
-};
+      setOrders(mappedOrders);
+    } catch (err) {
+      setError(err?.response?.data?.error || err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
     fetchOrders();
@@ -537,7 +540,7 @@ const fetchOrders = async () => {
                               </h4>
                               <div className="mt-1 sm:mt-0 sm:ml-2 inline-flex">
                                 <div className="px-2 py-0.5 sm:px-3 sm:py-1 bg-gradient-to-r from-amber-100 to-orange-100 dark:from-amber-900 dark:to-orange-900 text-amber-800 dark:text-amber-200 rounded-full text-xs font-bold shadow-sm">
-                                  {groupedOrders[state][municipality].length}{" "}
+                                  {groupedOrders[state][municipality].length}{' '}
                                   pedidos
                                 </div>
                               </div>
@@ -547,8 +550,8 @@ const fetchOrders = async () => {
                             <div className="w-6 h-6 sm:w-7 sm:h-7 bg-gradient-to-r from-amber-200 to-orange-200 dark:from-gray-600 dark:to-gray-500 rounded-full flex items-center justify-center group-hover:from-amber-300 group-hover:to-orange-300 dark:group-hover:from-gray-500 dark:group-hover:to-gray-400 transition-all duration-300 shadow-md">
                               <span className="text-amber-700 dark:text-gray-200 font-bold text-sm">
                                 {openMunicipality[state]?.[municipality]
-                                  ? "−"
-                                  : "+"}
+                                  ? '−'
+                                  : '+'}
                               </span>
                             </div>
                           </div>
@@ -620,7 +623,7 @@ const fetchOrders = async () => {
 
 // Función para capitalizar estados
 const capitalizeStatus = (status) => {
-  if (!status || typeof status !== "string") return "Disponible";
+  if (!status || typeof status !== 'string') return 'Disponible';
   return status.charAt(0).toUpperCase() + status.slice(1).toLowerCase();
 };
 

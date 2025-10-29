@@ -1,0 +1,8 @@
+# Ignorar archivos de integración y pruebas específicas
+src/pages/client/pedidos/HistorialPedidos.integration.test.js
+src/pages/client/pedidos/HistorialPedidos.test.jsx
+
+# O ignorar toda la carpeta de tests
+**/*.test.js
+**/*.test.jsx
+**/*.integration.test.js

@@ -1,31 +1,24 @@
-import React, { useState, useEffect, useRef, useContext } from "react";
-import {
-  Tabs,
-  Tab,
-  Box,
-  TextField,
-  Grid,
-  Typography,
-  CircularProgress,
-} from "@mui/material";
-import ComputerIcon from "@mui/icons-material/Computer";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+/* eslint-disable */
+import React, { useState, useEffect, useRef, useContext } from 'react';
+import { Grid, Typography, CircularProgress } from '@mui/material';
+import ComputerIcon from '@mui/icons-material/Computer';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
-import { toast } from "react-toastify";
-import AddressBook from "../../client/perfil/componetsPerfil/ListaDirecciones";
+import { toast } from 'react-toastify';
+import AddressBook from '../../client/perfil/componetsPerfil/ListaDirecciones';
 
-import "primereact/resources/themes/saga-blue/theme.css";
-import "primereact/resources/primereact.min.css";
+import 'primereact/resources/themes/saga-blue/theme.css';
+import 'primereact/resources/primereact.min.css';
 import {
   validateName,
   validatePhone,
   validateFechaNacimiento,
-} from "../../client/perfil/componetsPerfil/validaciones";
-import EditableInput from "../../client/perfil/componetsPerfil/EditableInput";
-import CambiarContrasenaModal from "../perfil/cambiarPass/Modal";
-import MFAComponent from "../../client/perfil/componetsPerfil/Mfa";
-import "primereact/resources/themes/saga-blue/theme.css";
-import "primereact/resources/primereact.min.css";
+} from '../../client/perfil/componetsPerfil/validaciones';
+import EditableInput from '../../client/perfil/componetsPerfil/EditableInput';
+import CambiarContrasenaModal from '../perfil/cambiarPass/Modal';
+import MFAComponent from '../../client/perfil/componetsPerfil/Mfa';
+import 'primereact/resources/themes/saga-blue/theme.css';
+import 'primereact/resources/primereact.min.css';
 import {
   Camera,
   User,
@@ -34,6 +27,8 @@ import {
   Calendar,
   CreditCard,
   Key,
+  ServerCrash,
+  RefreshCw,
   Shield,
   MapPin,
   Phone,
@@ -44,21 +39,21 @@ import {
   LogOut,
   Edit3,
   ChartNoAxesColumnDecreasing,
-} from "lucide-react";
+} from 'lucide-react';
 
 import {
   faWindows,
   faAndroid,
   faLinux,
   faApple,
-} from "@fortawesome/free-brands-svg-icons";
-import { motion, useAnimation } from "framer-motion";
-import PhoneIphoneIcon from "@mui/icons-material/PhoneIphone";
-import TabletMacIcon from "@mui/icons-material/TabletMac";
-import { useAuth } from "../../../hooks/ContextAuth";
-import api from "../../../utils/AxiosConfig";
-import axios from "axios";
-import CustomSpinner from "../../../components/spiner/SpinerGlobal";
+} from '@fortawesome/free-brands-svg-icons';
+import { motion, useAnimation } from 'framer-motion';
+import PhoneIphoneIcon from '@mui/icons-material/PhoneIphone';
+import TabletMacIcon from '@mui/icons-material/TabletMac';
+import { useAuth } from '../../../hooks/ContextAuth';
+import api from '../../../utils/AxiosConfig';
+import axios from 'axios';
+import CustomSpinner from '../../../components/spiner/SpinerGlobal';
 
 const PerfilRepartidor = ({ totalUsuarios, totalRentas, totalFinalizado }) => {
   const fileInputRef = useRef(null);
@@ -78,19 +73,20 @@ const PerfilRepartidor = ({ totalUsuarios, totalRentas, totalFinalizado }) => {
   const [sessions, setSessions] = useState([]);
   const [openModal, setOpenModal] = useState(false);
 
-  const [activeTab, setActiveTab] = useState("personal");
+  const [activeTab, setActiveTab] = useState('personal');
   const isMounted = useRef(true);
   const controls = useAnimation();
   const [cambiosContrasena, setCambiosContrasena] = useState(0);
   const [bloqueado, setBloqueado] = useState(false);
-  const [ estadisticas, setEstadisticas]= useState([]);
+  const [estadisticas, setEstadisticas] = useState([]);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     isMounted.current = true;
     if (user) {
       fetchProfileData();
       verificarCambiosContrasena(user.idUsuarios);
-      fetchEstadisticas()
+      fetchEstadisticas();
     }
     return () => {
       isMounted.current = false;
@@ -102,9 +98,10 @@ const PerfilRepartidor = ({ totalUsuarios, totalRentas, totalFinalizado }) => {
 
     try {
       setLoading(true);
+      setError(null);
       const response = await api.get(`api/usuarios/perfil`, {
         withCredentials: true,
-        headers: { "X-CSRF-Token": csrfToken },
+        headers: { 'X-CSRF-Token': csrfToken },
       });
       checkAuth();
 
@@ -114,62 +111,62 @@ const PerfilRepartidor = ({ totalUsuarios, totalRentas, totalFinalizado }) => {
         setLastUpdated(new Date(response.data.user.fechaActualizacionF));
         setLoading(false);
         controls.start({ opacity: 1, y: 0 });
-        console.log("✅ Datos de usuario obtenidos:", response.data.user);
+        console.log('✅ Datos de usuario obtenidos:', response.data.user);
       }
     } catch (error) {
       if (isMounted.current) {
         setLoading(false);
+        setError(
+          'No pudimos cargar tu información. Por favor, intenta de nuevo.'
+        );
       }
-      console.error("❌ Error al obtener los datos del perfil:", error);
+      console.error('❌ Error al obtener los datos del perfil:', error);
     }
   };
 
-
-    const fetchEstadisticas = async () => {
+  const fetchEstadisticas = async () => {
     if (!isMounted.current) return;
 
     try {
       setLoading(true);
       const response = await api.get(`api/repartidor/repartidor/estadisticas`, {
         withCredentials: true,
-        headers: { "X-CSRF-Token": csrfToken },
+        headers: { 'X-CSRF-Token': csrfToken },
       });
-    
 
       if (isMounted.current) {
-      setEstadisticas(response.data)
-      console.log("Dtas de estatdiscica", response.data)
+        setEstadisticas(response.data);
+        console.log('Dtas de estatdiscica', response.data);
         setLoading(false);
         controls.start({ opacity: 1, y: 0 });
-        console.log("✅ Datos de usuario obtenidos:", response.data.user);
+        console.log('✅ Datos de usuario obtenidos:', response.data.user);
       }
     } catch (error) {
       if (isMounted.current) {
         setLoading(false);
       }
-      console.error("❌ Error al obtener los datos del perfil:", error);
+      console.error('❌ Error al obtener los datos del perfil:', error);
     }
   };
-
 
   const verificarCambiosContrasena = async (idUsuario) => {
     if (!idUsuario) {
       console.warn(
-        "⚠️ ID de usuario no disponible, no se verificará cambios de contraseña."
+        '⚠️ ID de usuario no disponible, no se verificará cambios de contraseña.'
       );
       return;
     }
     try {
       const response = await api.get(`/api/usuarios/vecesCambioPass`, {
         params: { idUsuario },
-        headers: { "X-CSRF-Token": csrfToken },
+        headers: { 'X-CSRF-Token': csrfToken },
         withCredentials: true,
       });
-      console.log("Respuesta de vecesCambioPass:", response.data);
+      console.log('Respuesta de vecesCambioPass:', response.data);
       setCambiosContrasena(response.data.cambiosRealizados);
       setBloqueado(response.data.cambiosRealizados >= 20);
     } catch (error) {
-      console.error("Error al verificar los cambios de contraseña:", error);
+      console.error('Error al verificar los cambios de contraseña:', error);
     }
   };
 
@@ -199,36 +196,36 @@ const PerfilRepartidor = ({ totalUsuarios, totalRentas, totalFinalizado }) => {
       const lastUpdatedTime = lastUpdated?.getTime();
       const twoMonths = 60 * 60 * 24 * 1000 * 30 * 2;
       if (lastUpdated && now - lastUpdatedTime < twoMonths) {
-        console.log("Solo puedes cambiar tu foto de perfil cada dos meses.");
-        toast.error("Solo puedes cambiar tu foto de perfil cada dos meses. ");
+        console.log('Solo puedes cambiar tu foto de perfil cada dos meses.');
+        toast.error('Solo puedes cambiar tu foto de perfil cada dos meses. ');
 
         return;
       }
       if (
         ![
-          "image/png",
-          "image/jpeg",
-          "image/jpg",
-          "image/gif",
-          "image/webp",
-          "image/svg+xml",
+          'image/png',
+          'image/jpeg',
+          'image/jpg',
+          'image/gif',
+          'image/webp',
+          'image/svg+xml',
         ].includes(file.type)
       ) {
         toast.error(
-          "Solo se aceptan imágenes en formatos PNG, JPG, JPEG, GIF, WEBP, o SVG."
+          'Solo se aceptan imágenes en formatos PNG, JPG, JPEG, GIF, WEBP, o SVG.'
         );
-        console.log("Error Formato de imagen,");
+        console.log('Error Formato de imagen,');
 
         return;
       }
 
       if (file.size > 2 * 1024 * 1024) {
-        console.log("El tamaño de la imagen debe ser menor a 2MB.");
-        toast.info("El tamaño de la imagen debe ser menor a 2MB.");
+        console.log('El tamaño de la imagen debe ser menor a 2MB.');
+        toast.info('El tamaño de la imagen debe ser menor a 2MB.');
 
         return;
       }
-      console.log("Imagen enviado  handleImagenChange", file);
+      console.log('Imagen enviado  handleImagenChange', file);
       handleImageChange(file);
     }
   };
@@ -237,18 +234,18 @@ const PerfilRepartidor = ({ totalUsuarios, totalRentas, totalFinalizado }) => {
     const now = new Date();
 
     const formData = new FormData();
-    formData.append("imagen", file);
+    formData.append('imagen', file);
 
     setUploading(true);
     setIsBlocked(true);
-    console.log("Subiendo imagen");
-    toast.info("Subiendo Imagen, Espera Mientras se sube.....");
+    console.log('Subiendo imagen');
+    toast.info('Subiendo Imagen, Espera Mientras se sube.....');
 
     try {
       const response = await api.post(`/api/imagenes/upload`, formData, {
         headers: {
-          "Content-Type": "multipart/form-data",
-          "X-CSRF-Token": csrfToken,
+          'Content-Type': 'multipart/form-data',
+          'X-CSRF-Token': csrfToken,
         },
         withCredentials: true,
         onUploadProgress: (progressEvent) => {
@@ -260,7 +257,7 @@ const PerfilRepartidor = ({ totalUsuarios, totalRentas, totalFinalizado }) => {
       });
 
       const imageUrl = response.data.url;
-      console.log("URL de la imagen subida:", imageUrl);
+      console.log('URL de la imagen subida:', imageUrl);
 
       // Actualizar el perfil con la nueva URL de la imagen en MySQL
       await api.patch(
@@ -269,7 +266,7 @@ const PerfilRepartidor = ({ totalUsuarios, totalRentas, totalFinalizado }) => {
           fotoPerfil: imageUrl,
           fechaActualizacionF: now.toISOString(),
         },
-        { headers: { "X-CSRF-Token": csrfToken }, withCredentials: true }
+        { headers: { 'X-CSRF-Token': csrfToken }, withCredentials: true }
       );
 
       // Actualizar el estado del frontend con la nueva imagen
@@ -280,11 +277,11 @@ const PerfilRepartidor = ({ totalUsuarios, totalRentas, totalFinalizado }) => {
 
       setLastUpdated(now);
       fetchProfileData();
-      console.log("Imagen subido correctamente");
-      toast.success("Foto de perfil actualizada correctamente.");
+      console.log('Imagen subido correctamente');
+      toast.success('Foto de perfil actualizada correctamente.');
     } catch (error) {
-      console.error("Error al actualizar la foto de perfil:", error);
-      toast.error("error", "Error", "Error al actualizar la foto de perfil.");
+      console.error('Error al actualizar la foto de perfil:', error);
+      toast.error('error', 'Error', 'Error al actualizar la foto de perfil.');
     } finally {
       setUploading(false);
       setIsBlocked(false);
@@ -294,7 +291,7 @@ const PerfilRepartidor = ({ totalUsuarios, totalRentas, totalFinalizado }) => {
 
   //===================GUARDAR EN LA BASE DE DATOS=======================================================================
   const saveField = async (field, value) => {
-    console.log("VALOR DE FILE, VALUE", field, value);
+    console.log('VALOR DE FILE, VALUE', field, value);
 
     try {
       // Asegúrate de que el valor se envíe correctamente en el cuerpo de la solicitud
@@ -302,7 +299,7 @@ const PerfilRepartidor = ({ totalUsuarios, totalRentas, totalFinalizado }) => {
         `/api/usuarios/perfil/${usuariosC.idUsuarios}/${field}`,
         { value },
         {
-          headers: { "X-CSRF-Token": csrfToken },
+          headers: { 'X-CSRF-Token': csrfToken },
           withCredentials: true,
         }
       );
@@ -313,7 +310,7 @@ const PerfilRepartidor = ({ totalUsuarios, totalRentas, totalFinalizado }) => {
         `El ${field} ha sido guardado correctamente.`
       );
     } catch (error) {
-      toast.error("Error al guardar", `Hubo un error al guardar el ${field}.`);
+      toast.error('Error al guardar', `Hubo un error al guardar el ${field}.`);
       console.error(`Error al guardar el ${field}:`, error);
     }
   };
@@ -339,15 +336,15 @@ const PerfilRepartidor = ({ totalUsuarios, totalRentas, totalFinalizado }) => {
         `/api/usuarios/sesiones`,
         { userId: usuariosC.idUsuarios },
         {
-          headers: { "X-CSRF-Token": csrfToken },
+          headers: { 'X-CSRF-Token': csrfToken },
           withCredentials: true,
           timeout: 10000,
         }
       );
       setSessions(response.data);
-      console.log("Sesiones abiertas edilberto:", response.data);
+      console.log('Sesiones abiertas edilberto:', response.data);
     } catch (error) {
-      console.error("Error al obtener las sesiones activas:", error);
+      console.error('Error al obtener las sesiones activas:', error);
     }
   };
 
@@ -357,7 +354,7 @@ const PerfilRepartidor = ({ totalUsuarios, totalRentas, totalFinalizado }) => {
         `/api/usuarios/Delete/login/all-except-current`,
         {},
         {
-          headers: { "X-CSRF-Token": csrfToken },
+          headers: { 'X-CSRF-Token': csrfToken },
           withCredentials: true,
           timeout: 10000,
         }
@@ -367,21 +364,21 @@ const PerfilRepartidor = ({ totalUsuarios, totalRentas, totalFinalizado }) => {
       );
 
       showAlert({
-        severity: "success",
-        summary: "Sesiones cerradas",
+        severity: 'success',
+        summary: 'Sesiones cerradas',
         detail:
           response.data.message ||
-          "Todas las sesiones excepto la actual han sido cerradas.",
+          'Todas las sesiones excepto la actual han sido cerradas.',
         life: 3000,
       });
     } catch (error) {
-      console.error("Error al cerrar todas las sesiones:", error);
+      console.error('Error al cerrar todas las sesiones:', error);
       showAlert({
-        severity: "error",
-        summary: "Error",
+        severity: 'error',
+        summary: 'Error',
         detail:
           error.response?.data?.message ||
-          "Hubo un problema al cerrar las sesiones.",
+          'Hubo un problema al cerrar las sesiones.',
         life: 3000,
       });
     }
@@ -405,28 +402,28 @@ const PerfilRepartidor = ({ totalUsuarios, totalRentas, totalFinalizado }) => {
   }, [usuariosC]);
 
   const getDeviceIcon = (deviceType) => {
-    if (deviceType === "Windows") return <FontAwesomeIcon icon={faWindows} />;
-    if (deviceType === "Android") return <FontAwesomeIcon icon={faAndroid} />;
-    if (deviceType === "Linux") return <FontAwesomeIcon icon={faLinux} />;
-    if (deviceType === "Mac") return <FontAwesomeIcon icon={faApple} />;
-    if (deviceType === "iOS") return <PhoneIphoneIcon />;
-    if (deviceType === "iPad") return <TabletMacIcon />;
+    if (deviceType === 'Windows') return <FontAwesomeIcon icon={faWindows} />;
+    if (deviceType === 'Android') return <FontAwesomeIcon icon={faAndroid} />;
+    if (deviceType === 'Linux') return <FontAwesomeIcon icon={faLinux} />;
+    if (deviceType === 'Mac') return <FontAwesomeIcon icon={faApple} />;
+    if (deviceType === 'iOS') return <PhoneIphoneIcon />;
+    if (deviceType === 'iPad') return <TabletMacIcon />;
     return <ComputerIcon />;
   };
-  const formatDateForDisplay = (dateString, format = "dd-MM-yyyy") => {
-    if (!dateString) return "";
+  const formatDateForDisplay = (dateString, format = 'dd-MM-yyyy') => {
+    if (!dateString) return '';
 
     const date = new Date(dateString);
     if (isNaN(date.getTime())) {
-      console.error("Fecha inválida:", dateString);
-      return "";
+      console.error('Fecha inválida:', dateString);
+      return '';
     }
 
-    const day = date.getDate().toString().padStart(2, "0");
-    const month = (date.getMonth() + 1).toString().padStart(2, "0");
+    const day = date.getDate().toString().padStart(2, '0');
+    const month = (date.getMonth() + 1).toString().padStart(2, '0');
     const year = date.getFullYear();
 
-    if (format === "yyyy-MM-dd") {
+    if (format === 'yyyy-MM-dd') {
       return `${year}-${month}-${day}`;
     }
 
@@ -436,66 +433,85 @@ const PerfilRepartidor = ({ totalUsuarios, totalRentas, totalFinalizado }) => {
   //Configracion de la estrutura de la tabla
   const fields = [
     {
-      label: "Nombre",
-      value: usuariosC?.nombre || "",
+      label: 'Nombre',
+      value: usuariosC?.nombre || '',
       icon: User,
-      validate: (value) => validateName(value, "nombre"),
-      field: "nombre",
+      validate: (value) => validateName(value, 'nombre'),
+      field: 'nombre',
       editable: true,
     },
     {
-      label: "Apellido Paterno",
-      value: usuariosC?.apellidoP || "",
+      label: 'Apellido Paterno',
+      value: usuariosC?.apellidoP || '',
       icon: User,
-      validate: (value) => validateName(value, "apellido paterno"),
-      field: "apellidoP",
+      validate: (value) => validateName(value, 'apellido paterno'),
+      field: 'apellidoP',
       editable: true,
     },
     {
-      label: "Apellido Materno",
-      value: usuariosC?.apellidoM || "",
+      label: 'Apellido Materno',
+      value: usuariosC?.apellidoM || '',
       icon: User,
-      validate: (value) => validateName(value, "apellido materno"),
-      field: "apellidoM",
+      validate: (value) => validateName(value, 'apellido materno'),
+      field: 'apellidoM',
       editable: true,
     },
     {
-      label: "Teléfono",
-      value: usuariosC?.telefono || "",
+      label: 'Teléfono',
+      value: usuariosC?.telefono || '',
       icon: Phone,
       validate: validatePhone,
-      field: "telefono",
+      field: 'telefono',
       editable: true,
     },
     {
-      label: "Correo",
-      value: usuariosC?.correo || "",
+      label: 'Correo',
+      value: usuariosC?.correo || '',
       icon: Mail,
-      field: "correo",
+      field: 'correo',
       editable: false,
     },
     {
-      label: "Fecha de Nacimiento",
-      value: formatDateForDisplay(usuariosC.fechaNacimiento, "yyyy-MM-dd"),
+      label: 'Fecha de Nacimiento',
+      value: formatDateForDisplay(usuariosC.fechaNacimiento, 'yyyy-MM-dd'),
       icon: Calendar,
       validate: validateFechaNacimiento,
-      field: "fechaNacimiento",
+      field: 'fechaNacimiento',
       editable: true,
     },
   ];
 
   function formatDate(dateString) {
     const dateObj = new Date(dateString);
-    const day = String(dateObj.getDate()).padStart(2, "0");
-    const month = String(dateObj.getMonth() + 1).padStart(2, "0");
+    const day = String(dateObj.getDate()).padStart(2, '0');
+    const month = String(dateObj.getMonth() + 1).padStart(2, '0');
     const year = String(dateObj.getFullYear()).slice(-2);
     return `${day}/${month}/${year}`;
   }
   //==========================================================================================
 
   if (loading) {
+    return <CustomSpinner />;
+  }
+
+  if (error) {
     return (
-     <CustomSpinner/>
+      <div className="flex flex-col items-center justify-center min-h-[60vh] text-center px-4">
+        <ServerCrash className="w-16 h-16 text-red-500 mb-4" />
+        <h2 className="text-2xl font-bold text-slate-800 dark:text-white mb-2">
+          Oops, algo salió mal
+        </h2>
+        <p className="text-slate-600 dark:text-slate-400 mb-6 max-w-md">
+          {error}
+        </p>
+        <button
+          onClick={fetchProfileData}
+          className="flex items-center gap-2 px-6 py-3 rounded-full bg-slate-800 text-white font-semibold hover:bg-slate-700 transition-colors"
+        >
+          <RefreshCw className="w-5 h-5" />
+          Reintentar
+        </button>
+      </div>
     );
   }
 
@@ -515,7 +531,7 @@ const PerfilRepartidor = ({ totalUsuarios, totalRentas, totalFinalizado }) => {
       {loading && (
         <div className="absolute inset-0 flex justify-center items-center bg-black bg-opacity-50">
           <div className="flex flex-col items-center space-y-4">
-            <CircularProgress size={60} sx={{ color: "#1976d2" }} />
+            <CircularProgress size={60} sx={{ color: '#1976d2' }} />
             <Typography variant="h6" color="white">
               Cargando datos del perfil...
             </Typography>
@@ -540,10 +556,10 @@ const PerfilRepartidor = ({ totalUsuarios, totalRentas, totalFinalizado }) => {
                 <div className="flex items-center gap-2">
                   <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
                   <span className="text-xs sm:text-sm text-blue-600 font-semibold dark:text-blue-300">
-                    Registrado:{" "}
-                    {new Date(usuariosC.fechaCreacion).toLocaleString("es-ES", {
-                      day: "2-digit",
-                      month: "short",
+                    Registrado:{' '}
+                    {new Date(usuariosC.fechaCreacion).toLocaleString('es-ES', {
+                      day: '2-digit',
+                      month: 'short',
                     })}
                   </span>
                 </div>
@@ -560,7 +576,7 @@ const PerfilRepartidor = ({ totalUsuarios, totalRentas, totalFinalizado }) => {
                       src={
                         usuariosC.fotoPerfil ||
                         `https://ui-avatars.com/api/?name=${encodeURIComponent(
-                          usuariosC.nombre ? usuariosC.nombre.charAt(0) : "U"
+                          usuariosC.nombre ? usuariosC.nombre.charAt(0) : 'U'
                         )}&background=0D6EFD&color=fff&size=128`
                       }
                       alt="Foto de Perfil"
@@ -574,7 +590,7 @@ const PerfilRepartidor = ({ totalUsuarios, totalRentas, totalFinalizado }) => {
                           value={uploadProgress}
                           size={50}
                           thickness={5}
-                          sx={{ color: "#1976d2" }}
+                          sx={{ color: '#1976d2' }}
                         />
                         <Typography
                           variant="caption"
@@ -599,7 +615,7 @@ const PerfilRepartidor = ({ totalUsuarios, totalRentas, totalFinalizado }) => {
                     type="file"
                     ref={fileInputRef}
                     onChange={handleFileChange}
-                    style={{ display: "none" }}
+                    style={{ display: 'none' }}
                     accept="image/*"
                   />
                 </div>
@@ -645,7 +661,9 @@ const PerfilRepartidor = ({ totalUsuarios, totalRentas, totalFinalizado }) => {
                           </svg>
                         </div>
                         <div className="text-2xl sm:text-3xl font-bold text-yellow-600 dark:text-yellow-300">
-                          {estadisticas.entregasPendientes? estadisticas.entregasPendientes:0}
+                          {estadisticas.entregasPendientes
+                            ? estadisticas.entregasPendientes
+                            : 0}
                         </div>
                       </div>
                       <div className="text-sm sm:text-base font-medium text-gray-700 dark:text-gray-200">
@@ -675,7 +693,9 @@ const PerfilRepartidor = ({ totalUsuarios, totalRentas, totalFinalizado }) => {
                           </svg>
                         </div>
                         <div className="text-2xl sm:text-3xl font-bold text-green-600 dark:text-green-300">
-                          {estadisticas.entregasFinalizadas? estadisticas.entregasFinalizadas:0    }
+                          {estadisticas.entregasFinalizadas
+                            ? estadisticas.entregasFinalizadas
+                            : 0}
                         </div>
                       </div>
                       <div className="text-sm sm:text-base font-medium text-gray-700 dark:text-gray-200">
@@ -705,7 +725,9 @@ const PerfilRepartidor = ({ totalUsuarios, totalRentas, totalFinalizado }) => {
                           </svg>
                         </div>
                         <div className="text-2xl sm:text-3xl font-bold text-indigo-600 dark:text-indigo-300">
-                          {estadisticas.clientesAtendidos? estadisticas.clientesAtendidos : 0}
+                          {estadisticas.clientesAtendidos
+                            ? estadisticas.clientesAtendidos
+                            : 0}
                         </div>
                       </div>
                       <div className="text-sm sm:text-base font-medium text-gray-700 dark:text-gray-200">
@@ -730,10 +752,13 @@ const PerfilRepartidor = ({ totalUsuarios, totalRentas, totalFinalizado }) => {
                           Tasa de Cumplimiento
                         </div>
                         <div className="text-xl font-bold text-green-600 dark:text-green-400">
-                          {estadisticas.clientesAtendidos + estadisticas.entregasFinalizadas > 0
+                          {estadisticas.clientesAtendidos +
+                            estadisticas.entregasFinalizadas >
+                          0
                             ? Math.round(
                                 (estadisticas.entregasFinalizadas /
-                                  (estadisticas.clientesAtendidos + estadisticas.entregasFinalizadas)) *
+                                  (estadisticas.clientesAtendidos +
+                                    estadisticas.entregasFinalizadas)) *
                                   100
                               )
                             : 0}
@@ -758,16 +783,16 @@ const PerfilRepartidor = ({ totalUsuarios, totalRentas, totalFinalizado }) => {
           <div className="bg-white rounded-xl shadow-md p-2 overflow-x-auto dark:bg-gray-800">
             <div className="flex justify-start md:justify-center space-x-2">
               {[
-                { id: "personal", icon: User, label: "Datos Personales" },
-                { id: "Seguridad", icon: Shield, label: "Seguridad" },
+                { id: 'personal', icon: User, label: 'Datos Personales' },
+                { id: 'Seguridad', icon: Shield, label: 'Seguridad' },
               ].map((tab) => (
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}
                   className={`flex items-center space-x-2 px-3 py-2 rounded-lg transition-all whitespace-nowrap ${
                     activeTab === tab.id
-                      ? "bg-blue-600 text-white dark:bg-blue-700 dark:text-white"
-                      : "text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700"
+                      ? 'bg-blue-600 text-white dark:bg-blue-700 dark:text-white'
+                      : 'text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700'
                   }`}
                 >
                   <tab.icon className="w-4 h-4 md:w-5 md:h-5" />
@@ -778,7 +803,7 @@ const PerfilRepartidor = ({ totalUsuarios, totalRentas, totalFinalizado }) => {
           </div>
 
           <div className="bg-white rounded-2xl shadow-lg p-4 sm:p-6 dark:bg-gray-800">
-            {activeTab === "personal" && (
+            {activeTab === 'personal' && (
               <>
                 <div className=" dark:bg-gray-800 rounded-2xl  p-6">
                   <h2 className="text-xl font-semibold text-gray-800 dark:text-white mb-6">
@@ -807,11 +832,11 @@ const PerfilRepartidor = ({ totalUsuarios, totalRentas, totalFinalizado }) => {
                               <EditableInput
                                 label={field.label}
                                 value={field.value}
-                                validate={field.validate || (() => "")}
+                                validate={field.validate || (() => '')}
                                 onSave={(newValue) =>
                                   saveField(field.field, newValue)
                                 }
-                                showHint={field.label === "Teléfono"}
+                                showHint={field.label === 'Teléfono'}
                                 hintMessage="Ingrese su número real para recuperación de cuenta."
                               />
                             </div>
@@ -859,7 +884,7 @@ const PerfilRepartidor = ({ totalUsuarios, totalRentas, totalFinalizado }) => {
               </motion.div>
             )}
 
-            {activeTab === "Seguridad" && (
+            {activeTab === 'Seguridad' && (
               <div className="p-4 sm:p-6 space-y-8 max-w-full overflow-hidden">
                 {/* 🔹 Título de la sección */}
                 <motion.h2
@@ -931,11 +956,11 @@ const PerfilRepartidor = ({ totalUsuarios, totalRentas, totalFinalizado }) => {
                       onClick={handleOpenMfaModal}
                       className={`px-4 py-2 w-full sm:w-auto rounded-lg transition-all ${
                         activo
-                          ? "bg-red-600 hover:bg-red-700"
-                          : "bg-blue-600 hover:bg-blue-700"
+                          ? 'bg-red-600 hover:bg-red-700'
+                          : 'bg-blue-600 hover:bg-blue-700'
                       } text-white`}
                     >
-                      {activo ? "Desactivar MFA" : "Activar MFA"}
+                      {activo ? 'Desactivar MFA' : 'Activar MFA'}
                     </button>
                   </motion.div>
                 </div>
@@ -988,11 +1013,11 @@ const PerfilRepartidor = ({ totalUsuarios, totalRentas, totalFinalizado }) => {
                                   </p>
                                   <p className="text-sm text-gray-600 dark:text-gray-300 flex items-center space-x-2">
                                     <span className="text-blue-500 dark:text-blue-300">
-                                      <i className="fas fa-calendar-alt"></i>{" "}
+                                      <i className="fas fa-calendar-alt"></i>{' '}
                                       {/* Icono de calendario */}
                                     </span>
                                     <span>
-                                      Fecha de inicio:{" "}
+                                      Fecha de inicio:{' '}
                                       {formatDate(session.horaInicio)}
                                     </span>
                                   </p>
@@ -1038,10 +1063,10 @@ const PerfilRepartidor = ({ totalUsuarios, totalRentas, totalFinalizado }) => {
                                   </p>
                                   <p className="text-sm text-gray-600 dark:text-gray-300 flex items-center space-x-2">
                                     <span className="text-blue-500 dark:text-blue-300">
-                                      <i className="fas fa-calendar-alt"></i>{" "}
+                                      <i className="fas fa-calendar-alt"></i>{' '}
                                     </span>
                                     <span>
-                                      Fecha de inicio:{" "}
+                                      Fecha de inicio:{' '}
                                       {formatDate(session.horaInicio)}
                                     </span>
                                   </p>

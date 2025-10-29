@@ -1,29 +1,29 @@
-import React, { useState, useEffect } from "react";
-import axios from "axios";
-import { Plus, Edit2, Trash, X, Loader2 } from "lucide-react";
-import api from "../../../utils/AxiosConfig";
-import { useAuth } from "../../../hooks/ContextAuth";
-import { toast } from "react-toastify";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faMapMarkerAlt } from "@fortawesome/free-solid-svg-icons";
+import React, { useState, useEffect } from 'react';
+
+import { Plus, Edit2, Trash, X, Loader2 } from 'lucide-react';
+import api from '../../../utils/AxiosConfig';
+import { useAuth } from '../../../hooks/ContextAuth';
+import { toast } from 'react-toastify';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faMapMarkerAlt } from '@fortawesome/free-solid-svg-icons';
 
 function BodegaSecundaria({ bodega, onEdit, onDelete, onToggle }) {
   const iconColor =
-    bodega.estado === "activa"
-      ? "bg-green-200 text-green-700"
-      : "bg-red-200 text-red-700";
+    bodega.estado === 'activa'
+      ? 'bg-green-200 text-green-700'
+      : 'bg-red-200 text-red-700';
 
   const btnClass =
-    bodega.estado === "activa"
-      ? "px-3 py-1 rounded-full border border-red-300 text-red-700 dark:text-red-200 hover:bg-red-100 dark:hover:bg-red-700 transition-colors"
-      : "px-3 py-1 rounded-full border border-green-300 text-green-700 dark:text-green-200 hover:bg-green-100 dark:hover:bg-green-700 transition-colors";
+    bodega.estado === 'activa'
+      ? 'px-3 py-1 rounded-full border border-red-300 text-red-700 dark:text-red-200 hover:bg-red-100 dark:hover:bg-red-700 transition-colors'
+      : 'px-3 py-1 rounded-full border border-green-300 text-green-700 dark:text-green-200 hover:bg-green-100 dark:hover:bg-green-700 transition-colors';
 
   return (
     <div className="relative p-4 bg-white dark:bg-gray-800 rounded-xl shadow-md hover:shadow-xl transform hover:-translate-y-1 transition duration-300 flex flex-col gap-3 max-w-sm mx-auto">
       <p className="absolute top-2 right-2 text-xs text-gray-500 dark:text-gray-400">
         {bodega.fechaRegistro
           ? new Date(bodega.fechaRegistro).toLocaleDateString()
-          : ""}
+          : ''}
       </p>
       <div className="flex flex-col items-center">
         <div
@@ -40,7 +40,7 @@ function BodegaSecundaria({ bodega, onEdit, onDelete, onToggle }) {
             className="text-gray-500 dark:text-gray-400 mr-1 flex-shrink-0"
           />
           <p className="text-sm text-gray-500 dark:text-gray-400 truncate">
-            {bodega.ubicacion || "Ubicación desconocida"}
+            {bodega.ubicacion || 'Ubicación desconocida'}
           </p>
         </div>
       </div>
@@ -49,7 +49,7 @@ function BodegaSecundaria({ bodega, onEdit, onDelete, onToggle }) {
           onClick={() => onToggle(bodega.idBodega, !bodega.activo)}
           className={btnClass}
         >
-          {bodega.estado === "activa" ? "Desactivar" : "Activar"}
+          {bodega.estado === 'activa' ? 'Desactivar' : 'Activar'}
         </button>
         <button
           onClick={() => onEdit(bodega)}
@@ -76,14 +76,14 @@ export default function Bodegas() {
   const [bodegaPrincipal, setBodegaPrincipal] = useState(null);
   const [isModalAddOpen, setIsModalAddOpen] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [nombre, setNombre] = useState("");
-  const [ubicacion, setUbicacion] = useState("");
+  const [nombre, setNombre] = useState('');
+  const [ubicacion, setUbicacion] = useState('');
   const [isModalEditOpen, setIsModalEditOpen] = useState(false);
   const [editBodega, setEditBodega] = useState(null);
-  const [editNombre, setEditNombre] = useState("");
-  const [editUbicacion, setEditUbicacion] = useState("");
-  const [filterName, setFilterName] = useState("");
-  const [filterStatus, setFilterStatus] = useState("todos");
+  const [editNombre, setEditNombre] = useState('');
+  const [editUbicacion, setEditUbicacion] = useState('');
+  const [filterName, setFilterName] = useState('');
+  const [filterStatus, setFilterStatus] = useState('todos');
 
   // Estados para manejo de carga en creación y actualización
   const [createLoading, setCreateLoading] = useState(false);
@@ -96,7 +96,7 @@ export default function Bodegas() {
   const fetchBodegas = async () => {
     setLoading(true);
     try {
-      const resp = await api.get("/api/bodegas/bodegas/", {
+      const resp = await api.get('/api/bodegas/bodegas/', {
         withCredentials: true,
       });
       const { bodegas } = resp.data;
@@ -107,7 +107,7 @@ export default function Bodegas() {
       }
       setBodegasSecundarias(secundarias);
     } catch (error) {
-      console.error("Error al obtener bodegas:", error);
+      console.error('Error al obtener bodegas:', error);
     } finally {
       setLoading(false);
     }
@@ -116,8 +116,8 @@ export default function Bodegas() {
   const handleShowAddModal = () => setIsModalAddOpen(true);
   const handleCloseAddModal = () => {
     setIsModalAddOpen(false);
-    setNombre("");
-    setUbicacion("");
+    setNombre('');
+    setUbicacion('');
   };
 
   const locationPattern = /^([\w\s]+),\s*([\w\s]+),\s*([\w\s]+)$/;
@@ -125,12 +125,12 @@ export default function Bodegas() {
   const handleAddBodega = async (e) => {
     e.preventDefault();
     if (!nombre.trim() || nombre.trim().length < 4) {
-      toast.warning("El nombre debe tener al menos 4 caracteres.");
+      toast.warning('El nombre debe tener al menos 4 caracteres.');
       return;
     }
 
     if (!ubicacion.trim() || ubicacion.trim().length < 2) {
-      toast.warning("La ubicación debe tener al menos 2 caracteres.");
+      toast.warning('La ubicación debe tener al menos 2 caracteres.');
       return;
     }
     if (!locationPattern.test(ubicacion.trim())) {
@@ -143,61 +143,57 @@ export default function Bodegas() {
     try {
       setCreateLoading(true);
       const response = await api.post(
-        "/api/bodegas/bodegas/crear",
+        '/api/bodegas/bodegas/crear',
         {
           nombre: nombre.trim(),
           ubicacion: ubicacion.trim(),
         },
         {
-          headers: { "X-CSRF-Token": csrfToken },
+          headers: { 'X-CSRF-Token': csrfToken },
           withCredentials: true,
         }
       );
       if (response.data.success) {
-        toast.success("Bodega secundaria creada exitosamente.");
+        toast.success('Bodega secundaria creada exitosamente.');
         fetchBodegas();
         handleCloseAddModal();
       } else {
-        toast.error(response.data.message || "Error al crear la bodega.");
+        toast.error(response.data.message || 'Error al crear la bodega.');
       }
     } catch (error) {
-      console.error("Error al crear la bodega secundaria:", error);
-      toast.error("Ocurrió un error al crear la bodega.");
+      console.error('Error al crear la bodega secundaria:', error);
+      toast.error('Ocurrió un error al crear la bodega.');
     } finally {
       setCreateLoading(false);
     }
   };
 
   const handleDeleteBodega = async (id) => {
-    if (!window.confirm("¿Estás seguro de eliminar esta bodega?")) {
+    if (!window.confirm('¿Estás seguro de eliminar esta bodega?')) {
       return;
     }
     try {
       await api.delete(`/api/bodegas/delete/${id}`, {
-        headers: { "X-CSRF-Token": csrfToken },
+        headers: { 'X-CSRF-Token': csrfToken },
         withCredentials: true,
       });
       setBodegasSecundarias((prev) =>
         prev.filter((bodega) => bodega.id !== id)
       );
-      toast.success("Bodega eliminada correctamente.");
+      toast.success('Bodega eliminada correctamente.');
       fetchBodegas();
     } catch (error) {
-      toast.error("Error al eliminar la bodega.");
-      console.error("Error al eliminar bodega:", error);
+      toast.error('Error al eliminar la bodega.');
+      console.error('Error al eliminar bodega:', error);
     }
   };
 
   const handleToggleBodega = async (id) => {
     try {
-      const response = await api.patch(
-        `/api/bodegas/toggle/${id}`,
-        null,
-        {
-          withCredentials: true,
-          headers: { "X-CSRF-Token": csrfToken },
-        }
-      );
+      const response = await api.patch(`/api/bodegas/toggle/${id}`, null, {
+        withCredentials: true,
+        headers: { 'X-CSRF-Token': csrfToken },
+      });
       if (response.data.success) {
         setBodegasSecundarias((prev) =>
           prev.map((b) =>
@@ -205,20 +201,20 @@ export default function Bodegas() {
               ? {
                   ...b,
                   estado: response.data.estado,
-                  activa: response.data.estado === "activa",
+                  activa: response.data.estado === 'activa',
                 }
               : b
           )
         );
-      
+
         fetchBodegas();
         toast.success(response.data.message);
       } else {
-        toast.error("Error al actualizar el estado de la bodega");
+        toast.error('Error al actualizar el estado de la bodega');
       }
     } catch (error) {
-      console.error("Error al actualizar el estado de la bodega:", error);
-      toast.error("Error al actualizar el estado de la bodega");
+      console.error('Error al actualizar el estado de la bodega:', error);
+      toast.error('Error al actualizar el estado de la bodega');
     }
   };
 
@@ -232,18 +228,18 @@ export default function Bodegas() {
   const handleCloseEditModal = () => {
     setIsModalEditOpen(false);
     setEditBodega(null);
-    setEditNombre("");
-    setEditUbicacion("");
+    setEditNombre('');
+    setEditUbicacion('');
   };
 
   const handleSaveEdit = async (e) => {
     e.preventDefault();
     if (!editNombre.trim() || editNombre.trim().length < 4) {
-      toast.warning("El nombre debe tener al menos 4 caracteres.");
+      toast.warning('El nombre debe tener al menos 4 caracteres.');
       return;
     }
     if (!editUbicacion.trim() || editUbicacion.trim().length < 2) {
-      toast.warning("La ubicación debe tener al menos 2 caracteres.");
+      toast.warning('La ubicación debe tener al menos 2 caracteres.');
       return;
     }
     if (!locationPattern.test(editUbicacion.trim())) {
@@ -263,12 +259,12 @@ export default function Bodegas() {
             ubicacion: editUbicacion.trim(),
           },
           {
-            headers: { "X-CSRF-Token": csrfToken },
+            headers: { 'X-CSRF-Token': csrfToken },
             withCredentials: true,
           }
         );
         if (response.data.success) {
-          toast.success("Bodega principal actualizada correctamente.");
+          toast.success('Bodega principal actualizada correctamente.');
           setBodegaPrincipal((prev) => ({
             ...prev,
             nombre: editNombre.trim(),
@@ -276,11 +272,13 @@ export default function Bodegas() {
           }));
           handleCloseEditModal();
         } else {
-          toast.error(response.data.message || "Error al actualizar la bodega.");
+          toast.error(
+            response.data.message || 'Error al actualizar la bodega.'
+          );
         }
       } catch (error) {
-        console.error("Error al actualizar la bodega principal:", error);
-        toast.error("Ocurrió un error al actualizar la bodega.");
+        console.error('Error al actualizar la bodega principal:', error);
+        toast.error('Ocurrió un error al actualizar la bodega.');
       } finally {
         setUpdateLoading(false);
       }
@@ -294,26 +292,32 @@ export default function Bodegas() {
             ubicacion: editUbicacion.trim(),
           },
           {
-            headers: { "X-CSRF-Token": csrfToken },
+            headers: { 'X-CSRF-Token': csrfToken },
             withCredentials: true,
           }
         );
         if (response.data.success) {
-          toast.success("Bodega actualizada correctamente.");
+          toast.success('Bodega actualizada correctamente.');
           setBodegasSecundarias((prev) =>
             prev.map((b) =>
               b.idBodega === editBodega.idBodega
-                ? { ...b, nombre: editNombre.trim(), ubicacion: editUbicacion.trim() }
+                ? {
+                    ...b,
+                    nombre: editNombre.trim(),
+                    ubicacion: editUbicacion.trim(),
+                  }
                 : b
             )
           );
           handleCloseEditModal();
         } else {
-          toast.error(response.data.message || "Error al actualizar la bodega.");
+          toast.error(
+            response.data.message || 'Error al actualizar la bodega.'
+          );
         }
       } catch (error) {
-        console.error("Error al actualizar la bodega:", error);
-        toast.error("Ocurrió un error al actualizar la bodega.");
+        console.error('Error al actualizar la bodega:', error);
+        toast.error('Ocurrió un error al actualizar la bodega.');
       } finally {
         setUpdateLoading(false);
       }
@@ -325,10 +329,10 @@ export default function Bodegas() {
       .toLowerCase()
       .includes(filterName.toLowerCase());
     let matchesStatus = true;
-    if (filterStatus === "activos") {
-      matchesStatus = bodega.estado === "activa";
-    } else if (filterStatus === "desactivados") {
-      matchesStatus = bodega.estado !== "activa";
+    if (filterStatus === 'activos') {
+      matchesStatus = bodega.estado === 'activa';
+    } else if (filterStatus === 'desactivados') {
+      matchesStatus = bodega.estado !== 'activa';
     }
     return matchesName && matchesStatus;
   });
@@ -381,7 +385,7 @@ export default function Bodegas() {
               🏠
             </div>
             <h2 className="text-xl font-bold text-gray-800 dark:text-gray-200 text-center">
-              {bodegaPrincipal ? bodegaPrincipal.nombre : ""}
+              {bodegaPrincipal ? bodegaPrincipal.nombre : ''}
             </h2>
             <div className="flex items-center mt-1 w-full justify-center">
               <FontAwesomeIcon
@@ -390,8 +394,8 @@ export default function Bodegas() {
               />
               <p className="text-sm text-gray-500 dark:text-gray-400 truncate">
                 {bodegaPrincipal
-                  ? bodegaPrincipal.ubicacion || "Ubicación desconocida"
-                  : "Ubicación desconocida"}
+                  ? bodegaPrincipal.ubicacion || 'Ubicación desconocida'
+                  : 'Ubicación desconocida'}
               </p>
             </div>
             <p className="text-xs text-gray-400 dark:text-gray-500 text-center mt-2">
@@ -509,7 +513,7 @@ export default function Bodegas() {
                   {createLoading ? (
                     <Loader2 className="w-6 h-6 animate-spin" />
                   ) : (
-                    "Agregar"
+                    'Agregar'
                   )}
                 </button>
               </div>
@@ -575,7 +579,7 @@ export default function Bodegas() {
                   {updateLoading ? (
                     <Loader2 className="w-6 h-6 animate-spin" />
                   ) : (
-                    "Guardar"
+                    'Guardar'
                   )}
                 </button>
               </div>

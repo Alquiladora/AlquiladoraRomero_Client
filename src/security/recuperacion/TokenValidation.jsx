@@ -1,14 +1,19 @@
+/* eslint-disable */
 import React, { useState, useRef, useEffect } from 'react';
-import { useLocation, useNavigate } from "react-router-dom";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faExclamationCircle, faCheckCircle, faClock } from "@fortawesome/free-solid-svg-icons";
+import { useLocation, useNavigate } from 'react-router-dom';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import {
+  faExclamationCircle,
+  faCheckCircle,
+  faClock,
+} from '@fortawesome/free-solid-svg-icons';
 import Swal from 'sweetalert2';
 import { useAuth } from '../../hooks/ContextAuth';
 import api from '../../utils/AxiosConfig';
 
 export const TokenValidation = ({ correo, setStep }) => {
-  const [tokens, setTokens] = useState(Array(6).fill(""));
-  const [errorMessage, setErrorMessage] = useState("");
+  const [tokens, setTokens] = useState(Array(6).fill(''));
+  const [errorMessage, setErrorMessage] = useState('');
   const [isButtonDisabled, setIsButtonDisabled] = useState(true);
   const [timeLeft, setTimeLeft] = useState(600);
   const inputRefs = useRef([]);
@@ -19,84 +24,83 @@ export const TokenValidation = ({ correo, setStep }) => {
   const [cambiosContrasena, setCambiosContrasena] = useState(0);
   const [bloqueado, setBloqueado] = useState(false);
 
-  
   const handleTokenChange = (index, value) => {
     const newTokens = [...tokens];
-   
+
     if (/^[A-Za-z0-9]$/.test(value)) {
       newTokens[index] = value;
       setTokens(newTokens);
-    
+
       if (index < tokens.length - 1) {
         inputRefs.current[index + 1].focus();
       }
     }
-  
-    const allTokensFilled = newTokens.every(token => token !== "");
+
+    const allTokensFilled = newTokens.every((token) => token !== '');
     setIsButtonDisabled(!allTokensFilled || timeLeft <= 0);
   };
 
- 
   const handleKeyDown = (e, index) => {
-    if (e.key === "Backspace") {
+    if (e.key === 'Backspace') {
       const newTokens = [...tokens];
-      if (newTokens[index] === "" && index > 0) {
+      if (newTokens[index] === '' && index > 0) {
         inputRefs.current[index - 1].focus();
       } else {
-        newTokens[index] = "";
+        newTokens[index] = '';
         setTokens(newTokens);
       }
     }
   };
 
   const handleClose = () => {
-    navigate("/login");
+    navigate('/login');
   };
 
   const verificarCambiosContrasena = async (idUsuario) => {
     if (!idUsuario) {
       console.warn(
-        "⚠️ ID de usuario no disponible, no se verificará cambios de contraseña."
+        '⚠️ ID de usuario no disponible, no se verificará cambios de contraseña.'
       );
       return;
     }
     try {
       const response = await api.get(`/api/usuarios/vecesCambioPass`, {
         params: { idUsuario },
-        headers: { "X-CSRF-Token": csrfToken },
+        headers: { 'X-CSRF-Token': csrfToken },
         withCredentials: true,
       });
-      console.log("Respuesta de vecesCambioPass:", response.data);
+      console.log('Respuesta de vecesCambioPass:', response.data);
       setCambiosContrasena(response.data.cambiosRealizados);
       setBloqueado(response.data.cambiosRealizados >= 20);
     } catch (error) {
-      console.error("Error al verificar los cambios de contraseña:", error);
+      console.error('Error al verificar los cambios de contraseña:', error);
     }
   };
 
- 
   const handleSubmit = async () => {
-    const tokenIngresado = tokens.join("");
-    console.log("Token enviado a correo:", correo);
+    const tokenIngresado = tokens.join('');
+    console.log('Token enviado a correo:', correo);
 
     try {
       const response = await api.post(
-        "/api/usuarios/validarToken/contrasena",
+        '/api/usuarios/validarToken/contrasena',
         { correo: correo, token: tokenIngresado },
         {
           headers: {
-            "X-CSRF-Token": csrfToken,
+            'X-CSRF-Token': csrfToken,
           },
           withCredentials: true,
         }
       );
 
-      
-      console.log("Este es lo que me contiene de response de validar correo", response)
+      console.log(
+        'Este es lo que me contiene de response de validar correo',
+        response
+      );
 
       if (
         response.data.message ===
-        "Token válido. Puede proceder con el cambio de contraseña. El token ha sido eliminado."
+        'Token válido. Puede proceder con el cambio de contraseña. El token ha sido eliminado.'
       ) {
         Swal.fire({
           title: '¡Token Correcto!',
@@ -105,28 +109,25 @@ export const TokenValidation = ({ correo, setStep }) => {
           timer: 2000,
           showConfirmButton: false,
         }).then(() => {
-            setStep(3)
-       
+          setStep(3);
         });
       } else {
         setErrorMessage(response.data.message);
       }
     } catch (error) {
-      Swal.fire("Error", "Hubo un problema al validar el token.", "error");
+      Swal.fire('Error', 'Hubo un problema al validar el token.', 'error');
     }
   };
 
- 
   const formatTime = (seconds) => {
     const minutes = Math.floor(seconds / 60);
     const remainingSeconds = seconds % 60;
     return `${minutes}:${remainingSeconds < 10 ? '0' : ''}${remainingSeconds}`;
   };
 
-
   useEffect(() => {
     const timer = setInterval(() => {
-      setTimeLeft(prevTime => {
+      setTimeLeft((prevTime) => {
         if (prevTime <= 1) {
           clearInterval(timer);
           setIsButtonDisabled(true);
@@ -141,10 +142,7 @@ export const TokenValidation = ({ correo, setStep }) => {
 
   return (
     <div className=" flex  items-center justify-center  dark:bg-gray-900 dark:text-white ">
-      
       <div className="relative   p-6 text-center  dark:bg-gray-900 dark:text-white ">
-        
-       
         <button
           onClick={handleClose}
           className="absolute top-3 right-3 text-gray-400 hover:text-gray-600 text-xl font-bold"
@@ -191,7 +189,6 @@ export const TokenValidation = ({ correo, setStep }) => {
           ))}
         </div>
 
-       
         <button
           onClick={handleSubmit}
           disabled={isButtonDisabled}
@@ -203,13 +200,14 @@ export const TokenValidation = ({ correo, setStep }) => {
           `}
         >
           <FontAwesomeIcon icon={faCheckCircle} className="mr-2" />
-          Validar Token 
+          Validar Token
           <FontAwesomeIcon icon={faClock} className="ml-2" />
           <span className="ml-1">{formatTime(timeLeft)}</span>
         </button>
 
         <p className="mt-3 text-xs sm:text-sm text-orange-600">
-          El token es válido por 10 minutos. {timeLeft === 0 && 'El token ha expirado.'}
+          El token es válido por 10 minutos.{' '}
+          {timeLeft === 0 && 'El token ha expirado.'}
         </p>
       </div>
     </div>

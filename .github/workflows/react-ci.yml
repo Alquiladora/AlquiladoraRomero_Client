@@ -1,0 +1,138 @@
+name: CI/CD - Alquiladora Romero Client
+
+on:
+  push:
+    branches: ["main", "develop"]
+  pull_request:
+    branches: ["main", "develop"]
+
+permissions:
+  contents: write
+
+jobs:
+
+  lint-audit:
+    name: Lint, Formato y Seguridad
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout código
+        uses: actions/checkout@v4
+
+      - name: Configurar Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Instalar dependencias
+        run: npm ci
+
+      - name: ESLint
+        run: npm run lint
+
+      - name: Prettier
+        run: npm run format:check
+
+      - name: Revisar vulnerabilidades
+        run: npm audit 
+
+  pruebas-unitarias:
+    name: Pruebas Unitarias y Cobertura
+    runs-on: ubuntu-latest
+    needs: lint-audit
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+      - run: npm ci
+      - name: Ejecutar pruebas unitarias
+        run: npm test -- --coverage --watchAll=false
+        env:
+          NODE_ENV: test
+          CI: true
+      - name: Subir reporte de cobertura
+        uses: actions/upload-artifact@v4
+        with:
+          name: reporte-cobertura-unitaria
+          path: coverage
+
+ 
+  pruebas-integracion:
+    name: Pruebas de Integración
+    runs-on: ubuntu-latest
+    needs: pruebas-unitarias
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+      - run: npm ci
+      - name: Ejecutar pruebas de integración
+        run: npm test -- --testPathPattern="**/*.integration.test.{js,jsx}" --watchAll=false
+        env:
+          NODE_ENV: test
+          CI: true
+
+ 
+  deploy:
+    name: Deploy a GitHub Pages
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    runs-on: ubuntu-latest
+    needs: pruebas-integracion
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+      - run: npm ci
+      - name: Build
+        run: npm run build
+        env:
+          CI: false
+          PUBLIC_URL: /Alquiladora
+      - name: Deploy a gh-pages
+        uses: JamesIves/github-pages-deploy-action@v4
+        with:
+          folder: build
+          branch: gh-pages
+          clean: true
+
+
+  deploy-hostinger:
+    name: Deploy a Hostinger vía SFTP
+    runs-on: ubuntu-latest
+    needs: deploy
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    steps:
+      - uses: actions/checkout@v4
+      - name: Instalar lftp
+        run: sudo apt-get update && sudo apt-get install -y lftp
+      - name: Subir build a Hostinger
+        env:
+          HOSTINGER_HOST: ${{ secrets.HOSTINGER_HOST  }}
+          HOSTINGER_USER: ${{ secrets.HOSTINGER_USER }}
+          HOSTINGER_PASS: ${{ secrets.HOSTINGER_PASS }}
+        run: |
+         lftp -c "
+         open -u $HOSTINGER_USER,$HOSTINGER_PASS $HOSTINGER_HOST;
+         mirror -R ./build /public_html/romero --delete --verbose --exclude-glob=.htaccess
+         "
+
+  version-tag:
+    name: Crear tag automático (SemVer)
+    runs-on: ubuntu-latest
+    needs: deploy-hostinger
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    steps:
+      - uses: actions/checkout@v4
+      - name: Crear tag SemVer
+        run: |
+          VERSION=$(node -p "require('./package.json').version")
+          git config user.name "github-actions"
+          git config user.email "actions@github.com"
+          git tag -a "v$VERSION" -m "Release v$VERSION"
+          git push origin "v$VERSION"

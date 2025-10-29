@@ -1,10 +1,10 @@
-import React, { useEffect, useMemo, useState } from "react";
-import api from "../../utils/AxiosConfig";
-import { useAuth } from "../../hooks/ContextAuth";
-import { toast } from "react-toastify";
-import { Link } from "react-router-dom";
+import React, { useEffect, useMemo, useState } from 'react';
+import api from '../../utils/AxiosConfig';
+import { useAuth } from '../../hooks/ContextAuth';
+import { toast } from 'react-toastify';
+import { Link } from 'react-router-dom';
 
-const fallbackImage = "https://via.placeholder.com/300x300?text=Sin+Imagen";
+const fallbackImage = 'https://via.placeholder.com/300x300?text=Sin+Imagen';
 
 function isNewProduct(fechaCreacion) {
   if (!fechaCreacion) return false;
@@ -15,10 +15,14 @@ function isNewProduct(fechaCreacion) {
   return diffDays < 5;
 }
 
-const ProductosRelacionados = ({ idSubCategoria, idProducto,nombreCategoria }) => {
+const ProductosRelacionados = ({
+  idSubCategoria,
+  idProducto,
+  nombreCategoria,
+}) => {
   const [rawProductos, setRawProductos] = useState([]);
   const [loading, setLoading] = useState(true);
-  const { csrfToken,user } = useAuth();
+  const { csrfToken, user } = useAuth();
 
   useEffect(() => {
     const fetchProductosRelacionados = async () => {
@@ -27,7 +31,7 @@ const ProductosRelacionados = ({ idSubCategoria, idProducto,nombreCategoria }) =
           `/api/productos/productosRelacionado/${idSubCategoria}`,
           {
             withCredentials: true,
-            headers: { "X-CSRF-Token": csrfToken },
+            headers: { 'X-CSRF-Token': csrfToken },
           }
         );
         if (response.data.success) {
@@ -36,8 +40,8 @@ const ProductosRelacionados = ({ idSubCategoria, idProducto,nombreCategoria }) =
           setRawProductos([]);
         }
       } catch (error) {
-        console.error("Error al cargar productos relacionados:", error);
-        toast.error("Error al cargar productos relacionados");
+        console.error('Error al cargar productos relacionados:', error);
+        toast.error('Error al cargar productos relacionados');
       } finally {
         setLoading(false);
       }
@@ -62,7 +66,7 @@ const ProductosRelacionados = ({ idSubCategoria, idProducto,nombreCategoria }) =
         };
       }
 
-      if (prod.estadoProducto === "activo") {
+      if (prod.estadoProducto === 'activo') {
         groups[prod.idProducto].stock += Number(prod.stock) || 0;
         groups[prod.idProducto].activeCount += 1;
       }
@@ -72,10 +76,6 @@ const ProductosRelacionados = ({ idSubCategoria, idProducto,nombreCategoria }) =
       (item) => item.activeCount > 0 && item.idProducto !== Number(idProducto)
     );
   }, [rawProductos, idProducto]);
-
-
-
- 
 
   return (
     <div className="mt-12">
@@ -91,7 +91,7 @@ const ProductosRelacionados = ({ idSubCategoria, idProducto,nombreCategoria }) =
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {aggregatedProducts.map((producto) => {
             const imageUrl = producto.imagenes
-              ? producto.imagenes.split(",")[0]
+              ? producto.imagenes.split(',')[0]
               : fallbackImage;
             const stockNumber = producto.stock || 0;
             const nuevo = isNewProduct(producto.fechaCreacion);
@@ -101,7 +101,7 @@ const ProductosRelacionados = ({ idSubCategoria, idProducto,nombreCategoria }) =
                 key={producto.idProducto}
                 className="bg-white dark:bg-gray-800 p-4 rounded-md shadow-lg transform transition-all duration-300 hover:scale-105 hover:shadow-2xl"
               >
-                {user && user.rol === "cliente" ? (
+                {user && user.rol === 'cliente' ? (
                   <Link
                     to={`/cliente/${nombreCategoria}/${producto.idProducto}`}
                     className="block"
@@ -122,7 +122,7 @@ const ProductosRelacionados = ({ idSubCategoria, idProducto,nombreCategoria }) =
                         className="w-full h-40 object-cover rounded-md mb-4"
                       />
                     </div>
-            
+
                     <h4 className="text-lg font-semibold text-gray-800 dark:text-white">
                       {producto.nombreProducto}
                     </h4>
@@ -130,12 +130,12 @@ const ProductosRelacionados = ({ idSubCategoria, idProducto,nombreCategoria }) =
                       {producto.detalles}
                     </p>
                     <p className="text-sm text-gray-800 dark:text-gray-200 mt-2">
-                      Subcategoría:{" "}
+                      Subcategoría:{' '}
                       <span className="font-medium">
                         {producto.nombreSubcategoria}
                       </span>
                     </p>
-            
+
                     <p className="text-sm mt-2">
                       {stockNumber > 0 ? (
                         <span className="text-green-600 font-bold">
@@ -167,7 +167,7 @@ const ProductosRelacionados = ({ idSubCategoria, idProducto,nombreCategoria }) =
                         className="w-full h-40 object-cover rounded-md mb-4"
                       />
                     </div>
-            
+
                     <h4 className="text-lg font-semibold text-gray-800 dark:text-white">
                       {producto.nombreProducto}
                     </h4>
@@ -175,12 +175,12 @@ const ProductosRelacionados = ({ idSubCategoria, idProducto,nombreCategoria }) =
                       {producto.detalles}
                     </p>
                     <p className="text-sm text-gray-800 dark:text-gray-200 mt-2">
-                      Subcategoría:{" "}
+                      Subcategoría:{' '}
                       <span className="font-medium">
                         {producto.nombreSubcategoria}
                       </span>
                     </p>
-            
+
                     <p className="text-sm mt-2">
                       {stockNumber > 0 ? (
                         <span className="text-green-600 font-bold">

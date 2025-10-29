@@ -1,16 +1,14 @@
-import React, { useState, useEffect } from "react";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+/* eslint-disable */
+import React, { useState, useEffect } from 'react';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faTasks,
   faFilter,
   faFrown,
   faImage,
   faSearch,
-  faFileExport,
-  faFileInvoice,
   faMapMarkerAlt,
   faEye,
-  faMoneyCheckAlt,
   faChevronLeft,
   faChevronRight,
   faCalendarAlt,
@@ -21,30 +19,25 @@ import {
   faCreditCard,
   faDollarSign,
   faCheckCircle,
-  faBoxOpen,
   faUndo,
   faExclamationTriangle,
   faExclamationCircle,
   faTimes,
   faBan,
   faQuestionCircle,
-  faPlus,
-  faMinus,
   faTicketAlt,
-  faChartBar,
   faBox,
-  faCalendar,
   faUserShield,
-} from "@fortawesome/free-solid-svg-icons";
-import { toast } from "react-toastify";
-import TicketCompra from "./Ticket";
-import api from "../../../utils/AxiosConfig";
-import { useAuth } from "../../../hooks/ContextAuth";
-import CustomLoading from "../../../components/spiner/SpinerGlobal";
+} from '@fortawesome/free-solid-svg-icons';
+import { toast } from 'react-toastify';
+import TicketCompra from './Ticket';
+import api from '../../../utils/AxiosConfig';
+import { useAuth } from '../../../hooks/ContextAuth';
+import CustomLoading from '../../../components/spiner/SpinerGlobal';
 
 // Función para capitalizar estados
 const capitalizeStatus = (status) => {
-  if (!status || typeof status !== "string") return "Desconocido";
+  if (!status || typeof status !== 'string') return 'Desconocido';
   return status.charAt(0).toUpperCase() + status.slice(1).toLowerCase();
 };
 
@@ -59,15 +52,14 @@ const UpdateStatusModal = ({ pedido, onClose, onUpdateStatus }) => {
   );
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const estadosProducto = ["Disponible", "Incidente", "Incompleto"];
   const estadosCambioPedido = [
-    "Seleciona un estado",
-    "Enviando",
-    "Recogiendo",
-    "En alquiler",
-    "Devuelto",
-    "Cancelado",
-    "Finalizado",
+    'Seleciona un estado',
+    'Enviando',
+    'Recogiendo',
+    'En alquiler',
+    'Devuelto',
+    'Cancelado',
+    'Finalizado',
   ];
 
   const handleProductStatusChange = (idProductoColores, newEstado) => {
@@ -80,91 +72,101 @@ const UpdateStatusModal = ({ pedido, onClose, onUpdateStatus }) => {
     );
   };
 
-
-const handleSubmit = async () => {
-  const hasNonCompletedProducts = productStatuses.some(
-    (prod) => prod.estadoProducto !== "Disponible"
-  );
-
-  // Estado original de productos
-  const productosOriginales = pedido.productos.map((p) => ({
-    id: p.idProductoColores,
-    estadoProducto: p.estadoProducto,
-  }));
-
-  // Detectar productos cuyo estado cambió
-  const productosCambiados = productStatuses.filter((prod) => {
-    const original = productosOriginales.find((p) => p.id === prod.idProductoColores);
-    return original && original.estadoProducto !== prod.estadoProducto;
-  });
-
-  const pedidoCambio = newStatus !== pedido.estado;
-
-  // Productos con estado original "Incidente" o "Incompleto"
-  const productosIncOInc = pedido.productos.filter(
-    (p) => p.estadoProducto === "Incidente" || p.estadoProducto === "Incompleto"
-  );
-
-  // ¿Se actualizó alguno de esos productos?
-  const algunoIncOIncModificado = productosIncOInc.some((prod) => {
-    const actualizado = productStatuses.find((p) => p.idProductoColores === prod.idProductoColores);
-    return actualizado && actualizado.estadoProducto !== prod.estadoProducto;
-  });
-
-  // ❌ Si no cambió ni el pedido ni algún producto, no permitir enviar
-  if (!pedidoCambio && productosCambiados.length === 0) {
-    toast.error("Debes modificar al menos el estado del pedido o el de algún producto para actualizar.");
-    return;
-  }
-
-  // ❌ Cambió producto pero no cambió estado del pedido, y ya no quedan productos en incidente
-  const quedanIncidentes = productStatuses.some(
-    (p) =>
-      (pedido.productos.find((x) => x.idProductoColores === p.idProductoColores)?.estadoProducto !==
-        "Disponible") &&
-      p.estadoProducto !== "Disponible"
-  );
-
-  if (productosCambiados.length > 0 && !pedidoCambio && !quedanIncidentes) {
-    toast.error(
-      "Has cambiado el estado de uno o más productos, pero no el estado del pedido. Actualízalo también."
+  const handleSubmit = async () => {
+    const hasNonCompletedProducts = productStatuses.some(
+      (prod) => prod.estadoProducto !== 'Disponible'
     );
-    return;
-  }
 
-  // ❌ Cambió pedido pero no se actualizó ningún producto en incidente/incompleto
-  if (pedidoCambio && productosIncOInc.length > 0 && !algunoIncOIncModificado) {
-    toast.error(
-      "Has cambiado el estado del pedido, pero no actualizaste productos con incidente o incompleto."
+    // Estado original de productos
+    const productosOriginales = pedido.productos.map((p) => ({
+      id: p.idProductoColores,
+      estadoProducto: p.estadoProducto,
+    }));
+
+    // Detectar productos cuyo estado cambió
+    const productosCambiados = productStatuses.filter((prod) => {
+      const original = productosOriginales.find(
+        (p) => p.id === prod.idProductoColores
+      );
+      return original && original.estadoProducto !== prod.estadoProducto;
+    });
+
+    const pedidoCambio = newStatus !== pedido.estado;
+
+    // Productos con estado original "Incidente" o "Incompleto"
+    const productosIncOInc = pedido.productos.filter(
+      (p) =>
+        p.estadoProducto === 'Incidente' || p.estadoProducto === 'Incompleto'
     );
-    return;
-  }
 
-  // ❌ No finalizar si hay productos que no estén disponibles
-  if (newStatus === "Finalizado" && hasNonCompletedProducts) {
-    toast.error(
-      "No se puede finalizar el pedido: todos los productos deben estar en estado 'Disponible'."
-    );
-    return;
-  }
+    // ¿Se actualizó alguno de esos productos?
+    const algunoIncOIncModificado = productosIncOInc.some((prod) => {
+      const actualizado = productStatuses.find(
+        (p) => p.idProductoColores === prod.idProductoColores
+      );
+      return actualizado && actualizado.estadoProducto !== prod.estadoProducto;
+    });
 
-  setIsSubmitting(true);
-  try {
-    await onUpdateStatus(pedido.idPedido, newStatus, productStatuses);
-
-    if (newStatus === "Finalizado" || newStatus === "Cancelado") {
-      toast.success("Estado actualizado y stock de productos restaurado en el inventario.");
-    } else {
-      toast.success("Estado actualizado correctamente.");
+    // ❌ Si no cambió ni el pedido ni algún producto, no permitir enviar
+    if (!pedidoCambio && productosCambiados.length === 0) {
+      toast.error(
+        'Debes modificar al menos el estado del pedido o el de algún producto para actualizar.'
+      );
+      return;
     }
-  } catch (error) {
-    toast.error("Error al actualizar el estado");
-  } finally {
-    setIsSubmitting(false);
-  }
-};
 
+    // ❌ Cambió producto pero no cambió estado del pedido, y ya no quedan productos en incidente
+    const quedanIncidentes = productStatuses.some(
+      (p) =>
+        pedido.productos.find(
+          (x) => x.idProductoColores === p.idProductoColores
+        )?.estadoProducto !== 'Disponible' && p.estadoProducto !== 'Disponible'
+    );
 
+    if (productosCambiados.length > 0 && !pedidoCambio && !quedanIncidentes) {
+      toast.error(
+        'Has cambiado el estado de uno o más productos, pero no el estado del pedido. Actualízalo también.'
+      );
+      return;
+    }
+
+    // ❌ Cambió pedido pero no se actualizó ningún producto en incidente/incompleto
+    if (
+      pedidoCambio &&
+      productosIncOInc.length > 0 &&
+      !algunoIncOIncModificado
+    ) {
+      toast.error(
+        'Has cambiado el estado del pedido, pero no actualizaste productos con incidente o incompleto.'
+      );
+      return;
+    }
+
+    // ❌ No finalizar si hay productos que no estén disponibles
+    if (newStatus === 'Finalizado' && hasNonCompletedProducts) {
+      toast.error(
+        "No se puede finalizar el pedido: todos los productos deben estar en estado 'Disponible'."
+      );
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      await onUpdateStatus(pedido.idPedido, newStatus, productStatuses);
+
+      if (newStatus === 'Finalizado' || newStatus === 'Cancelado') {
+        toast.success(
+          'Estado actualizado y stock de productos restaurado en el inventario.'
+        );
+      } else {
+        toast.success('Estado actualizado correctamente.');
+      }
+    } catch (error) {
+      toast.error('Error al actualizar el estado');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 animate-fade-in">
@@ -217,8 +219,8 @@ const handleSubmit = async () => {
           {pedido.productos
             .filter(
               (producto) =>
-                producto.estadoProducto === "Incidente" ||
-                producto.estadoProducto === "Incompleto"
+                producto.estadoProducto === 'Incidente' ||
+                producto.estadoProducto === 'Incompleto'
             )
             .map((producto, i) => {
               const currentStatus =
@@ -261,7 +263,7 @@ const handleSubmit = async () => {
                       className="w-full p-2 border rounded-lg bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-yellow-500 transition-all duration-200"
                     >
                       <option value={currentStatus}>{currentStatus}</option>
-                      {currentStatus !== "Disponible" && (
+                      {currentStatus !== 'Disponible' && (
                         <option value="Disponible">Disponible</option>
                       )}
                     </select>
@@ -295,7 +297,7 @@ const handleSubmit = async () => {
             onClick={handleSubmit}
             disabled={isSubmitting}
             className={`px-4 py-2 bg-gradient-to-r from-yellow-500 to-yellow-600 text-white rounded-md hover:from-yellow-600 hover:to-yellow-700 transition-all duration-200 flex items-center ${
-              isSubmitting ? "opacity-50 cursor-not-allowed" : ""
+              isSubmitting ? 'opacity-50 cursor-not-allowed' : ''
             }`}
           >
             {isSubmitting ? (
@@ -311,13 +313,12 @@ const handleSubmit = async () => {
   );
 };
 
-
 const GestionPedidosIncidentes = ({ onNavigate }) => {
   const [pedidos, setPedidos] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [filterEstado, setFilterEstado] = useState("Todos");
-  const [searchTerm, setSearchTerm] = useState("");
-  const [dateRange, setDateRange] = useState({ start: "", end: "" });
+  const [filterEstado, setFilterEstado] = useState('Todos');
+  const [searchTerm, setSearchTerm] = useState('');
+  const [dateRange, setDateRange] = useState({ start: '', end: '' });
   const [currentPage, setCurrentPage] = useState(1);
   const [showTimelineModal, setShowTimelineModal] = useState(null);
   const [showDetailsModal, setShowDetailsModal] = useState(null);
@@ -326,39 +327,27 @@ const GestionPedidosIncidentes = ({ onNavigate }) => {
   const [timelineData, setTimelineData] = useState([]);
   const [timelineLoading, setTimelineLoading] = useState(false);
   const [timelineError, setTimelineError] = useState(null);
-  const [repartidorData, setRepartidorData] = useState(null);
+  const [setRepartidorData] = useState(null);
   const { csrfToken } = useAuth();
   const ordersPerPage = 10;
 
-  const estadosDisponibles = ["Todos", "Incidente", "Incompleto"];
-  const estadosProducto = ["Completado", "Incidente", "Incompleto"];
-  const estadosCambioPedido = [
-    "Procesando",
-    "Enviando",
-    "Recogiendo",
-    "En alquiler",
-    "Devuelto",
-    "Incompleto",
-    "Incidente",
-    "Cancelado",
-    "Finalizado",
-  ];
+  const estadosDisponibles = ['Todos', 'Incidente', 'Incompleto'];
 
   useEffect(() => {
     const fetchPedidos = async () => {
       try {
         setLoading(true);
-        const response = await api.get("/api/pedidos/pedidos-incidentes", {
-          headers: { "X-CSRF-Token": csrfToken },
+        const response = await api.get('/api/pedidos/pedidos-incidentes', {
+          headers: { 'X-CSRF-Token': csrfToken },
           withCredentials: true,
         });
         const result = response.data;
-        console.log("Resultados obtenidos-incidentes", result);
+        console.log('Resultados obtenidos-incidentes', result);
 
         if (result.success) {
           const filteredPedidos = result.data
             .filter((pedido) =>
-              ["Incidente", "Incompleto"].includes(pedido.estado)
+              ['Incidente', 'Incompleto'].includes(pedido.estado)
             )
             .map((pedido) => ({
               ...pedido,
@@ -367,15 +356,15 @@ const GestionPedidosIncidentes = ({ onNavigate }) => {
                 ...prod,
                 estado: prod.estado
                   ? capitalizeStatus(prod.estado)
-                  : "Completado",
+                  : 'Completado',
               })),
             }));
           setPedidos(filteredPedidos);
+          // eslint-disable-next-line no-useless-escape
         } else {
-          toast.error("Error al cargar los pedidos");
+          console.log('Datos de error');
         }
       } catch (error) {
-        toast.error("Error de conexión al servidor");
         console.error(error);
       } finally {
         setLoading(false);
@@ -384,6 +373,7 @@ const GestionPedidosIncidentes = ({ onNavigate }) => {
     fetchPedidos();
   }, [csrfToken]);
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     const fetchTimelineData = async () => {
       if (!showTimelineModal) return;
@@ -394,21 +384,21 @@ const GestionPedidosIncidentes = ({ onNavigate }) => {
         const response = await api.get(
           `/api/pedidos/historial/${showTimelineModal.idPedido}`,
           {
-            headers: { "X-CSRF-Token": csrfToken },
+            headers: { 'X-CSRF-Token': csrfToken },
             withCredentials: true,
           }
         );
         const result = response.data;
-        console.log("historial de peido", result);
+        console.log('historial de peido', result);
 
         if (result.success) {
           const historial = result.data.map((entry) => ({
             estado: capitalizeStatus(entry.estadoNuevo),
-            fecha: new Date(entry.fechaActualizacion).toLocaleString("es-MX", {
-              day: "2-digit",
-              month: "short",
-              hour: "2-digit",
-              minute: "2-digit",
+            fecha: new Date(entry.fechaActualizacion).toLocaleString('es-MX', {
+              day: '2-digit',
+              month: 'short',
+              hour: '2-digit',
+              minute: '2-digit',
             }),
             descripcion: `Pedido actualizado a ${capitalizeStatus(
               entry.estadoNuevo
@@ -417,16 +407,16 @@ const GestionPedidosIncidentes = ({ onNavigate }) => {
                 ? ` desde ${capitalizeStatus(
                     entry.estadoAnterior
                   ).toLowerCase()}`
-                : ""
+                : ''
             }`,
           }));
           setTimelineData(historial);
         } else {
-          throw new Error("Error al cargar el historial del pedido");
+          throw new Error('Error al cargar el historial del pedido');
         }
       } catch (error) {
-        setTimelineError(error.message || "Error al cargar el historial");
-        toast.error("No se pudo cargar el historial del pedido");
+        setTimelineError(error.message || 'Error al cargar el historial');
+        toast.error('No se pudo cargar el historial del pedido');
       } finally {
         setTimelineLoading(false);
       }
@@ -439,12 +429,12 @@ const GestionPedidosIncidentes = ({ onNavigate }) => {
         const response = await api.get(
           `/api/pedidos/asignacion/${showDetailsModal.idPedido}`,
           {
-            headers: { "X-CSRF-Token": csrfToken },
+            headers: { 'X-CSRF-Token': csrfToken },
             withCredentials: true,
           }
         );
         const result = response.data;
-        console.log("Repartidor asignacion ---", result);
+        console.log('Repartidor asignacion ---', result);
         if (result.success && result.data) {
           setRepartidorData(result.data);
         } else {
@@ -452,7 +442,7 @@ const GestionPedidosIncidentes = ({ onNavigate }) => {
         }
       } catch (error) {
         setRepartidorData(null);
-        console.error("Error al obtener datos del repartidor:", error);
+        console.error('Error al obtener datos del repartidor:', error);
       }
     };
 
@@ -460,56 +450,62 @@ const GestionPedidosIncidentes = ({ onNavigate }) => {
     fetchRepartidorData();
   }, [showTimelineModal, showDetailsModal, csrfToken]);
 
-const handleUpdateStatus = async (idPedido, newStatus, productUpdates = []) => {
-  try {
-    const response = await api.put(
-      "/api/pedidos/pedidos/actualizar-estado",
-      { idPedido, newStatus, productUpdates },
-      {
-        headers: { "X-CSRF-Token": csrfToken },
-        withCredentials: true,
-      }
-    );
-
-    const result = response.data;
-
-    if (result.success) {
-      setPedidos((prev) =>
-        prev.map((pedido) =>
-          pedido.idPedido === idPedido
-            ? {
-                ...pedido,
-                estado: capitalizeStatus(newStatus),
-                productos: pedido.productos.map((prod) => {
-                  const updated = productUpdates.find(
-                    (p) => p.idProductoColores === prod.idProductoColores
-                  );
-                  return updated
-                    ? {
-                        ...prod,
-                        estadoProducto: capitalizeStatus(updated.estadoProducto),
-                      }
-                    : prod;
-                }),
-              }
-            : pedido
-        )
+  const handleUpdateStatus = async (
+    idPedido,
+    newStatus,
+    productUpdates = []
+  ) => {
+    try {
+      const response = await api.put(
+        '/api/pedidos/pedidos/actualizar-estado',
+        { idPedido, newStatus, productUpdates },
+        {
+          headers: { 'X-CSRF-Token': csrfToken },
+          withCredentials: true,
+        }
       );
 
-      toast.success("Estado actualizado correctamente");
-      setShowUpdateStatusModal(null);
-    } else {
-      toast.error(result.message || "Error al actualizar el estado");
+      const result = response.data;
+
+      if (result.success) {
+        setPedidos((prev) =>
+          prev.map((pedido) =>
+            pedido.idPedido === idPedido
+              ? {
+                  ...pedido,
+                  estado: capitalizeStatus(newStatus),
+                  productos: pedido.productos.map((prod) => {
+                    const updated = productUpdates.find(
+                      (p) => p.idProductoColores === prod.idProductoColores
+                    );
+                    return updated
+                      ? {
+                          ...prod,
+                          estadoProducto: capitalizeStatus(
+                            updated.estadoProducto
+                          ),
+                        }
+                      : prod;
+                  }),
+                }
+              : pedido
+          )
+        );
+
+        toast.success('Estado actualizado correctamente');
+        setShowUpdateStatusModal(null);
+      } else {
+        toast.error(result.message || 'Error al actualizar el estado');
+      }
+    } catch (error) {
+      toast.error('Error al actualizar el estado');
+      console.error(error);
     }
-  } catch (error) {
-    toast.error("Error al actualizar el estado");
-    console.error(error);
-  }
-};
+  };
 
   const filteredPedidos = pedidos
     .filter(
-      (pedido) => filterEstado === "Todos" || pedido.estado === filterEstado
+      (pedido) => filterEstado === 'Todos' || pedido.estado === filterEstado
     )
     .filter((pedido) => {
       const search = searchTerm.toLowerCase();
@@ -517,7 +513,7 @@ const handleUpdateStatus = async (idPedido, newStatus, productUpdates = []) => {
         pedido.idRastreo.toLowerCase().includes(search) ||
         pedido.cliente?.nombre?.toLowerCase().includes(search) ||
         pedido.cliente?.direccion?.toLowerCase().includes(search) ||
-        ""
+        ''
       );
     })
     .filter((pedido) => {
@@ -540,28 +536,17 @@ const handleUpdateStatus = async (idPedido, newStatus, productUpdates = []) => {
     if (page >= 1 && page <= totalPages) setCurrentPage(page);
   };
 
-  const handleGenerateReport = () =>
-    toast.info("Funcionalidad de generar reporte en desarrollo");
-  const handleExportCSV = () =>
-    toast.info("Funcionalidad de exportar a CSV en desarrollo");
-  const handleGenerateInvoice = (pedido) =>
-    toast.info(
-      `Generando factura para el pedido ${pedido.idRastreo}... (en desarrollo)`
-    );
   const handleShowTimeline = (pedido) => {
     setShowTimelineModal(pedido);
   };
   const handleShowDetails = (pedido) => setShowDetailsModal(pedido);
 
-  const handleShowTicketModal = (pedido) => setShowTicketModal(pedido);
   const handleShowUpdateStatusModal = (pedido) =>
     setShowUpdateStatusModal(pedido);
   const handleSendTicket = (email, pdfBlob) => {
     toast.success(`Ticket enviado al correo ${email} en formato PDF.`);
     setShowTicketModal(null);
   };
-  const handleNavigateDashboard = (dashboard) =>
-    toast.info(`Navegando al Dashboard de ${dashboard}... (en desarrollo)`);
 
   const renderTimelineModal = () => {
     return (
@@ -581,7 +566,7 @@ const handleUpdateStatus = async (idPedido, newStatus, productUpdates = []) => {
           </div>
           <div className="p-6 space-y-5">
             <p className="text-sm text-gray-600 dark:text-gray-300">
-              ID de Rastreo:{" "}
+              ID de Rastreo:{' '}
               <span className="font-semibold">
                 {showTimelineModal.idRastreo}
               </span>
@@ -607,27 +592,27 @@ const handleUpdateStatus = async (idPedido, newStatus, productUpdates = []) => {
                       <div className="w-10 h-10 bg-green-500 rounded-full flex items-center justify-center z-10 shadow-md">
                         <FontAwesomeIcon
                           icon={
-                            evento.estado === "Procesando"
+                            evento.estado === 'Procesando'
                               ? faClock
-                              : evento.estado === "Enviando"
-                              ? faTruck
-                              : evento.estado === "Confirmado"
-                              ? faCheckCircle
-                              : evento.estado === "En alquiler"
-                              ? faCheckCircle
-                              : evento.estado === "Recogiendo"
-                              ? faTruck
-                              : evento.estado === "Devuelto"
-                              ? faUndo
-                              : evento.estado === "Incompleto"
-                              ? faExclamationTriangle
-                              : evento.estado === "Incidente"
-                              ? faExclamationCircle
-                              : evento.estado === "Cancelado"
-                              ? faBan
-                              : evento.estado === "Finalizado"
-                              ? faCheckCircle
-                              : faQuestionCircle
+                              : evento.estado === 'Enviando'
+                                ? faTruck
+                                : evento.estado === 'Confirmado'
+                                  ? faCheckCircle
+                                  : evento.estado === 'En alquiler'
+                                    ? faCheckCircle
+                                    : evento.estado === 'Recogiendo'
+                                      ? faTruck
+                                      : evento.estado === 'Devuelto'
+                                        ? faUndo
+                                        : evento.estado === 'Incompleto'
+                                          ? faExclamationTriangle
+                                          : evento.estado === 'Incidente'
+                                            ? faExclamationCircle
+                                            : evento.estado === 'Cancelado'
+                                              ? faBan
+                                              : evento.estado === 'Finalizado'
+                                                ? faCheckCircle
+                                                : faQuestionCircle
                           }
                           className="text-white"
                         />
@@ -654,7 +639,7 @@ const handleUpdateStatus = async (idPedido, newStatus, productUpdates = []) => {
     );
   };
 
-  console.log("Parametro enviado de peiddo detalles", showDetailsModal);
+  console.log('Parametro enviado de peiddo detalles', showDetailsModal);
 
   const renderDetailsModal = () => (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/50 backdrop-blur-sm p-4 animate-fade-in">
@@ -693,11 +678,11 @@ const handleUpdateStatus = async (idPedido, newStatus, productUpdates = []) => {
             <div className="bg-[#fcb900] text-white p-2 rounded-full">
               <FontAwesomeIcon
                 icon={
-                  showDetailsModal.estado === "Incidente"
+                  showDetailsModal.estado === 'Incidente'
                     ? faExclamationCircle
-                    : showDetailsModal.estado === "Incompleto"
-                    ? faExclamationTriangle
-                    : faQuestionCircle
+                    : showDetailsModal.estado === 'Incompleto'
+                      ? faExclamationTriangle
+                      : faQuestionCircle
                 }
               />
             </div>
@@ -707,11 +692,11 @@ const handleUpdateStatus = async (idPedido, newStatus, productUpdates = []) => {
               </p>
               <p
                 className={`font-bold text-lg ${
-                  showDetailsModal.estado === "Incidente"
-                    ? "text-red-600 dark:text-red-400"
-                    : showDetailsModal.estado === "Incompleto"
-                    ? "text-[#fcb900] dark:text-yellow-400"
-                    : "text-gray-600 dark:text-gray-400"
+                  showDetailsModal.estado === 'Incidente'
+                    ? 'text-red-600 dark:text-red-400'
+                    : showDetailsModal.estado === 'Incompleto'
+                      ? 'text-[#fcb900] dark:text-yellow-400'
+                      : 'text-gray-600 dark:text-gray-400'
                 }`}
               >
                 {showDetailsModal.estado}
@@ -779,12 +764,12 @@ const handleUpdateStatus = async (idPedido, newStatus, productUpdates = []) => {
               </p>
               <p>
                 {new Date(showDetailsModal.fechas.inicio).toLocaleDateString(
-                  "es-ES",
+                  'es-ES',
                   {
-                    weekday: "short",
-                    year: "numeric",
-                    month: "short",
-                    day: "numeric",
+                    weekday: 'short',
+                    year: 'numeric',
+                    month: 'short',
+                    day: 'numeric',
                   }
                 )}
               </p>
@@ -795,12 +780,12 @@ const handleUpdateStatus = async (idPedido, newStatus, productUpdates = []) => {
               </p>
               <p>
                 {new Date(showDetailsModal.fechas.entrega).toLocaleDateString(
-                  "es-ES",
+                  'es-ES',
                   {
-                    weekday: "short",
-                    year: "numeric",
-                    month: "short",
-                    day: "numeric",
+                    weekday: 'short',
+                    year: 'numeric',
+                    month: 'short',
+                    day: 'numeric',
                   }
                 )}
               </p>
@@ -858,8 +843,8 @@ const handleUpdateStatus = async (idPedido, newStatus, productUpdates = []) => {
                       key={i}
                       className={
                         i % 2 === 0
-                          ? "bg-white dark:bg-gray-800"
-                          : "bg-gray-50 dark:bg-gray-900"
+                          ? 'bg-white dark:bg-gray-800'
+                          : 'bg-gray-50 dark:bg-gray-900'
                       }
                     >
                       <td className="px-2 sm:px-4 py-2 border-b border-gray-200 dark:border-gray-600">
@@ -890,16 +875,16 @@ const handleUpdateStatus = async (idPedido, newStatus, productUpdates = []) => {
                       <td className="px-2 sm:px-4 py-2 border-b border-gray-200 dark:border-gray-600">
                         <span
                           className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-semibold ${
-                            producto.estadoProducto === "Incidente"
-                              ? "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300"
-                              : producto.estadoProducto === "Incompleto"
-                              ? "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300"
-                              : "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300"
+                            producto.estadoProducto === 'Incidente'
+                              ? 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300'
+                              : producto.estadoProducto === 'Incompleto'
+                                ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300'
+                                : 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300'
                           }`}
                         >
-                          {producto.estadoProducto === "Sin estado" ||
-                          producto.estadoProducto === ""
-                            ? "Disponible"
+                          {producto.estadoProducto === 'Sin estado' ||
+                          producto.estadoProducto === ''
+                            ? 'Disponible'
                             : producto.estadoProducto}
                         </span>
                       </td>
@@ -938,7 +923,7 @@ const handleUpdateStatus = async (idPedido, newStatus, productUpdates = []) => {
                 Forma de Pago
               </p>
               <p className="text-base font-bold text-gray-900 dark:text-gray-100">
-                {showDetailsModal.pago.formaPago || "No especificado"}
+                {showDetailsModal.pago.formaPago || 'No especificado'}
               </p>
             </div>
             <div>
@@ -955,14 +940,14 @@ const handleUpdateStatus = async (idPedido, newStatus, productUpdates = []) => {
               </p>
               <p
                 className={`text-base font-bold ${
-                  showDetailsModal.pago.estadoPago === "completado"
-                    ? "text-green-600 dark:text-green-400"
-                    : showDetailsModal.pago.estadoPago === "parcial"
-                    ? "text-yellow-600 dark:text-yellow-400"
-                    : "text-red-600 dark:text-red-400"
+                  showDetailsModal.pago.estadoPago === 'completado'
+                    ? 'text-green-600 dark:text-green-400'
+                    : showDetailsModal.pago.estadoPago === 'parcial'
+                      ? 'text-yellow-600 dark:text-yellow-400'
+                      : 'text-red-600 dark:text-red-400'
                 }`}
               >
-                {showDetailsModal.pago.estadoPago || "Pendiente"}
+                {showDetailsModal.pago.estadoPago || 'Pendiente'}
               </p>
             </div>
           </div>
@@ -977,23 +962,23 @@ const handleUpdateStatus = async (idPedido, newStatus, productUpdates = []) => {
                     <div className="flex items-center space-x-2 mb-1 sm:mb-0">
                       <FontAwesomeIcon
                         icon={
-                          pago.estadoPago === "completado"
+                          pago.estadoPago === 'completado'
                             ? faCheckCircle
                             : faExclamationTriangle
                         }
                         className={`text-sm ${
-                          pago.estadoPago === "completado"
-                            ? "text-green-600 dark:text-green-400"
-                            : "text-yellow-600 dark:text-yellow-400"
+                          pago.estadoPago === 'completado'
+                            ? 'text-green-600 dark:text-green-400'
+                            : 'text-yellow-600 dark:text-yellow-400'
                         }`}
                       />
                       <span className="font-semibold capitalize">
-                        {pago.formaPago || "Forma no especificada"}
+                        {pago.formaPago || 'Forma no especificada'}
                       </span>
                       {pago.metodoPago && <span>- {pago.metodoPago}</span>}
                     </div>
                     <div className="text-right text-gray-700 dark:text-gray-300 font-mono">
-                      <span>${pago.monto || "0.00"}</span>
+                      <span>${pago.monto || '0.00'}</span>
                       <br />
                       <span className="text-xs italic">
                         {new Date(pago.fechaPago).toLocaleString()}
@@ -1003,7 +988,7 @@ const handleUpdateStatus = async (idPedido, newStatus, productUpdates = []) => {
                 ))}
               </div>
             )}
-          {showDetailsModal.pago.estadoPago === "pendiente" && (
+          {showDetailsModal.pago.estadoPago === 'pendiente' && (
             <p className="text-yellow-600 dark:text-yellow-400 font-semibold text-center">
               ⚠️ El cliente aún tiene un saldo pendiente por pagar.
             </p>
@@ -1037,7 +1022,7 @@ const handleUpdateStatus = async (idPedido, newStatus, productUpdates = []) => {
 
         {loading ? (
           <CustomLoading />
-        ): currentPedidos.length === 0 ? (
+        ) : currentPedidos.length === 0 ? (
           <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-6 text-center border border-gray-300 dark:border-gray-700">
             <FontAwesomeIcon
               icon={faFrown}
@@ -1164,21 +1149,21 @@ const handleUpdateStatus = async (idPedido, newStatus, productUpdates = []) => {
                       key={pedido.idPedido}
                       className={`border-b dark:border-gray-700 transition-all duration-200 ${
                         index % 2 === 0
-                          ? "bg-gray-50 dark:bg-gray-900"
-                          : "bg-white dark:bg-gray-800"
+                          ? 'bg-gray-50 dark:bg-gray-900'
+                          : 'bg-white dark:bg-gray-800'
                       } hover:bg-gray-100 dark:hover:bg-gray-700`}
                     >
                       <td className="px-2 sm:px-4 py-2 text-sm font-medium text-gray-800 dark:text-gray-200 truncate">
                         {pedido.idRastreo}
                       </td>
                       <td className="px-2 sm:px-4 py-2 text-sm font-medium text-gray-800 dark:text-gray-200 truncate">
-                        {pedido.cliente.nombre || "No especificado"}
+                        {pedido.cliente.nombre || 'No especificado'}
                       </td>
                       <td className="px-2 sm:px-4 py-2 text-sm font-medium text-gray-800 dark:text-gray-200 truncate hidden sm:table-cell">
-                        {pedido.cliente.telefono || "N/A"}
+                        {pedido.cliente.telefono || 'N/A'}
                       </td>
                       <td className="px-2 sm:px-4 py-2 text-sm font-medium text-gray-800 dark:text-gray-200 truncate hidden md:table-cell">
-                        {pedido.cliente.direccion?.slice(0, 20) || "N/A"}...
+                        {pedido.cliente.direccion?.slice(0, 20) || 'N/A'}...
                       </td>
                       <td className="px-2 sm:px-4 py-2 text-sm font-medium text-gray-800 dark:text-gray-200 truncate hidden sm:table-cell">
                         {pedido.fechas.diasAlquiler}
@@ -1191,20 +1176,20 @@ const handleUpdateStatus = async (idPedido, newStatus, productUpdates = []) => {
                       <td className="px-2 sm:px-4 py-2 text-sm text-gray-800 dark:text-gray-200">
                         <span
                           className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-semibold shadow-sm select-none ${
-                            pedido.estado === "Incidente"
-                              ? "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300"
-                              : pedido.estado === "Incompleto"
-                              ? "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300"
-                              : "bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-300"
+                            pedido.estado === 'Incidente'
+                              ? 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300'
+                              : pedido.estado === 'Incompleto'
+                                ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300'
+                                : 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-300'
                           }`}
                         >
                           <FontAwesomeIcon
                             icon={
-                              pedido.estado === "Incidente"
+                              pedido.estado === 'Incidente'
                                 ? faExclamationCircle
-                                : pedido.estado === "Incompleto"
-                                ? faExclamationTriangle
-                                : faQuestionCircle
+                                : pedido.estado === 'Incompleto'
+                                  ? faExclamationTriangle
+                                  : faQuestionCircle
                             }
                             className="mr-1"
                           />
@@ -1233,63 +1218,68 @@ const handleUpdateStatus = async (idPedido, newStatus, productUpdates = []) => {
               </table>
             </div>
 
-           <div className="flex flex-col sm:flex-row justify-between items-center mt-4 sm:mt-6 gap-4">
-    <p className="text-sm text-gray-600 dark:text-gray-300">
-      Mostrando {indexOfFirstOrder + 1} - {Math.min(indexOfLastOrder, filteredPedidos.length)} de {filteredPedidos.length} pedidos
-    </p>
-    <div className="flex space-x-2 flex-wrap justify-center">
-      <button
-        onClick={() => handlePageChange(currentPage - 1)}
-        disabled={currentPage === 1}
-        className={`px-2 sm:px-3 py-1 rounded-lg ${
-          currentPage === 1
-            ? "bg-gray-300 text-gray-500 cursor-not-allowed dark:bg-gray-600"
-            : "bg-[#fcb900] text-white hover:bg-[#e0a900] dark:hover:bg-[#e0a900] transition-all duration-200"
-        }`}
-      >
-        <FontAwesomeIcon icon={faChevronLeft} />
-      </button>
-      {(() => {
-        const maxVisiblePages = 5;
-        const halfVisible = Math.floor(maxVisiblePages / 2);
-        let startPage = Math.max(1, currentPage - halfVisible);
-        let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
+            <div className="flex flex-col sm:flex-row justify-between items-center mt-4 sm:mt-6 gap-4">
+              <p className="text-sm text-gray-600 dark:text-gray-300">
+                Mostrando {indexOfFirstOrder + 1} -{' '}
+                {Math.min(indexOfLastOrder, filteredPedidos.length)} de{' '}
+                {filteredPedidos.length} pedidos
+              </p>
+              <div className="flex space-x-2 flex-wrap justify-center">
+                <button
+                  onClick={() => handlePageChange(currentPage - 1)}
+                  disabled={currentPage === 1}
+                  className={`px-2 sm:px-3 py-1 rounded-lg ${
+                    currentPage === 1
+                      ? 'bg-gray-300 text-gray-500 cursor-not-allowed dark:bg-gray-600'
+                      : 'bg-[#fcb900] text-white hover:bg-[#e0a900] dark:hover:bg-[#e0a900] transition-all duration-200'
+                  }`}
+                >
+                  <FontAwesomeIcon icon={faChevronLeft} />
+                </button>
+                {(() => {
+                  const maxVisiblePages = 5;
+                  const halfVisible = Math.floor(maxVisiblePages / 2);
+                  let startPage = Math.max(1, currentPage - halfVisible);
+                  let endPage = Math.min(
+                    totalPages,
+                    startPage + maxVisiblePages - 1
+                  );
 
-        if (endPage - startPage + 1 < maxVisiblePages) {
-          startPage = Math.max(1, endPage - maxVisiblePages + 1);
-        }
+                  if (endPage - startPage + 1 < maxVisiblePages) {
+                    startPage = Math.max(1, endPage - maxVisiblePages + 1);
+                  }
 
-        const pages = [];
-        for (let i = startPage; i <= endPage; i++) {
-          pages.push(
-            <button
-              key={i}
-              onClick={() => handlePageChange(i)}
-              className={`px-2 sm:px-3 py-1 rounded-lg ${
-                currentPage === i
-                  ? "bg-[#fcb900] text-white dark:bg-[#fcb900]"
-                  : "bg-gray-200 text-gray-700 hover:bg-gray-300 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600 transition-all duration-200"
-              }`}
-            >
-              {i}
-            </button>
-          );
-        }
-        return pages;
-      })()}
-      <button
-        onClick={() => handlePageChange(currentPage + 1)}
-        disabled={currentPage === totalPages}
-        className={`px-2 sm:px-3 py-1 rounded-lg ${
-          currentPage === totalPages
-            ? "bg-gray-300 text-gray-500 cursor-not-allowed dark:bg-gray-600"
-            : "bg-[#fcb900] text-white hover:bg-[#e0a900] dark:hover:bg-[#e0a900] transition-all duration-200"
-        }`}
-      >
-        <FontAwesomeIcon icon={faChevronRight} />
-      </button>
-    </div>
-  </div>
+                  const pages = [];
+                  for (let i = startPage; i <= endPage; i++) {
+                    pages.push(
+                      <button
+                        key={i}
+                        onClick={() => handlePageChange(i)}
+                        className={`px-2 sm:px-3 py-1 rounded-lg ${
+                          currentPage === i
+                            ? 'bg-[#fcb900] text-white dark:bg-[#fcb900]'
+                            : 'bg-gray-200 text-gray-700 hover:bg-gray-300 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600 transition-all duration-200'
+                        }`}
+                      >
+                        {i}
+                      </button>
+                    );
+                  }
+                  return pages;
+                })()}
+                <button
+                  onClick={() => handlePageChange(currentPage + 1)}
+                  disabled={currentPage === totalPages}
+                  className={`px-2 sm:px-3 py-1 rounded-lg ${
+                    currentPage === totalPages
+                      ? 'bg-gray-300 text-gray-500 cursor-not-allowed dark:bg-gray-600'
+                      : 'bg-[#fcb900] text-white hover:bg-[#e0a900] dark:hover:bg-[#e0a900] transition-all duration-200'
+                  }`}
+                >
+                  <FontAwesomeIcon icon={faChevronRight} />
+                </button>
+              </div>
+            </div>
 
             {showTimelineModal && renderTimelineModal()}
             {showDetailsModal && renderDetailsModal()}

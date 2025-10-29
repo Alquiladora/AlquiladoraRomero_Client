@@ -1,0 +1,16 @@
+{
+  "success": true,
+  "data": [
+    {
+      "idPedido": 102,
+      "idRastreo": "ALQ-2025-002",
+      "estado": "Finalizado",
+      "fechaInicio": "2025-10-15T08:00:00Z",
+      "totalPagar": 380.00,
+      "nombreCliente": "Ana Gómez",
+      "numeroDeProductos": 1,
+      "fotosProductos": ["https://placehold.co/80x80/10b981/ffffff?text=P"]
+    }
+  ],
+  "paginacion": { "totalPedidos": 1, "totalPaginas": 1 }
+}

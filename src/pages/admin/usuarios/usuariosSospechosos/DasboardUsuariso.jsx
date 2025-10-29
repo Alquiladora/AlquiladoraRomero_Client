@@ -1,25 +1,23 @@
-import React from "react";
+import React from 'react';
 
 const DasboardUsuarios = ({ onNavigate }) => {
   return (
     <div className="min-h-screen  dark:from-gray-900 dark:to-gray-800 p-6">
-   
       <div className="max-w-7xl mx-auto text-center mb-12">
         <h1 className="text-4xl font-bold text-gray-900 dark:text-gray-100 mb-3">
           Panel Administrativo
         </h1>
         <p className="text-lg text-gray-600 dark:text-gray-300">
-          Monitorea y gestiona aspectos críticos del sistema de manera eficiente.
+          Monitorea y gestiona aspectos críticos del sistema de manera
+          eficiente.
         </p>
       </div>
 
-    
       <div className="max-w-7xl mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-8">
-    
         <div
           className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-8 flex flex-col items-center text-center 
                      hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 hover:scale-101"
-          onClick={() => onNavigate("Usuarios Sospechosos")}
+          onClick={() => onNavigate('Usuarios Sospechosos')}
         >
           <div className="text-5xl mb-6 text-red-500 animate-pulse">
             {/* Ícono moderno */}
@@ -42,13 +40,14 @@ const DasboardUsuarios = ({ onNavigate }) => {
             Usuarios Sospechosos
           </h2>
           <p className="text-gray-600 dark:text-gray-300 mb-6">
-            Identifica y gestiona a los usuarios con actividad inusual o potencialmente peligrosa.
+            Identifica y gestiona a los usuarios con actividad inusual o
+            potencialmente peligrosa.
           </p>
           <button
             className="mt-auto bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white py-3 px-6 rounded-full transition-all duration-300 transform hover:scale-105"
             onClick={(e) => {
               e.stopPropagation();
-              onNavigate("Usuarios Sospechosos");
+              onNavigate('Usuarios Sospechosos');
             }}
           >
             Ver Usuarios Sospechosos
@@ -59,7 +58,7 @@ const DasboardUsuarios = ({ onNavigate }) => {
         <div
           className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-8 flex flex-col items-center text-center 
                      hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 hover:scale-101"
-          onClick={() => onNavigate("Auditoría de Sesiones")}
+          onClick={() => onNavigate('Auditoría de Sesiones')}
         >
           <div className="text-5xl mb-6 text-blue-500 animate-bounce">
             {/* Ícono moderno */}
@@ -87,13 +86,14 @@ const DasboardUsuarios = ({ onNavigate }) => {
             Auditoría de Inicio de Sesión
           </h2>
           <p className="text-gray-600 dark:text-gray-300 mb-6">
-            Revisa el historial de accesos y detecta intentos sospechosos o no autorizados.
+            Revisa el historial de accesos y detecta intentos sospechosos o no
+            autorizados.
           </p>
           <button
             className="mt-auto bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white py-3 px-6 rounded-full transition-all duration-300 transform hover:scale-105"
             onClick={(e) => {
               e.stopPropagation();
-              onNavigate("Auditoría de Sesiones");
+              onNavigate('Auditoría de Sesiones');
             }}
           >
             Ver Auditoría

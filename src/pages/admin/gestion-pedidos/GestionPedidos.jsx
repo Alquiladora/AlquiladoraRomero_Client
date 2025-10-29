@@ -1,13 +1,10 @@
-
-import React, { useState, useEffect } from "react";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import React, { useState, useEffect, useCallback } from 'react';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faTasks,
   faFilter,
   faBrain,
   faSearch,
-  faFileExport,
-  faFileInvoice,
   faMapMarkerAlt,
   faEye,
   faMoneyCheckAlt,
@@ -21,7 +18,6 @@ import {
   faCreditCard,
   faDollarSign,
   faCheckCircle,
-  faBoxOpen,
   faUndo,
   faExclamationTriangle,
   faExclamationCircle,
@@ -32,20 +28,15 @@ import {
   faMinus,
   faTicketAlt,
   faChartBar,
-  faMoneyBillWave,
-  faUsers,
   faBox,
   faCalendar,
-} from "@fortawesome/free-solid-svg-icons";
-import { toast } from "react-toastify";
-import TicketCompra from "./Ticket";
-import api from "../../../utils/AxiosConfig";
-import { useAuth } from "../../../hooks/ContextAuth";
-import CustomLoading from "../../../components/spiner/SpinerGlobal";
-import PredictCancelModal from "./PedidosPredicion";
-import PedidosConPrediccion from "./PedidosModeloPrevenir";
-
-
+} from '@fortawesome/free-solid-svg-icons';
+import { toast } from 'react-toastify';
+import TicketCompra from './Ticket';
+import api from '../../../utils/AxiosConfig';
+import { useAuth } from '../../../hooks/ContextAuth';
+import CustomLoading from '../../../components/spiner/SpinerGlobal';
+import PredictCancelModal from './PedidosPredicion';
 
 // Función para capitalizar estados
 const capitalizeStatus = (status) => {
@@ -56,10 +47,12 @@ const capitalizeStatus = (status) => {
 const GestionPedidos = ({ onNavigate }) => {
   const [pedidos, setPedidos] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [filterEstado, setFilterEstado] = useState("Todos");
-  const [searchTerm, setSearchTerm] = useState("");
-  const [dateRange, setDateRange] = useState({ start: "", end: "" });
+  const [filterEstado, setFilterEstado] = useState('Todos');
+  const [searchTerm, setSearchTerm] = useState('');
+  const [dateRange, setDateRange] = useState({ start: '', end: '' });
   const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalPedidos, setTotalPedidos] = useState(0);
   const [showTimelineModal, setShowTimelineModal] = useState(null);
   const [showDetailsModal, setShowDetailsModal] = useState(null);
   const [showTicketModal, setShowTicketModal] = useState(null);
@@ -69,52 +62,90 @@ const GestionPedidos = ({ onNavigate }) => {
   const [timelineError, setTimelineError] = useState(null);
   const { csrfToken } = useAuth();
   const ordersPerPage = 10;
-    const [pedidoParaPredecir, setPedidoParaPredecir] = useState(null);
+  const [pedidoParaPredecir, setPedidoParaPredecir] = useState(null);
 
   const estadosDisponibles = [
-    "Todos",
-    "Procesando",
-    "Enviando",
-    "Recogiendo",
-    "En alquiler",
-    "Devuelto",
-    "Incompleto",
-    "Incidente",
-    "Cancelado",
-    "Finalizado",
+    'Todos',
+    'Procesando',
+    'Enviando',
+    'Recogiendo',
+    'En alquiler',
+    'Devuelto',
+    'Incompleto',
+    'Incidente',
+    'Cancelado',
+    'Finalizado',
   ];
 
-  useEffect(() => {
-    const fetchPedidos = async () => {
-      try {
-        setLoading(true);
-        const response = await api.get("/api/pedidos/pedidos-general", {
-          headers: { "X-CSRF-Token": csrfToken },
-          withCredentials: true,
-        });
-        const result = response.data;
+  const fetchPedidos = useCallback(async () => {
+    try {
+      setLoading(true);
+      const params = new URLSearchParams({
+        page: currentPage,
+        limit: ordersPerPage,
+      });
 
-        if (result.success) {
-          const transformedPedidos = result.data.map((pedido) => ({
-            ...pedido,
-            estado: capitalizeStatus(pedido.estado),
-            historialEstados: [], 
-          }));
-          setPedidos(transformedPedidos);
-
-          console.log("Datos de peidso genaral", transformedPedidos)
-        } else {
-          toast.error("Error al cargar los pedidos");
-        }
-      } catch (error) {
-        toast.error("Error de conexión al servidor");
-        console.error(error);
-      } finally {
-        setLoading(false);
+      if (filterEstado !== 'Todos') {
+        params.append('estado', filterEstado.toLowerCase());
       }
-    };
+      if (searchTerm) {
+        params.append('search', searchTerm);
+      }
+      if (dateRange.start) {
+        params.append('startDate', dateRange.start);
+      }
+      if (dateRange.end) {
+        params.append('endDate', dateRange.end);
+      }
+
+      const response = await api.get(
+        `/api/pedidos/pedidos-general?${params.toString()}`,
+        {
+          headers: { 'X-CSRF-Token': csrfToken },
+          withCredentials: true,
+        }
+      );
+      const result = response.data;
+
+      if (result.success) {
+        const transformedPedidos = result.data.map((pedido) => ({
+          ...pedido,
+          estado: capitalizeStatus(pedido.estado),
+          historialEstados: [],
+        }));
+        setPedidos(transformedPedidos);
+        setTotalPedidos(result.totalPedidos);
+        setTotalPages(result.totalPages);
+
+        console.log('Datos de pedidos general', transformedPedidos);
+      } else {
+        console.log('Eroor');
+      }
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
+  }, [
+    csrfToken,
+    currentPage,
+    dateRange.end,
+    dateRange.start,
+    filterEstado,
+    searchTerm,
+  ]);
+
+  useEffect(() => {
     fetchPedidos();
-  }, [csrfToken]);
+  }, [
+    fetchPedidos,
+    currentPage,
+    filterEstado,
+    searchTerm,
+    dateRange.start,
+    dateRange.end,
+    csrfToken,
+  ]);
 
   useEffect(() => {
     const fetchTimelineData = async () => {
@@ -123,30 +154,33 @@ const GestionPedidos = ({ onNavigate }) => {
       try {
         setTimelineLoading(true);
         setTimelineError(null);
-        const response = await api.get(`/api/pedidos/historial/${showTimelineModal.idPedido}`, {
-          headers: { "X-CSRF-Token": csrfToken },
-          withCredentials: true,
-        });
+        const response = await api.get(
+          `/api/pedidos/historial/${showTimelineModal.idPedido}`,
+          {
+            headers: { 'X-CSRF-Token': csrfToken },
+            withCredentials: true,
+          }
+        );
         const result = response.data;
 
         if (result.success) {
           const historial = result.data.map((entry) => ({
             estado: capitalizeStatus(entry.estadoNuevo),
-            fecha: new Date(entry.fechaActualizacion).toLocaleString("es-MX", {
-              day: "2-digit",
-              month: "short",
-              hour: "2-digit",
-              minute: "2-digit",
+            fecha: new Date(entry.fechaActualizacion).toLocaleString('es-MX', {
+              day: '2-digit',
+              month: 'short',
+              hour: '2-digit',
+              minute: '2-digit',
             }),
             descripcion: `Pedido actualizado a ${capitalizeStatus(entry.estadoNuevo).toLowerCase()}${entry.estadoAnterior ? ` desde ${capitalizeStatus(entry.estadoAnterior).toLowerCase()}` : ''}`,
           }));
           setTimelineData(historial);
         } else {
-          throw new Error("Error al cargar el historial del pedido");
+          throw new Error('Error al cargar el historial del pedido');
         }
       } catch (error) {
-        setTimelineError(error.message || "Error al cargar el historial");
-        toast.error("No se pudo cargar el historial del pedido");
+        setTimelineError(error.message || 'Error al cargar el historial');
+        toast.error('No se pudo cargar el historial del pedido');
       } finally {
         setTimelineLoading(false);
       }
@@ -155,59 +189,21 @@ const GestionPedidos = ({ onNavigate }) => {
     fetchTimelineData();
   }, [showTimelineModal, csrfToken]);
 
-  const filteredPedidos = pedidos
-    .filter(
-      (pedido) => filterEstado === "Todos" || pedido.estado === filterEstado
-    )
-    .filter((pedido) => {
-      const search = searchTerm.toLowerCase();
-      return (
-        pedido.idRastreo.toLowerCase().includes(search) ||
-        pedido.cliente?.nombre?.toLowerCase().includes(search) ||
-        pedido.cliente?.direccion?.toLowerCase().includes(search) ||
-        ""
-      );
-    })
-    .filter((pedido) => {
-      if (!dateRange.start || !dateRange.end) return true;
-      const startDate = new Date(dateRange.start);
-      const endDate = new Date(dateRange.end);
-      const pedidoDate = new Date(pedido.fechas.inicio);
-      return pedidoDate >= startDate && pedidoDate <= endDate;
-    });
-
-  const indexOfLastOrder = currentPage * ordersPerPage;
-  const indexOfFirstOrder = indexOfLastOrder - ordersPerPage;
-  const currentPedidos = filteredPedidos.slice(
-    indexOfFirstOrder,
-    indexOfLastOrder
-  );
-  const totalPages = Math.ceil(filteredPedidos.length / ordersPerPage);
-
   const handlePageChange = (page) => {
     if (page >= 1 && page <= totalPages) setCurrentPage(page);
   };
 
-  const handleGenerateReport = () =>
-    toast.info("Funcionalidad de generar reporte en desarrollo");
-  const handleExportCSV = () =>
-    toast.info("Funcionalidad de exportar a CSV en desarrollo");
-  const handleGenerateInvoice = (pedido) =>
-    toast.info(
-      `Generando factura para el pedido ${pedido.idRastreo}... (en desarrollo)`
-    );
   const handleShowTimeline = (pedido) => {
     setShowTimelineModal(pedido);
     setShowMoreTimeline(false);
   };
+
   const handleShowDetails = (pedido) => setShowDetailsModal(pedido);
   const handleShowTicketModal = (pedido) => setShowTicketModal(pedido);
   const handleSendTicket = (email, pdfBlob) => {
     toast.success(`Ticket enviado al correo ${email} en formato PDF.`);
     setShowTicketModal(null);
   };
-  const handleNavigateDashboard = (dashboard) =>
-    toast.info(`Navegando al Dashboard de ${dashboard}... (en desarrollo)`);
 
   const renderTimelineModal = () => {
     const visibleEvents = showMoreTimeline
@@ -231,7 +227,7 @@ const GestionPedidos = ({ onNavigate }) => {
           </div>
           <div className="p-6 space-y-5">
             <p className="text-sm text-gray-600 dark:text-gray-300">
-              ID de Rastreo:{" "}
+              ID de Rastreo:{' '}
               <span className="font-semibold">
                 {showTimelineModal.idRastreo}
               </span>
@@ -257,25 +253,25 @@ const GestionPedidos = ({ onNavigate }) => {
                       <div className="w-10 h-10 bg-green-500 rounded-full flex items-center justify-center z-10 shadow-md">
                         <FontAwesomeIcon
                           icon={
-                            evento.estado === "Procesando"
+                            evento.estado === 'Procesando'
                               ? faClock
-                              : evento.estado === "Enviando"
-                              ? faTruck
-                              : evento.estado === "Confirmado"
-                              ? faCheckCircle
-                              : evento.estado === "En alquiler"
-                              ? faTruck
-                              : evento.estado === "Devuelto"
-                              ? faUndo
-                              : evento.estado === "Incompleto"
-                              ? faExclamationTriangle
-                              : evento.estado === "Incidente"
-                              ? faExclamationCircle
-                              : evento.estado === "Cancelado"
-                              ? faBan
-                              : evento.estado === "Finalizado"
-                              ? faCheckCircle
-                              : faQuestionCircle
+                              : evento.estado === 'Enviando'
+                                ? faTruck
+                                : evento.estado === 'Confirmado'
+                                  ? faCheckCircle
+                                  : evento.estado === 'En alquiler'
+                                    ? faTruck
+                                    : evento.estado === 'Devuelto'
+                                      ? faUndo
+                                      : evento.estado === 'Incompleto'
+                                        ? faExclamationTriangle
+                                        : evento.estado === 'Incidente'
+                                          ? faExclamationCircle
+                                          : evento.estado === 'Cancelado'
+                                            ? faBan
+                                            : evento.estado === 'Finalizado'
+                                              ? faCheckCircle
+                                              : faQuestionCircle
                           }
                           className="text-white"
                         />
@@ -305,7 +301,7 @@ const GestionPedidos = ({ onNavigate }) => {
                   icon={showMoreTimeline ? faMinus : faPlus}
                   className="mr-2"
                 />
-                {showMoreTimeline ? "Ver menos" : "Ver más detalles"}
+                {showMoreTimeline ? 'Ver menos' : 'Ver más detalles'}
               </button>
             )}
           </div>
@@ -318,97 +314,96 @@ const GestionPedidos = ({ onNavigate }) => {
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 animate-fade-in">
       <div className="bg-white rounded-2xl shadow-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto p-6 space-y-6 dark:bg-gray-900">
         {/* Header */}
-       <div className="flex justify-between items-center bg-[#fcb900] p-4 rounded-t-xl">
-        <h2 className="text-xl font-bold text-white flex items-center space-x-2">
-          <FontAwesomeIcon icon={faTicketAlt} />
-          <span>Ticket del Pedido</span>
-        </h2>
-        <button
-          onClick={() => setShowDetailsModal(null)}
-          className="text-white hover:text-gray-200 transition"
-          aria-label="Cerrar modal"
-        >
-          <FontAwesomeIcon icon={faTimes} />
-        </button>
-      </div>
+        <div className="flex justify-between items-center bg-[#fcb900] p-4 rounded-t-xl">
+          <h2 className="text-xl font-bold text-white flex items-center space-x-2">
+            <FontAwesomeIcon icon={faTicketAlt} />
+            <span>Ticket del Pedido</span>
+          </h2>
+          <button
+            onClick={() => setShowDetailsModal(null)}
+            className="text-white hover:text-gray-200 transition"
+            aria-label="Cerrar modal"
+          >
+            <FontAwesomeIcon icon={faTimes} />
+          </button>
+        </div>
 
         {/* Sección ID y Estado */}
-       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <div className="bg-gray-50 rounded-lg p-4 flex items-center space-x-3 dark:bg-gray-700">
-          <div className="bg-[#fcb900] text-white p-2 rounded-full">
-            <FontAwesomeIcon icon={faTruck} />
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="bg-gray-50 rounded-lg p-4 flex items-center space-x-3 dark:bg-gray-700">
+            <div className="bg-[#fcb900] text-white p-2 rounded-full">
+              <FontAwesomeIcon icon={faTruck} />
+            </div>
+            <div>
+              <p className="text-sm text-gray-600 font-medium dark:text-gray-300">
+                ID de Rastreo
+              </p>
+              <p className="text-lg font-bold text-gray-900 break-all dark:text-gray-100">
+                {showDetailsModal.idRastreo}
+              </p>
+            </div>
           </div>
-          <div>
-            <p className="text-sm text-gray-600 font-medium dark:text-gray-300">
-              ID de Rastreo
-            </p>
-            <p className="text-lg font-bold text-gray-900 break-all dark:text-gray-100">
-              {showDetailsModal.idRastreo}
-            </p>
-          </div>
-        </div>
-        <div className="bg-gray-50 rounded-lg p-4 flex items-center space-x-3 dark:bg-gray-700">
-          <div
-            className={`rounded-full p-2 ${
-              showDetailsModal.estado === "Procesando"
-                ? "bg-orange-500"
-                : showDetailsModal.estado === "Confirmado"
-                ? "bg-green-500"
-                : showDetailsModal.estado === "Enviando"
-                ? "bg-blue-500"
-                : showDetailsModal.estado === "En alquiler"
-                ? "bg-purple-500"
-                : showDetailsModal.estado === "Devuelto"
-                ? "bg-gray-500"
-                : showDetailsModal.estado === "Incompleto"
-                ? "bg-yellow-500"
-                : showDetailsModal.estado === "Incidente"
-                ? "bg-red-500"
-                : showDetailsModal.estado === "Cancelado"
-                ? "bg-black"
-                : showDetailsModal.estado === "Finalizado"
-                ? "bg-green-800"
-                : "bg-gray-400"
-            }`}
-          ><FontAwesomeIcon
-              icon={faCheckCircle}
-              className="text-white text-xs sm:text-sm"
-            />
-          </div>
-          <div>
-            <p className="text-sm font-medium text-gray-600 dark:text-gray-300 select-none">
-              Estado del Pedido
-            </p>
-            <p
-              className={`font-bold text-lg select-text ${
-                showDetailsModal.estado === "Procesando"
-                  ? "text-orange-600 dark:text-orange-400"
-                  : showDetailsModal.estado === "Confirmado"
-                  ? "text-green-600 dark:text-green-400"
-                  : showDetailsModal.estado === "Enviando"
-                  ? "text-blue-600 dark:text-blue-400"
-                  : showDetailsModal.estado === "En alquiler"
-                  ? "text-purple-600 dark:text-purple-400"
-                  : showDetailsModal.estado === "Devuelto"
-                  ? "text-gray-600 dark:text-gray-400"
-                  : showDetailsModal.estado === "Incompleto"
-                  ? "text-yellow-600 dark:text-yellow-400"
-                  : showDetailsModal.estado === "Incidente"
-                  ? "text-red-600 dark:text-red-400"
-                  : showDetailsModal.estado === "Cancelado"
-                  ? "text-black dark:text-gray-300"
-                  : showDetailsModal.estado === "Finalizado"
-                  ? "text-green-800 dark:text-green-600"
-                  : "text-gray-600 dark:text-gray-400"
+          <div className="bg-gray-50 rounded-lg p-4 flex items-center space-x-3 dark:bg-gray-700">
+            <div
+              className={`rounded-full p-2 ${
+                showDetailsModal.estado === 'Procesando'
+                  ? 'bg-orange-500'
+                  : showDetailsModal.estado === 'Confirmado'
+                    ? 'bg-green-500'
+                    : showDetailsModal.estado === 'Enviando'
+                      ? 'bg-blue-500'
+                      : showDetailsModal.estado === 'En alquiler'
+                        ? 'bg-purple-500'
+                        : showDetailsModal.estado === 'Devuelto'
+                          ? 'bg-gray-500'
+                          : showDetailsModal.estado === 'Incompleto'
+                            ? 'bg-yellow-500'
+                            : showDetailsModal.estado === 'Incidente'
+                              ? 'bg-red-500'
+                              : showDetailsModal.estado === 'Cancelado'
+                                ? 'bg-black'
+                                : showDetailsModal.estado === 'Finalizado'
+                                  ? 'bg-green-800'
+                                  : 'bg-gray-400'
               }`}
             >
-              {showDetailsModal.estado}
-            </p>
+              <FontAwesomeIcon
+                icon={faCheckCircle}
+                className="text-white text-xs sm:text-sm"
+              />
+            </div>
+            <div>
+              <p className="text-sm font-medium text-gray-600 dark:text-gray-300 select-none">
+                Estado del Pedido
+              </p>
+              <p
+                className={`font-bold text-lg select-text ${
+                  showDetailsModal.estado === 'Procesando'
+                    ? 'text-orange-600 dark:text-orange-400'
+                    : showDetailsModal.estado === 'Confirmado'
+                      ? 'text-green-600 dark:text-green-400'
+                      : showDetailsModal.estado === 'Enviando'
+                        ? 'text-blue-600 dark:text-blue-400'
+                        : showDetailsModal.estado === 'En alquiler'
+                          ? 'text-purple-600 dark:text-purple-400'
+                          : showDetailsModal.estado === 'Devuelto'
+                            ? 'text-gray-600 dark:text-gray-400'
+                            : showDetailsModal.estado === 'Incompleto'
+                              ? 'text-yellow-600 dark:text-yellow-400'
+                              : showDetailsModal.estado === 'Incidente'
+                                ? 'text-red-600 dark:text-red-400'
+                                : showDetailsModal.estado === 'Cancelado'
+                                  ? 'text-black dark:text-gray-300'
+                                  : showDetailsModal.estado === 'Finalizado'
+                                    ? 'text-green-800 dark:text-green-600'
+                                    : 'text-gray-600 dark:text-gray-400'
+                }`}
+              >
+                {showDetailsModal.estado}
+              </p>
+            </div>
           </div>
         </div>
-      </div>
-
-
 
         {/* Sección Información del Cliente */}
         <div className="bg-gray-100 rounded-lg p-4 space-y-3 dark:bg-gray-800/50 dark:border dark:border-gray-700">
@@ -445,12 +440,12 @@ const GestionPedidos = ({ onNavigate }) => {
               <p className="font-semibold mb-1">Fecha Inicio</p>
               <p>
                 {new Date(showDetailsModal.fechas.inicio).toLocaleDateString(
-                  "es-ES",
+                  'es-ES',
                   {
-                    weekday: "short",
-                    year: "numeric",
-                    month: "short",
-                    day: "numeric",
+                    weekday: 'short',
+                    year: 'numeric',
+                    month: 'short',
+                    day: 'numeric',
                   }
                 )}
               </p>
@@ -459,12 +454,12 @@ const GestionPedidos = ({ onNavigate }) => {
               <p className="font-semibold mb-1">Fecha Entrega</p>
               <p>
                 {new Date(showDetailsModal.fechas.entrega).toLocaleDateString(
-                  "es-ES",
+                  'es-ES',
                   {
-                    weekday: "short",
-                    year: "numeric",
-                    month: "short",
-                    day: "numeric",
+                    weekday: 'short',
+                    year: 'numeric',
+                    month: 'short',
+                    day: 'numeric',
                   }
                 )}
               </p>
@@ -484,11 +479,11 @@ const GestionPedidos = ({ onNavigate }) => {
         </div>
 
         {/* Sección Productos del Pedido */}
-       <div className="bg-gray-50 rounded-lg p-4 dark:bg-gray-700">
-        <h3 className="text-lg font-bold text-gray-900 flex items-center space-x-2 mb-3 dark:text-gray-100">
-          <FontAwesomeIcon icon={faBox} className="text-[#fcb900]" />
-          <span>Productos del Pedido</span>
-        </h3>
+        <div className="bg-gray-50 rounded-lg p-4 dark:bg-gray-700">
+          <h3 className="text-lg font-bold text-gray-900 flex items-center space-x-2 mb-3 dark:text-gray-100">
+            <FontAwesomeIcon icon={faBox} className="text-[#fcb900]" />
+            <span>Productos del Pedido</span>
+          </h3>
 
           <div className="overflow-x-auto rounded-md border border-yellow-300 dark:border-yellow-700">
             <table className="min-w-full text-sm text-left text-yellow-900 dark:text-yellow-300">
@@ -517,8 +512,8 @@ const GestionPedidos = ({ onNavigate }) => {
                     key={i}
                     className={`${
                       i % 2 === 0
-                        ? "bg-yellow-50 dark:bg-yellow-900/30"
-                        : "bg-yellow-100 dark:bg-yellow-900/20"
+                        ? 'bg-yellow-50 dark:bg-yellow-900/30'
+                        : 'bg-yellow-100 dark:bg-yellow-900/20'
                     }`}
                   >
                     <td className="px-4 py-2 border border-yellow-300 dark:border-yellow-700">
@@ -544,12 +539,12 @@ const GestionPedidos = ({ onNavigate }) => {
         </div>
 
         {/* Sección Información de Pago */}
-       <div className="bg-gray-50 rounded-lg p-4 space-y-6 dark:bg-gray-700">
-        <div> 
-         <h3 className="text-lg font-bold text-gray-900 flex items-center space-x-2 dark:text-gray-100">
-          <FontAwesomeIcon icon={faCreditCard} className="text-[#fcb900]" />
-          <span>Información de Pago</span>
-        </h3>
+        <div className="bg-gray-50 rounded-lg p-4 space-y-6 dark:bg-gray-700">
+          <div>
+            <h3 className="text-lg font-bold text-gray-900 flex items-center space-x-2 dark:text-gray-100">
+              <FontAwesomeIcon icon={faCreditCard} className="text-[#fcb900]" />
+              <span>Información de Pago</span>
+            </h3>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
@@ -557,7 +552,9 @@ const GestionPedidos = ({ onNavigate }) => {
                   Forma de Pago
                 </p>
                 <p className="text-base font-bold text-green-900 dark:text-green-100">
-                  {showDetailsModal.pago.formaPago ? showDetailsModal.pago.formaPago  : "No especificado"}
+                  {showDetailsModal.pago.formaPago
+                    ? showDetailsModal.pago.formaPago
+                    : 'No especificado'}
                 </p>
               </div>
               <div>
@@ -565,7 +562,7 @@ const GestionPedidos = ({ onNavigate }) => {
                   Detalles
                 </p>
                 <p className="text-base text-green-900 dark:text-green-100">
-                  {showDetailsModal.pago.detalles || "Sin detalles"}
+                  {showDetailsModal.pago.detalles || 'Sin detalles'}
                 </p>
               </div>
               <div>
@@ -594,7 +591,7 @@ const GestionPedidos = ({ onNavigate }) => {
                     key={idx}
                     className="bg-green-100 dark:bg-green-900/50 rounded-lg p-3 text-sm border border-green-200 dark:border-green-700 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between"
                     title={`${pago.formaPago} / ${pago.metodoPago} - $${
-                      pago.monto ?? "Pendiente"
+                      pago.monto ?? 'Pendiente'
                     } (${pago.estadoPago}) - ${new Date(
                       pago.fechaPago
                     ).toLocaleString()}`}
@@ -602,18 +599,18 @@ const GestionPedidos = ({ onNavigate }) => {
                     <div className="flex items-center space-x-2 mb-1 sm:mb-0">
                       <FontAwesomeIcon
                         icon={
-                          pago.estadoPago === "completado"
+                          pago.estadoPago === 'completado'
                             ? faCheckCircle
                             : faExclamationTriangle
                         }
                         className={`text-sm ${
-                          pago.estadoPago === "completado"
-                            ? "text-green-600 dark:text-green-400"
-                            : "text-yellow-600 dark:text-yellow-400"
+                          pago.estadoPago === 'completado'
+                            ? 'text-green-600 dark:text-green-400'
+                            : 'text-yellow-600 dark:text-yellow-400'
                         }`}
                       />
                       <span className="font-semibold capitalize">
-                        {pago.formaPago || "Forma no especificada"}
+                        {pago.formaPago || 'Forma no especificada'}
                       </span>
                       {pago.metodoPago && <span>- {pago.metodoPago}</span>}
                     </div>
@@ -622,7 +619,7 @@ const GestionPedidos = ({ onNavigate }) => {
                         $
                         {pago.monto !== null
                           ? pago.monto.toFixed(2)
-                          : "Pendiente"}
+                          : 'Pendiente'}
                       </span>
                       <br />
                       <span className="text-xs italic">
@@ -661,369 +658,400 @@ const GestionPedidos = ({ onNavigate }) => {
     </div>
   );
 
+  return (
+    <div className="min-h-screen dark:from-gray-900 dark:to-gray-800 p-6 lg:p-8">
+      <div className="max-w-7xl mx-auto">
+        <div className="flex justify-end space-x-2 mb-4">
+          <button
+            onClick={() => onNavigate('Pedidos General Calendario')}
+            className="flex items-center px-3 py-1.5 text-sm bg-teal-500 text-white rounded-md hover:bg-teal-600 transition-all duration-200 dark:bg-teal-600 dark:hover:bg-teal-700"
+          >
+            <FontAwesomeIcon icon={faCalendar} className="mr-1" />
+            <span className="hidden sm:inline">Pedidos Organizado</span>
+          </button>
+          {/* Botón para Generar Reporte */}
+        </div>
 
-  
+        <h2 className="text-3xl font-extrabold text-gray-800 dark:text-gray-100 mb-8 flex items-center justify-center">
+          <FontAwesomeIcon icon={faTasks} className="mr-3 text-yellow-500" />
+          Gestión de Pedidos
+        </h2>
 
- return (
-  <div className="min-h-screen dark:from-gray-900 dark:to-gray-800 p-6 lg:p-8">
-    <div className="max-w-7xl mx-auto">
-      <div className="flex justify-end space-x-2 mb-4">
-        <button
-          onClick={() => onNavigate("Pedidos General Calendario")}
-          className="flex items-center px-3 py-1.5 text-sm bg-teal-500 text-white rounded-md hover:bg-teal-600 transition-all duration-200 dark:bg-teal-600 dark:hover:bg-teal-700"
-        >
-          <FontAwesomeIcon icon={faCalendar} className="mr-1" />
-          <span className="hidden sm:inline">Pedidos Organizado</span>
-        </button>
-        {/* Botón para Generar Reporte */}
-      </div>
-
-      <h2 className="text-3xl font-extrabold text-gray-800 dark:text-gray-100 mb-8 flex items-center justify-center">
-        <FontAwesomeIcon icon={faTasks} className="mr-3 text-yellow-500" />
-        Gestión de Pedidos
-      </h2>
-
-      {loading ? (
-        <CustomLoading />
-      ) : (
-        <>
-          <div className="bg-white dark:bg-gray-800 p-6 rounded-xl">
-            <div className="flex flex-col sm:flex-row gap-4 items-center justify-between">
-              <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
-                <div className="flex items-center space-x-3 w-full sm:w-auto">
-                  <FontAwesomeIcon icon={faFilter} className="text-yellow-500" />
-                  <select
-                    value={filterEstado}
-                    onChange={(e) => {
-                      setFilterEstado(e.target.value);
-                      setCurrentPage(1);
-                    }}
-                    className="p-2 border rounded-lg bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200 w-full sm:w-40 focus:outline-none focus:ring-2 focus:ring-yellow-500 transition-all duration-200"
-                  >
-                    {estadosDisponibles.map((estado) => (
-                      <option key={estado} value={estado}>
-                        {estado}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                <div className="flex items-center space-x-3 w-full sm:w-auto">
-                  <FontAwesomeIcon icon={faSearch} className="text-yellow-500" />
-                  <input
-                    type="text"
-                    placeholder="Buscar por ID, cliente o dirección..."
-                    value={searchTerm}
-                    onChange={(e) => {
-                      setSearchTerm(e.target.value);
-                      setCurrentPage(1);
-                    }}
-                    className="p-2 border rounded-lg bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200 w-full sm:w-64 focus:outline-none focus:ring-2 focus:ring-yellow-500 transition-all duration-200"
-                  />
-                </div>
-                <div className="flex items-center space-x-3 w-full sm:w-auto">
-                  <FontAwesomeIcon icon={faCalendarAlt} className="text-yellow-500" />
-                  <input
-                    type="date"
-                    value={dateRange.start}
-                    onChange={(e) =>
-                      setDateRange({ ...dateRange, start: e.target.value })
-                    }
-                    className="p-2 border rounded-lg bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200 w-full sm:w-36 focus:outline-none focus:ring-2 focus:ring-yellow-500 transition-all duration-200"
-                  />
-                  <span className="text-gray-500 dark:text-gray-400">-</span>
-                  <input
-                    type="date"
-                    value={dateRange.end}
-                    onChange={(e) =>
-                      setDateRange({ ...dateRange, end: e.target.value })
-                    }
-                    className="p-2 border rounded-lg bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200 w-full sm:w-36 focus:outline-none focus:ring-2 focus:ring-yellow-500 transition-all duration-200"
-                  />
+        {loading ? (
+          <CustomLoading />
+        ) : (
+          <>
+            <div className="bg-white dark:bg-gray-800 p-6 rounded-xl">
+              <div className="flex flex-col sm:flex-row gap-4 items-center justify-between">
+                <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
+                  <div className="flex items-center space-x-3 w-full sm:w-auto">
+                    <FontAwesomeIcon
+                      icon={faFilter}
+                      className="text-yellow-500"
+                    />
+                    <select
+                      value={filterEstado}
+                      onChange={(e) => {
+                        setFilterEstado(e.target.value);
+                        setCurrentPage(1);
+                      }}
+                      className="p-2 border rounded-lg bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200 w-full sm:w-40 focus:outline-none focus:ring-2 focus:ring-yellow-500 transition-all duration-200"
+                    >
+                      {estadosDisponibles.map((estado) => (
+                        <option key={estado} value={estado}>
+                          {estado}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="flex items-center space-x-3 w-full sm:w-auto">
+                    <FontAwesomeIcon
+                      icon={faSearch}
+                      className="text-yellow-500"
+                    />
+                    <input
+                      type="text"
+                      placeholder="Buscar por ID, cliente o dirección..."
+                      value={searchTerm}
+                      onChange={(e) => {
+                        setSearchTerm(e.target.value);
+                        setCurrentPage(1);
+                      }}
+                      className="p-2 border rounded-lg bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200 w-full sm:w-64 focus:outline-none focus:ring-2 focus:ring-yellow-500 transition-all duration-200"
+                    />
+                  </div>
+                  <div className="flex items-center space-x-3 w-full sm:w-auto">
+                    <FontAwesomeIcon
+                      icon={faCalendarAlt}
+                      className="text-yellow-500"
+                    />
+                    <input
+                      type="date"
+                      value={dateRange.start}
+                      onChange={(e) => {
+                        setDateRange({ ...dateRange, start: e.target.value });
+                        setCurrentPage(1);
+                      }}
+                      className="p-2 border rounded-lg bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200 w-full sm:w-36 focus:outline-none focus:ring-2 focus:ring-yellow-500 transition-all duration-200"
+                    />
+                    <span className="text-gray-500 dark:text-gray-400">-</span>
+                    <input
+                      type="date"
+                      value={dateRange.end}
+                      onChange={(e) => {
+                        setDateRange({ ...dateRange, end: e.target.value });
+                        setCurrentPage(1);
+                      }}
+                      className="p-2 border rounded-lg bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200 w-full sm:w-36 focus:outline-none focus:ring-2 focus:ring-yellow-500 transition-all duration-200"
+                    />
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
 
-          <div className="overflow-x-auto rounded-xl shadow-lg">
-            <table className="min-w-full bg-white dark:bg-gray-800">
-              <thead className="bg-gradient-to-r from-yellow-500 to-yellow-600">
-                <tr>
-                  <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-tight text-white">
-                    <FontAwesomeIcon icon={faTruck} className="mr-1" />
-                    <span className="hidden sm:inline">ID Rastreo</span>
-                    <span className="sm:hidden">ID</span>
-                  </th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-tight text-white">
-                    <FontAwesomeIcon icon={faUser} className="mr-1" /> Cliente
-                  </th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-tight text-white hidden sm:table-cell">
-                    <FontAwesomeIcon icon={faPhone} className="mr-1" /> Teléfono
-                  </th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-tight text-white hidden md:table-cell">
-                    <FontAwesomeIcon icon={faMapMarkerAlt} className="mr-1" /> Dirección
-                  </th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-tight text-white hidden sm:table-cell">
-                    <FontAwesomeIcon icon={faClock} className="mr-1" /> Días
-                  </th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-tight text-white">
-                    <FontAwesomeIcon icon={faDollarSign} className="mr-1" /> Total
-                  </th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-tight text-white">
-                    <FontAwesomeIcon icon={faCheckCircle} className="mr-1" /> Estado
-                  </th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-tight text-white">
-                    Acciones
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {currentPedidos.map((pedido, index) => {
-                  const estadosParaPredecir = ['Procesando', 'Enviando', 'Confirmado'];
-                  const puedePredecir = estadosParaPredecir.includes(pedido.estado);
+            <div className="overflow-x-auto rounded-xl shadow-lg">
+              <table className="min-w-full bg-white dark:bg-gray-800">
+                <thead className="bg-gradient-to-r from-yellow-500 to-yellow-600">
+                  <tr>
+                    <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-tight text-white">
+                      <FontAwesomeIcon icon={faTruck} className="mr-1" />
+                      <span className="hidden sm:inline">ID Rastreo</span>
+                      <span className="sm:hidden">ID</span>
+                    </th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-tight text-white">
+                      <FontAwesomeIcon icon={faUser} className="mr-1" /> Cliente
+                    </th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-tight text-white hidden sm:table-cell">
+                      <FontAwesomeIcon icon={faPhone} className="mr-1" />{' '}
+                      Teléfono
+                    </th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-tight text-white hidden md:table-cell">
+                      <FontAwesomeIcon icon={faMapMarkerAlt} className="mr-1" />{' '}
+                      Dirección
+                    </th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-tight text-white hidden sm:table-cell">
+                      <FontAwesomeIcon icon={faClock} className="mr-1" /> Días
+                    </th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-tight text-white">
+                      <FontAwesomeIcon icon={faDollarSign} className="mr-1" />{' '}
+                      Total
+                    </th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-tight text-white">
+                      <FontAwesomeIcon icon={faCheckCircle} className="mr-1" />{' '}
+                      Estado
+                    </th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-tight text-white">
+                      Acciones
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {pedidos.map((pedido, index) => {
+                    const estadosParaPredecir = [
+                      'Procesando',
+                      'Enviando',
+                      'Confirmado',
+                    ];
+                    const puedePredecir = estadosParaPredecir.includes(
+                      pedido.estado
+                    );
 
-                  return (
-                    <tr
-                      key={pedido.idPedido}
-                      className={`border-b dark:border-gray-700 transition-all duration-200 ${
-                        index % 2 === 0
-                          ? "bg-gray-50 dark:bg-gray-900"
-                          : "bg-white dark:bg-gray-800"
-                      } hover:bg-gray-100 dark:hover:bg-gray-700`}
-                    >
-                      <td className="px-4 py-3 text-sm font-medium text-gray-800 dark:text-gray-200">
-                        {pedido.idRastreo}
-                      </td>
-                      <td className="px-4 py-3 text-sm font-medium text-gray-800 dark:text-gray-200">
-                        {pedido.cliente.nombre || "No especificado"}
-                      </td>
-                      <td className="px-4 py-3 text-sm font-medium text-gray-800 dark:text-gray-200 hidden sm:table-cell">
-                        {pedido.cliente.telefono || "N/A"}
-                      </td>
-                      <td className="px-4 py-3 text-sm font-medium text-gray-800 dark:text-gray-200 hidden md:table-cell">
-                        {pedido.cliente.direccion?.slice(0, 20) || "N/A"}...
-                      </td>
-                      <td className="px-4 py-3 text-sm font-medium text-gray-800 dark:text-gray-200 hidden sm:table-cell">
-                        {pedido.fechas.diasAlquiler}
-                      </td>
-                      <td className="px-4 py-3 text-sm font-medium text-gray-800 dark:text-gray-200">
-                        <span className="text-green-600 dark:text-green-400">
-                          ${pedido.pago.total}
-                        </span>
-                      </td>
-                      <td className="px-4 py-3 text-sm text-gray-800 dark:text-gray-200">
-                        <span
-                          className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-semibold shadow-sm select-none ${
-                            pedido.estado === "Procesando"
-                              ? "bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-300"
-                              : pedido.estado === "Enviando"
-                              ? "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300"
-                              : pedido.estado === "Confirmado"
-                              ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300"
-                              : pedido.estado === "En alquiler"
-                              ? "bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-300"
-                              : pedido.estado === "Devuelto"
-                              ? "bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-300"
-                              : pedido.estado === "Incompleto"
-                              ? "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300"
-                              : pedido.estado === "Incidente"
-                              ? "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300"
-                              : pedido.estado === "Cancelado"
-                              ? "bg-black text-white dark:bg-gray-800 dark:text-gray-300"
-                              : pedido.estado === "Finalizado"
-                              ? "bg-green-800 text-green-100 dark:bg-green-700 dark:text-green-200"
-                              : ""
-                          }`}
-                        >
-                          <FontAwesomeIcon
-                            icon={
-                              pedido.estado === "Procesando"
-                                ? faClock
-                                : pedido.estado === "Enviando"
-                                ? faTruck
-                                : pedido.estado === "Confirmado"
-                                ? faCheckCircle
-                                : pedido.estado === "En alquiler"
-                                ? faTruck
-                                : pedido.estado === "Devuelto"
-                                ? faUndo
-                                : pedido.estado === "Incompleto"
-                                ? faExclamationTriangle
-                                : pedido.estado === "Incidente"
-                                ? faExclamationCircle
-                                : pedido.estado === "Cancelado"
-                                ? faBan
-                                : pedido.estado === "Finalizado"
-                                ? faCheckCircle
-                                : faQuestionCircle
-                            }
-                            className="mr-1"
-                          />
-                          {pedido.estado}
-                        </span>
-                      </td>
-                      <td className="px-4 py-3 text-sm flex space-x-3">
-                        <button
-                          onClick={() => handleShowDetails(pedido)}
-                          className="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 transition-all duration-200 p-2 rounded-full hover:bg-blue-100 dark:hover:bg-blue-900"
-                          title="Ver Detalles"
-                        >
-                          <FontAwesomeIcon icon={faEye} size="lg" />
-                        </button>
-                        <button
-                          onClick={() => handleShowTimeline(pedido)}
-                          className="text-green-600 hover:text-green-800 dark:text-green-400 dark:hover:text-green-300 transition-all duration-200 p-2 rounded-full hover:bg-green-100 dark:hover:bg-green-900"
-                          title="Ver Localización"
-                        >
-                          <FontAwesomeIcon icon={faMapMarkerAlt} size="lg" />
-                        </button>
-                        <button
-                          onClick={() => handleShowTicketModal(pedido)}
-                          className="text-orange-600 hover:text-orange-800 dark:text-orange-400 dark:hover:text-orange-300 transition-all duration-200 p-2 rounded-full hover:bg-orange-100 dark:hover:bg-orange-900"
-                          title="Generar Ticket"
-                        >
-                          <FontAwesomeIcon icon={faTicketAlt} size="lg" />
-                        </button>
-                        {puedePredecir && (
-                          <button
-                            onClick={() => setPedidoParaPredecir(pedido)}
-                            className="text-purple-600 hover:text-purple-800 p-2 rounded-full hover:bg-purple-100 dark:text-purple-400 dark:hover:text-purple-300 dark:hover:bg-purple-900"
-                            title="Predecir Cancelación"
+                    return (
+                      <tr
+                        key={pedido.idPedido}
+                        className={`border-b dark:border-gray-700 transition-all duration-200 ${
+                          index % 2 === 0
+                            ? 'bg-gray-50 dark:bg-gray-900'
+                            : 'bg-white dark:bg-gray-800'
+                        } hover:bg-gray-100 dark:hover:bg-gray-700`}
+                      >
+                        <td className="px-4 py-3 text-sm font-medium text-gray-800 dark:text-gray-200">
+                          {pedido.idRastreo}
+                        </td>
+                        <td className="px-4 py-3 text-sm font-medium text-gray-800 dark:text-gray-200">
+                          {pedido.cliente.nombre || 'No especificado'}
+                        </td>
+                        <td className="px-4 py-3 text-sm font-medium text-gray-800 dark:text-gray-200 hidden sm:table-cell">
+                          {pedido.cliente.telefono || 'N/A'}
+                        </td>
+                        <td className="px-4 py-3 text-sm font-medium text-gray-800 dark:text-gray-200 hidden md:table-cell">
+                          {pedido.cliente.direccion?.slice(0, 20) || 'N/A'}...
+                        </td>
+                        <td className="px-4 py-3 text-sm font-medium text-gray-800 dark:text-gray-200 hidden sm:table-cell">
+                          {pedido.fechas.diasAlquiler}
+                        </td>
+                        <td className="px-4 py-3 text-sm font-medium text-gray-800 dark:text-gray-200">
+                          <span className="text-green-600 dark:text-green-400">
+                            ${pedido.pago.total}
+                          </span>
+                        </td>
+                        <td className="px-4 py-3 text-sm text-gray-800 dark:text-gray-200">
+                          <span
+                            className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-semibold shadow-sm select-none ${
+                              pedido.estado === 'Procesando'
+                                ? 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-300'
+                                : pedido.estado === 'Enviando'
+                                  ? 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300'
+                                  : pedido.estado === 'Confirmado'
+                                    ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300'
+                                    : pedido.estado === 'En alquiler'
+                                      ? 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-300'
+                                      : pedido.estado === 'Devuelto'
+                                        ? 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-300'
+                                        : pedido.estado === 'Incompleto'
+                                          ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300'
+                                          : pedido.estado === 'Incidente'
+                                            ? 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300'
+                                            : pedido.estado === 'Cancelado'
+                                              ? 'bg-black text-white dark:bg-gray-800 dark:text-gray-300'
+                                              : pedido.estado === 'Finalizado'
+                                                ? 'bg-green-800 text-green-100 dark:bg-green-700 dark:text-green-200'
+                                                : ''
+                            }`}
                           >
-                            <FontAwesomeIcon icon={faBrain} />
+                            <FontAwesomeIcon
+                              icon={
+                                pedido.estado === 'Procesando'
+                                  ? faClock
+                                  : pedido.estado === 'Enviando'
+                                    ? faTruck
+                                    : pedido.estado === 'Confirmado'
+                                      ? faCheckCircle
+                                      : pedido.estado === 'En alquiler'
+                                        ? faTruck
+                                        : pedido.estado === 'Devuelto'
+                                          ? faUndo
+                                          : pedido.estado === 'Incompleto'
+                                            ? faExclamationTriangle
+                                            : pedido.estado === 'Incidente'
+                                              ? faExclamationCircle
+                                              : pedido.estado === 'Cancelado'
+                                                ? faBan
+                                                : pedido.estado === 'Finalizado'
+                                                  ? faCheckCircle
+                                                  : faQuestionCircle
+                              }
+                              className="mr-1"
+                            />
+                            {pedido.estado}
+                          </span>
+                        </td>
+                        <td className="px-4 py-3 text-sm flex space-x-3">
+                          <button
+                            onClick={() => handleShowDetails(pedido)}
+                            className="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 transition-all duration-200 p-2 rounded-full hover:bg-blue-100 dark:hover:bg-blue-900"
+                            title="Ver Detalles"
+                          >
+                            <FontAwesomeIcon icon={faEye} size="lg" />
                           </button>
-                        )}
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
+                          <button
+                            onClick={() => handleShowTimeline(pedido)}
+                            className="text-green-600 hover:text-green-800 dark:text-green-400 dark:hover:text-green-300 transition-all duration-200 p-2 rounded-full hover:bg-green-100 dark:hover:bg-green-900"
+                            title="Ver Localización"
+                          >
+                            <FontAwesomeIcon icon={faMapMarkerAlt} size="lg" />
+                          </button>
+                          <button
+                            onClick={() => handleShowTicketModal(pedido)}
+                            className="text-orange-600 hover:text-orange-800 dark:text-orange-400 dark:hover:text-orange-300 transition-all duration-200 p-2 rounded-full hover:bg-orange-100 dark:hover:bg-orange-900"
+                            title="Generar Ticket"
+                          >
+                            <FontAwesomeIcon icon={faTicketAlt} size="lg" />
+                          </button>
+                          {puedePredecir && (
+                            <button
+                              onClick={() => setPedidoParaPredecir(pedido)}
+                              className="text-purple-600 hover:text-purple-800 p-2 rounded-full hover:bg-purple-100 dark:text-purple-400 dark:hover:text-purple-300 dark:hover:bg-purple-900"
+                              title="Predecir Cancelación"
+                            >
+                              <FontAwesomeIcon icon={faBrain} />
+                            </button>
+                          )}
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
 
-          <div className="flex flex-col sm:flex-row justify-between items-center mt-6 gap-4">
-            <p className="text-sm text-gray-600 dark:text-gray-300">
-              Mostrando {indexOfFirstOrder + 1} - {Math.min(indexOfLastOrder, filteredPedidos.length)} de {filteredPedidos.length} pedidos
-            </p>
-            <div className="flex items-center space-x-2">
+            <div className="flex flex-col sm:flex-row justify-between items-center mt-6 gap-4">
+              <p className="text-sm text-gray-600 dark:text-gray-300">
+                Mostrando {(currentPage - 1) * ordersPerPage + 1} -{' '}
+                {Math.min(currentPage * ordersPerPage, totalPedidos)} de{' '}
+                {totalPedidos} pedidos
+              </p>
+              <div className="flex items-center space-x-2">
+                <button
+                  onClick={() => handlePageChange(currentPage - 1)}
+                  disabled={currentPage === 1}
+                  className={`px-3 py-1 rounded-l-lg ${
+                    currentPage === 1
+                      ? 'bg-gray-300 text-gray-500 cursor-not-allowed dark:bg-gray-600'
+                      : 'bg-yellow-500 text-white hover:bg-yellow-600 dark:hover:bg-yellow-600 transition-all duration-200'
+                  }`}
+                  aria-label="Página anterior"
+                >
+                  <FontAwesomeIcon icon={faChevronLeft} />
+                </button>
+                {totalPages <= 7 ? (
+                  Array.from({ length: totalPages }, (_, i) => i + 1).map(
+                    (page) => (
+                      <button
+                        key={page}
+                        onClick={() => handlePageChange(page)}
+                        className={`px-3 py-1 rounded-lg ${
+                          currentPage === page
+                            ? 'bg-yellow-600 text-white dark:bg-yellow-600'
+                            : 'bg-gray-200 text-gray-700 hover:bg-gray-300 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600 transition-all duration-200'
+                        }`}
+                        aria-label={`Ir a página ${page}`}
+                      >
+                        {page}
+                      </button>
+                    )
+                  )
+                ) : (
+                  <>
+                    {Array.from({ length: 3 }, (_, i) => i + 1).map((page) => (
+                      <button
+                        key={page}
+                        onClick={() => handlePageChange(page)}
+                        className={`px-3 py-1 rounded-lg ${
+                          currentPage === page
+                            ? 'bg-yellow-600 text-white dark:bg-yellow-600'
+                            : 'bg-gray-200 text-gray-700 hover:bg-gray-300 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600 transition-all duration-200'
+                        }`}
+                        aria-label={`Ir a página ${page}`}
+                      >
+                        {page}
+                      </button>
+                    ))}
+                    {currentPage > 4 && (
+                      <span className="px-3 py-1 text-gray-600 dark:text-gray-300">
+                        ...
+                      </span>
+                    )}
+                    {currentPage > 3 && currentPage < totalPages - 2 && (
+                      <button
+                        onClick={() => handlePageChange(currentPage)}
+                        className="px-3 py-1 rounded-lg bg-yellow-600 text-white dark:bg-yellow-600"
+                        aria-label={`Página actual ${currentPage}`}
+                      >
+                        {currentPage}
+                      </button>
+                    )}
+                    {currentPage < totalPages - 2 && (
+                      <span className="px-3 py-1 text-gray-600 dark:text-gray-300">
+                        ...
+                      </span>
+                    )}
+                    {Array.from(
+                      { length: 3 },
+                      (_, i) => totalPages - 2 + i
+                    ).map((page) => (
+                      <button
+                        key={page}
+                        onClick={() => handlePageChange(page)}
+                        className={`px-3 py-1 rounded-lg ${
+                          currentPage === page
+                            ? 'bg-yellow-600 text-white dark:bg-yellow-600'
+                            : 'bg-gray-200 text-gray-700 hover:bg-gray-300 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600 transition-all duration-200'
+                        }`}
+                        aria-label={`Ir a página ${page}`}
+                      >
+                        {page}
+                      </button>
+                    ))}
+                  </>
+                )}
+                <button
+                  onClick={() => handlePageChange(currentPage + 1)}
+                  disabled={currentPage === totalPages}
+                  className={`px-3 py-1 rounded-r-lg ${
+                    currentPage === totalPages
+                      ? 'bg-gray-300 text-gray-500 cursor-not-allowed dark:bg-gray-600'
+                      : 'bg-yellow-500 text-white hover:bg-yellow-600 dark:hover:bg-yellow-600 transition-all duration-200'
+                  }`}
+                  aria-label="Página siguiente"
+                >
+                  <FontAwesomeIcon icon={faChevronRight} />
+                </button>
+              </div>
+            </div>
+
+            <div className="mt-6 flex flex-col sm:flex-row justify-center gap-3">
               <button
-                onClick={() => handlePageChange(currentPage - 1)}
-                disabled={currentPage === 1}
-                className={`px-3 py-1 rounded-l-lg ${
-                  currentPage === 1
-                    ? "bg-gray-300 text-gray-500 cursor-not-allowed dark:bg-gray-600"
-                    : "bg-yellow-500 text-white hover:bg-yellow-600 dark:hover:bg-yellow-600 transition-all duration-200"
-                }`}
-                aria-label="Página anterior"
+                onClick={() => onNavigate('Pedidos General Dashboard')}
+                className="flex items-center px-3 py-1.5 text-sm bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-md shadow-sm hover:from-blue-700 hover:to-blue-800 transition-all duration-200"
               >
-                <FontAwesomeIcon icon={faChevronLeft} />
-              </button>
-              {totalPages <= 7 ? (
-                Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-                  <button
-                    key={page}
-                    onClick={() => handlePageChange(page)}
-                    className={`px-3 py-1 rounded-lg ${
-                      currentPage === page
-                        ? "bg-yellow-600 text-white dark:bg-yellow-600"
-                        : "bg-gray-200 text-gray-700 hover:bg-gray-300 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600 transition-all duration-200"
-                    }`}
-                    aria-label={`Ir a página ${page}`}
-                  >
-                    {page}
-                  </button>
-                ))
-              ) : (
-                <>
-                  {Array.from({ length: 3 }, (_, i) => i + 1).map((page) => (
-                    <button
-                      key={page}
-                      onClick={() => handlePageChange(page)}
-                      className={`px-3 py-1 rounded-lg ${
-                        currentPage === page
-                          ? "bg-yellow-600 text-white dark:bg-yellow-600"
-                          : "bg-gray-200 text-gray-700 hover:bg-gray-300 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600 transition-all duration-200"
-                      }`}
-                      aria-label={`Ir a página ${page}`}
-                    >
-                      {page}
-                    </button>
-                  ))}
-                  {currentPage > 4 && <span className="px-3 py-1 text-gray-600 dark:text-gray-300">...</span>}
-                  {currentPage > 3 && currentPage < totalPages - 2 && (
-                    <button
-                      onClick={() => handlePageChange(currentPage)}
-                      className="px-3 py-1 rounded-lg bg-yellow-600 text-white dark:bg-yellow-600"
-                      aria-label={`Página actual ${currentPage}`}
-                    >
-                      {currentPage}
-                    </button>
-                  )}
-                  {currentPage < totalPages - 2 && <span className="px-3 py-1 text-gray-600 dark:text-gray-300">...</span>}
-                  {Array.from({ length: 3 }, (_, i) => totalPages - 2 + i).map((page) => (
-                    <button
-                      key={page}
-                      onClick={() => handlePageChange(page)}
-                      className={`px-3 py-1 rounded-lg ${
-                        currentPage === page
-                          ? "bg-yellow-600 text-white dark:bg-yellow-600"
-                          : "bg-gray-200 text-gray-700 hover:bg-gray-300 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600 transition-all duration-200"
-                      }`}
-                      aria-label={`Ir a página ${page}`}
-                    >
-                      {page}
-                    </button>
-                  ))}
-                </>
-              )}
-              <button
-                onClick={() => handlePageChange(currentPage + 1)}
-                disabled={currentPage === totalPages}
-                className={`px-3 py-1 rounded-r-lg ${
-                  currentPage === totalPages
-                    ? "bg-gray-300 text-gray-500 cursor-not-allowed dark:bg-gray-600"
-                    : "bg-yellow-500 text-white hover:bg-yellow-600 dark:hover:bg-yellow-600 transition-all duration-200"
-                }`}
-                aria-label="Página siguiente"
-              >
-                <FontAwesomeIcon icon={faChevronRight} />
+                <FontAwesomeIcon icon={faChartBar} className="mr-1" />
+                <span className="hidden sm:inline">Dashboard</span>
+                <span className="sm:hidden">Pedidos</span>
               </button>
             </div>
-          </div>
 
-          <div className="mt-6 flex flex-col sm:flex-row justify-center gap-3">
-            <button
-              onClick={() => onNavigate("Pedidos General Dashboard")}
-              className="flex items-center px-3 py-1.5 text-sm bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-md shadow-sm hover:from-blue-700 hover:to-blue-800 transition-all duration-200"
-            >
-              <FontAwesomeIcon icon={faChartBar} className="mr-1" />
-              <span className="hidden sm:inline">Dashboard</span>
-              <span className="sm:hidden">Pedidos</span>
-            </button>
-          </div>
+            {showTimelineModal && renderTimelineModal()}
+            {showDetailsModal && renderDetailsModal()}
+            {showTicketModal && (
+              <TicketCompra
+                pedido={showTicketModal}
+                onClose={() => setShowTicketModal(null)}
+                onSend={handleSendTicket}
+              />
+            )}
 
-          {showTimelineModal && renderTimelineModal()}
-          {showDetailsModal && renderDetailsModal()}
-          {showTicketModal && (
-            <TicketCompra
-              pedido={showTicketModal}
-              onClose={() => setShowTicketModal(null)}
-              onSend={handleSendTicket}
-            />
-          )}
-
-          {pedidoParaPredecir && (
-            <PredictCancelModal
-              pedido={pedidoParaPredecir}
-              onClose={() => setPedidoParaPredecir(null)}
-            />
-          )}
-        </>
-      )}
+            {pedidoParaPredecir && (
+              <PredictCancelModal
+                pedido={pedidoParaPredecir}
+                onClose={() => setPedidoParaPredecir(null)}
+              />
+            )}
+          </>
+        )}
+      </div>
     </div>
-  </div>
-);
-
-
+  );
 };
 
 export default GestionPedidos;

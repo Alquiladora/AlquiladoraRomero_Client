@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect } from 'react';
 import {
   ChatAlt2Icon,
   XIcon,
@@ -6,31 +6,32 @@ import {
   PhoneIcon,
   ChatIcon,
   PaperAirplaneIcon,
-} from "@heroicons/react/outline";
-import Draggable from "react-draggable";
-import { motion, AnimatePresence } from "framer-motion";
-import { GoogleGenerativeAI } from "@google/generative-ai";
+} from '@heroicons/react/outline';
+import Draggable from 'react-draggable';
+import { motion, AnimatePresence } from 'framer-motion';
+import { GoogleGenerativeAI } from '@google/generative-ai';
 
 const Chatbox = ({ onClose }) => {
   const [messages, setMessages] = useState([]);
-  const [inputText, setInputText] = useState("");
+  const [inputText, setInputText] = useState('');
   const [isMinimized, setIsMinimized] = useState(false);
   const [isPhoneMenuOpen, setIsPhoneMenuOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const nodeRef = useRef(null);
   const messagesContainerRef = useRef(null);
 
+  const genAI = new GoogleGenerativeAI(
+    'AIzaSyBB9oSHIU3ajlWDPJQN3RaTWIIPA8eHyFo'
+  );
+  const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
 
-  const genAI = new GoogleGenerativeAI("AIzaSyBB9oSHIU3ajlWDPJQN3RaTWIIPA8eHyFo");
-  const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
-
-
-  const encargadaPhoneNumber = "+525659722146";
+  const encargadaPhoneNumber = '+525659722146';
 
   // Scroll automático al final de los mensajes
   const scrollToBottom = () => {
     if (messagesContainerRef.current) {
-      messagesContainerRef.current.scrollTop = messagesContainerRef.current.scrollHeight;
+      messagesContainerRef.current.scrollTop =
+        messagesContainerRef.current.scrollHeight;
     }
   };
 
@@ -38,51 +39,56 @@ const Chatbox = ({ onClose }) => {
     scrollToBottom();
   }, [messages, isLoading]);
 
-
   const fetchEmpresaInfo = async () => {
     try {
-      const response = await fetch("https://localhost:4000/api/getEmpresa");
-      if (!response.ok) throw new Error("Error en la respuesta del servidor");
+      const response = await fetch('https://localhost:4000/api/getEmpresa');
+      if (!response.ok) throw new Error('Error en la respuesta del servidor');
       const data = await response.json();
-      console.log("Datos de la empresa:", data);
+      console.log('Datos de la empresa:', data);
       return Array.isArray(data) ? data[0] : data;
     } catch (error) {
-      console.error("Error al obtener información de la empresa:", error);
+      console.error('Error al obtener información de la empresa:', error);
       return null;
     }
   };
 
   // Enviar mensaje y obtener respuesta del bot
   const handleSendMessage = async () => {
-    if (inputText.trim() === "") return;
+    if (inputText.trim() === '') return;
 
-    const timestamp = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
-    const userMessage = { text: inputText, sender: "user", timestamp };
+    const timestamp = new Date().toLocaleTimeString([], {
+      hour: '2-digit',
+      minute: '2-digit',
+    });
+    const userMessage = { text: inputText, sender: 'user', timestamp };
     setMessages([...messages, userMessage]);
-    setInputText("");
+    setInputText('');
     setIsLoading(true);
 
     try {
-      let botResponseText = "";
+      let botResponseText = '';
       const lowerCaseInput = inputText.toLowerCase();
       const empresaInfo = await fetchEmpresaInfo();
 
       if (empresaInfo) {
-        if (lowerCaseInput.includes("nombre") || lowerCaseInput.includes("como se llama")) {
+        if (
+          lowerCaseInput.includes('nombre') ||
+          lowerCaseInput.includes('como se llama')
+        ) {
           botResponseText = `El nombre de la empresa es: ${empresaInfo.nombre}.`;
         } else if (
-          lowerCaseInput.includes("quienes son") ||
-          lowerCaseInput.includes("acerca de") ||
-          lowerCaseInput.includes("farmamedic")
+          lowerCaseInput.includes('quienes son') ||
+          lowerCaseInput.includes('acerca de') ||
+          lowerCaseInput.includes('farmamedic')
         ) {
           botResponseText = `${empresaInfo.nosotros}.`;
-        } else if (lowerCaseInput.includes("mision")) {
+        } else if (lowerCaseInput.includes('mision')) {
           botResponseText = `${empresaInfo.mision}.`;
-        } else if (lowerCaseInput.includes("vision")) {
+        } else if (lowerCaseInput.includes('vision')) {
           botResponseText = `Visión: ${empresaInfo.vision}.`;
-        } else if (lowerCaseInput.includes("valores")) {
+        } else if (lowerCaseInput.includes('valores')) {
           botResponseText = `Nuestros valores son: ${empresaInfo.valores}.`;
-        } else if (lowerCaseInput.includes("servicios")) {
+        } else if (lowerCaseInput.includes('servicios')) {
           botResponseText = `Ofrecemos los siguientes servicios: ${empresaInfo.servicios}.`;
         } else {
           // Si no coincide con ninguna condición, usar Gemini API
@@ -90,16 +96,17 @@ const Chatbox = ({ onClose }) => {
           botResponseText = result.response.text();
         }
       } else {
-        botResponseText = "Lo siento, no pude obtener información sobre la empresa en este momento.";
+        botResponseText =
+          'Lo siento, no pude obtener información sobre la empresa en este momento.';
       }
 
-      const botResponse = { text: botResponseText, sender: "bot", timestamp };
+      const botResponse = { text: botResponseText, sender: 'bot', timestamp };
       setMessages((prevMessages) => [...prevMessages, botResponse]);
     } catch (error) {
-      console.error("Error al enviar el mensaje:", error);
+      console.error('Error al enviar el mensaje:', error);
       const errorMessage = {
-        text: "Lo siento, ocurrió un error al procesar tu mensaje.",
-        sender: "bot",
+        text: 'Lo siento, ocurrió un error al procesar tu mensaje.',
+        sender: 'bot',
         timestamp,
       };
       setMessages((prevMessages) => [...prevMessages, errorMessage]);
@@ -113,8 +120,18 @@ const Chatbox = ({ onClose }) => {
   };
 
   const chatboxVariants = {
-    minimized: { scale: 0.8, opacity: 0, y: 100, transition: { type: "spring", stiffness: 100 } },
-    expanded: { scale: 1, opacity: 1, y: 0, transition: { type: "spring", stiffness: 100 } },
+    minimized: {
+      scale: 0.8,
+      opacity: 0,
+      y: 100,
+      transition: { type: 'spring', stiffness: 100 },
+    },
+    expanded: {
+      scale: 1,
+      opacity: 1,
+      y: 0,
+      transition: { type: 'spring', stiffness: 100 },
+    },
   };
 
   const phoneMenuVariants = {
@@ -126,7 +143,11 @@ const Chatbox = ({ onClose }) => {
     <>
       <AnimatePresence>
         {!isMinimized ? (
-          <Draggable nodeRef={nodeRef} defaultPosition={{ x: 0, y: 0 }} bounds="parent">
+          <Draggable
+            nodeRef={nodeRef}
+            defaultPosition={{ x: 0, y: 0 }}
+            bounds="parent"
+          >
             <motion.div
               ref={nodeRef}
               initial="minimized"
@@ -139,7 +160,9 @@ const Chatbox = ({ onClose }) => {
               <div className="bg-gradient-to-r from-yellow-500 to-yellow-600 text-white p-4 rounded-tl-lg flex justify-between items-center">
                 <div className="flex items-center space-x-3">
                   <ChatAlt2Icon className="w-7 h-7" />
-                  <h2 className="text-base sm:text-lg font-semibold">Ayuda en línea</h2>
+                  <h2 className="text-base sm:text-lg font-semibold">
+                    Ayuda en línea
+                  </h2>
                 </div>
                 <div className="flex items-center space-x-3">
                   <div
@@ -165,7 +188,7 @@ const Chatbox = ({ onClose }) => {
                             Llamar
                           </a>
                           <a
-                            href={`https://wa.me/${encargadaPhoneNumber.replace("+", "")}?text=Hola,%20necesito%20ayuda%20con%20Alquiladora%20Romero`}
+                            href={`https://wa.me/${encargadaPhoneNumber.replace('+', '')}?text=Hola,%20necesito%20ayuda%20con%20Alquiladora%20Romero`}
                             target="_blank"
                             rel="noopener noreferrer"
                             className="flex items-center p-2 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 rounded"
@@ -177,10 +200,16 @@ const Chatbox = ({ onClose }) => {
                       )}
                     </AnimatePresence>
                   </div>
-                  <button onClick={handleMinimize} className="hover:text-gray-200 transition-colors">
+                  <button
+                    onClick={handleMinimize}
+                    className="hover:text-gray-200 transition-colors"
+                  >
                     <MinusIcon className="w-6 h-6" />
                   </button>
-                  <button onClick={onClose} className="hover:text-gray-200 transition-colors">
+                  <button
+                    onClick={onClose}
+                    className="hover:text-gray-200 transition-colors"
+                  >
                     <XIcon className="w-6 h-6" />
                   </button>
                 </div>
@@ -202,17 +231,19 @@ const Chatbox = ({ onClose }) => {
                       initial={{ opacity: 0, y: 20 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ duration: 0.3 }}
-                      className={`flex ${message.sender === "user" ? "justify-end" : "justify-start"}`}
+                      className={`flex ${message.sender === 'user' ? 'justify-end' : 'justify-start'}`}
                     >
                       <div
                         className={`max-w-[75%] p-3 rounded-lg shadow-sm ${
-                          message.sender === "user"
-                            ? "bg-yellow-500 text-white rounded-br-none"
-                            : "bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded-bl-none"
+                          message.sender === 'user'
+                            ? 'bg-yellow-500 text-white rounded-br-none'
+                            : 'bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded-bl-none'
                         }`}
                       >
                         <p>{message.text}</p>
-                        <p className="text-xs mt-1 opacity-70">{message.timestamp}</p>
+                        <p className="text-xs mt-1 opacity-70">
+                          {message.timestamp}
+                        </p>
                       </div>
                     </motion.div>
                   ))
@@ -237,7 +268,7 @@ const Chatbox = ({ onClose }) => {
                     type="text"
                     value={inputText}
                     onChange={(e) => setInputText(e.target.value)}
-                    onKeyPress={(e) => e.key === "Enter" && handleSendMessage()}
+                    onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
                     placeholder="Escribe tu mensaje..."
                     className="flex-1 p-3 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-yellow-500 bg-white text-gray-800 dark:bg-gray-800 dark:border-gray-600 dark:text-white dark:placeholder-gray-400 transition-all"
                     disabled={isLoading}

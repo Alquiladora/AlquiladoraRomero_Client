@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
- import Logo2 from '../img/Logos/LogoOriginal.png'
-import api from "./AxiosConfig";
+import Logo2 from '../img/Logos/LogoOriginal.png';
+import api from './AxiosConfig';
 
 const SpinerCarga = () => {
   const [logoData, setLogoData] = useState(null);
@@ -13,7 +13,7 @@ const SpinerCarga = () => {
       setLogoData(response.data);
     } catch (error) {
       console.error('Error al obtener el logo de la empresa:', error);
-    
+
       setLogoData(null);
     }
   };
@@ -22,7 +22,6 @@ const SpinerCarga = () => {
     getLogo();
   }, []);
 
- 
   const logoUrl = logoData && logoData.logoUrl ? logoData.logoUrl : Logo2;
 
   return (

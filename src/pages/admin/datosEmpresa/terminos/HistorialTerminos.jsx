@@ -1,5 +1,4 @@
-import React, { useEffect, useState, useContext, useRef } from "react";
-import axios from "axios";
+import React, { useEffect, useState } from 'react';
 import {
   Container,
   Typography,
@@ -16,7 +15,6 @@ import {
   TablePagination,
   Dialog,
   Grid,
-  DialogTitle,
   DialogContent,
   Chip,
   DialogActions,
@@ -24,20 +22,16 @@ import {
   List,
   ListItem,
   ListItemText,
-} from "@mui/material";
-import { Visibility, ArrowBack } from "@mui/icons-material";
-import { Toast } from "primereact/toast";
-import { useNavigate } from "react-router-dom";
-import api from "../../../../utils/AxiosConfig";
+} from '@mui/material';
+import { Visibility, ArrowBack } from '@mui/icons-material';
+
+import api from '../../../../utils/AxiosConfig';
 
 const HistorialTerminos = ({ onNavigate }) => {
   const [terminos, setTerminos] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const toast = useRef(null);
-  const navigate = useNavigate();
 
-  
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
 
@@ -51,12 +45,14 @@ const HistorialTerminos = ({ onNavigate }) => {
 
   const fetchTerminos = async () => {
     try {
-      const response = await api.get("/api/terminos", { withCredentials: true });
+      const response = await api.get('/api/terminos', {
+        withCredentials: true,
+      });
       setTerminos(response.data);
       setLoading(false);
     } catch (err) {
-      console.error("Error al obtener los términos:", err);
-      setError("No se pudieron cargar los términos.");
+      console.error('Error al obtener los términos:', err);
+      setError('No se pudieron cargar los términos.');
       setLoading(false);
     }
   };
@@ -73,20 +69,23 @@ const HistorialTerminos = ({ onNavigate }) => {
 
   // Función para formatear fechas
   const formatDate = (dateString) => {
-    if (!dateString) return "N/A";
-    return new Date(dateString).toLocaleDateString("es-MX", {
-      timeZone: "America/Mexico_City",
-      year: "numeric",
-      month: "2-digit",
-      day: "2-digit",
-      hour: "2-digit",
-      minute: "2-digit",
-      second: "2-digit",
+    if (!dateString) return 'N/A';
+    return new Date(dateString).toLocaleDateString('es-MX', {
+      timeZone: 'America/Mexico_City',
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
     });
   };
 
   // Datos a mostrar según la paginación
-  const paginatedTerminos = terminos.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
+  const paginatedTerminos = terminos.slice(
+    page * rowsPerPage,
+    page * rowsPerPage + rowsPerPage
+  );
 
   // Funciones para manejar el modal
   const handleOpenModal = (termino) => {
@@ -101,7 +100,7 @@ const HistorialTerminos = ({ onNavigate }) => {
 
   if (loading)
     return (
-      <Box sx={{ display: "flex", justifyContent: "center", mt: 4 }}>
+      <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
         <CircularProgress />
       </Box>
     );
@@ -117,7 +116,7 @@ const HistorialTerminos = ({ onNavigate }) => {
         <IconButton
           onClick={(e) => {
             e.stopPropagation();
-            onNavigate("Terminos");
+            onNavigate('Terminos');
           }}
           color="primary"
           aria-label="Regresar a la página principal"
@@ -185,13 +184,13 @@ const HistorialTerminos = ({ onNavigate }) => {
                     className="font-bold"
                     sx={{
                       color:
-                        termino.estado === "vigente"
-                          ? "green"
-                          : termino.estado === "no vigente"
-                          ? "orange"
-                          : termino.estado === "eliminado"
-                          ? "red"
-                          : "grey",
+                        termino.estado === 'vigente'
+                          ? 'green'
+                          : termino.estado === 'no vigente'
+                            ? 'orange'
+                            : termino.estado === 'eliminado'
+                              ? 'red'
+                              : 'grey',
                     }}
                   >
                     {termino.estado.charAt(0).toUpperCase() +
@@ -254,11 +253,11 @@ const HistorialTerminos = ({ onNavigate }) => {
         <Box
           className="bg-yellow-500 text-white"
           sx={{
-            display: "flex",
-            alignItems: "center",
+            display: 'flex',
+            alignItems: 'center',
             padding: 2,
-            borderTopLeftRadius: "8px",
-            borderTopRightRadius: "8px",
+            borderTopLeftRadius: '8px',
+            borderTopRightRadius: '8px',
           }}
         >
           <Visibility sx={{ marginRight: 1 }} />
@@ -333,13 +332,13 @@ const HistorialTerminos = ({ onNavigate }) => {
                       selectedTermino.estado.slice(1)
                     }
                     color={
-                      selectedTermino.estado === "vigente"
-                        ? "success"
-                        : selectedTermino.estado === "no vigente"
-                        ? "warning"
-                        : selectedTermino.estado === "eliminado"
-                        ? "error"
-                        : "default"
+                      selectedTermino.estado === 'vigente'
+                        ? 'success'
+                        : selectedTermino.estado === 'no vigente'
+                          ? 'warning'
+                          : selectedTermino.estado === 'eliminado'
+                            ? 'error'
+                            : 'default'
                     }
                     variant="outlined"
                   />
@@ -459,6 +458,6 @@ const HistorialTerminos = ({ onNavigate }) => {
       </Dialog>
     </Container>
   );
-}
+};
 
 export default HistorialTerminos;

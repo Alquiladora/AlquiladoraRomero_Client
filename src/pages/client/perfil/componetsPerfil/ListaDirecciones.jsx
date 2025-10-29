@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from "react";
-import axios from "axios";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+/* eslint-disable */
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faTimes,
   faMapMarkerAlt,
@@ -15,17 +16,24 @@ import {
   faLocationArrow,
   faHome,
   faClipboardCheck,
-} from "@fortawesome/free-solid-svg-icons";
-import api from "../../../../utils/AxiosConfig";
-import { useAuth } from "../../../../hooks/ContextAuth";
-import { toast } from "react-toastify";
+} from '@fortawesome/free-solid-svg-icons';
+import api from '../../../../utils/AxiosConfig';
+import { useAuth } from '../../../../hooks/ContextAuth';
+import { toast } from 'react-toastify';
 
-const ListaDirecciones = ({ idUsuarios, isOpen, onClose, onAddressUpdated, showList = true, editAddressId}) => {
+const ListaDirecciones = ({
+  idUsuarios,
+  isOpen,
+  onClose,
+  onAddressUpdated,
+  showList = true,
+  editAddressId,
+}) => {
   const { csrfToken } = useAuth();
   const [direcciones, setDirecciones] = useState([]);
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
- console.log("Dato recibido de dirreciones", editAddressId)
+  console.log('Dato recibido de dirreciones', editAddressId);
 
   const [showModal, setShowModal] = useState(false);
   const [currentStep, setCurrentStep] = useState(1);
@@ -33,17 +41,17 @@ const ListaDirecciones = ({ idUsuarios, isOpen, onClose, onAddressUpdated, showL
   const [isEditing, setIsEditing] = useState(false);
   const [editId, setEditId] = useState(null);
 
-  const [ubicacion, setUbicacion] = useState("México");
-  const [nombre, setNombre] = useState("");
-  const [apellido, setApellido] = useState("");
-  const [telefono, setTelefono] = useState("");
-  const [calleNumero, setCalleNumero] = useState("");
-  const [referencias, setReferencias] = useState("");
+  const [ubicacion, setUbicacion] = useState('México');
+  const [nombre, setNombre] = useState('');
+  const [apellido, setApellido] = useState('');
+  const [telefono, setTelefono] = useState('');
+  const [calleNumero, setCalleNumero] = useState('');
+  const [referencias, setReferencias] = useState('');
   const [referencesCount, setReferencesCount] = useState(0);
-  const [postalCode, setPostalCode] = useState("");
-  const [estado, setEstado] = useState("");
-  const [municipioInput, setMunicipioInput] = useState("");
-  const [ciudad, setCiudad] = useState("");
+  const [postalCode, setPostalCode] = useState('');
+  const [estado, setEstado] = useState('');
+  const [municipioInput, setMunicipioInput] = useState('');
+  const [ciudad, setCiudad] = useState('');
   const [esPredeterminada, setEsPredeterminada] = useState(false);
 
   const [isPostalCodeValidated, setIsPostalCodeValidated] = useState(false);
@@ -52,102 +60,91 @@ const ListaDirecciones = ({ idUsuarios, isOpen, onClose, onAddressUpdated, showL
   const [estadosData, setEstadosData] = useState([]);
   const [municipios, setMunicipios] = useState([]);
   const [localidades, setLocalidades] = useState([]);
-  const [selectedLocalidad, setSelectedLocalidad] = useState("");
+  const [selectedLocalidad, setSelectedLocalidad] = useState('');
   const [manualLocalidad, setManualLocalidad] = useState(false);
-  const [manualLocalidadValue, setManualLocalidadValue] = useState("");
+  const [manualLocalidadValue, setManualLocalidadValue] = useState('');
 
- 
-  const [originalCP, setOriginalCP] = useState("");
+  const [originalCP, setOriginalCP] = useState('');
   const [userHasChangedCP, setUserHasChangedCP] = useState(false);
 
- 
-  const [nombreError, setNombreError] = useState("");
-  const [apellidoError, setApellidoError] = useState("");
-  const [telefonoError, setTelefonoError] = useState("");
-  const [postalCodeError, setPostalCodeError] = useState("");
-  const [calleNumeroError, setCalleNumeroError] = useState("");
-  const [referenciasError, setReferenciasError] = useState("");
-  const [localidadError, setLocalidadError] = useState("");
-  const [municipioError, setMunicipioError] = useState("");
-  const [estadoError, setEstadoError] = useState("");
-
- 
- 
- useEffect(() => {
-  cargarDirecciones();
-}, []);
-
-
- 
- useEffect(() => {
-  if (isOpen) {
-    setShowModal(true);
-    if (editAddressId) {
-     
-      handleOpenModal(editAddressId);
-    } else {
-     
-      handleOpenModal(null);
-    }
-  }
-}, [isOpen, editAddressId]);
-
+  const [nombreError, setNombreError] = useState('');
+  const [apellidoError, setApellidoError] = useState('');
+  const [telefonoError, setTelefonoError] = useState('');
+  const [postalCodeError, setPostalCodeError] = useState('');
+  const [calleNumeroError, setCalleNumeroError] = useState('');
+  const [referenciasError, setReferenciasError] = useState('');
+  const [localidadError, setLocalidadError] = useState('');
+  const [municipioError, setMunicipioError] = useState('');
+  const [estadoError, setEstadoError] = useState('');
 
   useEffect(() => {
-    
+    cargarDirecciones();
+  }, []);
+
+  useEffect(() => {
+    if (isOpen) {
+      setShowModal(true);
+      if (editAddressId) {
+        handleOpenModal(editAddressId);
+      } else {
+        handleOpenModal(null);
+      }
+    }
+  }, [isOpen, editAddressId]);
+
+  useEffect(() => {
     if (nombre.trim().length > 0) {
       if (nombre.trim().length < 3) {
-        setNombreError("El nombre debe tener al menos 3 caracteres.");
+        setNombreError('El nombre debe tener al menos 3 caracteres.');
       } else if (!/^[a-zA-ZÀ-ÿ\u00f1\u00d1\s]+$/.test(nombre.trim())) {
-        setNombreError("El nombre solo puede contener letras, espacios y caracteres especiales como tildes o diéresis.");
+        setNombreError(
+          'El nombre solo puede contener letras, espacios y caracteres especiales como tildes o diéresis.'
+        );
       } else {
-        setNombreError("");
+        setNombreError('');
       }
     } else {
-      setNombreError("");
+      setNombreError('');
     }
   }, [nombre]);
-  
+
   useEffect(() => {
-   
     if (apellido.trim().length > 0) {
       if (apellido.trim().length < 3) {
-        setApellidoError("El apellido debe tener al menos 3 caracteres.");
+        setApellidoError('El apellido debe tener al menos 3 caracteres.');
       } else if (!/^[a-zA-ZÀ-ÿ\u00f1\u00d1\s]+$/.test(apellido.trim())) {
-        setApellidoError("El apellido solo puede contener letras, espacios y caracteres especiales como tildes o diéresis.");
+        setApellidoError(
+          'El apellido solo puede contener letras, espacios y caracteres especiales como tildes o diéresis.'
+        );
       } else {
-        setApellidoError("");
+        setApellidoError('');
       }
     } else {
-      setApellidoError("");
+      setApellidoError('');
     }
   }, [apellido]);
-  
-
 
   useEffect(() => {
-   
     if (telefono.trim().length > 0) {
       if (!/^\d{10}$/.test(telefono.trim())) {
-        setTelefonoError("El teléfono debe contener exactamente 10 dígitos.");
+        setTelefonoError('El teléfono debe contener exactamente 10 dígitos.');
       } else {
-        setTelefonoError("");
+        setTelefonoError('');
       }
     } else {
-      setTelefonoError("");
+      setTelefonoError('');
     }
   }, [telefono]);
 
   useEffect(() => {
-  
     if (postalCode.trim().length > 0) {
       if (!/^\d{5}$/.test(postalCode.trim())) {
-        setPostalCodeError("El código postal debe tener 5 dígitos.");
+        setPostalCodeError('El código postal debe tener 5 dígitos.');
       } else {
-        setPostalCodeError("");
+        setPostalCodeError('');
       }
     } else {
-      setPostalCodeError("");
+      setPostalCodeError('');
     }
   }, [postalCode]);
 
@@ -155,12 +152,12 @@ const ListaDirecciones = ({ idUsuarios, isOpen, onClose, onAddressUpdated, showL
     // Validación de Calle y Número
     if (calleNumero.trim().length > 0) {
       if (calleNumero.trim().length < 5) {
-        setCalleNumeroError("La dirección debe tener al menos 5 caracteres.");
+        setCalleNumeroError('La dirección debe tener al menos 5 caracteres.');
       } else {
-        setCalleNumeroError("");
+        setCalleNumeroError('');
       }
     } else {
-      setCalleNumeroError("");
+      setCalleNumeroError('');
     }
   }, [calleNumero]);
 
@@ -168,63 +165,74 @@ const ListaDirecciones = ({ idUsuarios, isOpen, onClose, onAddressUpdated, showL
     // Validación de Referencias
     if (referencias.trim().length > 0) {
       if (referencias.length > 50) {
-        setReferenciasError("Las referencias no pueden exceder 50 caracteres.");
+        setReferenciasError('Las referencias no pueden exceder 50 caracteres.');
       } else if (/[<>{}]/g.test(referencias)) {
-        setReferenciasError("Las referencias no pueden contener caracteres como <, >, {, }.");
+        setReferenciasError(
+          'Las referencias no pueden contener caracteres como <, >, {, }.'
+        );
       } else {
-        setReferenciasError("");
+        setReferenciasError('');
       }
     } else {
-      setReferenciasError("");
+      setReferenciasError('');
     }
   }, [referencias]);
 
   useEffect(() => {
     // Validación de Localidad
-    const localidadValue = manualLocalidad ? manualLocalidadValue : selectedLocalidad;
-    if (isPostalCodeValidated && (!localidadValue || localidadValue.trim().length === 0)) {
-      setLocalidadError("La localidad/colonia es obligatoria.");
+    const localidadValue = manualLocalidad
+      ? manualLocalidadValue
+      : selectedLocalidad;
+    if (
+      isPostalCodeValidated &&
+      (!localidadValue || localidadValue.trim().length === 0)
+    ) {
+      setLocalidadError('La localidad/colonia es obligatoria.');
     } else {
-      setLocalidadError("");
+      setLocalidadError('');
     }
-  }, [manualLocalidad, manualLocalidadValue, selectedLocalidad, isPostalCodeValidated]);
+  }, [
+    manualLocalidad,
+    manualLocalidadValue,
+    selectedLocalidad,
+    isPostalCodeValidated,
+  ]);
 
   useEffect(() => {
-  
-    if (isPostalCodeValidated && (!municipioInput || municipioInput.trim().length === 0)) {
-      setMunicipioError("El municipio es obligatorio.");
+    if (
+      isPostalCodeValidated &&
+      (!municipioInput || municipioInput.trim().length === 0)
+    ) {
+      setMunicipioError('El municipio es obligatorio.');
     } else {
-      setMunicipioError("");
+      setMunicipioError('');
     }
   }, [municipioInput, isPostalCodeValidated]);
 
-
   useEffect(() => {
-   
     if (isPostalCodeValidated && (!estado || estado.trim().length === 0)) {
-      setEstadoError("El estado es obligatorio.");
+      setEstadoError('El estado es obligatorio.');
     } else {
-      setEstadoError("");
+      setEstadoError('');
     }
   }, [estado, isPostalCodeValidated]);
 
   const cargarDirecciones = async () => {
     try {
       if (!idUsuarios) {
-        console.warn("⚠️ ID de usuario no disponible");
+        console.warn('⚠️ ID de usuario no disponible');
         return;
       }
       setLoading(true);
-      const response = await api.get("/api/direccion/listar", {
+      const response = await api.get('/api/direccion/listar', {
         params: { idUsuarios: idUsuarios },
-        headers: { "X-CSRF-Token": csrfToken },
+        headers: { 'X-CSRF-Token': csrfToken },
         withCredentials: true,
       });
-      console.log("Direcciones obtenidas:", response.data);
+      console.log('Direcciones obtenidas:', response.data);
       setDirecciones(response.data);
-     
     } catch (error) {
-      console.error("Error al cargar las direcciones:", error);
+      console.error('Error al cargar las direcciones:', error);
     } finally {
       setLoading(false);
     }
@@ -235,44 +243,46 @@ const ListaDirecciones = ({ idUsuarios, isOpen, onClose, onAddressUpdated, showL
     if (direccionId) {
       setIsEditing(true);
       setEditId(direccionId);
-      const dirToEdit = direcciones.find((dir) => dir.idDireccion === direccionId);
-      console.log("Datos a editar:", dirToEdit);
+      const dirToEdit = direcciones.find(
+        (dir) => dir.idDireccion === direccionId
+      );
+      console.log('Datos a editar:', dirToEdit);
       if (dirToEdit) {
-        setUbicacion("México");
+        setUbicacion('México');
         setNombre(dirToEdit.nombre);
         setApellido(dirToEdit.apellido);
         setTelefono(dirToEdit.telefono);
         setCalleNumero(dirToEdit.direccion);
-        setReferencias(dirToEdit.referencias || "");
-        setPostalCode(dirToEdit.codigoPostal || "");
-        setOriginalCP(dirToEdit.codigoPostal || "");
+        setReferencias(dirToEdit.referencias || '');
+        setPostalCode(dirToEdit.codigoPostal || '');
+        setOriginalCP(dirToEdit.codigoPostal || '');
         setUserHasChangedCP(false);
-  
+
         if (dirToEdit.localidad) {
           setManualLocalidad(false);
           setSelectedLocalidad(dirToEdit.localidad);
           setCiudad(dirToEdit.localidad);
           setManualLocalidadValue(dirToEdit.localidad);
         } else {
-          setSelectedLocalidad("");
-          setManualLocalidadValue("");
+          setSelectedLocalidad('');
+          setManualLocalidadValue('');
         }
         if (dirToEdit.codigoPostal && /^\d{5}$/.test(dirToEdit.codigoPostal)) {
           setIsPostalCodeValidated(true);
-          setEstado(dirToEdit.estado || "");
-          setMunicipioInput(dirToEdit.municipio || "");
+          setEstado(dirToEdit.estado || '');
+          setMunicipioInput(dirToEdit.municipio || '');
         } else {
           setIsPostalCodeValidated(false);
-          setEstado("");
-          setMunicipioInput("");
+          setEstado('');
+          setMunicipioInput('');
         }
         setEsPredeterminada(dirToEdit.predeterminado);
-  
+
         setEstadosData([]);
         setMunicipios([]);
         setLocalidades([]);
         setHasFetchedData(false);
-  
+
         if (dirToEdit.codigoPostal && /^\d{5}$/.test(dirToEdit.codigoPostal)) {
           setCpLoading(true);
           fetchPostalData(dirToEdit.codigoPostal);
@@ -281,27 +291,27 @@ const ListaDirecciones = ({ idUsuarios, isOpen, onClose, onAddressUpdated, showL
     } else {
       setIsEditing(false);
       setEditId(null);
-      setUbicacion("México");
-      setNombre("");
-      setApellido("");
-      setTelefono("");
-      setCalleNumero("");
-      setReferencias("");
-      setPostalCode("");
-      setOriginalCP("");
+      setUbicacion('México');
+      setNombre('');
+      setApellido('');
+      setTelefono('');
+      setCalleNumero('');
+      setReferencias('');
+      setPostalCode('');
+      setOriginalCP('');
       setUserHasChangedCP(false);
       setIsPostalCodeValidated(false);
-      setEstado("");
-      setMunicipioInput("");
-      setCiudad("");
+      setEstado('');
+      setMunicipioInput('');
+      setCiudad('');
       setEsPredeterminada(false);
       setEstadosData([]);
       setMunicipios([]);
       setLocalidades([]);
-      setSelectedLocalidad("");
+      setSelectedLocalidad('');
       setHasFetchedData(false);
       setManualLocalidad(false);
-      setManualLocalidadValue("");
+      setManualLocalidadValue('');
     }
     setShowModal(true);
   };
@@ -309,14 +319,14 @@ const ListaDirecciones = ({ idUsuarios, isOpen, onClose, onAddressUpdated, showL
   const handleCloseModal = () => {
     setShowModal(false);
     if (onClose) {
-      onClose(); 
+      onClose();
     }
   };
 
   const handleValidatePostalCode = () => {
     const cp = postalCode.trim();
     if (!/^\d{5}$/.test(cp)) {
-      toast.error("El código postal debe contener 5 dígitos numéricos.");
+      toast.error('El código postal debe contener 5 dígitos numéricos.');
       setIsPostalCodeValidated(false);
       return;
     }
@@ -334,27 +344,37 @@ const ListaDirecciones = ({ idUsuarios, isOpen, onClose, onAddressUpdated, showL
     try {
       const url = `https://sepomex.icalialabs.com/api/v1/zip_codes?zip_code=${cp}&per_page=100`;
       const response = await axios.get(url);
-      if (response.data && response.data.zip_codes && response.data.zip_codes.length > 0) {
-        const uniqueEstados = [...new Set(response.data.zip_codes.map((item) => item.d_estado))];
-        const uniqueMunicipios = [...new Set(response.data.zip_codes.map((item) => item.d_mnpio))];
-        const uniqueLocalidades = [...new Set(response.data.zip_codes.map((item) => item.d_asenta))];
+      if (
+        response.data &&
+        response.data.zip_codes &&
+        response.data.zip_codes.length > 0
+      ) {
+        const uniqueEstados = [
+          ...new Set(response.data.zip_codes.map((item) => item.d_estado)),
+        ];
+        const uniqueMunicipios = [
+          ...new Set(response.data.zip_codes.map((item) => item.d_mnpio)),
+        ];
+        const uniqueLocalidades = [
+          ...new Set(response.data.zip_codes.map((item) => item.d_asenta)),
+        ];
 
         setEstadosData(uniqueEstados);
         setMunicipios(uniqueMunicipios);
         setLocalidades(uniqueLocalidades);
-        console.log("datos de localidad", uniqueLocalidades);
+        console.log('datos de localidad', uniqueLocalidades);
 
-        setEstado(uniqueEstados[0] || "");
-        setMunicipioInput(uniqueMunicipios[0] || "");
-        setSelectedLocalidad(uniqueLocalidades[0] || "");
-        setCiudad(uniqueLocalidades[0] || uniqueMunicipios[0] || "");
+        setEstado(uniqueEstados[0] || '');
+        setMunicipioInput(uniqueMunicipios[0] || '');
+        setSelectedLocalidad(uniqueLocalidades[0] || '');
+        setCiudad(uniqueLocalidades[0] || uniqueMunicipios[0] || '');
       } else {
-        toast.error("Código postal no encontrado.");
+        toast.error('Código postal no encontrado.');
         setIsPostalCodeValidated(false);
         setHasFetchedData(false);
       }
     } catch (error) {
-      toast.error("Error al consultar el código postal.");
+      toast.error('Error al consultar el código postal.');
       setIsPostalCodeValidated(false);
       setHasFetchedData(false);
     } finally {
@@ -397,7 +417,9 @@ const ListaDirecciones = ({ idUsuarios, isOpen, onClose, onAddressUpdated, showL
   };
 
   const isFormValidStep2 = () => {
-    const localidadValue = manualLocalidad ? manualLocalidadValue : selectedLocalidad;
+    const localidadValue = manualLocalidad
+      ? manualLocalidadValue
+      : selectedLocalidad;
     return (
       postalCode.trim().length === 5 &&
       isPostalCodeValidated &&
@@ -410,12 +432,15 @@ const ListaDirecciones = ({ idUsuarios, isOpen, onClose, onAddressUpdated, showL
   const isFormValidStep3 = () => {
     return (
       calleNumero.trim().length >= 5 &&
-      (!referencias || (referencias.length <= 50 && !/[<>{}]/g.test(referencias)))
+      (!referencias ||
+        (referencias.length <= 50 && !/[<>{}]/g.test(referencias)))
     );
   };
 
   const isFormValidFinal = () => {
-    const localidadValue = manualLocalidad ? manualLocalidadValue : selectedLocalidad;
+    const localidadValue = manualLocalidad
+      ? manualLocalidadValue
+      : selectedLocalidad;
     return (
       isFormValidStep1() &&
       isFormValidStep2() &&
@@ -429,7 +454,9 @@ const ListaDirecciones = ({ idUsuarios, isOpen, onClose, onAddressUpdated, showL
   const handleSave = async (e) => {
     e.preventDefault();
     if (!isFormValidFinal()) {
-      toast.warning("Por favor completa todos los campos obligatorios correctamente.");
+      toast.warning(
+        'Por favor completa todos los campos obligatorios correctamente.'
+      );
       return;
     }
 
@@ -439,10 +466,12 @@ const ListaDirecciones = ({ idUsuarios, isOpen, onClose, onAddressUpdated, showL
       apellido: apellido.trim(),
       telefono: telefono.trim(),
       codigoPostal: postalCode.trim(),
-      pais: "México",
+      pais: 'México',
       estado: estado.trim(),
       municipio: municipioInput.trim(),
-      localidad: manualLocalidad ? manualLocalidadValue.trim() : selectedLocalidad.trim(),
+      localidad: manualLocalidad
+        ? manualLocalidadValue.trim()
+        : selectedLocalidad.trim(),
       direccion: calleNumero.trim(),
       referencias: referencias.trim() || null,
       predeterminado: esPredeterminada,
@@ -453,24 +482,32 @@ const ListaDirecciones = ({ idUsuarios, isOpen, onClose, onAddressUpdated, showL
       let response;
       if (isEditing) {
         response = await api.put(
-          "/api/direccion/actualizar",
+          '/api/direccion/actualizar',
           { idDireccion: editId, ...dataParaEnviar },
           {
-            headers: { "X-CSRF-Token": csrfToken },
+            headers: { 'X-CSRF-Token': csrfToken },
             withCredentials: true,
           }
         );
       } else {
-        response = await api.post("/api/direccion/crear", dataParaEnviar, {
-          headers: { "X-CSRF-Token": csrfToken },
+        response = await api.post('/api/direccion/crear', dataParaEnviar, {
+          headers: { 'X-CSRF-Token': csrfToken },
           withCredentials: true,
         });
       }
 
-      if ((isEditing && response.status === 200) || (!isEditing && response.status === 201)) {
-        console.log(isEditing ? "Dirección actualizada:" : "Dirección creada:", response.data);
+      if (
+        (isEditing && response.status === 200) ||
+        (!isEditing && response.status === 201)
+      ) {
+        console.log(
+          isEditing ? 'Dirección actualizada:' : 'Dirección creada:',
+          response.data
+        );
         toast.success(
-          isEditing ? "Dirección actualizada correctamente" : "Dirección creada correctamente"
+          isEditing
+            ? 'Dirección actualizada correctamente'
+            : 'Dirección creada correctamente'
         );
         if (showList) {
           cargarDirecciones();
@@ -481,11 +518,17 @@ const ListaDirecciones = ({ idUsuarios, isOpen, onClose, onAddressUpdated, showL
         handleCloseModal();
       }
     } catch (error) {
-      console.error("Error al guardar la dirección:", error);
-      if (error.response && error.response.data && error.response.data.message) {
+      console.error('Error al guardar la dirección:', error);
+      if (
+        error.response &&
+        error.response.data &&
+        error.response.data.message
+      ) {
         toast.error(error.response.data.message);
       } else {
-        toast.error("No se pudo guardar la dirección. Revisa la consola para más detalles.");
+        toast.error(
+          'No se pudo guardar la dirección. Revisa la consola para más detalles.'
+        );
       }
     } finally {
       setSaving(false);
@@ -493,31 +536,36 @@ const ListaDirecciones = ({ idUsuarios, isOpen, onClose, onAddressUpdated, showL
   };
 
   const handleDelete = async (id) => {
-    if (window.confirm("¿Deseas eliminar esta dirección?")) {
+    if (window.confirm('¿Deseas eliminar esta dirección?')) {
       try {
-        const response = await api.delete("/api/direccion/eliminar", {
+        const response = await api.delete('/api/direccion/eliminar', {
           data: { idDireccion: id, idUsuario: idUsuarios },
-          headers: { "X-CSRF-Token": csrfToken },
+          headers: { 'X-CSRF-Token': csrfToken },
           withCredentials: true,
         });
         if (response.status === 200) {
-          toast.success("Dirección eliminada correctamente");
+          toast.success('Dirección eliminada correctamente');
           cargarDirecciones();
           if (onAddressUpdated) {
             onAddressUpdated(); // Notificar al componente padre (DetallesPago)
           }
         }
       } catch (error) {
-        console.error("Error al eliminar la dirección:", error);
-        if (error.response && error.response.data && error.response.data.message) {
+        console.error('Error al eliminar la dirección:', error);
+        if (
+          error.response &&
+          error.response.data &&
+          error.response.data.message
+        ) {
           toast.error(error.response.data.message);
         } else {
-          toast.error("No se pudo eliminar la dirección. Revisa la consola para más detalles.");
+          toast.error(
+            'No se pudo eliminar la dirección. Revisa la consola para más detalles.'
+          );
         }
       }
     }
   };
-
 
   const nextStep = () => {
     if (currentStep < totalSteps) {
@@ -540,10 +588,10 @@ const ListaDirecciones = ({ idUsuarios, isOpen, onClose, onAddressUpdated, showL
 
   const renderStep1 = () => (
     <div className="space-y-4">
-    <h2 className="text-lg font-semibold text-gray-800 dark:text-white mb-4 flex items-center">
-      <FontAwesomeIcon icon={faAddressCard} className="mr-2 text-blue-600" />
-      Paso 1: Datos Personales
-    </h2>
+      <h2 className="text-lg font-semibold text-gray-800 dark:text-white mb-4 flex items-center">
+        <FontAwesomeIcon icon={faAddressCard} className="mr-2 text-blue-600" />
+        Paso 1: Datos Personales
+      </h2>
       <div className="relative">
         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
           Nombre* (mínimo 3 caracteres)
@@ -579,7 +627,9 @@ const ListaDirecciones = ({ idUsuarios, isOpen, onClose, onAddressUpdated, showL
             className="pl-9 block w-full py-2 border-gray-300 rounded focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
           />
         </div>
-        {apellidoError && <p className="text-xs text-red-500">{apellidoError}</p>}
+        {apellidoError && (
+          <p className="text-xs text-red-500">{apellidoError}</p>
+        )}
       </div>
       <div className="relative">
         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
@@ -593,14 +643,16 @@ const ListaDirecciones = ({ idUsuarios, isOpen, onClose, onAddressUpdated, showL
             type="text"
             value={telefono}
             onChange={(e) => {
-              const val = e.target.value.replace(/\D/g, "");
+              const val = e.target.value.replace(/\D/g, '');
               setTelefono(val);
             }}
             maxLength={10}
             className="pl-9 block w-full py-2 border-gray-300 rounded focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
           />
         </div>
-        {telefonoError && <p className="text-xs text-red-500">{telefonoError}</p>}
+        {telefonoError && (
+          <p className="text-xs text-red-500">{telefonoError}</p>
+        )}
       </div>
     </div>
   );
@@ -608,7 +660,10 @@ const ListaDirecciones = ({ idUsuarios, isOpen, onClose, onAddressUpdated, showL
   const renderStep2 = () => (
     <div className="space-y-4">
       <h2 className="text-lg font-semibold text-gray-800 dark:text-white mb-4 flex items-center">
-        <FontAwesomeIcon icon={faLocationArrow} className="mr-2 text-blue-600" />
+        <FontAwesomeIcon
+          icon={faLocationArrow}
+          className="mr-2 text-blue-600"
+        />
         Paso 2: Ubicación
       </h2>
       <div className="relative">
@@ -624,7 +679,7 @@ const ListaDirecciones = ({ idUsuarios, isOpen, onClose, onAddressUpdated, showL
               type="text"
               value={postalCode}
               onChange={(e) => {
-                const cp = e.target.value.replace(/\D/g, "").slice(0, 5);
+                const cp = e.target.value.replace(/\D/g, '').slice(0, 5);
                 setPostalCode(cp);
                 setIsPostalCodeValidated(false);
                 setHasFetchedData(false);
@@ -640,11 +695,17 @@ const ListaDirecciones = ({ idUsuarios, isOpen, onClose, onAddressUpdated, showL
               onClick={handleValidatePostalCode}
               className="px-3 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition flex items-center"
             >
-              {cpLoading ? <FontAwesomeIcon icon={faSpinner} spin /> : "Validar"}
+              {cpLoading ? (
+                <FontAwesomeIcon icon={faSpinner} spin />
+              ) : (
+                'Validar'
+              )}
             </button>
           )}
         </div>
-        {postalCodeError && <p className="text-xs text-red-500">{postalCodeError}</p>}
+        {postalCodeError && (
+          <p className="text-xs text-red-500">{postalCodeError}</p>
+        )}
       </div>
 
       {isPostalCodeValidated && (
@@ -681,7 +742,9 @@ const ListaDirecciones = ({ idUsuarios, isOpen, onClose, onAddressUpdated, showL
                 className="pl-9 block w-full py-2 bg-gray-100 border-gray-300 rounded"
               />
             </div>
-            {estadoError && <p className="text-xs text-red-500">{estadoError}</p>}
+            {estadoError && (
+              <p className="text-xs text-red-500">{estadoError}</p>
+            )}
           </div>
           <div className="relative">
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
@@ -698,9 +761,11 @@ const ListaDirecciones = ({ idUsuarios, isOpen, onClose, onAddressUpdated, showL
                 className="pl-9 block w-full py-2 border-gray-300 rounded focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
               />
             </div>
-            {municipioError && <p className="text-xs text-red-500">{municipioError}</p>}
+            {municipioError && (
+              <p className="text-xs text-red-500">{municipioError}</p>
+            )}
           </div>
-          {(isEditing && isPostalCodeValidated && !userHasChangedCP) ? (
+          {isEditing && isPostalCodeValidated && !userHasChangedCP ? (
             <div className="mt-4">
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                 Localidad/Colonia (Valor actual)
@@ -717,7 +782,9 @@ const ListaDirecciones = ({ idUsuarios, isOpen, onClose, onAddressUpdated, showL
                   className="pl-9 block w-full py-2 border-gray-300 rounded focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                 />
               </div>
-              {localidadError && <p className="text-xs text-red-500">{localidadError}</p>}
+              {localidadError && (
+                <p className="text-xs text-red-500">{localidadError}</p>
+              )}
             </div>
           ) : (
             <div className="mt-4">
@@ -782,7 +849,9 @@ const ListaDirecciones = ({ idUsuarios, isOpen, onClose, onAddressUpdated, showL
                   </select>
                 </div>
               )}
-              {localidadError && <p className="text-xs text-red-500">{localidadError}</p>}
+              {localidadError && (
+                <p className="text-xs text-red-500">{localidadError}</p>
+              )}
             </div>
           )}
         </>
@@ -812,7 +881,9 @@ const ListaDirecciones = ({ idUsuarios, isOpen, onClose, onAddressUpdated, showL
             className="pl-9 block w-full py-2 border-gray-300 rounded focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
           />
         </div>
-        {calleNumeroError && <p className="text-xs text-red-500">{calleNumeroError}</p>}
+        {calleNumeroError && (
+          <p className="text-xs text-red-500">{calleNumeroError}</p>
+        )}
       </div>
       <div className="relative">
         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
@@ -828,7 +899,9 @@ const ListaDirecciones = ({ idUsuarios, isOpen, onClose, onAddressUpdated, showL
         <div className="text-xs text-gray-500 mt-1">
           {referencesCount} / 50 caracteres
         </div>
-        {referenciasError && <p className="text-xs text-red-500">{referenciasError}</p>}
+        {referenciasError && (
+          <p className="text-xs text-red-500">{referenciasError}</p>
+        )}
       </div>
       <div className="flex items-center space-x-2 mt-2">
         <input
@@ -848,7 +921,10 @@ const ListaDirecciones = ({ idUsuarios, isOpen, onClose, onAddressUpdated, showL
   const renderStep4 = () => (
     <div className="space-y-4">
       <h2 className="text-lg font-semibold text-gray-800 dark:text-white mb-4 flex items-center">
-        <FontAwesomeIcon icon={faClipboardCheck} className="mr-2 text-blue-600" />
+        <FontAwesomeIcon
+          icon={faClipboardCheck}
+          className="mr-2 text-blue-600"
+        />
         Paso 4: Confirmación
       </h2>
       <div className="bg-gray-100 dark:bg-gray-700 p-4 rounded-md">
@@ -868,7 +944,7 @@ const ListaDirecciones = ({ idUsuarios, isOpen, onClose, onAddressUpdated, showL
           <strong>Municipio:</strong> {municipioInput}
         </p>
         <p className="text-sm text-gray-800 dark:text-gray-100 mb-2">
-          <strong>Localidad:</strong>{" "}
+          <strong>Localidad:</strong>{' '}
           {manualLocalidad ? manualLocalidadValue : selectedLocalidad}
         </p>
         <p className="text-sm text-gray-800 dark:text-gray-100 mb-2">
@@ -879,17 +955,13 @@ const ListaDirecciones = ({ idUsuarios, isOpen, onClose, onAddressUpdated, showL
         </p>
         {esPredeterminada && (
           <p className="text-sm text-green-600 dark:text-green-300">
-            <FontAwesomeIcon icon={faCheckCircle} /> Será la dirección predeterminada
+            <FontAwesomeIcon icon={faCheckCircle} /> Será la dirección
+            predeterminada
           </p>
         )}
       </div>
     </div>
   );
-
-
-
-
-
 
   return (
     <>
@@ -928,7 +1000,9 @@ const ListaDirecciones = ({ idUsuarios, isOpen, onClose, onAddressUpdated, showL
                   >
                     <div className="flex flex-col space-y-2">
                       <div className="text-lg font-semibold text-gray-700 dark:text-gray-100 flex items-center justify-between">
-                        <span>{dir.nombre} {dir.apellido}</span>
+                        <span>
+                          {dir.nombre} {dir.apellido}
+                        </span>
                         {dir.telefono && (
                           <span className="text-sm text-gray-600 dark:text-gray-300">
                             <FontAwesomeIcon icon={faPhone} className="mr-1" />
@@ -944,17 +1018,24 @@ const ListaDirecciones = ({ idUsuarios, isOpen, onClose, onAddressUpdated, showL
                       )}
 
                       <div className="text-sm text-gray-600 dark:text-gray-300">
-                        {dir.localidad}, {dir.municipio}, {dir.estado}, {dir.pais}
+                        {dir.localidad}, {dir.municipio}, {dir.estado},{' '}
+                        {dir.pais}
                       </div>
 
                       <div className="text-sm text-gray-500">
-                        <FontAwesomeIcon icon={faMapPin} className="mr-1 text-gray-400" />
-                        <strong>CP:</strong> {dir.codigoPostal || "N/A"}
+                        <FontAwesomeIcon
+                          icon={faMapPin}
+                          className="mr-1 text-gray-400"
+                        />
+                        <strong>CP:</strong> {dir.codigoPostal || 'N/A'}
                       </div>
 
                       {dir.predeterminado === 1 && (
                         <div className="flex items-center text-green-600 text-sm">
-                          <FontAwesomeIcon icon={faCheckCircle} className="mr-1" />
+                          <FontAwesomeIcon
+                            icon={faCheckCircle}
+                            className="mr-1"
+                          />
                           <span>Predeterminada</span>
                         </div>
                       )}
@@ -999,10 +1080,10 @@ const ListaDirecciones = ({ idUsuarios, isOpen, onClose, onAddressUpdated, showL
                     <div
                       className={`w-8 h-8 mx-auto rounded-full flex items-center justify-center ${
                         currentStep > index + 1
-                          ? "bg-green-500 text-white"
+                          ? 'bg-green-500 text-white'
                           : currentStep === index + 1
-                          ? "bg-yellow-600 text-white"
-                          : "bg-gray-300 text-gray-600"
+                            ? 'bg-yellow-600 text-white'
+                            : 'bg-gray-300 text-gray-600'
                       }`}
                     >
                       {currentStep > index + 1 ? (
@@ -1013,12 +1094,12 @@ const ListaDirecciones = ({ idUsuarios, isOpen, onClose, onAddressUpdated, showL
                     </div>
                     <p className="text-xs mt-1 text-gray-600 dark:text-gray-300">
                       {index === 0
-                        ? "Datos Personales"
+                        ? 'Datos Personales'
                         : index === 1
-                        ? "Ubicación"
-                        : index === 2
-                        ? "Detalles"
-                        : "Revisión"}
+                          ? 'Ubicación'
+                          : index === 2
+                            ? 'Detalles'
+                            : 'Revisión'}
                     </p>
                   </div>
                 ))}
@@ -1054,8 +1135,8 @@ const ListaDirecciones = ({ idUsuarios, isOpen, onClose, onAddressUpdated, showL
                     disabled={!canGoNext()}
                     className={`px-4 py-2 rounded transition ${
                       canGoNext()
-                        ? "bg-yellow-600 text-white hover:bg-yellow-700"
-                        : "bg-gray-300 text-gray-500 cursor-not-allowed"
+                        ? 'bg-yellow-600 text-white hover:bg-yellow-700'
+                        : 'bg-gray-300 text-gray-500 cursor-not-allowed'
                     }`}
                   >
                     Siguiente
@@ -1066,17 +1147,21 @@ const ListaDirecciones = ({ idUsuarios, isOpen, onClose, onAddressUpdated, showL
                     disabled={saving || !isFormValidFinal()}
                     className={`px-4 py-2 rounded transition flex items-center ${
                       saving || !isFormValidFinal()
-                        ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-                        : "bg-green-600 text-white hover:bg-green-700"
+                        ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                        : 'bg-green-600 text-white hover:bg-green-700'
                     }`}
                   >
                     {saving ? (
                       <>
-                        <FontAwesomeIcon icon={faSpinner} spin className="mr-2" />
+                        <FontAwesomeIcon
+                          icon={faSpinner}
+                          spin
+                          className="mr-2"
+                        />
                         Guardando...
                       </>
                     ) : (
-                      "Guardar Dirección"
+                      'Guardar Dirección'
                     )}
                   </button>
                 )}

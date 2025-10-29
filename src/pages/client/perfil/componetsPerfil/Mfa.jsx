@@ -11,7 +11,7 @@ import {
   Snackbar,
   Alert,
 } from '@mui/material';
-import { useAuth } from "../../../../hooks/ContextAuth";
+import { useAuth } from '../../../../hooks/ContextAuth';
 import api from '../../../../utils/AxiosConfig';
 
 const MFAComponent = ({ userId, setActivo }) => {
@@ -23,12 +23,10 @@ const MFAComponent = ({ userId, setActivo }) => {
   const [verificationError, setVerificationError] = useState('');
   const { csrfToken } = useAuth();
 
- 
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState('');
   const [snackbarSeverity, setSnackbarSeverity] = useState('info');
 
-  
   useEffect(() => {
     const checkMfaStatus = async () => {
       try {
@@ -36,10 +34,10 @@ const MFAComponent = ({ userId, setActivo }) => {
           headers: { 'X-CSRF-Token': csrfToken },
           withCredentials: true,
         });
-       
+
         setIsMfaEnabled(response.data.mfaEnabled);
       } catch (error) {
-        console.error("Error al obtener el estado MFA:", error);
+        console.error('Error al obtener el estado MFA:', error);
       }
     };
     checkMfaStatus();
@@ -56,7 +54,6 @@ const MFAComponent = ({ userId, setActivo }) => {
     setSnackbarOpen(false);
   };
 
- 
   const handleEnableMFA = async () => {
     setLoading(true);
     try {
@@ -69,9 +66,12 @@ const MFAComponent = ({ userId, setActivo }) => {
         }
       );
       setQrCodeUrl(response.data.qrCode);
-    
-      setOpenModal(true);  
-      showSnackbar('QR generado. Escanea el código con tu app de autenticación.', 'info');
+
+      setOpenModal(true);
+      showSnackbar(
+        'QR generado. Escanea el código con tu app de autenticación.',
+        'info'
+      );
     } catch (error) {
       console.error('Error al habilitar MFA:', error);
       showSnackbar('No se pudo habilitar MFA.', 'error');
@@ -86,18 +86,18 @@ const MFAComponent = ({ userId, setActivo }) => {
       const response = await api.post(
         `/api/mfa/verify-mfa`,
         {
-          userId,        
-          token: verificationCode 
+          userId,
+          token: verificationCode,
         },
         {
           headers: { 'X-CSRF-Token': csrfToken },
           withCredentials: true,
         }
       );
-  
+
       if (response.data.message === 'Código MFA verificado correctamente.') {
         setIsMfaEnabled(true);
-        setActivo(true);  // Activamos MFA solo si la verificación es exitosa.
+        setActivo(true); // Activamos MFA solo si la verificación es exitosa.
         showSnackbar('MFA activado correctamente.', 'success');
         handleCloseModal();
       } else {
@@ -112,7 +112,9 @@ const MFAComponent = ({ userId, setActivo }) => {
   // Desactivar MFA: primero verifica el código, luego lo desactiva.
   const handleDisableMFA = async () => {
     if (!verificationCode) {
-      setVerificationError('Es necesario ingresar el código para desactivar MFA.');
+      setVerificationError(
+        'Es necesario ingresar el código para desactivar MFA.'
+      );
       return;
     }
     try {
@@ -149,7 +151,6 @@ const MFAComponent = ({ userId, setActivo }) => {
     }
   };
 
- 
   const handleCloseModal = () => {
     if (verificationCode.trim() === '') return;
     setOpenModal(false);
@@ -172,11 +173,9 @@ const MFAComponent = ({ userId, setActivo }) => {
         label={isMfaEnabled ? 'MFA activado' : 'MFA desactivado'}
       />
 
-    
       <Modal
         open={openModal}
         onClose={(event, reason) => {
-       
           if (verificationCode.trim() !== '') {
             handleCloseModal();
           }
@@ -193,10 +192,9 @@ const MFAComponent = ({ userId, setActivo }) => {
             my: '10%',
             textAlign: 'center',
             width: { xs: '90%', sm: '500px' },
-            position: 'relative'
+            position: 'relative',
           }}
         >
-        
           <Button
             onClick={handleCloseModal}
             disabled={verificationCode.trim() === ''}
@@ -206,7 +204,7 @@ const MFAComponent = ({ userId, setActivo }) => {
               right: 8,
               minWidth: 'auto',
               p: 0,
-              color: 'text.secondary'
+              color: 'text.secondary',
             }}
           >
             X
@@ -258,7 +256,11 @@ const MFAComponent = ({ userId, setActivo }) => {
         onClose={handleSnackbarClose}
         anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
       >
-        <Alert onClose={handleSnackbarClose} severity={snackbarSeverity} sx={{ width: '100%' }}>
+        <Alert
+          onClose={handleSnackbarClose}
+          severity={snackbarSeverity}
+          sx={{ width: '100%' }}
+        >
           {snackbarMessage}
         </Alert>
       </Snackbar>

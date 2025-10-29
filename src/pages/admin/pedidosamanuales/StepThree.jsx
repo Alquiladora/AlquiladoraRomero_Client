@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from "react";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faPlusCircle, faTrashAlt } from "@fortawesome/free-solid-svg-icons";
-import { toast } from "react-toastify";
-import { buildGroupedData } from "./BuildGroupedData";
+/* eslint-disable */
+import React, { useState, useEffect } from 'react';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faPlusCircle, faTrashAlt } from '@fortawesome/free-solid-svg-icons';
+import { toast } from 'react-toastify';
+import { buildGroupedData } from './BuildGroupedData';
 
 const calcularDiasAlquiler = (fechaInicio, fechaEntrega) => {
   if (!fechaInicio || !fechaEntrega) return 0;
@@ -13,9 +14,9 @@ const calcularDiasAlquiler = (fechaInicio, fechaEntrega) => {
 };
 
 const obtenerFechaHoy = () => {
-  
   const ahora = new Date();
-  const offsetMexico = ahora.getTimezoneOffset() + (ahora.getTimezoneOffset() > 0 ? 360 : 300);
+  const offsetMexico =
+    ahora.getTimezoneOffset() + (ahora.getTimezoneOffset() > 0 ? 360 : 300);
   ahora.setMinutes(ahora.getMinutes() - offsetMexico);
   return ahora.toISOString().split('T')[0];
 };
@@ -23,7 +24,7 @@ const obtenerFechaHoy = () => {
 const obtenerFechaMasMeses = (fecha, meses) => {
   const date = fecha ? new Date(fecha) : new Date();
   date.setMonth(date.getMonth() + meses);
-  return date.toISOString().split("T")[0];
+  return date.toISOString().split('T')[0];
 };
 
 const obtenerFechaSiguiente = (fecha) => {
@@ -47,11 +48,10 @@ const StepThree = ({
   productosDisponibles,
   onChangeData,
 }) => {
- 
   const groupedCategories = buildGroupedData(productosDisponibles);
-  
+
   const [selectedProducts, setSelectedProducts] = useState([]);
-  const [searchTerm, setSearchTerm] = useState("");
+  const [searchTerm, setSearchTerm] = useState('');
   const [isAddingProduct, setIsAddingProduct] = useState(false);
   const [showTicket, setShowTicket] = useState(false);
   const [lineItems, setLineItems] = useState([]);
@@ -59,7 +59,6 @@ const StepThree = ({
 
   const MAX_PRODUCTS = 40;
 
- 
   const getAvailableColorsForProduct = (product) => {
     const selectedColorsForProduct = selectedProducts
       .filter((sp) => sp.productId === product.productId && sp.selectedColor)
@@ -78,30 +77,31 @@ const StepThree = ({
   };
 
   const handleSelectProduct = (catId, product) => {
-  
     const availableColors = getAvailableColorsForProduct(product);
     if (availableColors.length === 0) {
-      toast.error("Ya has seleccionado todos los colores disponibles para este producto.");
+      toast.error(
+        'Ya has seleccionado todos los colores disponibles para este producto.'
+      );
       return;
     }
-  
+
     const newItem = {
       categoryId: catId,
       productId: product.productId,
-      
+
       idProductoColores: availableColors[0].idProductoColores,
       productName: product.productName,
       details: product.details,
       price: product.price,
-    
+
       colorOptions: availableColors,
-      selectedColor: "",
-      unitsToRent: "",
+      selectedColor: '',
+      unitsToRent: '',
     };
 
     setSelectedProducts((prev) => [...prev, newItem]);
     setIsAddingProduct(false);
-    setSearchTerm("");
+    setSearchTerm('');
   };
 
   const handleRemoveProduct = (index) => {
@@ -118,7 +118,7 @@ const StepThree = ({
       if (selectedOption && selectedOption.idProductoColores !== undefined) {
         newProds[index].idProductoColores = selectedOption.idProductoColores;
       } else {
-        console.warn("La opción de color no tiene idProductoColores definido.");
+        console.warn('La opción de color no tiene idProductoColores definido.');
         newProds[index].idProductoColores = null;
       }
       return newProds;
@@ -149,15 +149,15 @@ const StepThree = ({
 
   const handleCotizar = () => {
     if (selectedProducts.length === 0) {
-      toast.error("Debes seleccionar al menos un producto.");
+      toast.error('Debes seleccionar al menos un producto.');
       return;
     }
     if (!fechaInicio) {
-      toast.error("Debes ingresar la fecha de inicio.");
+      toast.error('Debes ingresar la fecha de inicio.');
       return;
     }
     if (!fechaEntrega) {
-      toast.error("Debes ingresar la fecha de entrega.");
+      toast.error('Debes ingresar la fecha de entrega.');
       return;
     }
     for (const sp of selectedProducts) {
@@ -167,7 +167,9 @@ const StepThree = ({
       }
       const qty = parseInt(sp.unitsToRent, 10);
       if (!qty || qty < 1) {
-        toast.error(`Ingresa una cantidad válida para el producto: ${sp.productName}`);
+        toast.error(
+          `Ingresa una cantidad válida para el producto: ${sp.productName}`
+        );
         return;
       }
     }
@@ -207,15 +209,28 @@ const StepThree = ({
       lineItems,
       ticketTotal,
     });
-  }, [fechaInicio, fechaEntrega, horaAlquiler, formaPago, detallesPago, selectedProducts, lineItems, ticketTotal]);
+  }, [
+    fechaInicio,
+    fechaEntrega,
+    horaAlquiler,
+    formaPago,
+    detallesPago,
+    selectedProducts,
+    lineItems,
+    ticketTotal,
+  ]);
 
- 
   const renderSelectedProducts = () => {
     return selectedProducts.map((item, index) => {
-      const chosenColorObj = item.colorOptions.find((c) => c.color === item.selectedColor);
+      const chosenColorObj = item.colorOptions.find(
+        (c) => c.color === item.selectedColor
+      );
       const stockAvailable = chosenColorObj ? chosenColorObj.stock : 0;
       return (
-        <div key={index} className="border p-3 mb-3 rounded bg-gray-50 relative dark:bg-gray-800 dark:border-gray-700">
+        <div
+          key={index}
+          className="border p-3 mb-3 rounded bg-gray-50 relative dark:bg-gray-800 dark:border-gray-700"
+        >
           <button
             type="button"
             onClick={() => handleRemoveProduct(index)}
@@ -224,15 +239,21 @@ const StepThree = ({
             <FontAwesomeIcon icon={faTrashAlt} />
           </button>
           <details open className="border rounded dark:border-gray-700">
-            <summary className="px-2 py-1 cursor-pointer font-semibold">{item.productName}</summary>
+            <summary className="px-2 py-1 cursor-pointer font-semibold">
+              {item.productName}
+            </summary>
             <div className="p-2">
-              <p className="text-sm text-gray-600 mb-2 dark:text-gray-300">{item.details}</p>
+              <p className="text-sm text-gray-600 mb-2 dark:text-gray-300">
+                {item.details}
+              </p>
               <p className="text-sm mb-2">
                 Precio unitario: <strong>${item.price.toFixed(2)}</strong>
               </p>
               {item.colorOptions.length > 0 && (
                 <div className="mb-2">
-                  <label className="block mb-1 text-sm font-medium">Color</label>
+                  <label className="block mb-1 text-sm font-medium">
+                    Color
+                  </label>
                   <select
                     className="border p-2 rounded w-full dark:border-gray-600 dark:bg-gray-700"
                     value={item.selectedColor}
@@ -244,7 +265,7 @@ const StepThree = ({
                         key={idx}
                         value={c.color}
                         disabled={c.stock === 0}
-                        className={`${c.stock === 0 ? "bg-red-50 dark:bg-red-50 text-red-600 cursor-not-allowed" : ""}`}
+                        className={`${c.stock === 0 ? 'bg-red-50 dark:bg-red-50 text-red-600 cursor-not-allowed' : ''}`}
                       >
                         {c.color} (Stock: {c.stock})
                       </option>
@@ -253,7 +274,9 @@ const StepThree = ({
                 </div>
               )}
               <div>
-                <label className="block mb-1 text-sm font-medium">Unidades a rentar:</label>
+                <label className="block mb-1 text-sm font-medium">
+                  Unidades a rentar:
+                </label>
                 <input
                   type="number"
                   min="0"
@@ -261,7 +284,11 @@ const StepThree = ({
                   value={item.unitsToRent}
                   onChange={(e) => handleUnitsChange(index, e.target.value)}
                   disabled={!item.selectedColor}
-                  placeholder={item.selectedColor ? `Máx: ${stockAvailable}` : "Selecciona un color primero"}
+                  placeholder={
+                    item.selectedColor
+                      ? `Máx: ${stockAvailable}`
+                      : 'Selecciona un color primero'
+                  }
                 />
               </div>
             </div>
@@ -271,33 +298,35 @@ const StepThree = ({
     });
   };
 
-
   const renderProductSelector = () => {
     if (!isAddingProduct) return null;
     const term = searchTerm.toLowerCase().trim();
 
-
     const filteredCategories = groupedCategories.map((cat) => {
-      const productosFiltrados = cat.productos.filter((p) => {
-      
-        const availableColors = getAvailableColorsForProduct(p);
-       
-        const nameMatch = p.productName.toLowerCase().includes(term);
-        const detailsMatch = p.details.toLowerCase().includes(term);
-        return availableColors.length > 0 && (nameMatch || detailsMatch);
-      }).map((p) => {
-       
-        return { ...p, colorOptions: getAvailableColorsForProduct(p) };
-      });
+      const productosFiltrados = cat.productos
+        .filter((p) => {
+          const availableColors = getAvailableColorsForProduct(p);
+
+          const nameMatch = p.productName.toLowerCase().includes(term);
+          const detailsMatch = p.details.toLowerCase().includes(term);
+          return availableColors.length > 0 && (nameMatch || detailsMatch);
+        })
+        .map((p) => {
+          return { ...p, colorOptions: getAvailableColorsForProduct(p) };
+        });
       return { ...cat, productos: productosFiltrados };
     });
 
-    const anyProductFound = filteredCategories.some((cat) => cat.productos.length > 0);
+    const anyProductFound = filteredCategories.some(
+      (cat) => cat.productos.length > 0
+    );
 
     return (
       <div className="border p-3 mb-3 rounded bg-gray-50 dark:bg-gray-800 dark:border-gray-700">
         <div className="mb-4">
-          <label className="block mb-1 text-sm font-medium">Buscar producto:</label>
+          <label className="block mb-1 text-sm font-medium">
+            Buscar producto:
+          </label>
           <input
             type="text"
             className="border p-2 w-full dark:border-gray-600 dark:bg-gray-700"
@@ -314,24 +343,38 @@ const StepThree = ({
         {filteredCategories.map((cat) => {
           if (cat.productos.length === 0) return null;
           return (
-            <details key={cat.idCategoria} className="mb-2 border rounded dark:border-gray-700">
+            <details
+              key={cat.idCategoria}
+              className="mb-2 border rounded dark:border-gray-700"
+            >
               <summary className="px-2 py-1 cursor-pointer font-semibold bg-gray-200 dark:bg-gray-700">
                 {cat.nombreCategoria}
               </summary>
               <div className="p-2">
                 {cat.productos.map((product) => (
-                  <div key={product.productId} className="flex items-center justify-between p-2 border-b dark:border-gray-700">
+                  <div
+                    key={product.productId}
+                    className="flex items-center justify-between p-2 border-b dark:border-gray-700"
+                  >
                     <div>
                       <div className="font-medium">{product.productName}</div>
-                      <div className="text-sm text-gray-600 dark:text-gray-300">{product.details}</div>
+                      <div className="text-sm text-gray-600 dark:text-gray-300">
+                        {product.details}
+                      </div>
                       <div className="text-xs text-gray-500 dark:text-gray-400">
-                        Colores disponibles: {product.colorOptions.length} | Stock total:{" "}
-                        {product.colorOptions.reduce((sum, c) => sum + c.stock, 0)}
+                        Colores disponibles: {product.colorOptions.length} |
+                        Stock total:{' '}
+                        {product.colorOptions.reduce(
+                          (sum, c) => sum + c.stock,
+                          0
+                        )}
                       </div>
                     </div>
                     <button
                       type="button"
-                      onClick={() => handleSelectProduct(cat.idCategoria, product)}
+                      onClick={() =>
+                        handleSelectProduct(cat.idCategoria, product)
+                      }
                       className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded"
                     >
                       Seleccionar
@@ -370,34 +413,47 @@ const StepThree = ({
       <hr className="my-4 border-gray-300 dark:border-gray-700" />
 
       <div className="mt-4">
-      <div className="flex flex-col md:flex-row md:space-x-4">
-  <div className="flex-1 mb-3">
-    <label className="block mb-1 text-sm font-medium">Fecha de Inicio:</label>
-    <input
-      type="date"
-      value={fechaInicio}
-      onChange={(e) => setFechaInicio(e.target.value)}
-      min={obtenerFechaHoy()}
-      max={obtenerFechaMasMeses(obtenerFechaHoy(), 10)}
-      className="border p-2 w-full dark:border-gray-600 dark:bg-gray-700"
-    />
-  </div>
-  <div className="flex-1 mb-3">
-    <label className="block mb-1 text-sm font-medium">Fecha de Entrega:</label>
-    <input
-      type="date"
-      value={fechaEntrega}
-      onChange={(e) => setFechaEntrega(e.target.value)}
-      min={fechaInicio ? obtenerFechaSiguiente(fechaInicio) : obtenerFechaSiguiente(obtenerFechaHoy())}
-      max={fechaInicio ? obtenerFechaMasMeses(fechaInicio, 10) : obtenerFechaMasMeses(obtenerFechaHoy(), 10)}
-      className="border p-2 w-full dark:border-gray-600 dark:bg-gray-700"
-    />
-  </div>
-</div>
-
+        <div className="flex flex-col md:flex-row md:space-x-4">
+          <div className="flex-1 mb-3">
+            <label className="block mb-1 text-sm font-medium">
+              Fecha de Inicio:
+            </label>
+            <input
+              type="date"
+              value={fechaInicio}
+              onChange={(e) => setFechaInicio(e.target.value)}
+              min={obtenerFechaHoy()}
+              max={obtenerFechaMasMeses(obtenerFechaHoy(), 10)}
+              className="border p-2 w-full dark:border-gray-600 dark:bg-gray-700"
+            />
+          </div>
+          <div className="flex-1 mb-3">
+            <label className="block mb-1 text-sm font-medium">
+              Fecha de Entrega:
+            </label>
+            <input
+              type="date"
+              value={fechaEntrega}
+              onChange={(e) => setFechaEntrega(e.target.value)}
+              min={
+                fechaInicio
+                  ? obtenerFechaSiguiente(fechaInicio)
+                  : obtenerFechaSiguiente(obtenerFechaHoy())
+              }
+              max={
+                fechaInicio
+                  ? obtenerFechaMasMeses(fechaInicio, 10)
+                  : obtenerFechaMasMeses(obtenerFechaHoy(), 10)
+              }
+              className="border p-2 w-full dark:border-gray-600 dark:bg-gray-700"
+            />
+          </div>
+        </div>
 
         <div className="mb-3">
-          <label className="block mb-1 text-sm font-medium">Hora de Alquiler:</label>
+          <label className="block mb-1 text-sm font-medium">
+            Hora de Alquiler:
+          </label>
           <input
             type="time"
             value={horaAlquiler}
@@ -407,15 +463,14 @@ const StepThree = ({
         </div>
       </div>
 
-
-
-
       <button
         type="button"
         onClick={handleCotizar}
         disabled={selectedProducts.length === 0}
         className={`px-4 py-2 rounded text-white ${
-          selectedProducts.length === 0 ? "bg-gray-400 dark:bg-gray-600" : "bg-blue-500 hover:bg-blue-600"
+          selectedProducts.length === 0
+            ? 'bg-gray-400 dark:bg-gray-600'
+            : 'bg-blue-500 hover:bg-blue-600'
         }`}
       >
         Cotizar
@@ -427,28 +482,50 @@ const StepThree = ({
           <table className="w-full text-sm mb-4">
             <thead>
               <tr>
-                <th className="border px-2 py-1 dark:border-gray-700">Producto</th>
+                <th className="border px-2 py-1 dark:border-gray-700">
+                  Producto
+                </th>
                 <th className="border px-2 py-1 dark:border-gray-700">Color</th>
-                <th className="border px-2 py-1 dark:border-gray-700">Cantidad</th>
-                <th className="border px-2 py-1 dark:border-gray-700">Precio Unit.</th>
+                <th className="border px-2 py-1 dark:border-gray-700">
+                  Cantidad
+                </th>
+                <th className="border px-2 py-1 dark:border-gray-700">
+                  Precio Unit.
+                </th>
                 <th className="border px-2 py-1 dark:border-gray-700">Días</th>
-                <th className="border px-2 py-1 dark:border-gray-700">Subtotal</th>
+                <th className="border px-2 py-1 dark:border-gray-700">
+                  Subtotal
+                </th>
               </tr>
             </thead>
             <tbody>
               {lineItems.map((item, idx) => (
                 <tr key={idx}>
-                  <td className="border px-2 py-1 dark:border-gray-700">{item.productName}</td>
-                  <td className="border px-2 py-1 text-center dark:border-gray-700">{item.color}</td>
-                  <td className="border px-2 py-1 text-center dark:border-gray-700">{item.quantity}</td>
-                  <td className="border px-2 py-1 text-right dark:border-gray-700">${item.unitPrice.toFixed(2)}</td>
-                  <td className="border px-2 py-1 text-center dark:border-gray-700">{item.days}</td>
-                  <td className="border px-2 py-1 text-right dark:border-gray-700">${item.subtotal.toFixed(2)}</td>
+                  <td className="border px-2 py-1 dark:border-gray-700">
+                    {item.productName}
+                  </td>
+                  <td className="border px-2 py-1 text-center dark:border-gray-700">
+                    {item.color}
+                  </td>
+                  <td className="border px-2 py-1 text-center dark:border-gray-700">
+                    {item.quantity}
+                  </td>
+                  <td className="border px-2 py-1 text-right dark:border-gray-700">
+                    ${item.unitPrice.toFixed(2)}
+                  </td>
+                  <td className="border px-2 py-1 text-center dark:border-gray-700">
+                    {item.days}
+                  </td>
+                  <td className="border px-2 py-1 text-right dark:border-gray-700">
+                    ${item.subtotal.toFixed(2)}
+                  </td>
                 </tr>
               ))}
             </tbody>
           </table>
-          <div className="text-right font-bold mb-4">Total: ${ticketTotal.toFixed(2)}</div>
+          <div className="text-right font-bold mb-4">
+            Total: ${ticketTotal.toFixed(2)}
+          </div>
           <div className="mt-4">
             <label className="block mb-1 font-semibold">Forma de Pago:</label>
             <select
@@ -460,7 +537,9 @@ const StepThree = ({
               <option value="efectivo">Efectivo</option>
               <option value="transferencia">Transferencia</option>
             </select>
-            <label className="block mb-1 font-semibold">Detalles de Pago:</label>
+            <label className="block mb-1 font-semibold">
+              Detalles de Pago:
+            </label>
             <input
               type="text"
               value={detallesPago}
@@ -468,7 +547,9 @@ const StepThree = ({
               maxLength={40}
               className="border p-2 w-full mb-1 dark:border-gray-600 dark:bg-gray-700"
             />
-            <div className="text-right text-xs text-gray-500 dark:text-gray-400">{detallesPago.length}/40</div>
+            <div className="text-right text-xs text-gray-500 dark:text-gray-400">
+              {detallesPago.length}/40
+            </div>
           </div>
         </div>
       )}

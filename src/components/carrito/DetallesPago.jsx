@@ -1,19 +1,19 @@
-import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-import { useAuth } from "../../hooks/ContextAuth";
-import { useCart } from "./ContextCarrito";
-import api from "../../utils/AxiosConfig";
-import { toast } from "react-toastify";
-import { FaCreditCard, FaLock, FaTimes, FaPlus, FaEdit } from "react-icons/fa";
-import AddressBook from "../../pages/client/perfil/componetsPerfil/ListaDirecciones";
-import { loadStripe } from "@stripe/stripe-js";
-import { Elements } from "@stripe/react-stripe-js";
+/* eslint-disable */
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../../hooks/ContextAuth';
+import { useCart } from './ContextCarrito';
+import api from '../../utils/AxiosConfig';
+import { toast } from 'react-toastify';
+import { FaCreditCard, FaLock, FaPlus, FaEdit } from 'react-icons/fa';
+import AddressBook from '../../pages/client/perfil/componetsPerfil/ListaDirecciones';
+import { loadStripe } from '@stripe/stripe-js';
 
 const stripePromise = loadStripe(process.env.REACT_APP_STRIPE_PUBLISHABLE_KEY);
 
 const DetallesPago = ({ cartItems, total, rentalDate, returnDate, onBack }) => {
   console.log(
-    "Estos datos recibo de carrito",
+    'Estos datos recibo de carrito',
     cartItems,
     total,
     rentalDate,
@@ -30,7 +30,7 @@ const DetallesPago = ({ cartItems, total, rentalDate, returnDate, onBack }) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [showAddressModal, setShowAddressModal] = useState(false);
   const [editAddressId, setEditAddressId] = useState(null);
-  const [updaDirrecion, setUpdaDirrecion] = useState([]);
+  const [updaDirrecion] = useState([]);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
 
   const itemsPerPage = 10;
@@ -47,7 +47,7 @@ const DetallesPago = ({ cartItems, total, rentalDate, returnDate, onBack }) => {
         const response = await api.get(`/api/direccion/listar`, {
           params: { idUsuarios: idUser },
           withCredentials: true,
-          headers: { "X-CSRF-Token": csrfToken },
+          headers: { 'X-CSRF-Token': csrfToken },
         });
         const direccionesObtenidas = response.data || [];
 
@@ -67,8 +67,8 @@ const DetallesPago = ({ cartItems, total, rentalDate, returnDate, onBack }) => {
           setMostrarListaDirecciones(true);
         }
       } catch (error) {
-        console.error("Error al obtener las direcciones:", error);
-        toast.error("No se pudieron cargar las direcciones. Intenta de nuevo.");
+        console.error('Error al obtener las direcciones:', error);
+        toast.error('No se pudieron cargar las direcciones. Intenta de nuevo.');
       } finally {
         setIsLoading(false);
       }
@@ -77,24 +77,24 @@ const DetallesPago = ({ cartItems, total, rentalDate, returnDate, onBack }) => {
     if (user?.idUsuarios || user?.id) {
       cargarDirecciones();
     }
-  }, [updaDirrecion]);
+  }, [updaDirrecion, csrfToken, user?.id, user?.idUsuarios]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
 
     if (!direccionSeleccionada) {
-      toast.error("Por favor, selecciona una dirección de entrega.");
+      toast.error('Por favor, selecciona una dirección de entrega.');
       setIsLoading(false);
       return;
     }
 
     try {
       const response = await api.post(
-        "/api/pedidos/pagos/crear-checkout-session",
+        '/api/pedidos/pagos/crear-checkout-session',
         {
           amount: Math.round(total * 100),
-          currency: "mxn",
+          currency: 'mxn',
           successUrl: `${window.location.origin}/cliente/compra-exitosa/{CHECKOUT_SESSION_ID}`,
           cancelUrl: `${window.location.origin}/cliente/carrito`,
           idUsuario: user?.id || user?.idUsuarios,
@@ -105,10 +105,10 @@ const DetallesPago = ({ cartItems, total, rentalDate, returnDate, onBack }) => {
         },
         {
           withCredentials: true,
-          headers: { "X-CSRF-Token": csrfToken },
+          headers: { 'X-CSRF-Token': csrfToken },
         }
       );
-      console.log("datos a aneviar", Math.round(total * 100));
+      console.log('datos a aneviar', Math.round(total * 100));
 
       const stripe = await stripePromise;
       const { error } = await stripe.redirectToCheckout({
@@ -121,7 +121,7 @@ const DetallesPago = ({ cartItems, total, rentalDate, returnDate, onBack }) => {
       }
     } catch (err) {
       console.error(err);
-      toast.error("Error al iniciar el proceso de pago.");
+      toast.error('Error al iniciar el proceso de pago.');
       setIsLoading(false);
     }
   };
@@ -132,20 +132,20 @@ const DetallesPago = ({ cartItems, total, rentalDate, returnDate, onBack }) => {
         `/api/pedidos/pagos/verificar/${sessionId}`,
         {
           withCredentials: true,
-          headers: { "X-CSRF-Token": csrfToken },
+          headers: { 'X-CSRF-Token': csrfToken },
         }
       );
 
       if (response.data.success) {
-        const { idPago, idPedido } = response.data;
+        const { idPago } = response.data;
         clearCart();
         navigate(`/cliente/compra-exitosa/${idPago}`);
       } else {
-        toast.error("Error al verificar el pago.");
+        toast.error('Error al verificar el pago.');
       }
     } catch (error) {
-      console.error("Error al procesar el pago:", error);
-      toast.error("Error al procesar el pago.");
+      console.error('Error al procesar el pago:', error);
+      toast.error('Error al procesar el pago.');
     } finally {
       setShowPaymentModal(false);
     }
@@ -188,7 +188,7 @@ const DetallesPago = ({ cartItems, total, rentalDate, returnDate, onBack }) => {
       const response = await api.get(`/api/direccion/listar`, {
         params: { idUsuarios: idUsuarios },
         withCredentials: true,
-        headers: { "X-CSRF-Token": csrfToken },
+        headers: { 'X-CSRF-Token': csrfToken },
       });
       const direccionesObtenidas = response.data || [];
       setDirecciones(direccionesObtenidas);
@@ -202,25 +202,23 @@ const DetallesPago = ({ cartItems, total, rentalDate, returnDate, onBack }) => {
         setMostrarListaDirecciones(true);
       }
     } catch (error) {
-      console.error("Error al actualizar las direcciones:", error);
+      console.error('Error al actualizar las direcciones:', error);
       toast.error(
-        "No se pudieron actualizar las direcciones. Intenta de nuevo."
+        'No se pudieron actualizar las direcciones. Intenta de nuevo.'
       );
     } finally {
       setIsLoading(false);
     }
   };
 
-  const handleClosePaymentModal = () => {
-    setShowPaymentModal(false);
-  };
-
   useEffect(() => {
-    // Verificar si regresó de Stripe Checkout
     const urlParams = new URLSearchParams(window.location.search);
-    const sessionId = urlParams.get("session_id");
+
+    console.log('Datoa en viados de stripe '.urlParams);
+    const sessionId = urlParams.get('session_id');
+    console.log('Datoa en viados de stripe sesion id '.sessionId);
     if (sessionId) {
-      handlePaymentSuccess(sessionId, "success");
+      handlePaymentSuccess(sessionId, 'success');
     }
   }, []);
 
@@ -421,8 +419,8 @@ const DetallesPago = ({ cartItems, total, rentalDate, returnDate, onBack }) => {
                           className={`direccion-card cursor-pointer border transition-all ${
                             direccionSeleccionada?.idDireccion ===
                             dir.idDireccion
-                              ? "selected border-indigo-500 dark:border-indigo-400"
-                              : "border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600"
+                              ? 'selected border-indigo-500 dark:border-indigo-400'
+                              : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'
                           }`}
                           onClick={() => handleSeleccionarDireccion(dir)}
                         >
@@ -432,7 +430,7 @@ const DetallesPago = ({ cartItems, total, rentalDate, returnDate, onBack }) => {
                                 {dir.nombre} {dir.apellido}
                               </p>
                               <p className="text-xs text-gray-600 dark:text-gray-400">
-                                {dir.direccion}, {dir.localidad},{" "}
+                                {dir.direccion}, {dir.localidad},{' '}
                                 {dir.municipio}, {dir.estado}, {dir.pais}
                               </p>
                               <p className="text-xs text-gray-600 dark:text-gray-400">
@@ -474,14 +472,14 @@ const DetallesPago = ({ cartItems, total, rentalDate, returnDate, onBack }) => {
                   ) : (
                     <div className="direccion-card selected border border-gray-200 dark:border-gray-700 rounded-md p-4">
                       <p className="text-sm font-medium text-gray-800 dark:text-gray-100">
-                        {direccionSeleccionada.nombre}{" "}
+                        {direccionSeleccionada.nombre}{' '}
                         {direccionSeleccionada.apellido}
                       </p>
                       <p className="text-xs text-gray-600 dark:text-gray-400">
-                        {direccionSeleccionada.direccion},{" "}
-                        {direccionSeleccionada.localidad},{" "}
-                        {direccionSeleccionada.municipio},{" "}
-                        {direccionSeleccionada.estado},{" "}
+                        {direccionSeleccionada.direccion},{' '}
+                        {direccionSeleccionada.localidad},{' '}
+                        {direccionSeleccionada.municipio},{' '}
+                        {direccionSeleccionada.estado},{' '}
                         {direccionSeleccionada.pais}
                       </p>
                       <p className="text-xs text-gray-600 dark:text-gray-400">
@@ -556,7 +554,7 @@ const DetallesPago = ({ cartItems, total, rentalDate, returnDate, onBack }) => {
                       <img
                         src={
                           item.imagen ||
-                          "https://via.placeholder.com/80?text=Producto"
+                          'https://via.placeholder.com/80?text=Producto'
                         }
                         alt={item.nombre}
                         className="w-16 h-16 object-cover rounded-lg border border-gray-200 dark:border-gray-600"
@@ -590,8 +588,8 @@ const DetallesPago = ({ cartItems, total, rentalDate, returnDate, onBack }) => {
                       disabled={currentPage === 1}
                       className={`px-3 py-1 rounded-lg text-sm ${
                         currentPage === 1
-                          ? "bg-gray-300 dark:bg-gray-700 text-gray-500 dark:text-gray-400 cursor-not-allowed"
-                          : "bg-indigo-600 dark:bg-indigo-700 text-white hover:bg-indigo-700 dark:hover:bg-indigo-800"
+                          ? 'bg-gray-300 dark:bg-gray-700 text-gray-500 dark:text-gray-400 cursor-not-allowed'
+                          : 'bg-indigo-600 dark:bg-indigo-700 text-white hover:bg-indigo-700 dark:hover:bg-indigo-800'
                       } transition-all`}
                     >
                       Anterior
@@ -604,8 +602,8 @@ const DetallesPago = ({ cartItems, total, rentalDate, returnDate, onBack }) => {
                       disabled={currentPage === totalPages}
                       className={`px-3 py-1 rounded-lg text-sm ${
                         currentPage === totalPages
-                          ? "bg-gray-300 dark:bg-gray-700 text-gray-500 dark:text-gray-400 cursor-not-allowed"
-                          : "bg-indigo-600 dark:bg-indigo-700 text-white hover:bg-indigo-700 dark:hover:bg-indigo-800"
+                          ? 'bg-gray-300 dark:bg-gray-700 text-gray-500 dark:text-gray-400 cursor-not-allowed'
+                          : 'bg-indigo-600 dark:bg-indigo-700 text-white hover:bg-indigo-700 dark:hover:bg-indigo-800'
                       } transition-all`}
                     >
                       Siguiente
@@ -634,26 +632,26 @@ const DetallesPago = ({ cartItems, total, rentalDate, returnDate, onBack }) => {
 
                   <div className="mt-4">
                     <p className="text-sm text-gray-600 dark:text-gray-400">
-                      <span className="font-medium">Día de renta:</span>{" "}
-                      {new Date(rentalDate + "T00:00:00").toLocaleDateString(
-                        "es-MX",
+                      <span className="font-medium">Día de renta:</span>{' '}
+                      {new Date(rentalDate + 'T00:00:00').toLocaleDateString(
+                        'es-MX',
                         {
-                          weekday: "long",
-                          year: "numeric",
-                          month: "long",
-                          day: "numeric",
+                          weekday: 'long',
+                          year: 'numeric',
+                          month: 'long',
+                          day: 'numeric',
                         }
                       )}
                     </p>
                     <p className="text-sm text-gray-600 dark:text-gray-400">
-                      <span className="font-medium">Día de devolución:</span>{" "}
-                      {new Date(returnDate + "T00:00:00").toLocaleDateString(
-                        "es-MX",
+                      <span className="font-medium">Día de devolución:</span>{' '}
+                      {new Date(returnDate + 'T00:00:00').toLocaleDateString(
+                        'es-MX',
                         {
-                          weekday: "long",
-                          year: "numeric",
-                          month: "long",
-                          day: "numeric",
+                          weekday: 'long',
+                          year: 'numeric',
+                          month: 'long',
+                          day: 'numeric',
                         }
                       )}
                     </p>

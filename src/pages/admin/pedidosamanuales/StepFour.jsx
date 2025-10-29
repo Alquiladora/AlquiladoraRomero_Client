@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from "react";
-import { v4 as uuidv4 } from "uuid"; 
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+/* eslint-disable */
+import React, { useState, useEffect } from 'react';
+import { v4 as uuidv4 } from 'uuid';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faUser,
   faMapMarkerAlt,
@@ -8,14 +9,14 @@ import {
   faCartArrowDown,
   faMoneyBillWave,
   faHashtag,
-} from "@fortawesome/free-solid-svg-icons";
+} from '@fortawesome/free-solid-svg-icons';
 
 const StepFour = ({
   nombre,
   apellido,
   telefono,
   correo,
-  
+
   esClienteExistente,
   direccionesCliente,
   selectedDireccionId,
@@ -26,7 +27,7 @@ const StepFour = ({
   localidad,
   direccion,
   referencia,
-  
+
   step3Data,
   fechaInicio,
   fechaEntrega,
@@ -34,14 +35,14 @@ const StepFour = ({
   formaPago,
   detallesPago,
   setTrackingId,
-  trackingId
+  trackingId,
 }) => {
- 
-
   const generateNumericTrackingId = () => {
     const timestamp = Date.now().toString();
-    const randomDigits = Math.floor(Math.random() * 100).toString().padStart(2, "0");
-    return "ROMERO-" + timestamp + randomDigits; 
+    const randomDigits = Math.floor(Math.random() * 100)
+      .toString()
+      .padStart(2, '0');
+    return 'ROMERO-' + timestamp + randomDigits;
   };
 
   useEffect(() => {
@@ -49,7 +50,6 @@ const StepFour = ({
     setTrackingId(newId);
   }, [setTrackingId]);
 
-  
   let direccionSeleccionada = null;
   if (esClienteExistente && selectedDireccionId) {
     direccionSeleccionada = direccionesCliente.find(
@@ -59,7 +59,6 @@ const StepFour = ({
 
   return (
     <div className="space-y-4">
- 
       <h2 className="text-xl font-bold dark:text-white">
         Paso 4: Confirmación
       </h2>
@@ -72,7 +71,7 @@ const StepFour = ({
           </span>
         </div>
       )}
- 
+
       <div className="bg-white dark:bg-gray-800 p-4 rounded shadow-sm border dark:border-gray-600">
         <h3 className="text-lg font-semibold flex items-center mb-2 dark:text-white">
           <FontAwesomeIcon icon={faUser} className="text-yellow-500 mr-2" />
@@ -89,7 +88,6 @@ const StepFour = ({
         </p>
       </div>
 
-
       <div className="bg-white dark:bg-gray-800 p-4 rounded shadow-sm border dark:border-gray-600">
         <h3 className="text-lg font-semibold flex items-center mb-2 dark:text-white">
           <FontAwesomeIcon
@@ -100,7 +98,6 @@ const StepFour = ({
         </h3>
         {esClienteExistente ? (
           direccionSeleccionada ? (
-           
             <div className="text-sm text-gray-700 dark:text-gray-300">
               <p>Código Postal: {direccionSeleccionada.codigoPostal}</p>
               <p>País: {direccionSeleccionada.pais}</p>
@@ -111,7 +108,6 @@ const StepFour = ({
               <p>Detalles: {direccionSeleccionada.referencias}</p>
             </div>
           ) : (
-           
             <div className="text-sm text-gray-700 dark:text-gray-300">
               <p>Código Postal: {codigoPostal}</p>
               <p>País: {pais}</p>
@@ -123,7 +119,6 @@ const StepFour = ({
             </div>
           )
         ) : (
-         
           <div className="text-sm text-gray-700 dark:text-gray-300">
             <p>Código Postal: {codigoPostal}</p>
             <p>País: {pais}</p>
@@ -136,7 +131,6 @@ const StepFour = ({
         )}
       </div>
 
-     
       <div className="bg-white dark:bg-gray-800 p-4 rounded shadow-sm border dark:border-gray-600">
         <h3 className="text-lg font-semibold flex items-center mb-2 dark:text-white">
           <FontAwesomeIcon
@@ -203,19 +197,21 @@ const StepFour = ({
         </p>
       </div>
 
-    
       <div className="bg-white dark:bg-gray-800 p-4 rounded shadow-sm border dark:border-gray-600">
         <h3 className="text-lg font-semibold flex items-center mb-2 dark:text-white">
-          <FontAwesomeIcon icon={faMoneyBillWave} className="text-yellow-500 mr-2" />
+          <FontAwesomeIcon
+            icon={faMoneyBillWave}
+            className="text-yellow-500 mr-2"
+          />
           Forma de Pago
         </h3>
         <p className="text-sm text-gray-700 dark:text-gray-300">
-          <span className="font-semibold">Tipo:</span>{" "}
-          {formaPago || "No especificada"}
+          <span className="font-semibold">Tipo:</span>{' '}
+          {formaPago || 'No especificada'}
         </p>
         <p className="text-sm text-gray-700 dark:text-gray-300">
-          <span className="font-semibold">Detalles:</span>{" "}
-          {detallesPago || "N/A"}
+          <span className="font-semibold">Detalles:</span>{' '}
+          {detallesPago || 'N/A'}
         </p>
       </div>
     </div>

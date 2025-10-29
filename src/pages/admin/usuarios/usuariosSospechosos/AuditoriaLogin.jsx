@@ -1,28 +1,28 @@
-import React, { useEffect, useState } from "react";
-import api from "../../../../utils/AxiosConfig";
-import { 
-  FaUserCircle, 
-  FaClock, 
-  FaDesktop, 
-  FaCheckCircle, 
-  FaExclamationCircle, 
-  FaExclamationTriangle, 
-  FaInfoCircle 
-} from "react-icons/fa";
-import { useAuth } from "../../../../hooks/ContextAuth";
+/* eslint-disable */
+import React, { useEffect, useState } from 'react';
+import api from '../../../../utils/AxiosConfig';
+import {
+  FaUserCircle,
+  FaClock,
+  FaDesktop,
+  FaCheckCircle,
+  FaExclamationCircle,
+  FaExclamationTriangle,
+  FaInfoCircle,
+} from 'react-icons/fa';
+import { useAuth } from '../../../../hooks/ContextAuth';
 
 const Auditoria = () => {
   const [auditorias, setAuditorias] = useState([]);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
 
-  const [selectedMonth, setSelectedMonth] = useState("");
+  const [selectedMonth, setSelectedMonth] = useState('');
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
 
   const [loading, setLoading] = useState(false);
 
   const { csrfToken } = useAuth();
-
 
   const currentYear = new Date().getFullYear();
   const years = [];
@@ -30,43 +30,39 @@ const Auditoria = () => {
     years.push(y);
   }
 
-  const fetchAuditorias = async (pageNumber = 1, month = "", year = "") => {
+  const fetchAuditorias = async (pageNumber = 1, month = '', year = '') => {
     setLoading(true);
-    try { 
+    try {
       const limit = 10;
       const params = {
         page: pageNumber,
         limit,
       };
       if (year) params.year = year;
-      if (month !== "") params.month = month;
-      const response = await api.get("/api/auditoria/auditoria/lista", {
+      if (month !== '') params.month = month;
+      const response = await api.get('/api/auditoria/auditoria/lista', {
         params,
         withCredentials: true,
-        headers: { "X-CSRF-Token": csrfToken },
+        headers: { 'X-CSRF-Token': csrfToken },
       });
       setAuditorias(response.data.data);
       setTotalPages(response.data.totalPages);
       setPage(response.data.currentPage);
     } catch (error) {
-      console.error("Error al obtener registros de auditoría:", error);
+      console.error('Error al obtener registros de auditoría:', error);
     } finally {
       setLoading(false);
     }
   };
 
-
   useEffect(() => {
     fetchAuditorias(1, selectedMonth, selectedYear);
-   
   }, [csrfToken]);
 
   useEffect(() => {
     fetchAuditorias(1, selectedMonth, selectedYear);
-
   }, [selectedMonth, selectedYear]);
 
- 
   const handlePreviousPage = () => {
     if (page > 1) {
       fetchAuditorias(page - 1, selectedMonth, selectedYear);
@@ -79,25 +75,38 @@ const Auditoria = () => {
     }
   };
 
-
   const getChipProps = (accion) => {
     const act = accion.toLowerCase();
-    if (act.includes("error")) {
-      return { color: "red", icon: <FaExclamationCircle className="inline mr-1" /> };
-    } else if (act.includes("éxito") || act.includes("correcto") || act.includes("inicio de sesión exitoso")) {
-      return { color: "green", icon: <FaCheckCircle className="inline mr-1" /> };
-    } else if (act.includes("advertencia")) {
-      return { color: "yellow", icon: <FaExclamationTriangle className="inline mr-1" /> };
+    if (act.includes('error')) {
+      return {
+        color: 'red',
+        icon: <FaExclamationCircle className="inline mr-1" />,
+      };
+    } else if (
+      act.includes('éxito') ||
+      act.includes('correcto') ||
+      act.includes('inicio de sesión exitoso')
+    ) {
+      return {
+        color: 'green',
+        icon: <FaCheckCircle className="inline mr-1" />,
+      };
+    } else if (act.includes('advertencia')) {
+      return {
+        color: 'yellow',
+        icon: <FaExclamationTriangle className="inline mr-1" />,
+      };
     } else {
-      return { color: "blue", icon: <FaInfoCircle className="inline mr-1" /> };
+      return { color: 'blue', icon: <FaInfoCircle className="inline mr-1" /> };
     }
   };
 
   return (
     <div className="p-4 max-w-3xl mx-auto dark:bg-gray-900 dark:text-gray-100">
-      <h1 className="text-3xl font-bold text-center mb-6">Registro de Auditoría</h1>
+      <h1 className="text-3xl font-bold text-center mb-6">
+        Registro de Auditoría
+      </h1>
 
-    
       <div className="flex flex-col sm:flex-row justify-center gap-4 mb-6">
         <div className="flex flex-col">
           <label className="mb-1 font-semibold">Filtrar por mes</label>
@@ -109,8 +118,8 @@ const Auditoria = () => {
             <option value="">Todos los meses</option>
             {Array.from({ length: 12 }, (_, index) => (
               <option key={index} value={index}>
-                {new Date(0, index).toLocaleString("default", {
-                  month: "long",
+                {new Date(0, index).toLocaleString('default', {
+                  month: 'long',
                 })}
               </option>
             ))}
@@ -132,11 +141,9 @@ const Auditoria = () => {
         </div>
       </div>
 
-      
       {loading ? (
         <div className="flex justify-center items-center h-64">
           <div className="flex flex-col items-center">
-         
             <div className="w-16 h-16 border-4 border-yellow-500 border-t-transparent rounded-full animate-spin"></div>
             <p className="mt-4 text-sm text-gray-700 dark:text-gray-300">
               Cargando auditoría...
@@ -164,18 +171,22 @@ const Auditoria = () => {
                     </div>
                     <div>
                       <p className="text-lg font-bold">
-                        {auditoria.usuario || "Usuario desconocido"} - {auditoria.correo}
+                        {auditoria.usuario || 'Usuario desconocido'} -{' '}
+                        {auditoria.correo}
                       </p>
                       <p className="text-sm text-gray-600 dark:text-gray-300">
-                        {new Date(auditoria.fecha_hora).toLocaleString("es-MX", {
-                          dateStyle: "short",
-                          timeStyle: "short",
-                          hour12: true,
-                        })}
+                        {new Date(auditoria.fecha_hora).toLocaleString(
+                          'es-MX',
+                          {
+                            dateStyle: 'short',
+                            timeStyle: 'short',
+                            hour12: true,
+                          }
+                        )}
                       </p>
                     </div>
                   </div>
-                 
+
                   <div className="flex flex-wrap gap-2 items-center">
                     {(() => {
                       const chipProps = getChipProps(auditoria.accion);
@@ -190,10 +201,10 @@ const Auditoria = () => {
                     })()}
 
                     <span className="inline-block px-3 py-1 text-xs font-semibold text-gray-800 bg-gray-200 rounded-full flex items-center">
-                      <FaClock className="mr-1" />{" "}
-                      {new Date(auditoria.fecha_hora).toLocaleString("es-MX", {
-                        dateStyle: "short",
-                        timeStyle: "short",
+                      <FaClock className="mr-1" />{' '}
+                      {new Date(auditoria.fecha_hora).toLocaleString('es-MX', {
+                        dateStyle: 'short',
+                        timeStyle: 'short',
                         hour12: true,
                       })}
                     </span>
@@ -219,7 +230,9 @@ const Auditoria = () => {
         >
           Anterior
         </button>
-        <span>Página {page} de {totalPages}</span>
+        <span>
+          Página {page} de {totalPages}
+        </span>
         <button
           onClick={handleNextPage}
           disabled={page >= totalPages}

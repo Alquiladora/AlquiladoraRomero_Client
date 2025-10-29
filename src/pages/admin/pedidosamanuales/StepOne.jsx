@@ -1,6 +1,11 @@
-import React, { useState, useEffect } from "react";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faAddressCard, faUser, faPhone, faEnvelope } from "@fortawesome/free-solid-svg-icons";
+import React, { useState, useEffect } from 'react';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import {
+  faAddressCard,
+  faUser,
+  faPhone,
+  faEnvelope,
+} from '@fortawesome/free-solid-svg-icons';
 
 function StepOne({
   nombre,
@@ -13,49 +18,48 @@ function StepOne({
   setCorreo,
   handleAbrirSubmodalCorreo,
 }) {
-
-  const [nombreError, setNombreError] = useState("");
-  const [apellidoError, setApellidoError] = useState("");
-  const [telefonoError, setTelefonoError] = useState("");
-  const [correoError, setCorreoError] = useState("");
+  const [nombreError, setNombreError] = useState('');
+  const [apellidoError, setApellidoError] = useState('');
+  const [telefonoError, setTelefonoError] = useState('');
+  const [correoError, setCorreoError] = useState('');
 
   const validarNombre = (valor) => {
     if (valor.trim().length < 3) {
-      return "El nombre debe tener al menos 3 caracteres.";
+      return 'El nombre debe tener al menos 3 caracteres.';
     }
     const regexSoloLetras = /^[a-zA-ZÁÉÍÓÚÑáéíóúñ\s]+$/;
     if (!regexSoloLetras.test(valor.trim())) {
-      return "El nombre solo puede contener letras y espacios.";
+      return 'El nombre solo puede contener letras y espacios.';
     }
-    return "";
+    return '';
   };
 
   const validarApellido = (valor) => {
     if (valor.trim().length < 3) {
-      return "El apellido debe tener al menos 3 caracteres.";
+      return 'El apellido debe tener al menos 3 caracteres.';
     }
     const regexSoloLetras = /^[a-zA-ZÁÉÍÓÚÑáéíóúñ\s]+$/;
     if (!regexSoloLetras.test(valor.trim())) {
-      return "El apellido solo puede contener letras y espacios.";
+      return 'El apellido solo puede contener letras y espacios.';
     }
-    return "";
+    return '';
   };
 
   const validarTelefono = (valor) => {
     const regexTelefono = /^[0-9]{10}$/;
     if (!regexTelefono.test(valor.trim())) {
-      return "El teléfono debe tener exactamente 10 dígitos numéricos.";
+      return 'El teléfono debe tener exactamente 10 dígitos numéricos.';
     }
-    return "";
+    return '';
   };
 
   const validarCorreo = (valor) => {
-    if (!valor.trim()) return "";
+    if (!valor.trim()) return '';
     const regexCorreo = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!regexCorreo.test(valor.trim())) {
-      return "Ingresa un correo electrónico válido (ej: usuario@dominio.com).";
+      return 'Ingresa un correo electrónico válido (ej: usuario@dominio.com).';
     }
-    return "";
+    return '';
   };
 
   const handleNombreChange = (e) => {
@@ -73,7 +77,7 @@ function StepOne({
   };
 
   const handleTelefonoChange = (e) => {
-    setTelefono(e.target.value.replace(/\D/g, ""));
+    setTelefono(e.target.value.replace(/\D/g, ''));
   };
   const handleTelefonoBlur = () => {
     setTelefonoError(validarTelefono(telefono));
@@ -87,37 +91,40 @@ function StepOne({
   };
 
   useEffect(() => {
-    if (validarNombre(nombre) === "") {
-      setNombreError("");
+    if (validarNombre(nombre) === '') {
+      setNombreError('');
     }
   }, [nombre]);
 
   useEffect(() => {
-    if (validarApellido(apellido) === "") {
-      setApellidoError("");
+    if (validarApellido(apellido) === '') {
+      setApellidoError('');
     }
   }, [apellido]);
 
   useEffect(() => {
-    if (validarTelefono(telefono) === "") {
-      setTelefonoError("");
+    if (validarTelefono(telefono) === '') {
+      setTelefonoError('');
     }
   }, [telefono]);
 
   useEffect(() => {
-    if (validarCorreo(correo) === "") {
-      setCorreoError("");
+    if (validarCorreo(correo) === '') {
+      setCorreoError('');
     }
   }, [correo]);
 
   return (
     <div className="space-y-6 dark:text-gray-200">
       <h2 className="text-lg font-semibold text-gray-800 dark:text-white flex items-center">
-        <FontAwesomeIcon icon={faAddressCard} className="mr-2 text-yellow-500" />
+        <FontAwesomeIcon
+          icon={faAddressCard}
+          className="mr-2 text-yellow-500"
+        />
         Paso 1: Datos Personales
       </h2>
       <p className="text-sm text-gray-500 dark:text-gray-300">
-        ¿Ya eres cliente?{" "}
+        ¿Ya eres cliente?{' '}
         <button
           onClick={handleAbrirSubmodalCorreo}
           className="text-blue-500 underline"
@@ -147,7 +154,9 @@ function StepOne({
           />
         </div>
         {nombreError && (
-          <p className="text-red-500 dark:text-red-400 text-sm mt-1">{nombreError}</p>
+          <p className="text-red-500 dark:text-red-400 text-sm mt-1">
+            {nombreError}
+          </p>
         )}
       </div>
 
@@ -171,7 +180,9 @@ function StepOne({
           />
         </div>
         {apellidoError && (
-          <p className="text-red-500 dark:text-red-400 text-sm mt-1">{apellidoError}</p>
+          <p className="text-red-500 dark:text-red-400 text-sm mt-1">
+            {apellidoError}
+          </p>
         )}
       </div>
 
@@ -196,7 +207,9 @@ function StepOne({
           />
         </div>
         {telefonoError && (
-          <p className="text-red-500 dark:text-red-400 text-sm mt-1">{telefonoError}</p>
+          <p className="text-red-500 dark:text-red-400 text-sm mt-1">
+            {telefonoError}
+          </p>
         )}
       </div>
 
@@ -220,7 +233,9 @@ function StepOne({
           />
         </div>
         {correoError && (
-          <p className="text-red-500 dark:text-red-400 text-sm mt-1">{correoError}</p>
+          <p className="text-red-500 dark:text-red-400 text-sm mt-1">
+            {correoError}
+          </p>
         )}
       </div>
     </div>

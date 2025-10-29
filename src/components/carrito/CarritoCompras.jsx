@@ -1,29 +1,26 @@
-import React, { useState, useEffect } from "react";
+/* eslint-disable */
+import React, { useState, useEffect } from 'react';
 import {
-  CheckIcon,
   TrashIcon,
   PlusIcon,
   MinusIcon,
-  PaintBrushIcon,
-  WrenchScrewdriverIcon,
+  ColorSwatchIcon,
+  CogIcon,
   ClockIcon,
-} from "@heroicons/react/24/outline";
-import { useSocket } from "../../utils/Socket";
-import { useAuth } from "../../hooks/ContextAuth";
-import api from "../../utils/AxiosConfig";
-import { toast } from "react-toastify";
-import { useCart } from "./ContextCarrito";
-import DetallesPago from "./DetallesPago";
-import { useRecomendaciones } from "./ContextRecomendaciones";
-import { ShoppingCart, Star, ArrowRight } from "lucide-react";
-import "./carrito.css";
-import { Link } from "react-router-dom";
-
-
+} from '@heroicons/react/outline';
+import { useSocket } from '../../utils/Socket';
+import { useAuth } from '../../hooks/ContextAuth';
+import api from '../../utils/AxiosConfig';
+import { toast } from 'react-toastify';
+import { useCart } from './ContextCarrito';
+import DetallesPago from './DetallesPago';
+import { useRecomendaciones } from './ContextRecomendaciones';
+import { ShoppingCart } from 'lucide-react';
+import './carrito.css';
+import { Link } from 'react-router-dom';
 
 const SeccionRecomendaciones = ({ productos, onAgregar }) => {
   if (!productos || productos.length === 0) return null;
-  
 
   return (
     <div className="w-full max-w-7xl mx-auto px-4 mt-16 animate-fadeIn">
@@ -45,7 +42,7 @@ const SeccionRecomendaciones = ({ productos, onAgregar }) => {
                 <img
                   src={
                     prod.imagenProducto ||
-                    "https://via.placeholder.com/300x200?text=Sin+Imagen"
+                    'https://via.placeholder.com/300x200?text=Sin+Imagen'
                   }
                   alt={prod.nombre}
                   className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
@@ -73,7 +70,7 @@ const SeccionRecomendaciones = ({ productos, onAgregar }) => {
 
                 <p className="text-base font-bold text-blue-600 dark:text-blue-400 mb-3">
                   {isNaN(Number(prod.precioAlquiler))
-                    ? "Precio no disponible"
+                    ? 'Precio no disponible'
                     : `$${Number(prod.precioAlquiler).toFixed(2)}`}
                 </p>
 
@@ -81,11 +78,7 @@ const SeccionRecomendaciones = ({ productos, onAgregar }) => {
                 <button
                   onClick={(e) => {
                     e.preventDefault(); // ← evitar que el clic en botón navegue
-                    onAgregar(
-                      prod.idProductoColores,
-                      1,
-                      prod.precioAlquiler
-                    );
+                    onAgregar(prod.idProductoColores, 1, prod.precioAlquiler);
                   }}
                   className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-xl transition-all duration-300 text-sm flex justify-center items-center gap-2 shadow-sm"
                 >
@@ -107,9 +100,6 @@ const SeccionRecomendaciones = ({ productos, onAgregar }) => {
   );
 };
 
-
-
-
 function CarritoRentaSheinStyle() {
   const socket = useSocket();
   const { user, csrfToken } = useAuth();
@@ -117,8 +107,8 @@ function CarritoRentaSheinStyle() {
   const { removeFromCart: removeFromCartContext } = useCart();
   const [cartItems, setCartItems] = useState([]);
   const [selectedItems, setSelectedItems] = useState([]);
-  const [rentalDate, setRentalDate] = useState("");
-  const [returnDate, setReturnDate] = useState("");
+  const [rentalDate, setRentalDate] = useState('');
+  const [returnDate, setReturnDate] = useState('');
   const [totalCalculated, setTotalCalculated] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -132,27 +122,27 @@ function CarritoRentaSheinStyle() {
   const STRIPE_FEE_FIXED = 3;
 
   const getMexicoCityDate = () => {
-    const date = new Date().toLocaleString("en-US", {
-      timeZone: "America/Mexico_City",
+    const date = new Date().toLocaleString('en-US', {
+      timeZone: 'America/Mexico_City',
     });
     return new Date(date); // Convierte a objeto Date para evitar problemas con el formato
   };
 
   const getTodayDate = () => {
     const today = new Date(getMexicoCityDate());
-    return today.toISOString().split("T")[0]; // Asegura formato YYYY-MM-DD
+    return today.toISOString().split('T')[0]; // Asegura formato YYYY-MM-DD
   };
 
   const getMaxDate = (startDate) => {
     const maxDate = new Date(startDate);
     maxDate.setFullYear(maxDate.getFullYear() + 1);
-    return maxDate.toISOString().split("T")[0];
+    return maxDate.toISOString().split('T')[0];
   };
 
   const getNextDay = (date) => {
     const nextDay = new Date(date);
     nextDay.setDate(nextDay.getDate() + 1);
-    return nextDay.toISOString().split("T")[0];
+    return nextDay.toISOString().split('T')[0];
   };
 
   const isSunday = (dateStr) => {
@@ -170,9 +160,9 @@ function CarritoRentaSheinStyle() {
     if (idUsuario) {
       fetchCartItems();
     } else {
-      setError("No se pudo identificar al usuario. Por favor, inicia sesión.");
+      setError('No se pudo identificar al usuario. Por favor, inicia sesión.');
     }
-  }, [idUsuario]);
+  }, [idUsuario, fetchCartItems]);
 
   useEffect(() => {
     if (!socket || !idUsuario) return;
@@ -213,12 +203,12 @@ function CarritoRentaSheinStyle() {
       );
     };
 
-    socket.on("Agregalo Carrito", handleCartUpdate);
-    socket.on("Inventario Actualizado", handleInventoryUpdate);
+    socket.on('Agregalo Carrito', handleCartUpdate);
+    socket.on('Inventario Actualizado', handleInventoryUpdate);
 
     return () => {
-      socket.off("Agregalo Carrito", handleCartUpdate);
-      socket.off("Inventario Actualizado", handleInventoryUpdate);
+      socket.off('Agregalo Carrito', handleCartUpdate);
+      socket.off('Inventario Actualizado', handleInventoryUpdate);
     };
   }, [socket, idUsuario, selectedItems]);
 
@@ -241,20 +231,20 @@ function CarritoRentaSheinStyle() {
       const response = await api.get(`/api/carrito/carrito/${idUsuario}`, {
         withCredentials: true,
         headers: {
-          "X-CSRF-Token": csrfToken,
-          "Content-Type": "application/json",
+          'X-CSRF-Token': csrfToken,
+          'Content-Type': 'application/json',
         },
       });
 
       if (!response.data.success) {
-        throw new Error(response.data.message || "Error al obtener el carrito");
+        throw new Error(response.data.message || 'Error al obtener el carrito');
       }
 
       const mappedItems = response.data.carrito.map((item) => ({
         id: item.idCarrito,
         nombre: item.nombreProducto,
         imagen:
-          item.imagenProducto || "https://via.placeholder.com/80?text=Producto",
+          item.imagenProducto || 'https://via.placeholder.com/80?text=Producto',
         precioPorDia: parseFloat(item.precioProducto),
         cantidad: item.cantidad,
         disponible: item.stockDisponible > 0,
@@ -283,51 +273,49 @@ function CarritoRentaSheinStyle() {
           .map((item) => item.id)
       );
     } catch (err) {
-      console.error("Error fetching cart items:", err);
-      setError("No se pudo cargar el carrito. Intenta de nuevo.");
+      console.error('Error fetching cart items:', err);
+      setError('No se pudo cargar el carrito. Intenta de nuevo.');
     } finally {
       setIsLoading(false);
     }
   };
 
   const addToCart = async (idProductoColor, cantidad, precioAlquiler) => {
-
-
-    console.log("Datos recibidso",idProductoColor, cantidad, precioAlquiler )
+    console.log('Datos recibidso', idProductoColor, cantidad, precioAlquiler);
     if (!idUsuario) {
       toast.error(
-        "Por favor, inicia sesión para agregar productos al carrito."
+        'Por favor, inicia sesión para agregar productos al carrito.'
       );
       return;
     }
 
     try {
       const response = await api.post(
-        "/api/carrito/agregar",
+        '/api/carrito/agregar',
         { idUsuario, idProductoColor, cantidad, precioAlquiler },
         {
           withCredentials: true,
           headers: {
-            "X-CSRF-Token": csrfToken,
-            "Content-Type": "application/json",
+            'X-CSRF-Token': csrfToken,
+            'Content-Type': 'application/json',
           },
         }
       );
-       actualizarRecomendaciones(response.data.recomendaciones);
+      actualizarRecomendaciones(response.data.recomendaciones);
 
       if (!response.data.success) {
         throw new Error(
-          response.data.message || "No se pudo agregar el producto al carrito"
+          response.data.message || 'No se pudo agregar el producto al carrito'
         );
       }
 
-      toast.success("Producto agregado al carrito correctamente");
+      toast.success('Producto agregado al carrito correctamente');
       fetchCartItems();
     } catch (err) {
-      console.error("Error adding item to cart:", err);
+      console.error('Error adding item to cart:', err);
       toast.error(
         err.message ||
-          "No se pudo agregar el producto al carrito. Intenta de nuevo."
+          'No se pudo agregar el producto al carrito. Intenta de nuevo.'
       );
     }
   };
@@ -339,22 +327,22 @@ function CarritoRentaSheinStyle() {
       const response = await api.delete(`/api/carrito/eliminar/${idCarrito}`, {
         withCredentials: true,
         headers: {
-          "X-CSRF-Token": csrfToken,
-          "Content-Type": "application/json",
+          'X-CSRF-Token': csrfToken,
+          'Content-Type': 'application/json',
         },
         data: { idUsuario: idUser },
       });
-       actualizarRecomendaciones(response.data.recomendaciones);
+      actualizarRecomendaciones(response.data.recomendaciones);
 
       if (!response.data.success) {
         throw new Error(
-          response.data.message || "No se pudo eliminar el producto del carrito"
+          response.data.message || 'No se pudo eliminar el producto del carrito'
         );
       }
 
       setCartItems((prev) => prev.filter((item) => item.id !== idCarrito));
       setSelectedItems((prev) => prev.filter((id) => id !== idCarrito));
-      toast.success("Producto eliminado del carrito correctamente");
+      toast.success('Producto eliminado del carrito correctamente');
       await removeFromCartContext();
 
       if (totalCalculated !== null && rentalDate && returnDate) {
@@ -376,10 +364,10 @@ function CarritoRentaSheinStyle() {
         setTotalCalculated(total);
       }
     } catch (err) {
-      console.error("Error removing item from cart:", err);
+      console.error('Error removing item from cart:', err);
       toast.error(
         err.message ||
-          "No se pudo eliminar el producto del carrito. Intenta de nuevo."
+          'No se pudo eliminar el producto del carrito. Intenta de nuevo.'
       );
       fetchCartItems();
     } finally {
@@ -389,7 +377,7 @@ function CarritoRentaSheinStyle() {
 
   const updateQuantity = async (idCarrito, newCantidad) => {
     if (newCantidad <= 0) {
-      toast.error("La cantidad debe ser al menos 1.");
+      toast.error('La cantidad debe ser al menos 1.');
       return;
     }
 
@@ -401,15 +389,15 @@ function CarritoRentaSheinStyle() {
         {
           withCredentials: true,
           headers: {
-            "X-CSRF-Token": csrfToken,
-            "Content-Type": "application/json",
+            'X-CSRF-Token': csrfToken,
+            'Content-Type': 'application/json',
           },
         }
       );
 
       if (!response.data.success) {
         throw new Error(
-          response.data.message || "No se pudo actualizar la cantidad"
+          response.data.message || 'No se pudo actualizar la cantidad'
         );
       }
 
@@ -453,9 +441,9 @@ function CarritoRentaSheinStyle() {
         setTotalCalculated(total);
       }
     } catch (err) {
-      console.error("Error updating quantity:", err);
+      console.error('Error updating quantity:', err);
       toast.error(
-        err.message || "No se pudo actualizar la cantidad. Intenta de nuevo."
+        err.message || 'No se pudo actualizar la cantidad. Intenta de nuevo.'
       );
       fetchCartItems();
     } finally {
@@ -547,13 +535,13 @@ function CarritoRentaSheinStyle() {
 
   const handleCotizar = () => {
     if (!rentalDate || !returnDate) {
-      toast.error("Por favor selecciona las fechas de renta y devolución.");
+      toast.error('Por favor selecciona las fechas de renta y devolución.');
       return;
     }
 
     if (isTodaySunday() && isSunday(rentalDate)) {
       toast.error(
-        "Los domingos no trabajamos. Por favor, selecciona otro día para la renta."
+        'Los domingos no trabajamos. Por favor, selecciona otro día para la renta.'
       );
       return;
     }
@@ -571,7 +559,7 @@ function CarritoRentaSheinStyle() {
     }, 0);
 
     setTotalCalculated(total);
-    toast.success("Cotización realizada correctamente");
+    toast.success('Cotización realizada correctamente');
   };
 
   const getRemainingTime = (fechaAgregado) => {
@@ -582,7 +570,7 @@ function CarritoRentaSheinStyle() {
     const currentDate = new Date(getMexicoCityDate());
     const diffTime = expirationDate - currentDate;
 
-    if (diffTime <= 0) return { timeString: "Expirado", showTimer: false };
+    if (diffTime <= 0) return { timeString: 'Expirado', showTimer: false };
 
     const days = Math.floor(diffTime / (1000 * 60 * 60 * 24));
     const hours = Math.floor(
@@ -597,22 +585,21 @@ function CarritoRentaSheinStyle() {
 
   const handleRentalDateChange = (e) => {
     const newRentalDate = e.target.value;
-    const today = new Date(getMexicoCityDate()).toISOString().split("T")[0];
 
     if (isTodaySunday() && isSunday(newRentalDate)) {
       toast.error(
-        "Los domingos no trabajamos. Por favor, selecciona otro día."
+        'Los domingos no trabajamos. Por favor, selecciona otro día.'
       );
-      setRentalDate(""); // Limpia el campo si es domingo y hoy también lo es
+      setRentalDate('');
       return;
     }
 
     setRentalDate(newRentalDate);
 
     if (returnDate && new Date(newRentalDate) >= new Date(returnDate)) {
-      setReturnDate("");
+      setReturnDate('');
       toast.warn(
-        "La fecha de devolución ha sido reseteada porque debe ser posterior a la fecha de renta."
+        'La fecha de devolución ha sido reseteada porque debe ser posterior a la fecha de renta.'
       );
     }
 
@@ -627,16 +614,16 @@ function CarritoRentaSheinStyle() {
     const returnDateObj = new Date(newReturnDate);
 
     if (!rentalDate) {
-      toast.error("Por favor selecciona primero la fecha de renta.");
-      setReturnDate("");
+      toast.error('Por favor selecciona primero la fecha de renta.');
+      setReturnDate('');
       return;
     }
 
     if (returnDateObj <= rentalDateObj) {
       toast.error(
-        "La fecha de devolución debe ser posterior a la fecha de renta."
+        'La fecha de devolución debe ser posterior a la fecha de renta.'
       );
-      setReturnDate("");
+      setReturnDate('');
       return;
     }
 
@@ -650,23 +637,23 @@ function CarritoRentaSheinStyle() {
   const handleProceedToPayment = () => {
     if (selectedItems.length === 0) {
       toast.error(
-        "Por favor, selecciona al menos un producto para proceder al pago."
+        'Por favor, selecciona al menos un producto para proceder al pago.'
       );
       return;
     }
     if (!rentalDate || !returnDate) {
-      toast.error("Por favor, selecciona las fechas de renta y devolución.");
+      toast.error('Por favor, selecciona las fechas de renta y devolución.');
       return;
     }
     if (isTodaySunday() && isSunday(rentalDate)) {
       toast.error(
-        "Los domingos no trabajamos. Por favor, selecciona otro día para la renta."
+        'Los domingos no trabajamos. Por favor, selecciona otro día para la renta.'
       );
       return;
     }
     if (totalCalculated === null) {
       toast.error(
-        "Por favor, realiza la cotización antes de proceder al pago."
+        'Por favor, realiza la cotización antes de proceder al pago.'
       );
       return;
     }
@@ -681,10 +668,6 @@ function CarritoRentaSheinStyle() {
     totalCalculated !== null
       ? calculateTotalToPay(totalCalculated)
       : { subtotal: 0, stripeFee: 0, total: 0 };
-
-  const beforeShowDate = (date) => {
-    return !isSunday(date.toISOString().split("T")[0]);
-  };
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-900 text-gray-900 dark:text-gray-100">
@@ -889,8 +872,8 @@ function CarritoRentaSheinStyle() {
                       key={item.id}
                       className={`cart-item bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-4 sm:p-6 flex flex-col sm:flex-row items-center space-y-4 sm:space-y-0 sm:space-x-6 transform transition-all hover:shadow-xl animate-fadeIn border ${
                         isOutOfStock || isOverStock
-                          ? "border-red-200 dark:border-red-800 opacity-80"
-                          : "border-gray-100 dark:border-gray-700 hover:border-indigo-300 dark:hover:border-indigo-600"
+                          ? 'border-red-200 dark:border-red-800 opacity-80'
+                          : 'border-gray-100 dark:border-gray-700 hover:border-indigo-300 dark:hover:border-indigo-600'
                       }`}
                       style={{ animationDelay: `${index * 0.1}s` }}
                     >
@@ -907,7 +890,7 @@ function CarritoRentaSheinStyle() {
                           src={item.imagen}
                           alt={item.nombre}
                           className={`w-20 h-20 sm:w-24 sm:h-24 md:w-32 md:h-32 object-cover rounded-lg border border-gray-200 dark:border-gray-600 transition-transform transform hover:scale-105 ${
-                            isOutOfStock || isOverStock ? "opacity-60" : ""
+                            isOutOfStock || isOverStock ? 'opacity-60' : ''
                           }`}
                         />
                       </div>
@@ -934,8 +917,8 @@ function CarritoRentaSheinStyle() {
                         <p
                           className={`font-semibold text-lg sm:text-xl md:text-2xl text-gray-900 dark:text-gray-100 transition-colors ${
                             isOutOfStock || isOverStock
-                              ? "text-gray-500 dark:text-gray-400"
-                              : "hover:text-indigo-600 dark:hover:text-indigo-400"
+                              ? 'text-gray-500 dark:text-gray-400'
+                              : 'hover:text-indigo-600 dark:hover:text-indigo-400'
                           }`}
                         >
                           {item.nombre}
@@ -945,21 +928,21 @@ function CarritoRentaSheinStyle() {
                           <span
                             className={`bubble text-sm ${
                               isOutOfStock || isOverStock
-                                ? "bg-gray-200 text-gray-500 dark:bg-gray-700 dark:text-gray-400"
-                                : ""
+                                ? 'bg-gray-200 text-gray-500 dark:bg-gray-700 dark:text-gray-400'
+                                : ''
                             }`}
                           >
-                            <PaintBrushIcon className="h-4 w-4 mr-1" />
+                            <ColorSwatchIcon className="h-4 w-4 mr-1" />
                             Color: {item.color}
                           </span>
                           <span
                             className={`bubble text-sm ${
                               isOutOfStock || isOverStock
-                                ? "bg-gray-200 text-gray-500 dark:bg-gray-700 dark:text-gray-400"
-                                : ""
+                                ? 'bg-gray-200 text-gray-500 dark:bg-gray-700 dark:text-gray-400'
+                                : ''
                             }`}
                           >
-                            <WrenchScrewdriverIcon className="h-4 w-4 mr-1" />
+                            <CogIcon className="h-4 w-4 mr-1" />
                             Material: {item.material}
                           </span>
                         </div>
@@ -967,27 +950,27 @@ function CarritoRentaSheinStyle() {
                         <p
                           className={`text-sm ${
                             isOutOfStock || isOverStock
-                              ? "text-gray-500 dark:text-gray-400"
-                              : "text-gray-600 dark:text-gray-400"
+                              ? 'text-gray-500 dark:text-gray-400'
+                              : 'text-gray-600 dark:text-gray-400'
                           }`}
                         >
-                          <span className="font-medium">Detalles:</span>{" "}
+                          <span className="font-medium">Detalles:</span>{' '}
                           {item.detalles}
                         </p>
 
                         <p
                           className={`text-sm ${
                             isOutOfStock || isOverStock
-                              ? "text-gray-500 dark:text-gray-400"
-                              : "text-gray-600 dark:text-gray-400"
+                              ? 'text-gray-500 dark:text-gray-400'
+                              : 'text-gray-600 dark:text-gray-400'
                           }`}
                         >
-                          <span className="font-medium">Precio por día:</span>{" "}
+                          <span className="font-medium">Precio por día:</span>{' '}
                           <span
                             className={`font-semibold ${
                               isOutOfStock || isOverStock
-                                ? "text-gray-500 dark:text-gray-400"
-                                : "text-indigo-600 dark:text-indigo-400"
+                                ? 'text-gray-500 dark:text-gray-400'
+                                : 'text-indigo-600 dark:text-indigo-400'
                             }`}
                           >
                             ${item.precioPorDia.toLocaleString()}
@@ -1001,8 +984,8 @@ function CarritoRentaSheinStyle() {
                             }
                             className={`p-2 rounded-full transition-all duration-200 ${
                               canDecrease && !isItemLoading
-                                ? "bg-gradient-to-r from-indigo-100 to-indigo-200 text-indigo-600 hover:from-indigo-200 hover:to-indigo-300 dark:from-indigo-700 dark:to-indigo-800 dark:text-indigo-200 dark:hover:from-indigo-600 dark:hover:to-indigo-700"
-                                : "bg-gray-200 text-gray-400 dark:bg-gray-600 dark:text-gray-500 cursor-not-allowed"
+                                ? 'bg-gradient-to-r from-indigo-100 to-indigo-200 text-indigo-600 hover:from-indigo-200 hover:to-indigo-300 dark:from-indigo-700 dark:to-indigo-800 dark:text-indigo-200 dark:hover:from-indigo-600 dark:hover:to-indigo-700'
+                                : 'bg-gray-200 text-gray-400 dark:bg-gray-600 dark:text-gray-500 cursor-not-allowed'
                             }`}
                             aria-label="Reducir cantidad"
                             disabled={!canDecrease || isItemLoading}
@@ -1016,8 +999,8 @@ function CarritoRentaSheinStyle() {
                           <span
                             className={`px-4 py-1 rounded-full font-medium text-sm ${
                               isOutOfStock || isOverStock
-                                ? "bg-gray-200 text-gray-500 dark:bg-gray-700 dark:text-gray-400"
-                                : "bg-indigo-50 text-indigo-800 dark:bg-indigo-900 dark:text-indigo-200"
+                                ? 'bg-gray-200 text-gray-500 dark:bg-gray-700 dark:text-gray-400'
+                                : 'bg-indigo-50 text-indigo-800 dark:bg-indigo-900 dark:text-indigo-200'
                             }`}
                           >
                             {item.cantidad} unidades
@@ -1028,8 +1011,8 @@ function CarritoRentaSheinStyle() {
                             }
                             className={`p-2 rounded-full transition-all duration-200 ${
                               canIncrease && !isItemLoading
-                                ? "bg-gradient-to-r from-indigo-100 to-indigo-200 text-indigo-600 hover:from-indigo-200 hover:to-indigo-300 dark:from-indigo-700 dark:to-indigo-800 dark:text-indigo-200 dark:hover:from-indigo-600 dark:hover:to-indigo-700"
-                                : "bg-gray-200 text-gray-400 dark:bg-gray-600 dark:text-gray-500 cursor-not-allowed"
+                                ? 'bg-gradient-to-r from-indigo-100 to-indigo-200 text-indigo-600 hover:from-indigo-200 hover:to-indigo-300 dark:from-indigo-700 dark:to-indigo-800 dark:text-indigo-200 dark:hover:from-indigo-600 dark:hover:to-indigo-700'
+                                : 'bg-gray-200 text-gray-400 dark:bg-gray-600 dark:text-gray-500 cursor-not-allowed'
                             }`}
                             aria-label="Aumentar cantidad"
                             disabled={!canIncrease || isItemLoading}
@@ -1047,8 +1030,8 @@ function CarritoRentaSheinStyle() {
                         <p
                           className={`text-lg sm:text-xl md:text-2xl font-bold ${
                             isOutOfStock || isOverStock
-                              ? "text-gray-500 dark:text-gray-400"
-                              : "text-gray-900 dark:text-gray-100"
+                              ? 'text-gray-500 dark:text-gray-400'
+                              : 'text-gray-900 dark:text-gray-100'
                           }`}
                         >
                           ${subtotal.toLocaleString()}

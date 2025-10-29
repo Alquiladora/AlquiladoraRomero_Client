@@ -5,9 +5,15 @@ import 'mapbox-gl/dist/mapbox-gl.css';
 import { FaMapMarkerAlt } from 'react-icons/fa';
 import { Typography } from '@mui/material';
 
-const MAPBOX_TOKEN = 'pk.eyJ1IjoiZWRpbGJlcnRvMTIzIiwiYSI6ImNseTN3cWUxZzBkajUyanBvZHR0MjVsdXUifQ.U5EAmb6GXJOArRN9kAy0kg'; // Reemplaza con tu clave de API de Mapbox
+const MAPBOX_TOKEN =
+  'pk.eyJ1IjoiZWRpbGJlcnRvMTIzIiwiYSI6ImNseTN3cWUxZzBkajUyanBvZHR0MjVsdXUifQ.U5EAmb6GXJOArRN9kAy0kg'; // Reemplaza con tu clave de API de Mapbox
 
-const MapWithPostalCode = ({ postalCode, currentState, currentMunicipio, currentLocalidad }) => {
+const MapWithPostalCode = ({
+  postalCode,
+  currentState,
+  currentMunicipio,
+  currentLocalidad,
+}) => {
   const [position, setPosition] = useState(null);
   const [viewState, setViewState] = useState({
     latitude: 19.4326,
@@ -21,8 +27,14 @@ const MapWithPostalCode = ({ postalCode, currentState, currentMunicipio, current
       const fetchCoordinates = async () => {
         try {
           const query = `${currentLocalidad}, ${currentMunicipio}, ${currentState}, ${postalCode}, MX`;
-          const response = await axios.get(`https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(query)}.json?access_token=${MAPBOX_TOKEN}`);
-          if (response.data && response.data.features && response.data.features.length > 0) {
+          const response = await axios.get(
+            `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(query)}.json?access_token=${MAPBOX_TOKEN}`
+          );
+          if (
+            response.data &&
+            response.data.features &&
+            response.data.features.length > 0
+          ) {
             const { center } = response.data.features[0];
             const [lon, lat] = center;
             setPosition([lat, lon]);
@@ -32,22 +44,21 @@ const MapWithPostalCode = ({ postalCode, currentState, currentMunicipio, current
               zoom: 13,
             });
           } else {
-            console.error("No precise location found for this query.");
+            console.error('No precise location found for this query.');
           }
         } catch (error) {
-          console.error("Error fetching location data: ", error);
+          console.error('Error fetching location data: ', error);
         }
       };
       fetchCoordinates();
     }
   }, [postalCode, currentState, currentMunicipio, currentLocalidad]);
 
-  
   return (
     <>
       <Map
         {...viewState}
-        onMove={evt => setViewState(evt.viewState)}
+        onMove={(evt) => setViewState(evt.viewState)}
         style={{ width: '100%', height: '400px' }}
         mapStyle="mapbox://styles/mapbox/streets-v11"
         mapboxAccessToken={MAPBOX_TOKEN}
@@ -64,7 +75,8 @@ const MapWithPostalCode = ({ postalCode, currentState, currentMunicipio, current
                 onClose={() => setShowPopup(false)}
                 closeOnClick={true}
               >
-                Tu ubicación es: <br /> {currentLocalidad}, {currentMunicipio}, {currentState}
+                Tu ubicación es: <br /> {currentLocalidad}, {currentMunicipio},{' '}
+                {currentState}
               </Popup>
             )}
           </Marker>

@@ -1,131 +1,111 @@
-import React, { useEffect, useState } from "react";
-import { motion } from "framer-motion";
-import { RefreshCw, PlugZap } from "lucide-react";
+import React from 'react';
+import { motion } from 'framer-motion';
+import { RefreshCw, ServerCrash } from 'lucide-react';
 
-
+// --- Variantes de Animación Refinadas ---
 const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.1,
+      delayChildren: 0.2,
+    },
+  },
+};
+
+const itemVariants = {
   hidden: { opacity: 0, y: 20 },
   visible: {
     opacity: 1,
     y: 0,
-    transition: {
-      staggerChildren: 0.2,
-      type: "spring",
-      stiffness: 100,
-      damping: 12
-    }
-  }
-};
-
-
-const itemVariants = {
-  hidden: { opacity: 0, y: 20 },
-  visible: { opacity: 1, y: 0 }
-};
-
-
-const plugVariants = {
-  animate: {
-    rotate: [0, -15, 15, 0],
-    transition: {
-      repeat: Infinity,
-      duration: 3,
-      ease: "easeInOut"
-    }
-  }
+    transition: { type: 'spring', stiffness: 100, damping: 12 },
+  },
 };
 
 const Error500 = () => {
-  const [showError, setShowError] = useState(false);
+  const handleReload = () => window.location.replace('/');
 
-
-    useEffect(() => {
-      const handleServerError = () => {
-        console.error("⚠️ Evento 'server-error' detectado. Mostrando pantalla de error.");
-        setShowError(true);
-      };
-  
-      // Escucha el evento `server-error`
-      window.addEventListener("server-error", handleServerError);
-  
-      return () => {
-        // Limpiar el evento cuando el componente se desmonte
-        window.removeEventListener("server-error", handleServerError);
-      };
-    }, []);
-  
-    const handleReload = () => {
-      window.location.reload();
-    };
-  
-    if (!showError) return null; // Si no se detecta el error, no se renderiza nada
-  
   return (
-    <motion.div
-      className="flex flex-col items-center justify-center   dark:bg-black-800"
-      initial="hidden"
-      animate="visible"
-      variants={containerVariants}
-    >
-      
+    <div className="relative flex items-center justify-center min-h-screen px-4 sm:px-6 lg:px-8 py-10 sm:py-16 bg-slate-100 dark:bg-slate-900 overflow-hidden">
+      {/* Fondo animado */}
+      <div className="absolute inset-0 z-0">
+        <div className="absolute bottom-0 left-0 -translate-x-1/4 translate-y-1/4 w-64 h-64 sm:w-80 sm:h-80 md:w-96 md:h-96 rounded-full bg-red-500/10 dark:bg-red-500/5 blur-3xl animate-pulse-slow"></div>
+        <div className="absolute top-0 right-0 translate-x-1/4 -translate-y-1/4 w-64 h-64 sm:w-80 sm:h-80 md:w-96 md:h-96 rounded-full bg-blue-500/10 dark:bg-blue-500/5 blur-3xl animate-pulse-slow animation-delay-4000"></div>
+      </div>
+
       <motion.div
-        className="flex flex-col items-center text-center max-w-4xl mx-auto"
-        variants={itemVariants}
+        className="relative z-10 flex flex-col items-center text-center max-w-2xl w-full p-6 sm:p-8 md:p-10 bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl rounded-3xl shadow-2xl ring-1 ring-slate-900/5"
+        variants={containerVariants}
+        initial="hidden"
+        animate="visible"
       >
-      
-        <motion.h1
-          className="flex items-center gap-3 mb-4"
+        {/* Ícono Central */}
+        <motion.div
+          className="relative mb-6 flex items-center justify-center"
           variants={itemVariants}
         >
-         
-          <motion.span variants={plugVariants} animate="animate">
-            <PlugZap className="w-10 h-10 md:w-12 md:h-12 lg:w-14 lg:h-14 text-yellow-500" />
-          </motion.span>
+          <div className="absolute inset-0 bg-red-500/10 rounded-full blur-xl animate-pulse-slow"></div>
+          <div className="relative flex items-center justify-center w-20 h-20 sm:w-24 sm:h-24 bg-white dark:bg-slate-800 rounded-full shadow-inner ring-1 ring-slate-200 dark:ring-slate-700">
+            <ServerCrash
+              className="w-10 h-10 sm:w-12 sm:h-12 text-red-500"
+              strokeWidth={1.5}
+            />
+          </div>
+        </motion.div>
 
-          <span className="text-red-600 font-bold text-5xl md:text-6xl lg:text-8xl">
-            500
-          </span>
-
-          {/* Ícono de enchufe derecho, rotado */}
-          <motion.span variants={plugVariants} animate="animate">
-            <PlugZap className="w-10 h-10 md:w-12 md:h-12 lg:w-14 lg:h-14 text-yellow-500 rotate-180" />
-          </motion.span>
+        {/* Texto */}
+        <motion.h1
+          className="text-6xl sm:text-7xl md:text-8xl font-black text-transparent bg-clip-text bg-gradient-to-br from-slate-700 to-slate-900 dark:from-slate-200 dark:to-slate-400 mb-2"
+          variants={itemVariants}
+        >
+          500
         </motion.h1>
 
-        {/* Subtítulo */}
         <motion.h2
-          className="text-xl md:text-2xl lg:text-3xl text-gray-600 dark:text-gray-300 mb-6"
+          className="text-lg sm:text-xl md:text-2xl font-bold text-slate-800 dark:text-white mb-4"
           variants={itemVariants}
         >
-          Internal Server Error
+          Oops, algo salió mal en el servidor.
         </motion.h2>
 
-        {/* Mensaje descriptivo */}
         <motion.p
-          className="max-w-2xl text-base md:text-lg lg:text-xl text-gray-700 dark:text-gray-300 mb-8"
+          className="max-w-md text-sm sm:text-base md:text-lg text-slate-600 dark:text-slate-300 mb-6 sm:mb-8"
           variants={itemVariants}
         >
-          Nuestro servidor encontró un problema inesperado. Por favor, intenta
-          recargar la página o vuelve más tarde. Estamos trabajando para
-          solucionarlo.
+          Nuestro equipo ha sido notificado y estamos trabajando para
+          solucionarlo. Por favor, intenta regresar al inicio.
         </motion.p>
 
-        {/* Botón para recargar */}
+        {/* Botón */}
         <motion.button
           onClick={handleReload}
-          className="flex items-center gap-2 px-6 py-3 rounded-lg bg-blue-500 text-white
-                     hover:bg-blue-600 transition-colors focus:outline-none focus:ring-2
-                     focus:ring-blue-400 focus:ring-offset-2 dark:focus:ring-offset-black
-                     text-base md:text-lg lg:text-xl"
+          aria-label="Volver al inicio"
+          className="flex items-center gap-2 px-5 sm:px-6 py-2.5 sm:py-3 rounded-full bg-gradient-to-r from-slate-800 to-slate-700 text-white font-semibold shadow-lg hover:shadow-xl transition-all transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-slate-500/50"
           whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
+          whileTap={{ scale: 0.98 }}
           variants={itemVariants}
         >
-          <RefreshCw className="w-5 h-5" />
-          Recargar Página
+          <RefreshCw className="w-4 h-4 sm:w-5 sm:h-5" />
+          Volver al Inicio
         </motion.button>
       </motion.div>
-    </motion.div>
+
+      {/* Animaciones */}
+      <style jsx global>{`
+        @keyframes pulse-slow {
+          50% {
+            opacity: 0.5;
+          }
+        }
+        .animate-pulse-slow {
+          animation: pulse-slow 8s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+        .animation-delay-4000 {
+          animation-delay: 4s;
+        }
+      `}</style>
+    </div>
   );
 };
 

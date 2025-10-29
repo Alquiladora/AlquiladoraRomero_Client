@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import React, { useEffect, useState } from 'react';
+import { motion } from 'framer-motion';
 import img1 from './../../img/Logos/logo3.jpg';
 import img2 from './../../img/Logos/logo4.jpg';
 import img3 from './../../img/Logos/logo6.jpg';
@@ -7,14 +7,22 @@ import img4 from './../../img/Logos/logo7.jpg';
 
 const RelevantesProducts = () => {
   const [mounted, setMounted] = useState(false);
-  const [imagenes, setImagenes] = useState([img1, img2, img3, img4, img1, img2, img3, img4]);
+  const [imagenes, setImagenes] = useState([
+    img1,
+    img2,
+    img3,
+    img4,
+    img1,
+    img2,
+    img3,
+    img4,
+  ]);
   const [indiceImagen, setIndiceImagen] = useState(0);
-
 
   useEffect(() => {
     setMounted(true);
   }, []);
-  
+
   const siguienteImagen = () => {
     setIndiceImagen((prev) => (prev + 1) % imagenes.length);
   };
@@ -24,14 +32,11 @@ const RelevantesProducts = () => {
   };
 
   useEffect(() => {
-    
-
     const intervaloImagenes = setInterval(() => {
       setImagenes((prev) => [...prev.slice(1), prev[0]]);
     }, 4000);
 
     return () => {
-     
       clearInterval(intervaloImagenes);
     };
   }, []);
@@ -40,13 +45,13 @@ const RelevantesProducts = () => {
     return null;
   }
 
-
   return (
     <>
-    
       {/* Galería de productos relevantes */}
       <div className="w-full md:w-1/2">
-        <h2 className="text-4xl  text-[#fcb900] font-bold mb-5 text-center">Lo más relevante</h2>
+        <h2 className="text-4xl  text-[#fcb900] font-bold mb-5 text-center">
+          Lo más relevante
+        </h2>
         <div className="relative overflow-hidden rounded-lg">
           {/* Contenedor de la imagen actual */}
           <motion.div
@@ -84,17 +89,13 @@ const RelevantesProducts = () => {
                 key={index}
                 onClick={() => setIndiceImagen(index)}
                 className={`w-3 h-3 rounded-full ${
-                  index === indiceImagen ? "bg-blue-500" : "bg-gray-300"
+                  index === indiceImagen ? 'bg-blue-500' : 'bg-gray-300'
                 }`}
               />
             ))}
           </div>
         </div>
       </div>
-
-    
-
-
     </>
   );
 };

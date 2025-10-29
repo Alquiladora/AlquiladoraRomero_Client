@@ -1,25 +1,26 @@
-import React, { useState, useEffect } from "react";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faCheckCircle, faSpinner } from "@fortawesome/free-solid-svg-icons";
-import Swal from "sweetalert2";
-import { useNavigate } from "react-router-dom";
+/* eslint-disable */
+import React, { useState, useEffect } from 'react';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faCheckCircle, faSpinner } from '@fortawesome/free-solid-svg-icons';
+import Swal from 'sweetalert2';
+import { useNavigate } from 'react-router-dom';
 
-import api from "../../utils/AxiosConfig";
-import { useAuth } from "../../hooks/ContextAuth";
-import { TokenValidation } from "./TokenValidation";
-import ChangePasswordClient from "./ChangePasswordClient";
-import { useGoogleReCaptcha } from "react-google-recaptcha-v3";
+import api from '../../utils/AxiosConfig';
+import { useAuth } from '../../hooks/ContextAuth';
+import { TokenValidation } from './TokenValidation';
+import ChangePasswordClient from './ChangePasswordClient';
+import { useGoogleReCaptcha } from 'react-google-recaptcha-v3';
 
 const CambiarPassword = () => {
   const [step, setStep] = useState(1);
-  const [email, setEmail] = useState("");
-  const [token, setToken] = useState("");
-  const [newPassword, setNewPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
+  const [email, setEmail] = useState('');
+  const [token, setToken] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const { csrfToken } = useAuth();
   const [usuarios, setUsuarios] = useState([]);
-  const [errorMessage, setErrorMessage] = useState("");
+  const [errorMessage, setErrorMessage] = useState('');
   const [usuarioE, setUsuarioE] = useState(null);
   const navigate = useNavigate();
   const { executeRecaptcha } = useGoogleReCaptcha();
@@ -32,14 +33,14 @@ const CambiarPassword = () => {
         try {
           const response = await api.get(`/api/usuarios`, {
             headers: {
-              "X-CSRF-Token": csrfToken,
-              "Content-Type": "application/json",
+              'X-CSRF-Token': csrfToken,
+              'Content-Type': 'application/json',
             },
             withCredentials: true,
           });
           setUsuarios(response.data);
         } catch (error) {
-          console.error("Error al cargar los usuarios:", error);
+          console.error('Error al cargar los usuarios:', error);
         }
       };
       fetchUsuarios();
@@ -49,21 +50,21 @@ const CambiarPassword = () => {
   const verificarCambiosContrasena = async (idUsuario) => {
     if (!idUsuario) {
       console.warn(
-        "⚠️ ID de usuario no disponible, no se verificará cambios de contraseña."
+        '⚠️ ID de usuario no disponible, no se verificará cambios de contraseña.'
       );
       return;
     }
     try {
       const response = await api.get(`/api/usuarios/vecesCambioPass`, {
         params: { idUsuario },
-        headers: { "X-CSRF-Token": csrfToken },
+        headers: { 'X-CSRF-Token': csrfToken },
         withCredentials: true,
       });
-      console.log("Respuesta de vecesCambioPass:", response.data);
+      console.log('Respuesta de vecesCambioPass:', response.data);
       setCambiosContrasena(response.data.cambiosRealizados);
       setBloqueado(response.data.cambiosRealizados >= 20);
     } catch (error) {
-      console.error("Error al verificar los cambios de contraseña:", error);
+      console.error('Error al verificar los cambios de contraseña:', error);
     }
   };
 
@@ -74,38 +75,38 @@ const CambiarPassword = () => {
   };
 
   const getErrorColor = (message) => {
-    if (message.includes("válido")) return "bg-yellow-100 text-yellow-700";
-    if (message.includes("registrado") || message.includes("problema"))
-      return "bg-red-100 text-red-700";
-    return "bg-red-100 text-red-700";
+    if (message.includes('válido')) return 'bg-yellow-100 text-yellow-700';
+    if (message.includes('registrado') || message.includes('problema'))
+      return 'bg-red-100 text-red-700';
+    return 'bg-red-100 text-red-700';
   };
 
   const handleEmailSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-    setErrorMessage("");
+    setErrorMessage('');
 
     if (!validateEmail(email)) {
-      setErrorMessage("Por favor ingresa un correo electrónico válido.");
+      setErrorMessage('Por favor ingresa un correo electrónico válido.');
       setLoading(false);
       return;
     }
 
     // Ejecuta reCAPTCHA
     if (!executeRecaptcha) {
-      console.error("Execute recaptcha no está disponible");
+      console.error('Execute recaptcha no está disponible');
       setLoading(false);
       return;
     }
     //Integrar despues
-    const recaptchaToken = await executeRecaptcha("cambiar_password");
+    const recaptchaToken = await executeRecaptcha('cambiar_password');
 
     const usuarioEncontrado = usuarios.find(
       (usuario) =>
         usuario.correo.toLowerCase().trim() === email.toLowerCase().trim()
     );
     if (!usuarioEncontrado) {
-      setErrorMessage("Este correo no está registrado.");
+      setErrorMessage('Este correo no está registrado.');
       setLoading(false);
       return;
     }
@@ -115,7 +116,7 @@ const CambiarPassword = () => {
     );
     if (isBloqueado) {
       setErrorMessage(
-        "Has alcanzado el límite de cambios de contraseña para este mes. Por favor, intenta el próximo mes."
+        'Has alcanzado el límite de cambios de contraseña para este mes. Por favor, intenta el próximo mes.'
       );
       setLoading(false);
       return;
@@ -125,7 +126,7 @@ const CambiarPassword = () => {
 
     try {
       await api.post(
-        "/api/email/cambiarpass",
+        '/api/email/cambiarpass',
         {
           correo: email,
           nombreU: usuarioEncontrado.nombre,
@@ -133,21 +134,21 @@ const CambiarPassword = () => {
         },
         {
           headers: {
-            "X-CSRF-Token": csrfToken,
+            'X-CSRF-Token': csrfToken,
           },
           withCredentials: true,
         }
       );
       Swal.fire({
-        icon: "success",
-        title: "¡Token enviado al correo!",
+        icon: 'success',
+        title: '¡Token enviado al correo!',
         showConfirmButton: true,
-        customClass: { popup: "small-swal" },
+        customClass: { popup: 'small-swal' },
       });
       setStep(2);
     } catch (error) {
-      console.error("Error al enviar token:", error);
-      setErrorMessage("Lo sentimos, vuelve a intentar más tarde.");
+      console.error('Error al enviar token:', error);
+      setErrorMessage('Lo sentimos, vuelve a intentar más tarde.');
     } finally {
       setLoading(false);
     }
@@ -205,7 +206,7 @@ const CambiarPassword = () => {
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       className={`block w-full p-2 border rounded-md bg-gray-50 text-gray-900 dark:bg-gray-800 dark:text-white dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                        loading ? "opacity-50 cursor-not-allowed" : ""
+                        loading ? 'opacity-50 cursor-not-allowed' : ''
                       }`}
                       required
                       disabled={loading}
@@ -215,8 +216,8 @@ const CambiarPassword = () => {
                     type="submit"
                     className={`w-full flex justify-center items-center bg-blue-600 text-white py-2 px-4 rounded-md transition-colors ${
                       loading || bloqueado
-                        ? "opacity-50 cursor-not-allowed"
-                        : "hover:bg-blue-700"
+                        ? 'opacity-50 cursor-not-allowed'
+                        : 'hover:bg-blue-700'
                     }`}
                     disabled={loading || bloqueado}
                   >

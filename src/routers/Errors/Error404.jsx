@@ -1,16 +1,14 @@
-import React, { useEffect } from "react";
-import { Link } from "react-router-dom";
-import { motion, useAnimation } from "framer-motion";
+import React, { useEffect } from 'react';
+import { Link } from 'react-router-dom';
+import { motion, useAnimation } from 'framer-motion';
 
 const Error404 = () => {
- 
   const imageControls = useAnimation();
   const titleControls = useAnimation();
   const textControls = useAnimation();
   const buttonControls = useAnimation();
 
   useEffect(() => {
-   
     imageControls.start({
       opacity: 1,
       scale: 1,

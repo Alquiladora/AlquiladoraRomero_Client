@@ -1,5 +1,6 @@
-import React, { useEffect, useState } from "react";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+/* eslint-disable */
+import React, { useEffect, useState } from 'react';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faSearch,
   faInfoCircle,
@@ -16,68 +17,68 @@ import {
   faCalendarAlt,
   faDollarSign,
   faCheck,
-} from "@fortawesome/free-solid-svg-icons";
-import { toast } from "react-toastify";
-import DatePicker from "react-datepicker";
-import api from "../../../utils/AxiosConfig";
-import { useAuth } from "../../../hooks/ContextAuth";
-import CustomLoading from "../../../components/spiner/SpinerGlobal";
+} from '@fortawesome/free-solid-svg-icons';
+import { toast } from 'react-toastify';
+import DatePicker from 'react-datepicker';
+import api from '../../../utils/AxiosConfig';
+import { useAuth } from '../../../hooks/ContextAuth';
+import CustomLoading from '../../../components/spiner/SpinerGlobal';
 
 const statusColors = {
   procesando:
-    "bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200",
+    'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200',
   confirmado:
-    "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200",
-  enviando: "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200",
+    'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200',
+  enviando: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200',
   en_alquiler:
-    "bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200",
-  devuelto: "bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200",
+    'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200',
+  devuelto: 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200',
   incompleto:
-    "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200",
-  incidente: "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200",
-  cancelado: "bg-black text-white dark:bg-black dark:text-white",
+    'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200',
+  incidente: 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200',
+  cancelado: 'bg-black text-white dark:bg-black dark:text-white',
   finalizado:
-    "bg-green-200 text-green-900 dark:bg-green-800 dark:text-green-100",
+    'bg-green-200 text-green-900 dark:bg-green-800 dark:text-green-100',
   recogiendo:
-    "bg-indigo-100 text-indigo-800 dark:bg-indigo-900 dark:text-indigo-200",
+    'bg-indigo-100 text-indigo-800 dark:bg-indigo-900 dark:text-indigo-200',
 };
 
 const staticResenas = {
   1: [
     {
       calificacion: 5,
-      comentario: "Excelente servicio, muy puntual.",
-      clienteNombre: "Lucía Torres",
-      fecha: "2025-06-01",
+      comentario: 'Excelente servicio, muy puntual.',
+      clienteNombre: 'Lucía Torres',
+      fecha: '2025-06-01',
     },
     {
       calificacion: 4,
-      comentario: "Bueno, pero podría mejorar la comunicación.",
-      clienteNombre: "Pedro Ramírez",
-      fecha: "2025-06-02",
+      comentario: 'Bueno, pero podría mejorar la comunicación.',
+      clienteNombre: 'Pedro Ramírez',
+      fecha: '2025-06-02',
     },
   ],
   2: [
     {
       calificacion: 4,
-      comentario: "Rápida entrega, muy amable.",
-      clienteNombre: "Diego Morales",
-      fecha: "2025-06-01",
+      comentario: 'Rápida entrega, muy amable.',
+      clienteNombre: 'Diego Morales',
+      fecha: '2025-06-01',
     },
   ],
   3: [],
   4: [
     {
       calificacion: 5,
-      comentario: "Todo perfecto, gran repartidor.",
-      clienteNombre: "Clara Ortiz",
-      fecha: "2025-06-04",
+      comentario: 'Todo perfecto, gran repartidor.',
+      clienteNombre: 'Clara Ortiz',
+      fecha: '2025-06-04',
     },
   ],
 };
 
 const GestionRepartidores = () => {
-  const [searchTerm, setSearchTerm] = useState("");
+  const [searchTerm, setSearchTerm] = useState('');
   const { user, logout, csrfToken } = useAuth();
   const [openDialog, setOpenDialog] = useState(null);
   const [selectedRepartidor, setSelectedRepartidor] = useState(null);
@@ -88,7 +89,7 @@ const GestionRepartidores = () => {
   const [repartidores, setRepartidores] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
-  const [selectedStatus, setSelectedStatus] = useState("todos");
+  const [selectedStatus, setSelectedStatus] = useState('todos');
   const [startDate, setStartDate] = useState(null);
   const [endDate, setEndDate] = useState(null);
   const repartidoresPerPage = 8;
@@ -101,46 +102,46 @@ const GestionRepartidores = () => {
   const AxiosRepartidores = async () => {
     try {
       const response = await api.get(
-        "api/repartidor/administrar/repartidores",
+        'api/repartidor/administrar/repartidores',
         {
           withCredentials: true,
-          headers: { "X-CSRF-Token": csrfToken },
+          headers: { 'X-CSRF-Token': csrfToken },
         }
       );
       const validRepartidores = response.data.data.filter(
         (repartidor) =>
           repartidor &&
-          typeof repartidor.nombre === "string" &&
-          typeof repartidor.correo === "string"
+          typeof repartidor.nombre === 'string' &&
+          typeof repartidor.correo === 'string'
       );
       setRepartidores(validRepartidores);
       setLoading(false);
     } catch (error) {
-      console.error("Error al obtener repartidores", error);
+      console.error('Error al obtener repartidores', error);
       setError(true);
       setLoading(false);
-      toast.error("Error al cargar los repartidores");
+      toast.error('Error al cargar los repartidores');
     }
   };
 
   const AxiosHistorialPedidos = async (repartidorId, startDate, endDate) => {
     try {
       const params = {};
-      if (startDate) params.startDate = startDate.toISOString().split("T")[0];
-      if (endDate) params.endDate = endDate.toISOString().split("T")[0];
+      if (startDate) params.startDate = startDate.toISOString().split('T')[0];
+      if (endDate) params.endDate = endDate.toISOString().split('T')[0];
       const response = await api.get(
         `api/repartidor/repartidores/${repartidorId}/historial`,
         {
           params,
           withCredentials: true,
-          headers: { "X-CSRF-Token": csrfToken },
+          headers: { 'X-CSRF-Token': csrfToken },
         }
       );
 
       return Array.isArray(response.data.data) ? response.data.data : [];
     } catch (error) {
-      console.error("Error al obtener historial", error);
-      toast.error("Error al cargar historial");
+      console.error('Error al obtener historial', error);
+      toast.error('Error al cargar historial');
       return [];
     }
   };
@@ -155,16 +156,16 @@ const GestionRepartidores = () => {
       );
       const details = repartidores.find((r) => r.idRepartidor === repartidorId);
       setRepartidorData({
-        details: details || { nombre: "Sin nombre", correo: "Sin correo" },
+        details: details || { nombre: 'Sin nombre', correo: 'Sin correo' },
         history: historial,
         reviews: staticResenas[repartidorId] || [],
       });
 
-      console.log("repartido---0 ", historial);
+      console.log('repartido---0 ', historial);
     } catch (error) {
-      toast.error("Error al cargar los detalles del repartidor");
+      toast.error('Error al cargar los detalles del repartidor');
       setRepartidorData({
-        details: { nombre: "Sin nombre", correo: "Sin correo" },
+        details: { nombre: 'Sin nombre', correo: 'Sin correo' },
         history: [],
         reviews: [],
       });
@@ -175,12 +176,12 @@ const GestionRepartidores = () => {
 
   const handleToggleStatus = async (repartidorId, currentStatus) => {
     setUpdatingStatusId(repartidorId);
-    const newActivo = currentStatus === "activo" ? 0 : 1;
+    const newActivo = currentStatus === 'activo' ? 0 : 1;
     try {
       const response = await api.patch(
         `api/repartidor/administrar/repartidores/${repartidorId}/estado`,
         { activo: newActivo },
-        { withCredentials: true, headers: { "X-CSRF-Token": csrfToken } }
+        { withCredentials: true, headers: { 'X-CSRF-Token': csrfToken } }
       );
       setRepartidores((prev) =>
         prev.map((r) =>
@@ -195,13 +196,13 @@ const GestionRepartidores = () => {
       );
       toast.success(
         `Repartidor ${
-          response.data.estado === "activo" ? "activado" : "desactivado"
+          response.data.estado === 'activo' ? 'activado' : 'desactivado'
         } correctamente`
       );
     } catch (error) {
       const errorMessage =
         error.response?.data?.message ||
-        "Error al cambiar el estado del repartidor";
+        'Error al cambiar el estado del repartidor';
       toast.error(errorMessage);
       console.error(error);
     } finally {
@@ -222,7 +223,7 @@ const GestionRepartidores = () => {
     setRepartidorData({});
     setExpandedOrders({});
     setDetailsLoading(false);
-    setSelectedStatus("todos");
+    setSelectedStatus('todos');
     setStartDate(null);
     setEndDate(null);
   };
@@ -236,10 +237,10 @@ const GestionRepartidores = () => {
 
   const filteredRepartidores = repartidores.filter(
     (repartidor) =>
-      (repartidor.nombre && typeof repartidor.nombre === "string"
+      (repartidor.nombre && typeof repartidor.nombre === 'string'
         ? repartidor.nombre.toLowerCase().includes(searchTerm.toLowerCase())
         : false) ||
-      (repartidor.correo && typeof repartidor.correo === "string"
+      (repartidor.correo && typeof repartidor.correo === 'string'
         ? repartidor.correo.toLowerCase().includes(searchTerm.toLowerCase())
         : false)
   );
@@ -248,7 +249,7 @@ const GestionRepartidores = () => {
     .filter(
       (r) =>
         (r.pedidosFinalizados || 0) > 0 &&
-        typeof r.calificacionPromedio === "number" &&
+        typeof r.calificacionPromedio === 'number' &&
         !isNaN(r.calificacionPromedio)
     )
     .map((r) => ({
@@ -310,7 +311,7 @@ const GestionRepartidores = () => {
   // Filter orders by status and date
   const filteredHistory = () => {
     let history = repartidorData.history || [];
-    if (selectedStatus !== "todos") {
+    if (selectedStatus !== 'todos') {
       history = history.filter(
         (pedido) => pedido.estadoActual.toLowerCase() === selectedStatus
       );
@@ -428,7 +429,7 @@ const GestionRepartidores = () => {
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {topPerformers.map((repartidor, index) => {
-              const medallas = ["🥇", "🥈", "🥉"];
+              const medallas = ['🥇', '🥈', '🥉'];
               const posicion = medallas[index] || `#${index + 1}`;
               return (
                 <div
@@ -448,7 +449,7 @@ const GestionRepartidores = () => {
                       />
                     ) : (
                       <div className="w-16 h-16 bg-gradient-to-br from-[#fcb900] to-[#fcb900cc] rounded-full flex items-center justify-center text-white text-2xl font-bold">
-                        {repartidor.nombre?.charAt(0) || "?"}
+                        {repartidor.nombre?.charAt(0) || '?'}
                       </div>
                     )}
                     <div className="flex-1 min-w-0">
@@ -456,15 +457,15 @@ const GestionRepartidores = () => {
                         {repartidor.nombre}
                       </h3>
                       <p className="text-sm text-gray-600 dark:text-gray-400 truncate">
-                        Pedidos Completados:{" "}
+                        Pedidos Completados:{' '}
                         <span className="font-medium">
                           {repartidor.pedidosFinalizados || 0}
                         </span>
                       </p>
                       <p className="text-sm text-gray-600 dark:text-gray-400 flex items-center gap-1 truncate">
-                        Calificación:{" "}
+                        Calificación:{' '}
                         <span className="font-medium text-[#fcb900]">
-                          {repartidor.calificacionPromedio || "N/A"}
+                          {repartidor.calificacionPromedio || 'N/A'}
                         </span>
                         <FontAwesomeIcon
                           icon={faStar}
@@ -474,7 +475,7 @@ const GestionRepartidores = () => {
                     </div>
                   </div>
                   <button
-                    onClick={() => handleOpenDialog(repartidor, "details")}
+                    onClick={() => handleOpenDialog(repartidor, 'details')}
                     className="px-4 py-1.5 max-w-fit mx-auto bg-gradient-to-r from-[#fcb900] to-[#fcb900cc] text-white rounded-lg hover:brightness-110 transition-all text-sm font-medium shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-[#fcb900]"
                   >
                     Ver Detalles
@@ -487,160 +488,180 @@ const GestionRepartidores = () => {
       </div>
 
       {/* Repartidores Table */}
-  <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-6 sm:p-8 fadeIn border border-gray-200 dark:border-gray-700">
-  <h2 className="text-2xl sm:text-3xl font-semibold mb-6 text-gray-700 dark:text-gray-200">
-    Lista de Repartidores
-  </h2>
-  {filteredRepartidores.length === 0 ? (
-    <div className="text-center py-12">
-      <p className="text-xl font-medium text-gray-600 dark:text-gray-400">
-        No se encontraron repartidores
-      </p>
-      <p className="text-sm text-gray-500 dark:text-gray-500 mt-2">
-        Intenta ajustar la búsqueda.
-      </p>
-    </div>
-  ) : (
-    <>
-      <div className="overflow-x-auto rounded-lg">
-        <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-          <thead className="bg-gray-100 dark:bg-gray-700">
-            <tr>
-              <th className="px-6 py-4 text-left text-xs font-medium text-gray-600 dark:text-gray-300 uppercase tracking-wider">
-                Nombre
-              </th>
-              <th className="px-6 py-4 text-left text-xs font-medium text-gray-600 dark:text-gray-300 uppercase tracking-wider">
-                Pedidos Completados
-              </th>
-              <th className="px-6 py-4 text-left text-xs font-medium text-gray-600 dark:text-gray-300 uppercase tracking-wider">
-                Calificación
-              </th>
-              <th className="px-6 py-4 text-left text-xs font-medium text-gray-600 dark:text-gray-300 uppercase tracking-wider">
-                Estado
-              </th>
-              <th className="px-6 py-4 text-left text-xs font-medium text-gray-600 dark:text-gray-300 uppercase tracking-wider">
-                Acciones
-              </th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
-            {paginatedRepartidores.map((repartidor, index) => (
-              <tr
-                key={repartidor.idRepartidor}
-                className="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors slideIn"
-                style={{ animationDelay: `${index * 100}ms` }}
-              >
-                <td className="px-6 py-4">
-                  <div className="flex flex-col">
-                    <span className="font-bold text-gray-800 dark:text-gray-100 text-sm">
-                      {repartidor.correo || "Sin correo"}
-                    </span>
-                    <span className="text-xs text-gray-600 dark:text-gray-400">
-                      {repartidor.nombre || "Sin nombre"}
-                    </span>
-                  </div>
-                </td>
-                <td className="px-6 py-4 text-sm text-gray-700 dark:text-gray-200">
-                  {repartidor.pedidosFinalizados || 0}
-                </td>
-                <td className="px-6 py-4 text-sm text-gray-700 dark:text-gray-200">
-                  <div className="flex items-center gap-1">
-                    {repartidor.calificacionPromedio || "N/A"}
-                    <FontAwesomeIcon icon={faStar} className="text-yellow-500" />
-                  </div>
-                </td>
-                <td className="px-6 py-4">
-                  <div className="relative">
-                    {repartidor.rol === "repartidor" ? (
-                      <button
-                        disabled={updatingStatusId === repartidor.idRepartidor}
-                        onClick={() =>
-                          handleToggleStatus(
-                            repartidor.idRepartidor,
-                            repartidor.estado
-                          )
-                        }
-                        className={`flex items-center gap-2 px-3 py-1 rounded-full text-sm font-medium transition-colors ${
-                          repartidor.estado === "activo"
-                            ? "bg-green-100 text-green-600 dark:bg-green-900 dark:text-green-400 hover:bg-green-200"
-                            : "bg-red-100 text-red-600 dark:bg-red-900 dark:text-red-400 hover:bg-red-200"
-                        }`}
-                      >
-                        {repartidor.estado === "activo" ? (
-                          <>
-                            <FontAwesomeIcon icon={faToggleOn} />
-                            Activo
-                          </>
-                        ) : (
-                          <>
-                            <FontAwesomeIcon icon={faToggleOff} />
-                            Inactivo
-                          </>
-                        )}
-                        {updatingStatusId === repartidor.idRepartidor && (
+      <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-6 sm:p-8 fadeIn border border-gray-200 dark:border-gray-700">
+        <h2 className="text-2xl sm:text-3xl font-semibold mb-6 text-gray-700 dark:text-gray-200">
+          Lista de Repartidores
+        </h2>
+        {filteredRepartidores.length === 0 ? (
+          <div className="text-center py-12">
+            <p className="text-xl font-medium text-gray-600 dark:text-gray-400">
+              No se encontraron repartidores
+            </p>
+            <p className="text-sm text-gray-500 dark:text-gray-500 mt-2">
+              Intenta ajustar la búsqueda.
+            </p>
+          </div>
+        ) : (
+          <>
+            <div className="overflow-x-auto rounded-lg">
+              <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                <thead className="bg-gray-100 dark:bg-gray-700">
+                  <tr>
+                    <th className="px-6 py-4 text-left text-xs font-medium text-gray-600 dark:text-gray-300 uppercase tracking-wider">
+                      Nombre
+                    </th>
+                    <th className="px-6 py-4 text-left text-xs font-medium text-gray-600 dark:text-gray-300 uppercase tracking-wider">
+                      Pedidos Completados
+                    </th>
+                    <th className="px-6 py-4 text-left text-xs font-medium text-gray-600 dark:text-gray-300 uppercase tracking-wider">
+                      Calificación
+                    </th>
+                    <th className="px-6 py-4 text-left text-xs font-medium text-gray-600 dark:text-gray-300 uppercase tracking-wider">
+                      Estado
+                    </th>
+                    <th className="px-6 py-4 text-left text-xs font-medium text-gray-600 dark:text-gray-300 uppercase tracking-wider">
+                      Acciones
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
+                  {paginatedRepartidores.map((repartidor, index) => (
+                    <tr
+                      key={repartidor.idRepartidor}
+                      className="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors slideIn"
+                      style={{ animationDelay: `${index * 100}ms` }}
+                    >
+                      <td className="px-6 py-4">
+                        <div className="flex flex-col">
+                          <span className="font-bold text-gray-800 dark:text-gray-100 text-sm">
+                            {repartidor.correo || 'Sin correo'}
+                          </span>
+                          <span className="text-xs text-gray-600 dark:text-gray-400">
+                            {repartidor.nombre || 'Sin nombre'}
+                          </span>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 text-sm text-gray-700 dark:text-gray-200">
+                        {repartidor.pedidosFinalizados || 0}
+                      </td>
+                      <td className="px-6 py-4 text-sm text-gray-700 dark:text-gray-200">
+                        <div className="flex items-center gap-1">
+                          {repartidor.calificacionPromedio || 'N/A'}
                           <FontAwesomeIcon
-                            icon={faSpinner}
-                            className="absolute right-2 top-1/2 transform -translate-y-1/2 text-yellow-500 animate-spin"
+                            icon={faStar}
+                            className="text-yellow-500"
                           />
-                        )}
-                      </button>
-                    ) : (
-                      <span className="px-3 py-1 rounded-full text-sm font-medium bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200">
-                        Dejó de ser repartidor
-                      </span>
-                    )}
-                  </div>
-                </td>
-                <td className="px-6 py-4 text-sm text-gray-700 dark:text-gray-200">
-                  <div className="flex gap-3">
-                    <button
-                      onClick={() => handleOpenDialog(repartidor, "details")}
-                      className="text-yellow-600 dark:text-yellow-400 hover:text-yellow-800 dark:hover:text-yellow-300 transition-colors"
-                      title="Detalles"
-                    >
-                      <FontAwesomeIcon icon={faInfoCircle} className="text-lg" />
-                    </button>
-                    <button
-                      onClick={() => handleOpenDialog(repartidor, "history")}
-                      className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 transition-colors"
-                      title="Historial de Pedidos"
-                    >
-                      <FontAwesomeIcon icon={faHistory} className="text-lg" />
-                    </button>
-                    <button
-                      onClick={() => handleOpenDialog(repartidor, "reviews")}
-                      className="text-purple-600 dark:text-purple-400 hover:text-purple-800 dark:hover:text-purple-300 transition-colors"
-                      title="Reseñas"
-                    >
-                      <FontAwesomeIcon icon={faStar} className="text-lg" />
-                    </button>
-                  </div>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="relative">
+                          {repartidor.rol === 'repartidor' ? (
+                            <button
+                              disabled={
+                                updatingStatusId === repartidor.idRepartidor
+                              }
+                              onClick={() =>
+                                handleToggleStatus(
+                                  repartidor.idRepartidor,
+                                  repartidor.estado
+                                )
+                              }
+                              className={`flex items-center gap-2 px-3 py-1 rounded-full text-sm font-medium transition-colors ${
+                                repartidor.estado === 'activo'
+                                  ? 'bg-green-100 text-green-600 dark:bg-green-900 dark:text-green-400 hover:bg-green-200'
+                                  : 'bg-red-100 text-red-600 dark:bg-red-900 dark:text-red-400 hover:bg-red-200'
+                              }`}
+                            >
+                              {repartidor.estado === 'activo' ? (
+                                <>
+                                  <FontAwesomeIcon icon={faToggleOn} />
+                                  Activo
+                                </>
+                              ) : (
+                                <>
+                                  <FontAwesomeIcon icon={faToggleOff} />
+                                  Inactivo
+                                </>
+                              )}
+                              {updatingStatusId === repartidor.idRepartidor && (
+                                <FontAwesomeIcon
+                                  icon={faSpinner}
+                                  className="absolute right-2 top-1/2 transform -translate-y-1/2 text-yellow-500 animate-spin"
+                                />
+                              )}
+                            </button>
+                          ) : (
+                            <span className="px-3 py-1 rounded-full text-sm font-medium bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200">
+                              Dejó de ser repartidor
+                            </span>
+                          )}
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 text-sm text-gray-700 dark:text-gray-200">
+                        <div className="flex gap-3">
+                          <button
+                            onClick={() =>
+                              handleOpenDialog(repartidor, 'details')
+                            }
+                            className="text-yellow-600 dark:text-yellow-400 hover:text-yellow-800 dark:hover:text-yellow-300 transition-colors"
+                            title="Detalles"
+                          >
+                            <FontAwesomeIcon
+                              icon={faInfoCircle}
+                              className="text-lg"
+                            />
+                          </button>
+                          <button
+                            onClick={() =>
+                              handleOpenDialog(repartidor, 'history')
+                            }
+                            className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 transition-colors"
+                            title="Historial de Pedidos"
+                          >
+                            <FontAwesomeIcon
+                              icon={faHistory}
+                              className="text-lg"
+                            />
+                          </button>
+                          <button
+                            onClick={() =>
+                              handleOpenDialog(repartidor, 'reviews')
+                            }
+                            className="text-purple-600 dark:text-purple-400 hover:text-purple-800 dark:hover:text-purple-300 transition-colors"
+                            title="Reseñas"
+                          >
+                            <FontAwesomeIcon
+                              icon={faStar}
+                              className="text-lg"
+                            />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            {totalPages > 1 && (
+              <div className="mt-6 flex justify-center gap-2">
+                {Array.from({ length: totalPages }, (_, i) => (
+                  <button
+                    key={i + 1}
+                    onClick={() => setCurrentPage(i + 1)}
+                    className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
+                      currentPage === i + 1
+                        ? 'bg-blue-500 text-white shadow-md'
+                        : 'bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 hover:bg-gray-300 dark:hover:bg-gray-600'
+                    }`}
+                  >
+                    {i + 1}
+                  </button>
+                ))}
+              </div>
+            )}
+          </>
+        )}
       </div>
-      {totalPages > 1 && (
-        <div className="mt-6 flex justify-center gap-2">
-          {Array.from({ length: totalPages }, (_, i) => (
-            <button
-              key={i + 1}
-              onClick={() => setCurrentPage(i + 1)}
-              className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
-                currentPage === i + 1
-                  ? "bg-blue-500 text-white shadow-md"
-                  : "bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 hover:bg-gray-300 dark:hover:bg-gray-600"
-              }`}
-            >
-              {i + 1}
-            </button>
-          ))}
-        </div>
-      )}
-    </>
-  )}
-</div>
 
       {/* Modal for Details, History, Reviews */}
       {openDialog && selectedRepartidor && (
@@ -657,17 +678,17 @@ const GestionRepartidores = () => {
                   />
                 ) : (
                   <div className="w-14 h-14 bg-gradient-to-br from-[#fcb900] to-[#fcb900cc] rounded-full flex items-center justify-center text-white text-2xl font-bold shadow-md">
-                    {selectedRepartidor.nombre?.charAt(0) || "?"}
+                    {selectedRepartidor.nombre?.charAt(0) || '?'}
                   </div>
                 )}
                 <div>
                   <h3 className="text-xl sm:text-2xl font-bold text-white">
-                    {openDialog === "details" && "Detalles del Repartidor"}
-                    {openDialog === "history" && "Historial de Pedidos"}
-                    {openDialog === "reviews" && "Reseñas del Repartidor"}
+                    {openDialog === 'details' && 'Detalles del Repartidor'}
+                    {openDialog === 'history' && 'Historial de Pedidos'}
+                    {openDialog === 'reviews' && 'Reseñas del Repartidor'}
                   </h3>
                   <p className="text-sm text-gray-200">
-                    {selectedRepartidor.nombre || "Sin nombre"}
+                    {selectedRepartidor.nombre || 'Sin nombre'}
                   </p>
                 </div>
               </div>
@@ -696,21 +717,21 @@ const GestionRepartidores = () => {
             <div className="p-4 sm:p-6 flex-shrink-0 border-b border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-800">
               <div className="flex gap-2 sm:gap-4">
                 <button
-                  onClick={() => setOpenDialog("details")}
+                  onClick={() => setOpenDialog('details')}
                   className={`py-2 px-4 sm:px-6 text-sm font-semibold rounded-full transition-all ${
-                    openDialog === "details"
-                      ? "bg-[#fcb900] text-white shadow-md"
-                      : "bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 hover:bg-gray-300 dark:hover:bg-gray-600"
+                    openDialog === 'details'
+                      ? 'bg-[#fcb900] text-white shadow-md'
+                      : 'bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 hover:bg-gray-300 dark:hover:bg-gray-600'
                   }`}
                 >
                   Detalles
                 </button>
                 <button
-                  onClick={() => setOpenDialog("history")}
+                  onClick={() => setOpenDialog('history')}
                   className={`py-2 px-4 sm:px-6 text-sm font-semibold rounded-full transition-all ${
-                    openDialog === "history"
-                      ? "bg-[#fcb900] text-white shadow-md"
-                      : "bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 hover:bg-gray-300 dark:hover:bg-gray-600"
+                    openDialog === 'history'
+                      ? 'bg-[#fcb900] text-white shadow-md'
+                      : 'bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 hover:bg-gray-300 dark:hover:bg-gray-600'
                   }`}
                 >
                   Historial
@@ -734,31 +755,31 @@ const GestionRepartidores = () => {
                 <CustomLoading />
               ) : (
                 <>
-                  {openDialog === "details" && repartidorData.details && (
+                  {openDialog === 'details' && repartidorData.details && (
                     <div className="space-y-6 fadeIn">
                       <div className="flex items-center gap-4 bg-gray-100 dark:bg-gray-800 p-4 rounded-xl shadow-sm">
                         {repartidorData.details.fotoPerfil ? (
                           <img
                             src={repartidorData.details.fotoPerfil}
                             alt={`Foto de ${
-                              repartidorData.details.nombre || "Sin nombre"
+                              repartidorData.details.nombre || 'Sin nombre'
                             }`}
                             className="w-20 h-20 rounded-full object-cover border-2 border-[#fcb900] shadow-md"
                           />
                         ) : (
                           <div className="w-20 h-20 bg-gradient-to-br from-[#fcb900] to-[#fcb900cc] rounded-full flex items-center justify-center text-white text-3xl font-bold shadow-md">
-                            {repartidorData.details.nombre?.charAt(0) || "?"}
+                            {repartidorData.details.nombre?.charAt(0) || '?'}
                           </div>
                         )}
                         <div>
                           <h4 className="text-lg font-semibold text-gray-800 dark:text-gray-100">
-                            {repartidorData.details.nombre || "Sin nombre"}
+                            {repartidorData.details.nombre || 'Sin nombre'}
                           </h4>
                           <p className="text-sm text-gray-600 dark:text-gray-400 flex items-center gap-1">
-                            Calificación:{" "}
+                            Calificación:{' '}
                             <span className="font-medium text-[#fcb900]">
                               {repartidorData.details.calificacionPromedio ||
-                                "N/A"}
+                                'N/A'}
                             </span>
                             <FontAwesomeIcon
                               icon={faStar}
@@ -773,7 +794,7 @@ const GestionRepartidores = () => {
                             Correo
                           </p>
                           <p className="text-lg font-semibold text-gray-800 dark:text-gray-100">
-                            {repartidorData.details.correo || "Sin correo"}
+                            {repartidorData.details.correo || 'Sin correo'}
                           </p>
                         </div>
                         <div className="p-4 bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
@@ -781,7 +802,7 @@ const GestionRepartidores = () => {
                             Teléfono
                           </p>
                           <p className="text-lg font-semibold text-gray-800 dark:text-gray-100">
-                            {repartidorData.details.telefono || "N/A"}
+                            {repartidorData.details.telefono || 'N/A'}
                           </p>
                         </div>
                         <div className="p-4 bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
@@ -792,12 +813,12 @@ const GestionRepartidores = () => {
                             {repartidorData.details.fechaCreacion
                               ? new Date(
                                   repartidorData.details.fechaCreacion
-                                ).toLocaleDateString("es-MX", {
-                                  year: "numeric",
-                                  month: "long",
-                                  day: "numeric",
+                                ).toLocaleDateString('es-MX', {
+                                  year: 'numeric',
+                                  month: 'long',
+                                  day: 'numeric',
                                 })
-                              : "N/A"}
+                              : 'N/A'}
                           </p>
                         </div>
                         <div className="p-4 bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
@@ -806,14 +827,14 @@ const GestionRepartidores = () => {
                           </p>
                           <p
                             className={`text-lg font-semibold ${
-                              repartidorData.details.estado === "activo"
-                                ? "text-green-600 dark:text-green-400"
-                                : "text-red-600 dark:text-red-400"
+                              repartidorData.details.estado === 'activo'
+                                ? 'text-green-600 dark:text-green-400'
+                                : 'text-red-600 dark:text-red-400'
                             }`}
                           >
-                            {repartidorData.details.estado === "activo"
-                              ? "Activo"
-                              : "Inactivo"}
+                            {repartidorData.details.estado === 'activo'
+                              ? 'Activo'
+                              : 'Inactivo'}
                           </p>
                         </div>
                       </div>
@@ -845,11 +866,11 @@ const GestionRepartidores = () => {
                                 key={status}
                                 className={`p-4 rounded-xl ${
                                   statusColors[status] ||
-                                  "bg-gray-100 text-gray-800"
+                                  'bg-gray-100 text-gray-800'
                                 } shadow-sm hover:shadow-md transition-shadow duration-200 flex flex-col items-center justify-center`}
                               >
                                 <p className="text-sm font-semibold capitalize">
-                                  {status.replace("_", " ")}
+                                  {status.replace('_', ' ')}
                                 </p>
                                 <p className="text-3xl font-bold mt-2">
                                   {count}
@@ -862,7 +883,7 @@ const GestionRepartidores = () => {
                     </div>
                   )}
 
-                  {openDialog === "history" && repartidorData.history && (
+                  {openDialog === 'history' && repartidorData.history && (
                     <div className="space-y-6 fadeIn">
                       {/* Filtros y Controles */}
                       <div className="bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700 shadow-sm">
@@ -941,7 +962,7 @@ const GestionRepartidores = () => {
                                 <div className="flex items-center gap-2">
                                   <h4 className="text-lg font-semibold text-gray-800 dark:text-gray-100">
                                     {status.charAt(0).toUpperCase() +
-                                      status.slice(1).replace("_", " ")}
+                                      status.slice(1).replace('_', ' ')}
                                   </h4>
                                   <span
                                     className={`px-2 py-1 rounded-full text-xs font-medium ${statusColors[status]}`}
@@ -994,18 +1015,18 @@ const GestionRepartidores = () => {
                                               <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
                                                 {new Date(
                                                   pedido.fechaPedido
-                                                ).toLocaleDateString("es-MX", {
-                                                  year: "numeric",
-                                                  month: "long",
-                                                  day: "numeric",
-                                                  hour: "2-digit",
-                                                  minute: "2-digit",
+                                                ).toLocaleDateString('es-MX', {
+                                                  year: 'numeric',
+                                                  month: 'long',
+                                                  day: 'numeric',
+                                                  hour: '2-digit',
+                                                  minute: '2-digit',
                                                 })}
                                               </p>
                                               <div className="flex items-center gap-2">
                                                 <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
                                                   {pedido.cliente?.nombre ||
-                                                    "Sin cliente"}
+                                                    'Sin cliente'}
                                                 </span>
                                                 <div className="w-1 h-1 bg-gray-400 rounded-full"></div>
                                                 <span className="text-sm text-gray-500 dark:text-gray-400">
@@ -1022,7 +1043,7 @@ const GestionRepartidores = () => {
                                               className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${
                                                 statusColors[
                                                   pedido.estadoActual.toLowerCase()
-                                                ] || "bg-gray-100 text-gray-800"
+                                                ] || 'bg-gray-100 text-gray-800'
                                               }`}
                                             >
                                               {pedido.estadoActual
@@ -1065,7 +1086,7 @@ const GestionRepartidores = () => {
                                                     </p>
                                                     <p className="font-medium text-gray-800 dark:text-gray-100">
                                                       {pedido.cliente?.nombre ||
-                                                        "Sin cliente"}
+                                                        'Sin cliente'}
                                                     </p>
                                                   </div>
                                                   <div>
@@ -1074,7 +1095,7 @@ const GestionRepartidores = () => {
                                                     </p>
                                                     <p className="font-medium text-gray-800 dark:text-gray-100">
                                                       {pedido.cliente?.correo ||
-                                                        "Sin correo"}
+                                                        'Sin correo'}
                                                     </p>
                                                   </div>
                                                   <div>
@@ -1083,7 +1104,7 @@ const GestionRepartidores = () => {
                                                     </p>
                                                     <p className="font-medium text-gray-800 dark:text-gray-100">
                                                       {pedido.tipoPedido ||
-                                                        "N/A"}
+                                                        'N/A'}
                                                     </p>
                                                   </div>
                                                 </div>
@@ -1150,14 +1171,14 @@ const GestionRepartidores = () => {
                                                             <div className="flex-1">
                                                               <h6 className="text-sm font-medium text-gray-800 dark:text-gray-100 mb-1">
                                                                 {product.nombreProducto ||
-                                                                  "Sin nombre"}
+                                                                  'Sin nombre'}
                                                               </h6>
                                                               <div className="space-y-1 text-xs text-gray-600 dark:text-gray-400">
                                                                 {product.colorProducto && (
                                                                   <p>
                                                                     <span className="font-medium">
                                                                       Color:
-                                                                    </span>{" "}
+                                                                    </span>{' '}
                                                                     {
                                                                       product.colorProducto
                                                                     }
@@ -1167,7 +1188,7 @@ const GestionRepartidores = () => {
                                                                   <p>
                                                                     <span className="font-medium">
                                                                       Detalles:
-                                                                    </span>{" "}
+                                                                    </span>{' '}
                                                                     {
                                                                       product.detallesProducto
                                                                     }
@@ -1177,10 +1198,10 @@ const GestionRepartidores = () => {
                                                                   <span className="font-medium">
                                                                     Estado
                                                                     Producto:
-                                                                  </span>{" "}
+                                                                  </span>{' '}
                                                                   {product.estadoProducto ===
-                                                                  "N/A"
-                                                                    ? "Aun no calificado"
+                                                                  'N/A'
+                                                                    ? 'Aun no calificado'
                                                                     : product.estadoProducto}
                                                                 </p>
                                                                 {product.diasAlquiler >
@@ -1189,7 +1210,7 @@ const GestionRepartidores = () => {
                                                                     <span className="font-medium">
                                                                       Días de
                                                                       alquiler:
-                                                                    </span>{" "}
+                                                                    </span>{' '}
                                                                     {
                                                                       product.diasAlquiler
                                                                     }
@@ -1199,7 +1220,7 @@ const GestionRepartidores = () => {
                                                                   <p>
                                                                     <span className="font-medium">
                                                                       Observaciones:
-                                                                    </span>{" "}
+                                                                    </span>{' '}
                                                                     {
                                                                       product.observaciones
                                                                     }
@@ -1209,7 +1230,7 @@ const GestionRepartidores = () => {
                                                             </div>
                                                             <div className="text-right ml-4 text-xs text-gray-600 dark:text-gray-300">
                                                               <p>
-                                                                Cant:{" "}
+                                                                Cant:{' '}
                                                                 {product.cantidad ||
                                                                   0}
                                                               </p>
@@ -1279,7 +1300,7 @@ const GestionRepartidores = () => {
                     </div>
                   )}
 
-                  {openDialog === "reviews" && repartidorData.reviews && (
+                  {openDialog === 'reviews' && repartidorData.reviews && (
                     <div className="space-y-4 fadeIn">
                       {repartidorData.reviews.length > 0 ? (
                         repartidorData.reviews.map((review, index) => (
@@ -1296,19 +1317,19 @@ const GestionRepartidores = () => {
                                     icon={faStar}
                                     className={
                                       i < review.calificacion
-                                        ? "text-[#fcb900]"
-                                        : "text-gray-300 dark:text-gray-600"
+                                        ? 'text-[#fcb900]'
+                                        : 'text-gray-300 dark:text-gray-600'
                                     }
                                   />
                                 ))}
                               </div>
                               <span className="text-xs text-gray-600 dark:text-gray-400">
                                 {new Date(review.fecha).toLocaleDateString(
-                                  "es-ES",
+                                  'es-ES',
                                   {
-                                    year: "numeric",
-                                    month: "short",
-                                    day: "numeric",
+                                    year: 'numeric',
+                                    month: 'short',
+                                    day: 'numeric',
                                   }
                                 )}
                               </span>
@@ -1317,7 +1338,7 @@ const GestionRepartidores = () => {
                               "{review.comentario}"
                             </p>
                             <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
-                              Por:{" "}
+                              Por:{' '}
                               <span className="font-medium">
                                 {review.clienteNombre}
                               </span>

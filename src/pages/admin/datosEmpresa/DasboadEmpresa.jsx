@@ -1,44 +1,43 @@
-import React, { useState } from "react";
-import Logo from "../../../img/Logos/LogoOriginal.png";
+import Logo from '../../../img/Logos/LogoOriginal.png';
 
 const modulesData = [
   {
-    key: "perfil",
-    title: "Perfilempresa",
+    key: 'perfil',
+    title: 'Perfilempresa',
     description:
-      "Administra los datos y la configuración del perfil de la empresa.",
+      'Administra los datos y la configuración del perfil de la empresa.',
     logo: true,
     logoSrc: { Logo },
   },
   {
-    key: "Sobre Nosotros",
-    title: "Sobre Nosotros",
-    route: "/empresa/sobre",
-    description: "Conoce nuestra historia, misión y visión.",
+    key: 'Sobre Nosotros',
+    title: 'Sobre Nosotros',
+    route: '/empresa/sobre',
+    description: 'Conoce nuestra historia, misión y visión.',
   },
   {
-    key: "Deslin",
-    title: "Deslin",
-    route: "/empresa/disclaimer",
-    description: "Aviso legal y limitaciones de responsabilidad.",
+    key: 'Deslin',
+    title: 'Deslin',
+    route: '/empresa/disclaimer',
+    description: 'Aviso legal y limitaciones de responsabilidad.',
   },
   {
-    key: "Politicas",
-    title: "Politicas",
-    route: "/empresa/politicas",
-    description: "Nuestras políticas y lineamientos internos y externos.",
+    key: 'Politicas',
+    title: 'Politicas',
+    route: '/empresa/politicas',
+    description: 'Nuestras políticas y lineamientos internos y externos.',
   },
   {
-    key: "Terminos",
-    title: "Terminos",
-    route: "/empresa/terminos",
-    description: "Términos y condiciones de uso de nuestros servicios.",
+    key: 'Terminos',
+    title: 'Terminos',
+    route: '/empresa/terminos',
+    description: 'Términos y condiciones de uso de nuestros servicios.',
   },
   {
-    key: "Aviso de privacidad",
-    title: "privacidad",
-    route: "/empresa/privacidad",
-    description: "Aviso de privacidad para lso consumidores.",
+    key: 'Aviso de privacidad',
+    title: 'privacidad',
+    route: '/empresa/privacidad',
+    description: 'Aviso de privacidad para lso consumidores.',
   },
 ];
 
@@ -74,7 +73,7 @@ function DefaultIcon() {
 
 function getModuleIcon(key) {
   switch (key) {
-    case "Sobre Nosotros":
+    case 'Sobre Nosotros':
       return (
         <svg
           className="w-16 h-16 mx-auto text-blue-500 mb-4"
@@ -88,7 +87,7 @@ function getModuleIcon(key) {
           <circle cx="12" cy="16" r="1" />
         </svg>
       );
-    case "Deslin":
+    case 'Deslin':
       return (
         <svg
           className="w-16 h-16 mx-auto text-red-500 mb-4"
@@ -102,7 +101,7 @@ function getModuleIcon(key) {
           <path d="M2 12l10 5 10-5" />
         </svg>
       );
-    case "Politicas":
+    case 'Politicas':
       return (
         <svg
           className="w-16 h-16 mx-auto text-green-500 mb-4"
@@ -115,7 +114,7 @@ function getModuleIcon(key) {
           <path d="M12 22v-4" strokeLinecap="round" strokeLinejoin="round" />
         </svg>
       );
-    case "Terminos":
+    case 'Terminos':
       return (
         <svg
           className="w-16 h-16 mx-auto text-purple-500 mb-4"
@@ -128,7 +127,7 @@ function getModuleIcon(key) {
           <path d="M3 10h18" />
         </svg>
       );
-    case "Aviso de privacidad":
+    case 'Aviso de privacidad':
       return (
         <svg
           className="w-16 h-16 mx-auto text-red-500 mb-4"
@@ -147,22 +146,6 @@ function getModuleIcon(key) {
       return <DefaultIcon />;
   }
 }
-
-const LoadingSkeleton = () => (
-  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
-    {Array.from({ length: 6 }).map((_, index) => (
-      <div
-        key={index}
-        className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-md animate-pulse"
-      >
-        <div className="w-16 h-16 mx-auto bg-gray-300 dark:bg-gray-700 rounded-full mb-4"></div>
-        <div className="h-6 w-3/4 mx-auto bg-gray-300 dark:bg-gray-700 rounded mb-4"></div>
-        <div className="h-4 w-full bg-gray-300 dark:bg-gray-700 rounded mb-2"></div>
-        <div className="h-4 w-5/6 mx-auto bg-gray-300 dark:bg-gray-700 rounded"></div>
-      </div>
-    ))}
-  </div>
-);
 
 function DashboardModulosEmpresa({ onNavigate, fotoEmpresa }) {
   const handleModuleClick = (mod) => {
@@ -191,7 +174,7 @@ function DashboardModulosEmpresa({ onNavigate, fotoEmpresa }) {
                 overflow-hidden p-6 cursor-pointer flex flex-col
               "
             >
-              {mod.key === "perfil" ? (
+              {mod.key === 'perfil' ? (
                 //...
                 fotoEmpresa ? (
                   <img src={fotoEmpresa} alt="Foto de la Empresa" />

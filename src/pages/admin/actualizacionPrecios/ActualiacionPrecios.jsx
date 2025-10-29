@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect } from 'react';
 import {
   Plus,
   Trash,
@@ -6,10 +6,10 @@ import {
   Search,
   ChevronLeft,
   ChevronRight,
-} from "lucide-react";
-import api from "../../../utils/AxiosConfig";
-import { toast } from "react-toastify";
-import { useAuth } from "../../../hooks/ContextAuth";
+} from 'lucide-react';
+import api from '../../../utils/AxiosConfig';
+import { toast } from 'react-toastify';
+import { useAuth } from '../../../hooks/ContextAuth';
 
 function ListaPrecios({ items, onDelete, onEdit }) {
   return (
@@ -24,7 +24,7 @@ function ListaPrecios({ items, onDelete, onEdit }) {
               {item.nombreProducto}
             </p>
             <p className="text-sm text-gray-500 dark:text-gray-400">
-              Categoría: {item.nombreCategoria} – Subcategoría:{" "}
+              Categoría: {item.nombreCategoria} – Subcategoría:{' '}
               {item.nombreSubcategoria}
             </p>
           </div>
@@ -55,7 +55,7 @@ function ListaPrecios({ items, onDelete, onEdit }) {
 
 function ListaProductosSinPrecio({ items }) {
   const grouped = items.reduce((acc, prod) => {
-    const key = prod.nombreCategoria || "Sin categoría";
+    const key = prod.nombreCategoria || 'Sin categoría';
     if (!acc[key]) {
       acc[key] = [];
     }
@@ -92,18 +92,18 @@ function ActualizacionPrecios() {
   const [precios, setPrecios] = useState([]);
   const [productos, setProductos] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [modalType, setModalType] = useState("");
-  const [precioAlquiler, setPrecioAlquiler] = useState("");
-  const [selectedProduct, setSelectedProduct] = useState("");
+  const [modalType, setModalType] = useState('');
+  const [precioAlquiler, setPrecioAlquiler] = useState('');
+  const [selectedProduct, setSelectedProduct] = useState('');
   const [editItem, setEditItem] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
-  const [searchValue, setSearchValue] = useState("");
+  const [searchValue, setSearchValue] = useState('');
   const itemsPerPage = 5;
   const [currentPageUnassigned, setCurrentPageUnassigned] = useState(1);
-  const [searchValueUnassigned, setSearchValueUnassigned] = useState("");
+  const [searchValueUnassigned, setSearchValueUnassigned] = useState('');
   const itemsPerPageUnassigned = 5;
   const [isLoading, setIsLoading] = useState(true);
-  const { user, logout, csrfToken } = useAuth();
+  const { csrfToken } = useAuth();
 
   useEffect(() => {
     fetchData();
@@ -112,13 +112,12 @@ function ActualizacionPrecios() {
   const fetchData = async () => {
     setIsLoading(true);
     try {
-      const response = await api.get("/api/precios/precios", {
+      const response = await api.get('/api/precios/precios', {
         withCredentials: true,
       });
       const datos = response.data.precios || [];
       setPrecios(datos);
 
- 
       const productosDerivados = datos.map((item) => ({
         idProducto: item.idProducto,
         nombre: item.nombreProducto,
@@ -126,55 +125,55 @@ function ActualizacionPrecios() {
         nombreSubcategoria: item.nombreSubcategoria,
         idCategoria: item.idCategoria,
         nombreCategoria: item.nombreCategoria,
-        precioAlquiler: item.precioAlquiler || null, 
+        precioAlquiler: item.precioAlquiler || null,
       }));
       setProductos(productosDerivados);
     } catch (error) {
-      console.error("Error al obtener precios/productos:", error);
-      toast.error("Error al cargar datos.");
+      console.error('Error al obtener precios/productos:', error);
+      toast.error('Error al cargar datos.');
     } finally {
       setIsLoading(false);
     }
   };
-  
+
   const validatePrecioInput = () => {
     if (!selectedProduct) {
-      return "Selecciona un producto.";
+      return 'Selecciona un producto.';
     }
     const numPrecioAlquiler = parseFloat(precioAlquiler);
     if (!precioAlquiler || isNaN(numPrecioAlquiler) || numPrecioAlquiler <= 0) {
-      return "Ingresa un precio de alquiler válido (mayor que 0).";
+      return 'Ingresa un precio de alquiler válido (mayor que 0).';
     }
     return { numPrecioAlquiler };
   };
 
   const openAddModal = () => {
-    setModalType("add");
+    setModalType('add');
     setEditItem(null);
-    setPrecioAlquiler("");
-    setSelectedProduct("");
+    setPrecioAlquiler('');
+    setSelectedProduct('');
     setIsModalOpen(true);
   };
 
   const openEditModal = (item) => {
-    setModalType("edit");
+    setModalType('edit');
     setEditItem(item);
-    setPrecioAlquiler(item.precioAlquiler || "");
+    setPrecioAlquiler(item.precioAlquiler || '');
     setSelectedProduct(item.idProducto);
     setIsModalOpen(true);
   };
 
   const closeModal = () => {
     setIsModalOpen(false);
-    setModalType("");
-    setPrecioAlquiler("");
-    setSelectedProduct("");
+    setModalType('');
+    setPrecioAlquiler('');
+    setSelectedProduct('');
     setEditItem(null);
   };
 
   const handleAddPrecio = async () => {
     const validationResult = validatePrecioInput();
-    if (typeof validationResult === "string") {
+    if (typeof validationResult === 'string') {
       toast.warning(validationResult);
       return;
     }
@@ -182,34 +181,38 @@ function ActualizacionPrecios() {
 
     try {
       const response = await api.post(
-        "/api/precios/",
+        '/api/precios/',
         {
           idProducto: selectedProduct,
           precioAlquiler: numPrecioAlquiler,
         },
         {
-          headers: { "X-CSRF-Token": csrfToken },
+          headers: { 'X-CSRF-Token': csrfToken },
           withCredentials: true,
         }
       );
 
       setPrecios([...precios, response.data.nuevoPrecio]);
-      toast.success("Precio asignado correctamente.");
+      toast.success('Precio asignado correctamente.');
       fetchData();
       closeModal();
     } catch (error) {
-      if (error.response && error.response.data && error.response.data.message) {
+      if (
+        error.response &&
+        error.response.data &&
+        error.response.data.message
+      ) {
         toast.error(error.response.data.message);
       } else {
-        console.error("Error al asignar precio:", error);
-        toast.error("Error al asignar precio.");
+        console.error('Error al asignar precio:', error);
+        toast.error('Error al asignar precio.');
       }
     }
   };
 
   const handleEditPrecio = async () => {
     const validationResult = validatePrecioInput();
-    if (typeof validationResult === "string") {
+    if (typeof validationResult === 'string') {
       toast.warning(validationResult);
       return;
     }
@@ -223,44 +226,53 @@ function ActualizacionPrecios() {
           precioAlquiler: numPrecioAlquiler,
         },
         {
-          headers: { "X-CSRF-Token": csrfToken },
+          headers: { 'X-CSRF-Token': csrfToken },
           withCredentials: true,
         }
       );
+      console.log('Correcto actualizado precio', response);
 
-      toast.success("Precio actualizado correctamente.");
+      toast.success('Precio actualizado correctamente.');
       fetchData();
       closeModal();
     } catch (error) {
-      if (error.response && error.response.data && error.response.data.message) {
+      if (
+        error.response &&
+        error.response.data &&
+        error.response.data.message
+      ) {
         toast.error(error.response.data.message);
       } else {
-        console.error("Error al actualizar precio:", error);
-        toast.error("Error al actualizar precio.");
+        console.error('Error al actualizar precio:', error);
+        toast.error('Error al actualizar precio.');
       }
     }
   };
 
   const handleSave = () => {
-    if (modalType === "add") handleAddPrecio();
-    else if (modalType === "edit") handleEditPrecio();
+    if (modalType === 'add') handleAddPrecio();
+    else if (modalType === 'edit') handleEditPrecio();
   };
 
   const handleDeletePrecio = async (idPrecio) => {
-    if (!window.confirm("¿Estás seguro de eliminar este precio?")) return;
+    if (!window.confirm('¿Estás seguro de eliminar este precio?')) return;
     try {
       await api.delete(`/api/precios/delete/${idPrecio}`, {
-        headers: { "X-CSRF-Token": csrfToken },
+        headers: { 'X-CSRF-Token': csrfToken },
         withCredentials: true,
       });
-      toast.success("Precio eliminado correctamente.");
+      toast.success('Precio eliminado correctamente.');
       fetchData();
     } catch (error) {
-      if (error.response && error.response.data && error.response.data.message) {
+      if (
+        error.response &&
+        error.response.data &&
+        error.response.data.message
+      ) {
         toast.error(error.response.data.message);
       } else {
-        console.error("Error al eliminar precio:", error);
-        toast.error("Error al eliminar precio.");
+        console.error('Error al eliminar precio:', error);
+        toast.error('Error al eliminar precio.');
       }
     }
   };
@@ -308,7 +320,7 @@ function ActualizacionPrecios() {
 
   useEffect(() => {
     if (isModalOpen) {
-      const input = document.getElementById("modal-precioAlquiler");
+      const input = document.getElementById('modal-precioAlquiler');
       if (input) input.focus();
     }
   }, [isModalOpen]);
@@ -326,16 +338,13 @@ function ActualizacionPrecios() {
 
   return (
     <div className="p-6 space-y-8 max-w-screen-xl mx-auto dark:bg-gray-900 ">
- 
       <div className="  rounded-xl p-6 text-center transform transition-all duration-300 hover:scale-[1.01]">
         <h1 className="text-3xl font-extrabold dark:text-white tracking-tight">
           Actualización de Precios
         </h1>
       </div>
-  
-  
+
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-     
         <div className="bg-white dark:bg-gray-800 shadow-lg rounded-xl p-6 border-l-4 border-green-500 transition-all duration-300 hover:shadow-xl">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between border-b border-gray-200 dark:border-gray-700 pb-4 gap-4">
             <h2 className="text-2xl font-semibold text-gray-800 dark:text-gray-100">
@@ -366,20 +375,20 @@ function ActualizacionPrecios() {
               </button>
             </div>
           </div>
-  
+
           <div className="mt-6">
             <ListaPrecios
               items={currentPreciosPage}
               onDelete={handleDeletePrecio}
               onEdit={openEditModal}
             />
-  
+
             {currentPreciosPage.length === 0 && (
               <p className="text-gray-500 dark:text-gray-400 text-center py-4">
                 No hay precios asignados o no coinciden con la búsqueda.
               </p>
             )}
-  
+
             {/* Paginación */}
             <div className="flex items-center justify-center mt-6 gap-3">
               <button
@@ -410,7 +419,7 @@ function ActualizacionPrecios() {
             </div>
           </div>
         </div>
-  
+
         {/* Sección de Productos sin Precio */}
         <div className="bg-white dark:bg-gray-800 shadow-lg rounded-xl p-6 border-l-4 border-blue-500 transition-all duration-300 hover:shadow-xl">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between border-b border-gray-200 dark:border-gray-700 pb-4 gap-4">
@@ -433,16 +442,16 @@ function ActualizacionPrecios() {
               />
             </div>
           </div>
-  
+
           <div className="mt-6">
             <ListaProductosSinPrecio items={currentUnassignedPage} />
-  
+
             {currentUnassignedPage.length === 0 && (
               <p className="text-gray-500 dark:text-gray-400 text-center py-4">
                 No hay productos sin precio o no coinciden con la búsqueda.
               </p>
             )}
-  
+
             {/* Paginación */}
             <div className="flex items-center justify-center mt-6 gap-3">
               <button
@@ -458,7 +467,8 @@ function ActualizacionPrecios() {
                 <span className="ml-2 text-sm font-medium">Anterior</span>
               </button>
               <span className="text-gray-700 dark:text-gray-300 font-medium">
-                Página {safeCurrentPageUnassigned} de {totalPagesUnassigned || 1}
+                Página {safeCurrentPageUnassigned} de{' '}
+                {totalPagesUnassigned || 1}
               </span>
               <button
                 onClick={() =>
@@ -481,15 +491,15 @@ function ActualizacionPrecios() {
           </div>
         </div>
       </div>
-  
+
       {/* Modal para Agregar/Editar Precio */}
       {isModalOpen && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-60 z-50 transition-opacity duration-300">
           <div className="bg-white dark:bg-gray-800 p-8 rounded-2xl max-w-md w-full shadow-2xl transform transition-all duration-300 scale-100">
             <h3 className="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-6">
-              {modalType === "add" ? "Agregar Precio" : "Editar Precio"}
+              {modalType === 'add' ? 'Agregar Precio' : 'Editar Precio'}
             </h3>
-  
+
             {/* Precio de Alquiler */}
             <label className="block text-gray-700 dark:text-gray-200 text-sm font-medium mb-2">
               Precio de Alquiler
@@ -504,23 +514,23 @@ function ActualizacionPrecios() {
               value={precioAlquiler}
               onChange={(e) => {
                 const value = e.target.value;
-                if (value === "" || parseFloat(value) > 0) {
+                if (value === '' || parseFloat(value) > 0) {
                   setPrecioAlquiler(value);
                 }
               }}
             />
-  
+
             {/* Producto */}
             <label className="block text-gray-700 dark:text-gray-200 text-sm font-medium mt-4 mb-2">
               Producto
             </label>
-            {modalType === "edit" ? (
+            {modalType === 'edit' ? (
               <input
                 type="text"
                 className="w-full border border-gray-300 dark:border-gray-600 rounded-lg p-3 bg-gray-100 dark:bg-gray-600 text-gray-700 dark:text-gray-300 cursor-not-allowed"
                 value={
                   productos.find((prod) => prod.idProducto === selectedProduct)
-                    ?.nombre || ""
+                    ?.nombre || ''
                 }
                 readOnly
               />
@@ -538,7 +548,7 @@ function ActualizacionPrecios() {
                 ))}
               </select>
             )}
-  
+
             {/* Botones del Modal */}
             <div className="mt-8 flex justify-end gap-4">
               <button
@@ -549,13 +559,13 @@ function ActualizacionPrecios() {
               </button>
               <button
                 className={`px-5 py-2 ${
-                  modalType === "add"
-                    ? "bg-blue-600 hover:bg-blue-700"
-                    : "bg-yellow-500 hover:bg-yellow-600"
+                  modalType === 'add'
+                    ? 'bg-blue-600 hover:bg-blue-700'
+                    : 'bg-yellow-500 hover:bg-yellow-600'
                 } text-white rounded-lg transition-all duration-300 shadow-sm`}
                 onClick={handleSave}
               >
-                {modalType === "add" ? "Agregar" : "Editar"}
+                {modalType === 'add' ? 'Agregar' : 'Editar'}
               </button>
             </div>
           </div>

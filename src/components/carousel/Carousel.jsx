@@ -1,12 +1,12 @@
-import { useState, useEffect, useCallback } from "react";
-import { motion } from "framer-motion";
-import Typewriter from "typewriter-effect";
+import { useState, useEffect, useCallback } from 'react';
+import { motion } from 'framer-motion';
+import Typewriter from 'typewriter-effect';
 
 const Carousel = ({
   images,
-  margin = "1rem",
-  height = "100%",
-  headerText = ["Optimiza tus eventos", "Soluciones de calidad"],
+  margin = '1rem',
+  height = '100%',
+  headerText = ['Optimiza tus eventos', 'Soluciones de calidad'],
   autoPlayInterval = 7000,
 }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -101,7 +101,9 @@ const Carousel = ({
             key={index}
             onClick={() => setCurrentIndex(index)}
             className={`w-2 h-2 sm:w-3 sm:h-3 rounded-full transition-colors ${
-              currentIndex === index ? "bg-blue-500" : "bg-gray-400 hover:bg-gray-500"
+              currentIndex === index
+                ? 'bg-blue-500'
+                : 'bg-gray-400 hover:bg-gray-500'
             }`}
             aria-label={`Go to slide ${index + 1}`}
           />
