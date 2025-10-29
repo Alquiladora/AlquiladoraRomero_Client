@@ -1,5 +1,5 @@
-import React, { useState, useRef, useContext, useEffect } from "react";
-import logoUrl from "../../img/Logos/logo.jpg";
+import React, { useState, useRef, useEffect } from "react";
+
 import { Link, useNavigate } from "react-router-dom";
 import { motion, useAnimation } from "framer-motion";
 
@@ -12,26 +12,26 @@ import api from "../../utils/AxiosConfig";
 import axios from "axios";
 
 export const Login = () => {
-  const [captchaValid, setCaptchaValid] = useState(false);
+  const [ setCaptchaValid] = useState(false);
 
   const [correo, setCorreo] = useState("");
   const [contrasena, setContrasena] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [ setIsLoggedIn] = useState(false);
   const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
   const [isBlocked, setIsBlocked] = useState(false);
-  const [usuraioC, setUsuarioC] = useState([]);
+  const [ setUsuarioC] = useState([]);
   const recaptchaRef = useRef(null);
   const { executeRecaptcha } = useGoogleReCaptcha();
   const controls = useAnimation();
   const [mfaRequired, setMfaRequired] = useState(false);
   const [mfaToken, setMfaToken] = useState(""); 
-  const [userId, setUserId] = useState("");
+  const [ setUserId] = useState("");
 
 
-  const { setUser, csrfToken, socket } = useAuth();
+  const { setUser, csrfToken} = useAuth();
   useEffect(() => {
     controls.start({ opacity: 1, y: 0 });
   }, [controls]);

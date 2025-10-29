@@ -5,8 +5,7 @@ import {
   faCheckCircle,
   faClock,
 } from "@fortawesome/free-solid-svg-icons";
-import CryptoJS from "crypto-js";
-import axios from "axios";
+
 import { motion } from "framer-motion";
 import api from "../../utils/AxiosConfig";
 
@@ -16,7 +15,7 @@ const Paso2 = ({ onValidationSuccess, guardarCorreo }) => {
   const [isButtonDisabled, setIsButtonDisabled] = useState(true);
   const [timeLeft, setTimeLeft] = useState(600);
   const [tokenRecuperado, setTokenRecuperado] = useState(null);
-  const BASE_URL = "http://localhost:3001";
+
   const inputRefs = useRef([]); 
 
   //======================================================================================

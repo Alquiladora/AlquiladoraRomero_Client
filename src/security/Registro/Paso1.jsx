@@ -13,7 +13,6 @@ const Paso1 = ({ onValidationSuccess, setGuardarCorreo }) => {
   const { csrfToken } = useAuth();
   const { executeRecaptcha } = useGoogleReCaptcha();
 
-  const BASE_URL = "http://localhost:3001";
 
   useEffect(() => {
     if (csrfToken) {

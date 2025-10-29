@@ -669,7 +669,7 @@ const HistorialPedidos = () => {
         controller.abort();
       };
     }
-  }, [pagination.currentPage, fetchOrders, fetchRatedOrders, isLoadingAuth]);
+  }, [isFirstLoad,pagination.currentPage, fetchOrders, fetchRatedOrders, isLoadingAuth]);
 
 
   useEffect(() => {
@@ -680,7 +680,7 @@ const HistorialPedidos = () => {
         controller.abort();
       };
     }
-  }, [isFirstLoad,modal.isOpen, modal.orderId, modal.isLoading, fetchOrdetDetails]);
+  }, [modal.details, modal.errors,modal.isOpen, modal.orderId, modal.isLoading, fetchOrdetDetails]);
 
 
 

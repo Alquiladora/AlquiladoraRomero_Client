@@ -127,7 +127,7 @@ const GestionPedidos = ({ onNavigate }) => {
     } finally {
       setLoading(false);
     }
-  },[]);
+  },[csrfToken, currentPage, dateRange.end, dateRange.start, filterEstado, searchTerm]);
 
   useEffect(() => {
     fetchPedidos();

@@ -1,4 +1,5 @@
-import { BrowserRouter as Router, Routes, Route} from 'react-router-dom';
+
+import { BrowserRouter , Routes, Route} from 'react-router-dom';
 
 //----------------------LAYOUTS--------------------------------------------
 import LayoutHeader from "../components/layout/LayHeader";
@@ -8,7 +9,7 @@ import { CartProvider } from '../components/carrito/ContextCarrito';
 
 import ErrorBoundary from './Errors/ErrorBoundary';
 import ServerErrorModal from './Errors/ErrorTime';
-import AuthRedirector from '../components/layout/UrlDirrecion';
+
 import CarritoCompras from '../components/carrito/CarritoCompras';
 import {RecomendacionesProvider} from '../components/carrito/ContextRecomendaciones'
  
@@ -24,7 +25,7 @@ import GlobalErrores from './Errors/GlobalErrores';
 import Home from "../pages/public/home/Home";
 import { Login } from '../security/Login/Login';
 import Registro from '../security/Registro/Registro';
-import Catalogo from '../pages/public/catalog/Catalogo';
+
 import CambiarPassword from '../security/recuperacion/CambiarPasswor';
 import ProductosCategoria from '../components/productosCategoria/ProductosCatgeoria';
 import PoliticasPrivacidad from '../components/footer/foter-empresa/Politicas';

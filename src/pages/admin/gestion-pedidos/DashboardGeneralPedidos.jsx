@@ -105,7 +105,7 @@ const PedidosGeneralesDashboard = () => {
     } finally {
       setLoading(false);
     }
-  },[]);
+  },[csrfToken, defaultStats, selectedStatus, selectedYear]);
 
   useEffect(() => {
     fetchStats();

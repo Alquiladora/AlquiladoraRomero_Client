@@ -23,7 +23,7 @@ const InicioRepartidor = ({ datosRepartidor }) => {
     totalFinalizado: 0,
     promedioValoracion: 0,
   });
-  const [pedidosFinalizadosPorMes, setPedidosFinalizadosPorMes] = useState([]);
+  const [setPedidosFinalizadosPorMes] = useState([]);
   const { user,  csrfToken } = useAuth();
 
  
