@@ -87,10 +87,11 @@
     "test": "react-scripts test",
     "eject": "react-scripts eject",
     "lint": "eslint src --ext .js,.jsx",
+    "format": "prettier --write src/**/*.js",
     "format:check": "prettier --check 'src/**/*.{js,jsx}'",
     "cy:open": "cypress open",
-   "cy:run": "cypress run",
-   "cy:run:record": "cypress run --record --key=tu-key-de-cypress-dashboard"
+    "cy:run": "cypress run",
+    "cy:run:record": "cypress run --record --key=tu-key-de-cypress-dashboard"
   },
   "eslintConfig": {
     "extends": [
@@ -117,9 +118,12 @@
   },
   "devDependencies": {
     "@babel/plugin-proposal-private-property-in-object": "^7.21.11",
+    "@commitlint/cli": "^20.1.0",
+    "@commitlint/config-conventional": "^20.0.0",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.0",
     "cypress": "^15.5.0",
-    "eslint": "^8.57.1"
+    "eslint": "^8.57.1",
+    "husky": "^9.1.7"
   }
 }
