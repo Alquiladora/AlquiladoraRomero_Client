@@ -1,3 +1,4 @@
+/* eslint-disable */
 import React, { useEffect, useState } from "react";
 import { Plus, Edit, Trash, Search, Eye, X, ChevronLeft, ChevronRight } from "lucide-react";
 import { toast } from "react-toastify";

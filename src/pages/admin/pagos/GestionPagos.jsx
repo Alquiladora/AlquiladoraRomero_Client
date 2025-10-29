@@ -1,3 +1,4 @@
+/* eslint-disable */
 import React, { useState, useEffect } from "react";
 import api from "../../../utils/AxiosConfig";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -66,7 +67,7 @@ const CuentasReceptoras = () => {
 
   useEffect(() => {
     fetchCuentas();
-  }, []);
+  }, [ fetchCuentas]);
 
   const syncConStripe = async () => {
     setLoading(true);

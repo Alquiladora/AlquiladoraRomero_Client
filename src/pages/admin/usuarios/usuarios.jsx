@@ -13,7 +13,7 @@ const roleOptions = [
 
 const Usuarios = () => {
   const [usuarios, setUsuarios] = useState([]);
-  const { user, logout, csrfToken } = useAuth();
+  const { user,  csrfToken } = useAuth();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
   const [openDialog, setOpenDialog] = useState(false);

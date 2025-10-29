@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef,useCallback } from "react";
 import Chart from "react-apexcharts";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
@@ -55,7 +55,7 @@ const PedidosGeneralesDashboard = () => {
   // Detectar tema dark/light
   const isDark = document.documentElement.classList.contains("dark");
 
-  const fetchStats = async () => {
+  const fetchStats = useCallback(async () =>{
     try {
       setLoading(true);
       const params = new URLSearchParams({ year: selectedYear });
@@ -105,7 +105,7 @@ const PedidosGeneralesDashboard = () => {
     } finally {
       setLoading(false);
     }
-  };
+  },[]);
 
   useEffect(() => {
     fetchStats();

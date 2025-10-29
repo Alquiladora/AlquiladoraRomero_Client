@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState,useCallback } from 'react';
 import { useFormik, FieldArray, FormikProvider } from 'formik';
 import * as yup from 'yup';
 import {
@@ -61,26 +61,11 @@ const Terminos = ({ onNavigate }) => {
   const [error, setError]= useState(null);
   //Pagination
   const [page, setPage]= useState(0);
-  const [rowsPerPage, setRowsPerPage]=useState(5);
+  const [rowsPerPage]=useState(5);
   const [loading, setLoading] = useState(true);
 
 
-  useEffect(() => {
-    fetchTerminos();
-  }, [fetchTerminos]);
-
-
-
-  //EXTRAEMOS EL VALOR
-  const extractValue=(versionField)=>{
-    if(typeof versionField ==='object' && versionField !==null ){
-      return versionField || versionField.value || '';
-    }
-    return versionField;
-  }
-
-  //===============================================================================
-  const fetchTerminos = async () => {
+    const fetchTerminos = useCallback(async () =>{
     try {
       const response = await api.get("/api/terminos", {
         withCredentials: true,
@@ -111,7 +96,23 @@ const Terminos = ({ onNavigate }) => {
      setError("No se pudieron cargar los terminos");
      setLoading(false);
     }
-  };
+  },[]);
+
+  useEffect(() => {
+    fetchTerminos();
+  }, [fetchTerminos]);
+
+
+
+  //EXTRAEMOS EL VALOR
+  const extractValue=(versionField)=>{
+    if(typeof versionField ==='object' && versionField !==null ){
+      return versionField || versionField.value || '';
+    }
+    return versionField;
+  }
+
+  //===============================================================================
 
   //vALIDACIONES
   const formik = useFormik({

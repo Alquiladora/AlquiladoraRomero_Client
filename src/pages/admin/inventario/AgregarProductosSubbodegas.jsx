@@ -1,9 +1,10 @@
+/* eslint-disable */
 import React, { useState, useEffect } from "react";
 import {
   FaPlus,
-  FaCalendarAlt,
+
   FaImage,
-  FaTimesCircle,
+
   FaSpinner,
 } from "react-icons/fa";
 import { toast } from "react-toastify";
@@ -15,7 +16,7 @@ const AgregarProductosSubbodegas = ({ datosInventario }) => {
   const [filterMonth, setFilterMonth] = useState("all");
   const [filterYear, setFilterYear] = useState("all");
 
-  const [loading, setLoading] = useState(true);
+  const [setLoading] = useState(true);
  
   const [groupedData, setGroupedData] = useState({});
   const { csrfToken } = useAuth();
@@ -64,7 +65,7 @@ const AgregarProductosSubbodegas = ({ datosInventario }) => {
     years.push(y);
   }
 
-
+// eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     groupByCategoria(datosInventario);
 

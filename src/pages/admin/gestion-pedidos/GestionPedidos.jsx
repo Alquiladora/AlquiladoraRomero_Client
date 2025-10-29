@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect,useCallback } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faTasks,
@@ -80,7 +80,7 @@ const GestionPedidos = ({ onNavigate }) => {
     "Finalizado",
   ];
 
-  const fetchPedidos = async () => {
+  const fetchPedidos = useCallback(async () => {
     try {
       setLoading(true);
       const params = new URLSearchParams({
@@ -127,7 +127,7 @@ const GestionPedidos = ({ onNavigate }) => {
     } finally {
       setLoading(false);
     }
-  };
+  },[]);
 
   useEffect(() => {
     fetchPedidos();

@@ -1,5 +1,5 @@
 
-import React, { useEffect, useState} from 'react';
+import React, { useEffect, useState, useCallback} from 'react';
 import { useFormik, FieldArray, FormikProvider } from 'formik';
 import * as yup from 'yup';
 import {
@@ -66,7 +66,7 @@ const Politicas = ({ onNavigate }) => {
   const [page, setPage] = useState(0);
   const [rowsPerPage] = useState(5); 
 
-   const fetchPoliticas = async () => {
+   const fetchPoliticas = useCallback(async () =>{
     try {
       const response = await api.get("/api/politicas", { withCredentials: true });
      
@@ -98,7 +98,7 @@ const Politicas = ({ onNavigate }) => {
       setError("No se pudieron cargar las políticas");
       setLoading(false);
     }
-  };
+  },[]);
   
 
   useEffect(() => {

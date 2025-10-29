@@ -1,22 +1,6 @@
+
 import React, { useState, useEffect } from "react";
-import {
-  PieChart,
-  Pie,
-  Cell,
-  Tooltip,
-  Legend,
-  RadialBarChart,
-  RadialBar,
-  ResponsiveContainer,
-} from "recharts";
-import {
-  Truck,
-  Package,
-  CheckCircle,
-  Clock,
-  BarChart2,
-  Target,
-} from "lucide-react";
+
 import api from "../../../utils/AxiosConfig";
 import { useAuth } from "../../../hooks/ContextAuth";
 import CustomLoading from "../../../components/spiner/SpinerGlobal";
@@ -40,32 +24,13 @@ const InicioRepartidor = ({ datosRepartidor }) => {
     promedioValoracion: 0,
   });
   const [pedidosFinalizadosPorMes, setPedidosFinalizadosPorMes] = useState([]);
-  const { user, logout, csrfToken } = useAuth();
+  const { user,  csrfToken } = useAuth();
 
-  // Datos para el gráfico circular de distribución de pedidos
-  const pieData = [
-    { name: "Recogiendo", value: estadisticas.totalRecogiendo, color: "#2563EB" },
-    { name: "En Alquiler", value: estadisticas.totalEnAlquiler, color: "#F59E0B" },
-    { name: "Enviando", value: estadisticas.totalEnviando, color: "#DC2626" },
-    { name: "Finalizado", value: estadisticas.totalFinalizado, color: "#065F46" },
-  ];
+ 
 
   console.log("Datos recibidos desde el enpoit de datos de repartidor ", datosRepartidor)
   // Datos para el gráfico radial de rendimiento mensual
-  const radialData = pedidosFinalizadosPorMes.map((item, index) => ({
-    name: item.mes,
-    value: item.completados || 0,
-    fill: `hsl(${(index * 60) % 360}, 70%, 50%)`,
-  }));
 
-  // Datos para el gráfico radial de valoración
-  const valoracionData = [
-    {
-      name: "Puntuación",
-      value: estadisticas.promedioValoracion * 20,
-      color: estadisticas.promedioValoracion >= 4 ? "#065F46" : "#DC2626",
-    },
-  ];
 
   useEffect(() => {
     const fetchData = async () => {
@@ -127,13 +92,7 @@ const InicioRepartidor = ({ datosRepartidor }) => {
     fetchData();
   }, [user, csrfToken]);
 
-  const hasDataForCharts =
-    estadisticas.totalRecogiendo > 0 ||
-    estadisticas.totalEnAlquiler > 0 ||
-    estadisticas.totalEnviando > 0 ||
-    estadisticas.totalFinalizado > 0 ||
-    (pedidosFinalizadosPorMes && pedidosFinalizadosPorMes.length > 0) ||
-    estadisticas.promedioValoracion > 0;
+
 
   if (loading) {
     return <CustomLoading />;

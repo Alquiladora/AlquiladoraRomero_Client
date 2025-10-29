@@ -1,10 +1,9 @@
-import React, { useState, useEffect } from "react";
+import React, { useState} from "react";
 import { Modal, Box, Typography, Button, IconButton, TextField } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import { useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
-import axios from "axios";
-import { v4 as uuidv4 } from "uuid"; 
+
 import { useAuth } from "../../../../hooks/ContextAuth";
 import api from "../../../../utils/AxiosConfig";
  
@@ -14,7 +13,6 @@ import api from "../../../../utils/AxiosConfig";
 
 const ModalPassword = ({open, onClose, usuario}) => {
   const [isProcessing, setIsProcessing] = useState(false);
-  const [tokenValido, setTokenValido] = useState(""); 
   const navigate = useNavigate(); 
   const { csrfToken } = useAuth();
   

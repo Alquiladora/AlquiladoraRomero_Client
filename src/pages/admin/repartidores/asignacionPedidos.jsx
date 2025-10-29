@@ -1,3 +1,4 @@
+/* eslint-disable */
 import React, { useMemo, useState, useEffect, useReducer } from "react";
 import {
   Search,

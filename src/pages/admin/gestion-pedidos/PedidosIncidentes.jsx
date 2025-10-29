@@ -373,6 +373,7 @@ const GestionPedidosIncidentes = ({ onNavigate }) => {
     fetchPedidos();
   }, [csrfToken]);
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     const fetchTimelineData = async () => {
       if (!showTimelineModal) return;

@@ -17,7 +17,7 @@ import {
   faDollarSign,
   faMapMarkerAlt,
   faEye,
-  faFileInvoice,
+ 
   faQuestionCircle,
   faStar,
   faShoppingCart,
@@ -28,14 +28,10 @@ import {
   faUndo,
   faExclamationCircle,
   faBan,
-  faPlus,
-  faMinus,
   faChevronUp,
   faBox,
   faClipboardList,
   faUpload, // Nuevo ícono para subir fotos
-  faTrash, // Nuevo ícono para eliminar archivos
-
 } from "@fortawesome/free-solid-svg-icons";
 import { faWhatsapp } from '@fortawesome/free-brands-svg-icons';
 import { toast } from "react-toastify";
@@ -322,7 +318,7 @@ const ReviewModal = ({ isOpen, orderId, onClose,onSuccess }) => {
   const [photos, setPhotos] = useState([]);
   const [submitting, setSubmitting] = useState(false);
   const maxPhotos = 3;
-  const { csrfToken, user } = useAuth();
+  const { csrfToken } = useAuth();
 
   useEffect(() => {
     if (isOpen) {
@@ -537,7 +533,7 @@ const HistorialPedidos = () => {
   const [pageInput, setPageInput] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
   const [activeTab, setActiveTab] = useState("todos");
-  const { user, isLoading: isLoadingAuth, csrfToken } = useAuth();
+  const { isLoading: isLoadingAuth, csrfToken } = useAuth();
   const [isFirstLoad, setIsFirstLoad] = useState(true);
   const [modal, setModal] = useState({
     isOpen: false,
@@ -684,7 +680,7 @@ const HistorialPedidos = () => {
         controller.abort();
       };
     }
-  }, [modal.isOpen, modal.orderId, modal.isLoading, fetchOrdetDetails]);
+  }, [isFirstLoad,modal.isOpen, modal.orderId, modal.isLoading, fetchOrdetDetails]);
 
 
 

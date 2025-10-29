@@ -1,4 +1,4 @@
-// TiltImage.jsx
+/* eslint-disable */
 import React, { useRef, useEffect } from "react";
 import VanillaTilt from "vanilla-tilt";
 

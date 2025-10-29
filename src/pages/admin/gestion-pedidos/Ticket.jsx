@@ -235,7 +235,7 @@ const TicketCompra = ({ pedido, onClose }) => {
   const handleSendEmail = (e) => {
     e.preventDefault();
     if (email) {
-      const doc = generatePDF();
+     
      
       console.log(`Sending PDF to ${email}`);
       toast.success(`Ticket enviado a ${email}`);
