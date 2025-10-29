@@ -130,9 +130,10 @@ jobs:
           HOSTINGER_PASS: ${{ secrets.HOSTINGER_PASS }}
         run: |
           lftp -c "
+          set ssl:verify-certificate no;
           open -u $HOSTINGER_USER,$HOSTINGER_PASS $HOSTINGER_HOST;
           mirror -R ./build /public_html/romero --delete --verbose --exclude-glob=.htaccess
-          "       
+          "  
   version-tag:
     name: Crear tag automático (SemVer)
     runs-on: ubuntu-latest
