@@ -44,7 +44,7 @@ export const FooterDatos = () => {
     if (csrfToken) {
       fetchEmpresaData();
     }
-  }, [csrfToken,fetchEmpresaData]);
+  }, [csrfToken);
 
   const fetchEmpresaData = async () => {
     setLoading(true);

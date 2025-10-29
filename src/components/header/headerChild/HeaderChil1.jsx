@@ -1,3 +1,4 @@
+/* eslint-disable jsx-a11y/anchor-is-valid */
 import React, { useState, useEffect } from "react";
 import {
   HomeIcon,
@@ -32,7 +33,7 @@ const HeaderChil1 = () => {
 
   useEffect(() => {
     fetchCategorias();
-  }, [fetchCategorias]);
+  }, []);
 
   const handleCartClick = (e) => {
     if (!isCliente) {

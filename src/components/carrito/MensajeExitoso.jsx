@@ -1,5 +1,5 @@
 import React from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { FaCheckCircle, FaHome } from "react-icons/fa"; // Cambiado FaArrowLeft por FaHome para un sentido más claro
 import { motion } from "framer-motion"; // Para añadir animaciones sutiles
 

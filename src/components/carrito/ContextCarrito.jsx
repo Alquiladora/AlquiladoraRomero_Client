@@ -1,3 +1,4 @@
+/* eslint-disable jsx-a11y/anchor-is-valid */
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { useAuth } from "../../hooks/ContextAuth";
 import api from "../../utils/AxiosConfig";
@@ -39,7 +40,7 @@ export const CartProvider = ({ children }) => {
 
   useEffect(() => {
     fetchCartCount();
-  }, [fetchCartCount,user, csrfToken, isCliente]); 
+  }, [user, csrfToken, isCliente]); 
 
   const addToCart = async () => {
     if (isCliente && userId) {

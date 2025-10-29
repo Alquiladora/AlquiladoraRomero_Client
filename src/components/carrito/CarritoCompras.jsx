@@ -1,3 +1,4 @@
+/* eslint-disable jsx-a11y/anchor-is-valid */
 import React, { useState, useEffect } from "react";
 import {
   TrashIcon,
@@ -17,7 +18,6 @@ import { useRecomendaciones } from "./ContextRecomendaciones";
 import { ShoppingCart } from "lucide-react";
 import "./carrito.css";
 import { Link } from "react-router-dom";
-
 
 
 const SeccionRecomendaciones = ({ productos, onAgregar }) => {
@@ -171,7 +171,7 @@ function CarritoRentaSheinStyle() {
     } else {
       setError("No se pudo identificar al usuario. Por favor, inicia sesión.");
     }
-  }, [idUsuario]);
+  }, [idUsuario,fetchCartItems]);
 
   useEffect(() => {
     if (!socket || !idUsuario) return;

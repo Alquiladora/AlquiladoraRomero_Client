@@ -1,3 +1,4 @@
+/* eslint-disable jsx-a11y/anchor-is-valid */
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../hooks/ContextAuth";
@@ -223,7 +224,7 @@ const DetallesPago = ({ cartItems, total, rentalDate, returnDate, onBack }) => {
     if (sessionId) {
       handlePaymentSuccess(sessionId, "success");
     }
-  }, [handlePaymentSuccess]);
+  }, []);
 
   if (cartCount === 0 || cartItems.length === 0) {
     return (

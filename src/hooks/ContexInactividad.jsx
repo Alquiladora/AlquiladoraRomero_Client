@@ -1,4 +1,4 @@
-/* eslint-disable jsx-a11y/anchor-is-valid */
+/* eslint-disable jsx-a11y/anchor-is-valid, react-hooks/exhaustive-deps */
 import Swal from "sweetalert2";
 import React, {
   useState,

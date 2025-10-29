@@ -1,6 +1,4 @@
 import React, { useEffect, useState } from 'react';
-import Swal from 'sweetalert2';
-import withReactContent from 'sweetalert2-react-content';
 import { useFormik, FieldArray, FormikProvider } from 'formik';
 import * as yup from 'yup';
 import {
@@ -12,7 +10,6 @@ import {
 } from '@mui/material';
 import { useAuth } from '../../../../hooks/ContextAuth';
 import api from '../../../../utils/AxiosConfig';
-import { useNavigate } from 'react-router-dom'; 
 import { toast } from "react-toastify";
 
 
