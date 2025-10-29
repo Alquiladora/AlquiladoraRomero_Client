@@ -109,19 +109,30 @@ jobs:
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     steps:
       - uses: actions/checkout@v4
+      - name: Configurar Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+      - name: Instalar dependencias
+        run: npm ci
+      - name: Build
+        run: npm run build
+        env:
+          CI: false 
+          PUBLIC_URL: /romero 
       - name: Instalar lftp
         run: sudo apt-get update && sudo apt-get install -y lftp
       - name: Subir build a Hostinger
         env:
-          HOSTINGER_HOST: ${{ secrets.HOSTINGER_HOST  }}
+          HOSTINGER_HOST: ${{ secrets.HOSTINGER_HOST }}
           HOSTINGER_USER: ${{ secrets.HOSTINGER_USER }}
           HOSTINGER_PASS: ${{ secrets.HOSTINGER_PASS }}
         run: |
-         lftp -c "
-         open -u $HOSTINGER_USER,$HOSTINGER_PASS $HOSTINGER_HOST;
-         mirror -R ./build /public_html/romero --delete --verbose --exclude-glob=.htaccess
-         "
-
+          lftp -c "
+          open -u $HOSTINGER_USER,$HOSTINGER_PASS $HOSTINGER_HOST;
+          mirror -R ./build /public_html/romero --delete --verbose --exclude-glob=.htaccess
+          "       
   version-tag:
     name: Crear tag automático (SemVer)
     runs-on: ubuntu-latest
