@@ -34,7 +34,7 @@ jobs:
         run: npm run format:check
 
       - name: Revisar vulnerabilidades
-        run: npm audit --audit-level=high
+        run: npm audit 
 
   pruebas-unitarias:
     name: Pruebas Unitarias y Cobertura
