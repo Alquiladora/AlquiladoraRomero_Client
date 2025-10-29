@@ -1,8 +1,9 @@
-
 const isLocalhost = Boolean(
   window.location.hostname === 'localhost' ||
     window.location.hostname === '[::1]' ||
-    window.location.hostname.match(/^127(?:\.(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)){3}$/)
+    window.location.hostname.match(
+      /^127(?:\.(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)){3}$/
+    )
 );
 
 export function register(config) {
@@ -26,34 +27,42 @@ export function register(config) {
 }
 
 function registerValidSW(swUrl, config) {
-  navigator.serviceWorker.register(swUrl).then(registration => {
-    registration.onupdatefound = () => {
-      const installingWorker = registration.installing;
-      if (!installingWorker) return;
+  navigator.serviceWorker
+    .register(swUrl)
+    .then((registration) => {
+      registration.onupdatefound = () => {
+        const installingWorker = registration.installing;
+        if (!installingWorker) return;
 
-      installingWorker.onstatechange = () => {
-        if (installingWorker.state === 'installed') {
-          if (navigator.serviceWorker.controller) {
-            console.log('Nueva versión disponible');
-            if (config && config.onUpdate) config.onUpdate(registration);
-          } else {
-            console.log('App lista para offline');
-            if (config && config.onSuccess) config.onSuccess(registration);
+        installingWorker.onstatechange = () => {
+          if (installingWorker.state === 'installed') {
+            if (navigator.serviceWorker.controller) {
+              console.log('Nueva versión disponible');
+              if (config && config.onUpdate) config.onUpdate(registration);
+            } else {
+              console.log('App lista para offline');
+              if (config && config.onSuccess) config.onSuccess(registration);
+            }
           }
-        }
+        };
       };
-    };
-  }).catch(error => {
-    console.error('Error al registrar SW:', error);
-  });
+    })
+    .catch((error) => {
+      console.error('Error al registrar SW:', error);
+    });
 }
 
 function checkValidServiceWorker(swUrl, config) {
   fetch(swUrl, { headers: { 'Service-Worker': 'script' } })
-    .then(response => {
+    .then((response) => {
       const contentType = response.headers.get('content-type');
-      if (response.status === 404 || (contentType && !contentType.includes('javascript'))) {
-        navigator.serviceWorker.ready.then(reg => reg.unregister().then(() => window.location.reload()));
+      if (
+        response.status === 404 ||
+        (contentType && !contentType.includes('javascript'))
+      ) {
+        navigator.serviceWorker.ready.then((reg) =>
+          reg.unregister().then(() => window.location.reload())
+        );
       } else {
         registerValidSW(swUrl, config);
       }
@@ -65,6 +74,6 @@ function checkValidServiceWorker(swUrl, config) {
 
 export function unregister() {
   if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.ready.then(reg => reg.unregister());
+    navigator.serviceWorker.ready.then((reg) => reg.unregister());
   }
 }
