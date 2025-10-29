@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <title>RentFast - Sin conexión</title>
+  <style>
+    body { margin:0; font-family:system-ui; background:#f8fafc; display:flex; align-items:center; justify-content:center; min-height:100vh; padding:1rem; }
+    .card { background:white; padding:2rem; border-radius:1rem; box-shadow:0 4px 20px rgba(0,0,0,0.1); text-align:center; max-width:380px; width:100%; }
+    img { width:80px; margin-bottom:1rem; }
+    h1 { margin:0 0 0.5rem; color:#1E40AF; }
+    p { color:#64748b; margin:0.5rem 0; }
+    button { background:#1E40AF; color:white; border:none; padding:0.75rem 1.5rem; border-radius:0.5rem; font-size:1rem; margin-top:1rem; cursor:pointer; }
+    button:hover { background:#1d4ed8; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <img src="../src/img/Logos/LogoOriginal.jpg" alt="RentFast">
+    <h1>RentFast</h1>
+    <p>No hay conexión a internet</p>
+    <p>Puedes ver lo que ya cargaste.</p>
+    <button onclick="location.reload()">Reintentar</button>
+  </div>
+</body>
+</html>

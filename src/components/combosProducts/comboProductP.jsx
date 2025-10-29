@@ -38,7 +38,8 @@ const ProductCardSkeleton = () => (
 const ComboProdutsP = () => {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [setError] = useState(null);
+  // eslint-disable-next-line no-unused-vars
+  const [error, setError] = useState(null);
   const { csrfToken } = useAuth();
   const [pagination] = useState({
     currentPage: 1,
