@@ -1,5 +1,5 @@
 
-import { BrowserRouter , Routes, Route} from 'react-router-dom';
+import {  Routes, Route} from 'react-router-dom';
 
 //----------------------LAYOUTS--------------------------------------------
 import LayoutHeader from "../components/layout/LayHeader";

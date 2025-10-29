@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef,useCallback } from "react";
+import React, { useState, useEffect, useRef,useCallback,useMemo, } from "react";
 import Chart from "react-apexcharts";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
@@ -28,7 +28,7 @@ const SummaryCard = ({ icon, label, value, className = "" }) => (
 );
 
 const PedidosGeneralesDashboard = () => {
-  const defaultStats = {
+  const defaultStats = useMemo(() => ({
     totalOrders: 0,
     activeOrders: 0,
     totalRevenue: 0,
@@ -43,7 +43,7 @@ const PedidosGeneralesDashboard = () => {
     statusCounts: {},
     durationBins: { "1 día": 0, "2–3 días": 0, "4–7 días": 0, "8+ días": 0 },
     topClients: [],
-  };
+ }), [])
 
   const [stats, setStats] = useState(defaultStats);
   const [loading, setLoading] = useState(true);

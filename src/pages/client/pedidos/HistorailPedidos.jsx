@@ -680,7 +680,7 @@ const HistorialPedidos = () => {
         controller.abort();
       };
     }
-  }, [modal.details, modal.errors,modal.isOpen, modal.orderId, modal.isLoading, fetchOrdetDetails]);
+  }, [modal.details, modal.error,modal.isOpen, modal.orderId, modal.isLoading, fetchOrdetDetails]);
 
 
 
