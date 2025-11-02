@@ -1,7 +1,7 @@
 {
   "files": {
-    "main.css": "/Alquiladora/static/css/main.9ddaa65d.css",
-    "main.js": "/Alquiladora/static/js/main.de3d6a8b.js",
+    "main.css": "/Alquiladora/static/css/main.7864a7b9.css",
+    "main.js": "/Alquiladora/static/js/main.f419954d.js",
     "static/js/239.eab0352a.chunk.js": "/Alquiladora/static/js/239.eab0352a.chunk.js",
     "static/js/977.3becd578.chunk.js": "/Alquiladora/static/js/977.3becd578.chunk.js",
     "static/js/455.69109110.chunk.js": "/Alquiladora/static/js/455.69109110.chunk.js",
@@ -14,13 +14,13 @@
     "static/media/logo.jpg": "/Alquiladora/static/media/logo.a8e1b4989c2c803bbc06.jpg",
     "static/media/color.png": "/Alquiladora/static/media/color.6441e63a57ccc5105bad.png",
     "index.html": "/Alquiladora/index.html",
-    "main.9ddaa65d.css.map": "/Alquiladora/static/css/main.9ddaa65d.css.map",
-    "main.de3d6a8b.js.map": "/Alquiladora/static/js/main.de3d6a8b.js.map",
+    "main.7864a7b9.css.map": "/Alquiladora/static/css/main.7864a7b9.css.map",
+    "main.f419954d.js.map": "/Alquiladora/static/js/main.f419954d.js.map",
     "239.eab0352a.chunk.js.map": "/Alquiladora/static/js/239.eab0352a.chunk.js.map",
     "455.69109110.chunk.js.map": "/Alquiladora/static/js/455.69109110.chunk.js.map"
   },
   "entrypoints": [
-    "static/css/main.9ddaa65d.css",
-    "static/js/main.de3d6a8b.js"
+    "static/css/main.7864a7b9.css",
+    "static/js/main.f419954d.js"
   ]
 }
