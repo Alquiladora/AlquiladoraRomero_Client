@@ -8,8 +8,6 @@ import { AuthProvider } from './hooks/ContextAuth';
 import InactivityHandler from './hooks/ContexInactividad';
 import { useSocket } from './utils/Socket';
 
-
-
 function SocketController() {
   useSocket();
   return null;
@@ -31,11 +29,11 @@ root.render(
   </React.StrictMode>
 );
 
-
 if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/sw.js')
-            .then(reg => console.log('Service Worker registrado', reg))
-            .catch(err => console.log('Service Worker no registrado', err));
-    });
+  window.addEventListener('load', () => {
+    navigator.serviceWorker
+      .register('/sw.js')
+      .then((reg) => console.log('Service Worker registrado', reg))
+      .catch((err) => console.log('Service Worker no registrado', err));
+  });
 }

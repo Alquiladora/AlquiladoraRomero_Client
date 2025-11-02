@@ -34,7 +34,7 @@ import {
   FileText,
   Clock,
   Upload,
-   Camera as CameraIcon,
+  Camera as CameraIcon,
   Calendar,
   CreditCard,
   Key,
@@ -88,9 +88,9 @@ const PerfilUsuarioPrime = () => {
   const [bloqueado, setBloqueado] = useState(false);
   const [error, setError] = useState(null);
   //Variables paar camara
- const [menuAbierto, setMenuAbierto] = useState(false);
- const [showCameraModal, setShowCameraModal] = useState(false);
- const menuRef = useRef(null);
+  const [menuAbierto, setMenuAbierto] = useState(false);
+  const [showCameraModal, setShowCameraModal] = useState(false);
+  const menuRef = useRef(null);
 
   const isProfileComplete = useMemo(() => {
     if (!usuariosC) return false;
@@ -113,18 +113,17 @@ const PerfilUsuarioPrime = () => {
     };
   }, [controls]);
 
-
-useEffect(() => {
-  function handleClickOutside(event) {
-    if (menuRef.current && !menuRef.current.contains(event.target)) {
-      setMenuAbierto(false);
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (menuRef.current && !menuRef.current.contains(event.target)) {
+        setMenuAbierto(false);
+      }
     }
-  }
-  document.addEventListener('mousedown', handleClickOutside);
-  return () => {
-    document.removeEventListener('mousedown', handleClickOutside);
-  };
-}, [menuRef]);
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [menuRef]);
 
   const fetchProfileData = async () => {
     if (!isMounted.current) return;
@@ -190,8 +189,7 @@ useEffect(() => {
     fetchProfileData();
   };
 
-
-const checkUploadCooldown = () => {
+  const checkUploadCooldown = () => {
     const now = new Date();
     const lastUpdatedTime = lastUpdated ? new Date(lastUpdated) : null;
 
@@ -200,42 +198,43 @@ const checkUploadCooldown = () => {
     }
 
     const unlockDate = new Date(lastUpdatedTime.getTime());
-   
+
     unlockDate.setMonth(unlockDate.getMonth() + 3);
 
-  
     if (now < unlockDate) {
-      const remainingDays = Math.ceil((unlockDate - now) / (1000 * 60 * 60 * 24));
+      const remainingDays = Math.ceil(
+        (unlockDate - now) / (1000 * 60 * 60 * 24)
+      );
       console.log(`Bloqueado: Faltan ${remainingDays} días.`);
       toast.error(
         `Solo puedes cambiar tu foto cada 3 meses. Faltan ${remainingDays} días.`
       );
-      return false; 
+      return false;
     }
 
-    return true; 
+    return true;
   };
-  
+
   //=======================================================================================
- //Funcionalidad de camera
- const handleSubirFotoClick = () => {
-  fileInputRef.current.click();
-  setMenuAbierto(false);
-};
+  //Funcionalidad de camera
+  const handleSubirFotoClick = () => {
+    fileInputRef.current.click();
+    setMenuAbierto(false);
+  };
 
-const handleTomarFotoClick = () => {
-  setShowCameraModal(true);
-  setMenuAbierto(false);
-};
+  const handleTomarFotoClick = () => {
+    setShowCameraModal(true);
+    setMenuAbierto(false);
+  };
 
-const handleCapture = (file) => {
+  const handleCapture = (file) => {
     if (!file) {
       setShowCameraModal(false);
       return;
     }
     if (!checkUploadCooldown()) {
-      setShowCameraModal(false); 
-      return; 
+      setShowCameraModal(false);
+      return;
     }
     handleImageChange(file);
     setShowCameraModal(false);
@@ -244,9 +243,9 @@ const handleCapture = (file) => {
   //Function para actualizar el foto de perfil
   const handleFileChange = (e) => {
     const file = e.target.files[0];
-    if (!file) return; 
+    if (!file) return;
     if (!checkUploadCooldown()) {
-      return; 
+      return;
     }
     if (
       ![
@@ -264,15 +263,14 @@ const handleCapture = (file) => {
       );
       return;
     }
-    if (file.size > 10 * 1024 * 1024) { 
+    if (file.size > 10 * 1024 * 1024) {
       console.log('El tamaño de la imagen debe ser menor a 10 MB.');
-      toast.error('El tamaño de la imagen debe ser menor a 10MB.'); 
+      toast.error('El tamaño de la imagen debe ser menor a 10MB.');
       return;
     }
     console.log('Imagen enviado handleImageChange', file);
     handleImageChange(file);
   };
-
 
   const handleImageChange = async (file) => {
     const now = new Date();
@@ -585,64 +583,61 @@ const handleCapture = (file) => {
 
             <div className="px-4 sm:px-6 pb-6">
               <div className="flex flex-col items-center -mt-16 space-y-6">
+                <div className="relative" ref={menuRef}>
+                  <div className="w-28 h-28 md:w-32 md:h-32 rounded-full border-4 border-white bg-white overflow-hidden shadow-lg dark:border-gray-700 dark:bg-gray-700">
+                    <img
+                      src={
+                        usuariosC.fotoPerfil ||
+                        `https://ui-avatars.com/api/?name=${encodeURIComponent(
+                          usuariosC.nombre ? usuariosC.nombre.charAt(0) : 'U'
+                        )}&background=0D6EFD&color=fff`
+                      }
+                      alt="Foto de Perfil"
+                      className="w-full h-full object-cover"
+                    />
 
-          
-<div className="relative" ref={menuRef}>
-  <div className="w-28 h-28 md:w-32 md:h-32 rounded-full border-4 border-white bg-white overflow-hidden shadow-lg dark:border-gray-700 dark:bg-gray-700">
-    <img
-      src={
-        usuariosC.fotoPerfil ||
-        `https://ui-avatars.com/api/?name=${encodeURIComponent(
-          usuariosC.nombre ? usuariosC.nombre.charAt(0) : 'U'
-        )}&background=0D6EFD&color=fff`
-      }
-      alt="Foto de Perfil"
-      className="w-full h-full object-cover"
-    />
+                    {/* Botón principal que ahora ABRE EL MENÚ */}
+                    <button
+                      className="absolute bottom-1 right-1 p-2 bg-white rounded-full shadow-md hover:bg-gray-50 transition-all dark:bg-gray-600 dark:hover:bg-gray-500"
+                      onClick={() => setMenuAbierto(!menuAbierto)}
+                      aria-label="Cambiar foto de perfil"
+                    >
+                      <Camera className="w-4 h-4 text-gray-600 dark:text-gray-200" />
+                    </button>
+                  </div>
 
-    {/* Botón principal que ahora ABRE EL MENÚ */}
-    <button
-      className="absolute bottom-1 right-1 p-2 bg-white rounded-full shadow-md hover:bg-gray-50 transition-all dark:bg-gray-600 dark:hover:bg-gray-500"
-      onClick={() => setMenuAbierto(!menuAbierto)}
-      aria-label="Cambiar foto de perfil"
-    >
-      <Camera className="w-4 h-4 text-gray-600 dark:text-gray-200" />
-    </button>
-  </div>
+                  {menuAbierto && (
+                    <motion.div
+                      className="absolute right-0 bottom-12 mb-2 w-48 bg-white dark:bg-gray-700 rounded-lg shadow-xl z-10 overflow-hidden"
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: 10 }}
+                    >
+                      <button
+                        onClick={handleSubirFotoClick}
+                        className="w-full flex items-center gap-3 px-4 py-3 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-600"
+                      >
+                        <Upload className="w-5 h-5" />
+                        <span>Subir foto</span>
+                      </button>
+                      <button
+                        onClick={handleTomarFotoClick}
+                        className="w-full flex items-center gap-3 px-4 py-3 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-600"
+                      >
+                        <CameraIcon className="w-5 h-5" />
+                        <span>Tomar foto</span>
+                      </button>
+                    </motion.div>
+                  )}
 
-
-  {menuAbierto && (
-    <motion.div
-      className="absolute right-0 bottom-12 mb-2 w-48 bg-white dark:bg-gray-700 rounded-lg shadow-xl z-10 overflow-hidden"
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: 10 }}
-    >
-      <button
-        onClick={handleSubirFotoClick}
-        className="w-full flex items-center gap-3 px-4 py-3 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-600"
-      >
-        <Upload className="w-5 h-5" />
-        <span>Subir foto</span>
-      </button>
-      <button
-        onClick={handleTomarFotoClick}
-        className="w-full flex items-center gap-3 px-4 py-3 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-600"
-      >
-        <CameraIcon className="w-5 h-5" />
-        <span>Tomar foto</span>
-      </button>
-    </motion.div>
-  )}
-
-  <input
-    type="file"
-    ref={fileInputRef}
-    onChange={handleFileChange}
-    style={{ display: 'none' }}
-    accept="image/png, image/jpeg, image/webp"
-  />
-</div>
+                  <input
+                    type="file"
+                    ref={fileInputRef}
+                    onChange={handleFileChange}
+                    style={{ display: 'none' }}
+                    accept="image/png, image/jpeg, image/webp"
+                  />
+                </div>
 
                 {!usuariosC.fotoPerfil && (
                   <motion.div
@@ -687,7 +682,6 @@ const handleCapture = (file) => {
                 </div>
               </div>
             </div>
-
           </div>
 
           <div className="bg-white rounded-xl shadow-md p-2 overflow-x-auto dark:bg-gray-800">

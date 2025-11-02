@@ -3,7 +3,6 @@ import { motion } from 'framer-motion';
 import { Camera, X, RefreshCw } from 'lucide-react';
 import { toast } from 'react-toastify';
 
-
 const filters = [
   { name: 'none', label: 'Normal' },
   { name: 'grayscale', label: 'B&N' },
@@ -27,25 +26,21 @@ const CameraModal = ({ onCapture, onClose }) => {
   const [error, setError] = useState('');
   const [selectedFilter, setSelectedFilter] = useState('none');
 
-
   const stopCameraAndStream = () => {
     console.log('[CameraModal] Intentando apagar la cámara AHORA.');
-    
- 
+
     if (streamRef.current) {
       streamRef.current.getTracks().forEach((track) => {
         track.stop();
       });
       streamRef.current = null;
     }
-    
 
     if (videoRef.current) {
-      videoRef.current.pause(); 
+      videoRef.current.pause();
       videoRef.current.srcObject = null;
     }
   };
-
 
   const startCamera = async () => {
     setError('');
@@ -73,11 +68,10 @@ const CameraModal = ({ onCapture, onClose }) => {
   useEffect(() => {
     startCamera();
 
-
     return () => {
       stopCameraAndStream();
     };
-  }, []); 
+  }, []);
 
   const handleCapture = () => {
     if (!videoRef.current) return;
@@ -89,22 +83,21 @@ const CameraModal = ({ onCapture, onClose }) => {
     const context = canvas.getContext('2d');
 
     context.filter = filterMap[selectedFilter];
-    context.save(); 
-    context.translate(video.videoWidth, 0); 
-    context.scale(-1, 1); 
-    context.drawImage(video, 0, 0, video.videoWidth, video.videoHeight); 
+    context.save();
+    context.translate(video.videoWidth, 0);
+    context.scale(-1, 1);
+    context.drawImage(video, 0, 0, video.videoWidth, video.videoHeight);
     context.restore();
     context.filter = 'none';
-    
+
     canvas.toBlob(
       (blob) => {
         const file = new File([blob], 'captura-camara.jpg', {
           type: 'image/jpeg',
         });
-        
 
-        stopCameraAndStream(); 
-        
+        stopCameraAndStream();
+
         onCapture(file);
       },
       'image/jpeg',
@@ -113,8 +106,7 @@ const CameraModal = ({ onCapture, onClose }) => {
   };
 
   const handleClose = () => {
- 
-    stopCameraAndStream(); 
+    stopCameraAndStream();
     onClose();
   };
 
@@ -131,9 +123,9 @@ const CameraModal = ({ onCapture, onClose }) => {
       >
         <div className="p-4 border-b dark:border-gray-700 flex justify-between items-center">
           <h3 className="text-lg font-semibold dark:text-white">Tomar Foto</h3>
-          
+
           <button
-            onClick={handleClose} 
+            onClick={handleClose}
             className="text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-white"
           >
             <X className="w-6 h-6" />
@@ -160,7 +152,7 @@ const CameraModal = ({ onCapture, onClose }) => {
               className="w-full h-auto rounded-lg"
               style={{
                 transform: 'scaleX(-1)',
-                filter: filterMap[selectedFilter], 
+                filter: filterMap[selectedFilter],
               }}
             />
           )}
