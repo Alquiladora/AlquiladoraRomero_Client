@@ -3,9 +3,12 @@ import { useEffect, useRef } from 'react';
 import { io } from 'socket.io-client';
 import { useAuth } from '../hooks/ContextAuth';
 
+// Detecta entorno y configura la URL del socket
 const SOCKET_SERVER_URL =
-  process.env.REACT_APP_SOCKET_SERVER_URL || 'http://localhost:3001';
-//const SOCKET_SERVER_URL = process.env.REACT_APP_SOCKET_SERVER_URL ||  "https://alquiladora-romero-server.onrender.com";
+  process.env.REACT_APP_SOCKET_SERVER_URL ||
+  (window.location.hostname === 'localhost'
+    ? 'http://localhost:3001'
+    : 'https://alquiladora-romero-server.onrender.com');
 
 export const useSocket = () => {
   const socketRef = useRef(null);
@@ -13,7 +16,6 @@ export const useSocket = () => {
 
   useEffect(() => {
     if (!user) return;
-
     if (socketRef.current) return;
 
     const userId = user?.id || user?.idUsuarios || user?.idUsuario;
@@ -24,6 +26,7 @@ export const useSocket = () => {
 
     const socketIo = io(SOCKET_SERVER_URL, {
       withCredentials: true,
+      transports: ['websocket'], // 🔧 fuerza WebSocket puro (evita polling)
       query: { idUsuario: userId },
     });
 
@@ -32,9 +35,7 @@ export const useSocket = () => {
     socketIo.on('connect', () => {
       console.log(`✅ Socket conectado con ID: ${socketIo.id}`);
       socketIo.emit('usuarioAutenticado', userId);
-      console.log(
-        `✅ Usuario ${userId} registrado con evento usuarioAutenticado`
-      );
+      console.log(`✅ Usuario ${userId} registrado en socket`);
     });
 
     socketIo.on('connect_error', (err) => {
@@ -42,7 +43,7 @@ export const useSocket = () => {
     });
 
     socketIo.on('productoAgregadoCarrito', (data) => {
-      console.log("Evento 'productoAgregadoCarrito' recibido:", data);
+      console.log("🛒 Evento 'productoAgregadoCarrito' recibido:", data);
     });
 
     return () => {
