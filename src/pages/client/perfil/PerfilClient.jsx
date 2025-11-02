@@ -33,6 +33,8 @@ import {
   RefreshCw,
   FileText,
   Clock,
+  Upload,
+  Camera as CameraIcon,
   Calendar,
   CreditCard,
   Key,
@@ -61,6 +63,7 @@ import TabletMacIcon from '@mui/icons-material/TabletMac';
 import { useAuth } from '../../../hooks/ContextAuth';
 import api from '../../../utils/AxiosConfig';
 import CustomLoading from '../../../components/spiner/SpinerGlobal';
+import CameraModal from './camaraFoto';
 
 const PerfilUsuarioPrime = () => {
   const fileInputRef = useRef(null);
@@ -84,6 +87,10 @@ const PerfilUsuarioPrime = () => {
   const [cambiosContrasena, setCambiosContrasena] = useState(0);
   const [bloqueado, setBloqueado] = useState(false);
   const [error, setError] = useState(null);
+  //Variables paar camara
+  const [menuAbierto, setMenuAbierto] = useState(false);
+  const [showCameraModal, setShowCameraModal] = useState(false);
+  const menuRef = useRef(null);
 
   const isProfileComplete = useMemo(() => {
     if (!usuariosC) return false;
@@ -105,6 +112,18 @@ const PerfilUsuarioPrime = () => {
       isMounted.current = false;
     };
   }, [controls]);
+
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (menuRef.current && !menuRef.current.contains(event.target)) {
+        setMenuAbierto(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [menuRef]);
 
   const fetchProfileData = async () => {
     if (!isMounted.current) return;
@@ -170,44 +189,87 @@ const PerfilUsuarioPrime = () => {
     fetchProfileData();
   };
 
+  const checkUploadCooldown = () => {
+    const now = new Date();
+    const lastUpdatedTime = lastUpdated ? new Date(lastUpdated) : null;
+
+    if (!lastUpdatedTime) {
+      return true;
+    }
+
+    const unlockDate = new Date(lastUpdatedTime.getTime());
+
+    unlockDate.setMonth(unlockDate.getMonth() + 3);
+
+    if (now < unlockDate) {
+      const remainingDays = Math.ceil(
+        (unlockDate - now) / (1000 * 60 * 60 * 24)
+      );
+      console.log(`Bloqueado: Faltan ${remainingDays} días.`);
+      toast.error(
+        `Solo puedes cambiar tu foto cada 3 meses. Faltan ${remainingDays} días.`
+      );
+      return false;
+    }
+
+    return true;
+  };
+
   //=======================================================================================
+  //Funcionalidad de camera
+  const handleSubirFotoClick = () => {
+    fileInputRef.current.click();
+    setMenuAbierto(false);
+  };
+
+  const handleTomarFotoClick = () => {
+    setShowCameraModal(true);
+    setMenuAbierto(false);
+  };
+
+  const handleCapture = (file) => {
+    if (!file) {
+      setShowCameraModal(false);
+      return;
+    }
+    if (!checkUploadCooldown()) {
+      setShowCameraModal(false);
+      return;
+    }
+    handleImageChange(file);
+    setShowCameraModal(false);
+  };
+
   //Function para actualizar el foto de perfil
   const handleFileChange = (e) => {
     const file = e.target.files[0];
-    const now = new Date();
-    if (file) {
-      const lastUpdatedTime = lastUpdated?.getTime();
-      const twoMonths = 60 * 60 * 24 * 1000 * 30 * 2;
-      if (lastUpdated && now - lastUpdatedTime < twoMonths) {
-        console.log('Solo puedes cambiar tu foto de perfil cada dos meses.');
-        toast.error('Solo puedes cambiar tu foto de perfil cada dos meses.');
-        return;
-      }
-      if (
-        ![
-          'image/png',
-          'image/jpeg',
-          'image/jpg',
-          'image/gif',
-          'image/webp',
-          'image/svg+xml',
-        ].includes(file.type)
-      ) {
-        console.log('Error Formato de imagen inválido');
-        toast.error(
-          'Solo se aceptan imágenes en formatos PNG, JPG, JPEG, GIF, WEBP, o SVG.'
-        );
-        return;
-      }
-
-      if (file.size > 10 * 1024 * 1024) {
-        console.log('El tamaño de la imagen debe ser menor a 10 MB.');
-        toast.error('El tamaño de la imagen debe ser menor a 2MB.');
-        return;
-      }
-      console.log('Imagen enviado  handleImagenChange', file);
-      handleImageChange(file);
+    if (!file) return;
+    if (!checkUploadCooldown()) {
+      return;
     }
+    if (
+      ![
+        'image/png',
+        'image/jpeg',
+        'image/jpg',
+        'image/gif',
+        'image/webp',
+        'image/svg+xml',
+      ].includes(file.type)
+    ) {
+      console.log('Error Formato de imagen inválido');
+      toast.error(
+        'Solo se aceptan imágenes en formatos PNG, JPG, JPEG, GIF, WEBP, o SVG.'
+      );
+      return;
+    }
+    if (file.size > 10 * 1024 * 1024) {
+      console.log('El tamaño de la imagen debe ser menor a 10 MB.');
+      toast.error('El tamaño de la imagen debe ser menor a 10MB.');
+      return;
+    }
+    console.log('Imagen enviado handleImageChange', file);
+    handleImageChange(file);
   };
 
   const handleImageChange = async (file) => {
@@ -521,7 +583,7 @@ const PerfilUsuarioPrime = () => {
 
             <div className="px-4 sm:px-6 pb-6">
               <div className="flex flex-col items-center -mt-16 space-y-6">
-                <div className="relative">
+                <div className="relative" ref={menuRef}>
                   <div className="w-28 h-28 md:w-32 md:h-32 rounded-full border-4 border-white bg-white overflow-hidden shadow-lg dark:border-gray-700 dark:bg-gray-700">
                     <img
                       src={
@@ -534,22 +596,49 @@ const PerfilUsuarioPrime = () => {
                       className="w-full h-full object-cover"
                     />
 
+                    {/* Botón principal que ahora ABRE EL MENÚ */}
                     <button
                       className="absolute bottom-1 right-1 p-2 bg-white rounded-full shadow-md hover:bg-gray-50 transition-all dark:bg-gray-600 dark:hover:bg-gray-500"
-                      onClick={() => fileInputRef.current.click()}
+                      onClick={() => setMenuAbierto(!menuAbierto)}
+                      aria-label="Cambiar foto de perfil"
                     >
                       <Camera className="w-4 h-4 text-gray-600 dark:text-gray-200" />
                     </button>
                   </div>
+
+                  {menuAbierto && (
+                    <motion.div
+                      className="absolute right-0 bottom-12 mb-2 w-48 bg-white dark:bg-gray-700 rounded-lg shadow-xl z-10 overflow-hidden"
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: 10 }}
+                    >
+                      <button
+                        onClick={handleSubirFotoClick}
+                        className="w-full flex items-center gap-3 px-4 py-3 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-600"
+                      >
+                        <Upload className="w-5 h-5" />
+                        <span>Subir foto</span>
+                      </button>
+                      <button
+                        onClick={handleTomarFotoClick}
+                        className="w-full flex items-center gap-3 px-4 py-3 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-600"
+                      >
+                        <CameraIcon className="w-5 h-5" />
+                        <span>Tomar foto</span>
+                      </button>
+                    </motion.div>
+                  )}
 
                   <input
                     type="file"
                     ref={fileInputRef}
                     onChange={handleFileChange}
                     style={{ display: 'none' }}
-                    accept="image/*"
+                    accept="image/png, image/jpeg, image/webp"
                   />
                 </div>
+
                 {!usuariosC.fotoPerfil && (
                   <motion.div
                     className="flex items-center justify-center gap-2 p-3 mt-4 bg-teal-50 border border-teal-200 rounded-lg shadow-sm dark:bg-teal-900/30 dark:border-teal-700 max-w-md mx-auto"
@@ -986,6 +1075,12 @@ const PerfilUsuarioPrime = () => {
           </div>
         </div>
       </div>
+      {showCameraModal && (
+        <CameraModal
+          onCapture={handleCapture}
+          onClose={() => setShowCameraModal(false)}
+        />
+      )}
     </div>
   );
 };

@@ -26,6 +26,8 @@ import {
   faDiscord,
   faTelegramPlane,
 } from '@fortawesome/free-brands-svg-icons';
+
+import { toast } from 'react-toastify';
 import api from '../../utils/AxiosConfig';
 import { useAuth } from '../../hooks/ContextAuth';
 
@@ -37,6 +39,13 @@ export const FooterDatos = () => {
     slogan: '',
     redesSociales: {},
   });
+
+  const [loading, setLoading] = useState(false);
+  useEffect(() => {
+    if (csrfToken) {
+      fetchEmpresaData();
+    }
+  }, [csrfToken]);
 
   const fetchEmpresaData = async () => {
     setLoading(true);
@@ -55,13 +64,6 @@ export const FooterDatos = () => {
       setLoading(false);
     }
   };
-
-  const [loading, setLoading] = useState(false);
-  useEffect(() => {
-    if (csrfToken) {
-      fetchEmpresaData();
-    }
-  }, [fetchEmpresaData, csrfToken]);
 
   const getSocialIcon = (url = '') => {
     if (!url || typeof url !== 'string') return faShareAlt;
