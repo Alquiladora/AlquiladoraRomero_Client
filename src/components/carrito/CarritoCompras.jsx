@@ -156,13 +156,69 @@ function CarritoRentaSheinStyle() {
     return today.getDay() === 0; // Verifica si hoy es domingo
   };
 
+   const fetchCartItems = async () => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      const response = await api.get(`/api/carrito/carrito/${idUsuario}`, {
+        withCredentials: true,
+        headers: {
+          'X-CSRF-Token': csrfToken,
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.data.success) {
+        throw new Error(response.data.message || 'Error al obtener el carrito');
+      }
+
+      const mappedItems = response.data.carrito.map((item) => ({
+        id: item.idCarrito,
+        nombre: item.nombreProducto,
+        imagen:
+          item.imagenProducto || 'https://via.placeholder.com/80?text=Producto',
+        precioPorDia: parseFloat(item.precioProducto),
+        cantidad: item.cantidad,
+        disponible: item.stockDisponible > 0,
+        stockDisponible: item.stockDisponible || 0,
+        idProductoColor: item.idProductoColores,
+        color: item.color,
+        detalles: item.detalles,
+        material: item.material,
+        fechaAgregado: item.fechaAgregado,
+        remainingTime: getRemainingTime(item.fechaAgregado),
+      }));
+
+      if (response.data.expiredCount > 0) {
+        toast.info(
+          `${response.data.expiredCount} producto(s) fueron eliminados del carrito porque excedieron el límite de 1 año.`
+        );
+      }
+
+      setCartItems(mappedItems);
+      setSelectedItems(
+        mappedItems
+          .filter(
+            (item) =>
+              item.stockDisponible > 0 && item.cantidad <= item.stockDisponible
+          )
+          .map((item) => item.id)
+      );
+    } catch (err) {
+      console.error('Error fetching cart items:', err);
+      setError('No se pudo cargar el carrito. Intenta de nuevo.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   useEffect(() => {
     if (idUsuario) {
       fetchCartItems();
     } else {
       setError('No se pudo identificar al usuario. Por favor, inicia sesión.');
     }
-  }, [idUsuario, fetchCartItems]);
+  }, [idUsuario]);
 
   useEffect(() => {
     if (!socket || !idUsuario) return;
@@ -224,61 +280,7 @@ function CarritoRentaSheinStyle() {
     return () => clearInterval(interval);
   }, [cartItems]);
 
-  const fetchCartItems = async () => {
-    setIsLoading(true);
-    setError(null);
-    try {
-      const response = await api.get(`/api/carrito/carrito/${idUsuario}`, {
-        withCredentials: true,
-        headers: {
-          'X-CSRF-Token': csrfToken,
-          'Content-Type': 'application/json',
-        },
-      });
-
-      if (!response.data.success) {
-        throw new Error(response.data.message || 'Error al obtener el carrito');
-      }
-
-      const mappedItems = response.data.carrito.map((item) => ({
-        id: item.idCarrito,
-        nombre: item.nombreProducto,
-        imagen:
-          item.imagenProducto || 'https://via.placeholder.com/80?text=Producto',
-        precioPorDia: parseFloat(item.precioProducto),
-        cantidad: item.cantidad,
-        disponible: item.stockDisponible > 0,
-        stockDisponible: item.stockDisponible || 0,
-        idProductoColor: item.idProductoColores,
-        color: item.color,
-        detalles: item.detalles,
-        material: item.material,
-        fechaAgregado: item.fechaAgregado,
-        remainingTime: getRemainingTime(item.fechaAgregado),
-      }));
-
-      if (response.data.expiredCount > 0) {
-        toast.info(
-          `${response.data.expiredCount} producto(s) fueron eliminados del carrito porque excedieron el límite de 1 año.`
-        );
-      }
-
-      setCartItems(mappedItems);
-      setSelectedItems(
-        mappedItems
-          .filter(
-            (item) =>
-              item.stockDisponible > 0 && item.cantidad <= item.stockDisponible
-          )
-          .map((item) => item.id)
-      );
-    } catch (err) {
-      console.error('Error fetching cart items:', err);
-      setError('No se pudo cargar el carrito. Intenta de nuevo.');
-    } finally {
-      setIsLoading(false);
-    }
-  };
+ 
 
   const addToCart = async (idProductoColor, cantidad, precioAlquiler) => {
     console.log('Datos recibidso', idProductoColor, cantidad, precioAlquiler);

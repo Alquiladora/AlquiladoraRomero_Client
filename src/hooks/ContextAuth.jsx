@@ -9,7 +9,7 @@ import React, {
 import SpinerCarga from '../utils/SpinerCarga';
 import { useNavigate } from 'react-router-dom';
 import api from '../utils/AxiosConfig';
-
+import { subscribeUserToPush, unsubscribeUserFromPush } from './notificacionesPwa';
 const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
@@ -33,6 +33,10 @@ export const AuthProvider = ({ children }) => {
   };
 
   const checkAuth = async () => {
+    
+    if (!csrfToken) {
+        return; 
+    }
     try {
       const response = await api.get('/api/usuarios/perfil', {
         withCredentials: true,
@@ -48,10 +52,14 @@ export const AuthProvider = ({ children }) => {
       }
     } catch (error) {
       console.error('⚠️ Error verificando autenticación:', error);
-      if (!error.response) {
-        setError('No se pudo conectar con el servidor.');
-      } else if (error.response.data?.message) {
-        setError(error.response.data.message);
+      if (isMounted.current) {
+          setUser(null);
+          navigate('/login');
+          if (!error.response) {
+              setError('No se pudo conectar con el servidor.');
+          } else if (error.response.data?.message) {
+              setError(error.response.data.message);
+          }
       }
     } finally {
       if (isMounted.current) setIsLoading(false);
@@ -60,8 +68,16 @@ export const AuthProvider = ({ children }) => {
 
   const logout = async () => {
     const userId = user?.id || user?.idUsuarios;
+    const SESSION_KEY = 'welcome_notified_' + userId;
     try {
       if (!csrfToken) await fetchCsrfToken();
+      if(csrfToken){
+        await unsubscribeUserFromPush(csrfToken);
+        console.log('🔗 Suscripción Push desvinculada del usuario actual.');
+      }
+      sessionStorage.removeItem(SESSION_KEY);
+      console.log(`🗑️ Flag de bienvenida (${SESSION_KEY}) limpiado de sessionStorage.`);
+     
       const response = await api.post(
         '/api/usuarios/Delete/login',
         { userId },
@@ -75,6 +91,15 @@ export const AuthProvider = ({ children }) => {
       );
 
       console.log('✅ Sesión cerrada exitosamente.');
+      if ('caches' in window) {
+          try {
+              await caches.delete('alquiladora-data-v1');
+              console.log('🗑️ Caché de datos de la API (alquiladora-data-v1) limpiada.');
+          } catch (cacheError) {
+              console.error('⚠️ Error al limpiar el caché del Service Worker:', cacheError);
+          }
+      }
+
       setUser(null);
       navigate('/login');
     } catch (error) {
@@ -93,6 +118,23 @@ export const AuthProvider = ({ children }) => {
       isMounted.current = false;
     };
   }, [csrfToken]);
+
+  useEffect(() => {
+    const userId = user?.id || user?.idUsuarios;
+    if (!isLoading && userId && csrfToken) {
+        console.log("🔥 Disparando suscripción Push para el usuario:", userId);
+        
+       const timer = setTimeout(() => {
+            console.log("-> Suscripción iniciada con token:", csrfToken);
+            subscribeUserToPush(userId, csrfToken); 
+        }, 500);
+
+        return () => clearTimeout(timer);
+      }
+
+    
+  }, [isLoading, user, csrfToken]);
+
 
   return (
     <AuthContext.Provider

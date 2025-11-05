@@ -2,9 +2,15 @@
 const CACHE_STATIC_NAME = 'alquiladora-static-v1';
 const CACHE_DYNAMIC_NAME = 'alquiladora-dynamic-v1';
 const CACHE_DATA_NAME = 'alquiladora-data-v1';
+const MAX_DYNAMIC_ITEMS = 80;
 
 const API_ORIGIN_DEV = 'http://localhost:3001';
 const API_ORIGIN_PROD = 'https://alquiladora-romero-server.onrender.com';
+
+const CRITICAL_API_PATHS = [
+  '/api/usuarios/perfil',
+  '/api/carrito/carrito',
+]
 
 const ASSETS = [
   '/',
@@ -22,6 +28,16 @@ const ASSETS = [
   '/logo512.png'
 ];
 
+const limitCacheSize = (cacheName, maxItems) => {
+  caches.open(cacheName).then(cache => {
+    cache.keys().then(keys => {
+      if (keys.length > maxItems) {
+        cache.delete(keys[0]).then(() => limitCacheSize(cacheName, maxItems));
+      }
+    })
+  })
+};
+
 
 self.addEventListener('install', e => {
   e.waitUntil(
@@ -32,6 +48,7 @@ self.addEventListener('install', e => {
   );
   self.skipWaiting();
 });
+
 
 self.addEventListener('activate', e => {
   const CACHE_WHITELIST = [
@@ -52,17 +69,33 @@ self.addEventListener('activate', e => {
 
 self.addEventListener('fetch', e => {
   const url = new URL(e.request.url);
+  const path = url.pathname.toLowerCase();
 
-  
   if (url.origin === API_ORIGIN_DEV || url.origin === API_ORIGIN_PROD) {
-  
-    if (e.request.method === 'GET') {
+
+    if (e.request.method === 'GET' && CRITICAL_API_PATHS.some(p => path.includes(p))) {
+      e.respondWith(
+        fetch(e.request)
+          .then(networkResponse => {
+            return caches.open(CACHE_DATA_NAME).then(cache => {
+              if (networkResponse.ok) {
+                cache.put(e.request, networkResponse.clone());
+              }
+              return networkResponse;
+            });
+          })
+          .catch(() => {
+            return caches.match(e.request);
+          })
+      );
+    }
+    else if (e.request.method === 'GET') {
       e.respondWith(
         caches.open(CACHE_DATA_NAME).then(cache => {
           return cache.match(e.request).then(response => {
             const fetchPromise = fetch(e.request).then(networkResponse => {
               if (networkResponse && networkResponse.ok) {
-                cache.put(e.request, networkResponse.clone());
+                cache.put(e.request, networkResponse.clone()); 
               }
               return networkResponse;
             });
@@ -71,29 +104,34 @@ self.addEventListener('fetch', e => {
         })
       );
     }
-
-    return;
+    return; 
   }
 
 
   else {
     e.respondWith(
       caches.match(e.request).then(response => {
-  
+
         if (response) {
           return response;
         }
-        
+
         return fetch(e.request).then(networkResponse => {
           return caches.open(CACHE_DYNAMIC_NAME).then(cache => {
             if (e.request.method === 'GET' && networkResponse.status === 200) {
-              cache.put(e.request, networkResponse.clone());
+              
+              if(url.protocol.startsWith('http')){
+                 cache.put(e.request, networkResponse.clone());
+              limitCacheSize(CACHE_DYNAMIC_NAME, MAX_DYNAMIC_ITEMS);
+
+              }
+             
             }
             return networkResponse;
           });
         });
       }).catch(() => {
-      
+
         if (e.request.mode === 'navigate') {
           return caches.match('/offline.html');
         }
@@ -102,10 +140,60 @@ self.addEventListener('fetch', e => {
   }
 });
 
+//EVENTO DE NOTIFICACIONES
+self.addEventListener('push', e => {
+  console.log('[SW] Push Received');
+  
+ 
+  let data;
+  try {
+    data = e.data.json();
+  } catch (err) {
+    data = { title: 'Alquiladora Romero', body: e.data?.text() || 'Nueva promoción disponible.' };
+  }
+
+  const title = data.title || 'Alerta de Alquiladora Romero';
+  const options = {
+    body: data.body || 'Nuevo mensaje o actualización disponible.',
+    icon: '/icons/favicon-96x96.png', 
+    badge: '/icons/favicon.ico', 
+    data: {
+      url: data.url || '/' 
+    }
+  };
+
+  e.waitUntil(
+    self.registration.showNotification(title, options)
+  );
+});
+
+
+
+self.addEventListener('notificationclick', e => {
+  console.log('[SW] Notification Clicked');
+  e.notification.close(); 
+  const targetUrl = e.notification.data.url || '/';
+  e.waitUntil(
+    clients.matchAll({ type: 'window' }).then(windowClients => {
+     
+      for (const client of windowClients) {
+        if (client.url.includes(self.location.origin) && 'focus' in client) {
+          return client.focus().then(() => client.navigate(targetUrl));
+        }
+      }
+    
+      if (clients.openWindow) {
+        return clients.openWindow(targetUrl);
+      }
+    })
+  );
+});
+
+
 // --- FASE DE SYNC (COMENTADA PARA DESPUÉS) ---
 // self.addEventListener('sync', event => {
 //   console.log('[SW] Background sync!', event.tag);
-// 
+//
 //   if (event.tag === 'sync-new-cart-item') {
 //     console.log('[SW] Sincronizando nuevo item del carrito...');
 //     event.waitUntil(

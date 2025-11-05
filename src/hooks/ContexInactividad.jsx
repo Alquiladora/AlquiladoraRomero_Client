@@ -10,7 +10,7 @@ const InactivityHandler = ({ children }) => {
   const TIMEOUT_INACTIVIDAD = 10 * 60 * 1000;
   const AVISO_ANTES_MS = 50 * 1000;
   const { user, isLoading, logout } = useAuth();
-  const [setShowWarning] = useState(false);
+
 
   const handleOnIdle = async () => {
     if (!user || isLoading) return;
@@ -30,7 +30,7 @@ const InactivityHandler = ({ children }) => {
     if (!user || isLoading) return;
 
     console.log('⚠️ Aviso de inactividad: La sesión está por caducar.');
-    setShowWarning(true);
+
     Swal.fire({
       icon: 'warning',
       title: '⚠️ Aviso de Inactividad',
