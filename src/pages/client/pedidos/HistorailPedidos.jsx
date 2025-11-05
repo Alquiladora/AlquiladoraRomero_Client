@@ -35,7 +35,7 @@ import {
 import { faWhatsapp } from '@fortawesome/free-brands-svg-icons';
 import { toast } from 'react-toastify';
 
-const numeroWhatsApp = '521234567890';
+
 
 const OrderCardSkeleton = () => (
   <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700 p-6 mb-4 animate-pulse">
@@ -223,7 +223,7 @@ const OrderDetailsModal = ({
                 </h4>
 
                 {details?.pedido?.productos &&
-                details.pedido.productos.length > 0 ? (
+                  details.pedido.productos.length > 0 ? (
                   <div className="space-y-3">
                     {details.pedido.productos.map((item, index) => {
                       const esIncompleto = item.estadoProducto === 'Incompleto';
@@ -348,11 +348,10 @@ const RatingStars = ({ rating, setRating }) => {
           data-testid={`star-${star}`}
           icon={faStar}
           onClick={() => setRating(star)}
-          className={`text-2xl cursor-pointer transition-colors duration-200 ${
-            star <= rating
+          className={`text-2xl cursor-pointer transition-colors duration-200 ${star <= rating
               ? 'text-yellow-500'
               : 'text-gray-300 dark:text-gray-600 hover:text-yellow-400'
-          }`}
+            }`}
         />
       ))}
     </div>
@@ -569,11 +568,10 @@ const ReviewModal = ({ isOpen, orderId, onClose, onSuccess }) => {
           <button
             onClick={handleSubmit}
             disabled={submitting || rating === 0}
-            className={`px-6 py-2 text-sm font-medium rounded-lg transition-colors duration-200 flex items-center space-x-2 ${
-              submitting || rating === 0
+            className={`px-6 py-2 text-sm font-medium rounded-lg transition-colors duration-200 flex items-center space-x-2 ${submitting || rating === 0
                 ? 'bg-gray-400 text-gray-700 cursor-not-allowed'
                 : 'bg-green-600 text-white hover:bg-green-700'
-            }`}
+              }`}
           >
             {submitting && (
               <FontAwesomeIcon icon={faSpinner} spin className="mr-2" />
@@ -618,6 +616,29 @@ const HistorialPedidos = () => {
     orderId: null,
   });
   const [ratedOrders, setRatedOrders] = useState([]);
+  const [numeroWhatsApp, setNumeroWhatsApp] = useState('');
+  
+
+
+  const fetchWhatsappNumber = useCallback(async (signal) => {
+    if (!csrfToken) return;
+
+    try {
+      const response = await api.get('/api/empresa/telefonoEmpresa', {
+        withCredentials: true,
+        headers: { 'X-CSRF-Token': csrfToken },
+        signal,
+      });
+
+      if (response.data.telefono) {
+
+        setNumeroWhatsApp(response.data.telefono);
+      }
+    } catch (err) {
+      console.error('Error al obtener el número de WhatsApp:', err);
+
+    }
+  }, [csrfToken]);
 
   const fetchOrders = useCallback(async (page, signal) => {
     setLoading(true);
@@ -653,7 +674,7 @@ const HistorialPedidos = () => {
       if (err.name !== 'AbortError') {
         setError(
           'Error al cargar el historial de pedidos: ' +
-            (err.message || 'Error desconocido.')
+          (err.message || 'Error desconocido.')
         );
       }
     } finally {
@@ -740,11 +761,12 @@ const HistorialPedidos = () => {
 
   useEffect(() => {
     const controller = new AbortController();
-    if (!isLoadingAuth) {
+    if (!isLoadingAuth && csrfToken) {
       const timer = setTimeout(
         () => {
           fetchOrders(pagination.currentPage, controller.signal);
           fetchRatedOrders(controller.signal);
+          fetchWhatsappNumber(controller.signal);
         },
         isFirstLoad ? 150 : 0
       );
@@ -763,6 +785,8 @@ const HistorialPedidos = () => {
     fetchOrders,
     fetchRatedOrders,
     isLoadingAuth,
+    fetchWhatsappNumber,
+    csrfToken,
   ]);
 
   useEffect(() => {
@@ -1204,11 +1228,10 @@ const HistorialPedidos = () => {
             <button
               key={page}
               onClick={() => handlePageChange(page)}
-              className={`px-3 py-2 text-sm font-medium rounded-lg transition-all duration-200 ${
-                page === currentPage
+              className={`px-3 py-2 text-sm font-medium rounded-lg transition-all duration-200 ${page === currentPage
                   ? 'bg-indigo-600 text-white shadow-md'
                   : 'text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 hover:bg-indigo-50 dark:hover:bg-indigo-900'
-              } focus:outline-none focus:ring-2 focus:ring-indigo-500`}
+                } focus:outline-none focus:ring-2 focus:ring-indigo-500`}
             >
               {page}
             </button>
@@ -1330,11 +1353,10 @@ const HistorialPedidos = () => {
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}
-                  className={`px-4 py-2 rounded-lg font-medium transition-all duration-200 ${
-                    activeTab === tab.id
+                  className={`px-4 py-2 rounded-lg font-medium transition-all duration-200 ${activeTab === tab.id
                       ? 'bg-indigo-600 text-white shadow-md'
                       : 'text-gray-600 dark:text-gray-400 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600'
-                  }`}
+                    }`}
                 >
                   {tab.label}
                   <span className="ml-2 px-2 py-1 text-x dark:bg-gray-800 rounded-full">
@@ -1566,10 +1588,20 @@ const HistorialPedidos = () => {
                           {/* Aquí puedes mantener el botón de preguntar, si aplica al pedido en general */}
 
                           <a
-                            href={`https://wa.me/${numeroWhatsApp}?text=${mensaje}`}
+                            href={
+                              numeroWhatsApp
+                                ? `https://wa.me/${numeroWhatsApp}?text=${mensaje} #${order.idRastreo}`
+                                : '#'
+                            }
                             target="_blank"
-                            rel="noopener noreferrer" // Buena práctica de seguridad para enlaces externos
-                            className="flex items-center space-x-2 px-3 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors duration-200 text-sm no-underline"
+                            rel="noopener noreferrer"
+
+                            className={`flex items-center space-x-2 px-3 py-2 text-white rounded-lg transition-colors duration-200 text-sm no-underline ${numeroWhatsApp
+                                ? 'bg-green-500 hover:bg-green-600'
+                                : 'bg-gray-400 cursor-not-allowed'
+                              }`}
+
+                            onClick={(e) => !numeroWhatsApp && e.preventDefault()}
                           >
                             <FontAwesomeIcon
                               icon={faWhatsapp}
@@ -1582,7 +1614,7 @@ const HistorialPedidos = () => {
                         {/* Contenedor principal para las fotos */}
                         <div className="p-4 bg-gray-50 dark:bg-gray-700 rounded-lg mb-4 last:mb-0">
                           {order.fotosProductos &&
-                          order.fotosProductos.length > 0 ? (
+                            order.fotosProductos.length > 0 ? (
                             <div className="flex items-center space-x-2">
                               {order.fotosProductos
                                 .slice(0, 2)
