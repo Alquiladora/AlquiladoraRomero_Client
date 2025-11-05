@@ -11,7 +11,6 @@ const InactivityHandler = ({ children }) => {
   const AVISO_ANTES_MS = 50 * 1000;
   const { user, isLoading, logout } = useAuth();
 
-
   const handleOnIdle = async () => {
     if (!user || isLoading) return;
 

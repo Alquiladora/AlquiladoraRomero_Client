@@ -30,7 +30,7 @@ const InicioRepartidor = ({ datosRepartidor }) => {
     'Datos recibidos desde el enpoit de datos de repartidor ',
     datosRepartidor
   );
-  
+
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -60,8 +60,6 @@ const InicioRepartidor = ({ datosRepartidor }) => {
             totalFinalizado: data.totalFinalizado || 0,
             promedioValoracion: parseFloat(data.promedioValoracion) || 0,
           });
-
-        
         } else {
           console.log('Error');
         }
@@ -81,7 +79,6 @@ const InicioRepartidor = ({ datosRepartidor }) => {
           totalFinalizado: 0,
           promedioValoracion: 0,
         });
-     
       } finally {
         setLoading(false);
       }

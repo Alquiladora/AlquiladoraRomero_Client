@@ -7,7 +7,6 @@ import api from '../../../utils/AxiosConfig';
 const NavEncabezado = () => {
   const [empresa, setEmpresa] = useState(null);
   const [loading, setLoading] = useState(true);
-  
 
   const defaultData = {
     nombreEmpresa: 'Alquiladora Romero',
@@ -58,7 +57,7 @@ const NavEncabezado = () => {
         storeEmpresaData(empresaData);
       } catch (err) {
         console.error('Error fetching empresa data:', err);
-       
+
         setEmpresa(defaultData);
         storeEmpresaData(defaultData);
       } finally {

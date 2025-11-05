@@ -156,7 +156,7 @@ function CarritoRentaSheinStyle() {
     return today.getDay() === 0; // Verifica si hoy es domingo
   };
 
-   const fetchCartItems = async () => {
+  const fetchCartItems = async () => {
     setIsLoading(true);
     setError(null);
     try {
@@ -279,8 +279,6 @@ function CarritoRentaSheinStyle() {
     }, 60000);
     return () => clearInterval(interval);
   }, [cartItems]);
-
- 
 
   const addToCart = async (idProductoColor, cantidad, precioAlquiler) => {
     console.log('Datos recibidso', idProductoColor, cantidad, precioAlquiler);
