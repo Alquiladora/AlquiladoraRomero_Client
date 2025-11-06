@@ -9,11 +9,13 @@ import {
   Divider,
   IconButton,
   CircularProgress,
+ 
 } from '@mui/material';
 import {
   faUser,
   faSignOutAlt,
   faHistory,
+  faTrophy
 } from '@fortawesome/free-solid-svg-icons';
 import Swal from 'sweetalert2';
 import { useAuth } from '../../../hooks/ContextAuth';
@@ -169,9 +171,9 @@ const IconoPerfil = () => {
           to="/cliente/nivel/logros"
           className="hover:bg-gray-100 dark:hover:bg-gray-800 p-3 rounded-lg flex items-center transition-all duration-200"
         >
-          <FontAwesomeIcon icon={faHistory} className="mr-3 text-green-500" />
+          <FontAwesomeIcon icon={faTrophy} className="mr-3 text-yellow-500" />
           <span className="text-gray-700 dark:text-gray-200 font-medium text-sm">
-            Nivel / Logoros
+            Nivel / Logros
           </span>
         </MenuItem>
 

@@ -280,7 +280,7 @@ const PerfilUsuarioPrime = () => {
 
     setUploading(true);
     setIsBlocked(true);
-    console.log('Subiendo imagen');
+   
     toast.warning('Espera mientras se sube la imagen...');
 
     try {
@@ -313,13 +313,14 @@ const PerfilUsuarioPrime = () => {
         ...prevProfile,
         fotoPerfil: imageUrl,
       }));
+      window.dispatchEvent(new CustomEvent('fotoAgregado'));
 
       setLastUpdated(now);
       fetchProfileData();
-      console.log('Imagen subido correctamente');
+      
       toast.success('Foto de perfil actualizada correctamente.');
     } catch (error) {
-      console.error('Error al actualizar la foto de perfil:', error);
+      
       toast.error('Error al actualizar la foto de perfil.');
     } finally {
       setUploading(false);
@@ -353,9 +354,6 @@ const PerfilUsuarioPrime = () => {
   };
 
   //==========================================================================================
-  const handleTabChange = (event, newValue) => {
-    setActiveTab(newValue);
-  };
 
   const handleOpenMfaModal = () => {
     setOpenMfaModal(true);

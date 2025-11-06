@@ -81,6 +81,19 @@ export const AuthProvider = ({ children }) => {
       console.log(
         `🗑️ Flag de bienvenida (${SESSION_KEY}) limpiado de sessionStorage.`
       );
+      const keysToRemove = [];
+      for (let i = 0; i < sessionStorage.length; i++) {
+        const key = sessionStorage.key(i);
+        if (key && key.includes('previousLevel')) {
+          keysToRemove.push(key);
+        }
+      }
+      keysToRemove.forEach(key => {
+        sessionStorage.removeItem(key);
+        console.log(`🗑️ Removido: ${key}`);
+      });
+      console.log('🗑️ Todos los datos de niveles limpiados de sessionStorage.');
+
 
       const response = await api.post(
         '/api/usuarios/Delete/login',
