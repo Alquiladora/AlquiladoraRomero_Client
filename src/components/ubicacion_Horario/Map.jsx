@@ -4,13 +4,13 @@ import 'mapbox-gl/dist/mapbox-gl.css';
 import { motion } from 'framer-motion';
 import { MapPin, Loader2, Navigation } from 'lucide-react';
 
-// Configuración de Mapbox
+
 mapboxgl.accessToken = 'pk.eyJ1IjoiZWRpbGJlcnRvMTIzIiwiYSI6ImNseTN3cWUxZzBkajUyanBvZHR0MjVsdXUifQ.U5EAmb6GXJOArRN9kAy0kg';
 
 const MapComponent = () => {
   const mapContainer = useRef(null);
   const map = useRef(null);
-  const [mapStyle, setMapStyle] = useState('mapbox://styles/mapbox/streets-v11'); // Cambiado a v11
+  const [mapStyle, setMapStyle] = useState('mapbox://styles/mapbox/streets-v11');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -21,6 +21,8 @@ const MapComponent = () => {
 
   useEffect(() => {
     if (!mapContainer.current) return;
+
+    let isCancelled = false;
 
 
     const checkToken = async () => {
@@ -39,36 +41,39 @@ const MapComponent = () => {
 
     const initializeMap = async () => {
       const tokenValid = await checkToken();
-      if (!tokenValid) return;
+      if (!tokenValid || isCancelled) return;
 
       try {
+        if (isCancelled || !mapContainer.current) return;
+
         map.current = new mapboxgl.Map({
           container: mapContainer.current,
           style: mapStyle,
           center: [longitude, latitude],
-          zoom: 14, 
-          attributionControl: false, 
-          failIfMajorPerformanceCaveat: false, 
+          zoom: 14,
+          attributionControl: false,
+          failIfMajorPerformanceCaveat: false,
         });
 
-       
+
         map.current.on('error', (e) => {
-          console.error('Error del mapa:', e);
+          if (isCancelled) return;
           setError('Error al cargar el mapa');
           setLoading(false);
         });
 
         map.current.on('load', () => {
+          if (isCancelled) return;
           setLoading(false);
           setError(null);
-          
-         new mapboxgl.Marker({ 
+
+          new mapboxgl.Marker({
             color: '#ff5733',
             scale: 0.8
           })
             .setLngLat([longitude, latitude])
             .setPopup(
-              new mapboxgl.Popup({ 
+              new mapboxgl.Popup({
                 offset: 25,
                 closeButton: false,
                 closeOnClick: false
@@ -85,7 +90,7 @@ const MapComponent = () => {
             )
             .addTo(map.current);
 
-       
+
           map.current.flyTo({
             center: [longitude, latitude],
             zoom: 16,
@@ -94,10 +99,11 @@ const MapComponent = () => {
           });
         });
 
-        
+
         map.current.addControl(new mapboxgl.NavigationControl(), 'top-right');
 
       } catch (err) {
+        if (isCancelled) return;
         console.error('Error al inicializar el mapa:', err);
         setError('No se pudo cargar el mapa');
         setLoading(false);
@@ -108,6 +114,7 @@ const MapComponent = () => {
 
 
     return () => {
+      isCancelled = true;
       if (map.current) {
         map.current.remove();
         map.current = null;
@@ -130,7 +137,7 @@ const MapComponent = () => {
   const handleMapStyleToggle = () => {
     setMapStyle((prevStyle) =>
       prevStyle === 'mapbox://styles/mapbox/streets-v11'
-        ? 'mapbox://styles/mapbox/satellite-streets-v11' 
+        ? 'mapbox://styles/mapbox/satellite-streets-v11'
         : 'mapbox://styles/mapbox/streets-v11'
     );
   };
@@ -167,9 +174,9 @@ const MapComponent = () => {
           </button>
           <p className="text-white text-sm mt-4 text-center">
             O visita nuestra ubicación en{' '}
-            <a 
-              href={googleMapsLink} 
-              target="_blank" 
+            <a
+              href={googleMapsLink}
+              target="_blank"
               rel="noopener noreferrer"
               className="text-[#fcb900] underline"
             >
@@ -220,7 +227,7 @@ const MapComponent = () => {
             <Navigation className="w-4 h-4 md:w-5 md:h-5" />
             Cómo llegar
           </a>
-          
+
           <a
             href={googleMapsLink}
             target="_blank"

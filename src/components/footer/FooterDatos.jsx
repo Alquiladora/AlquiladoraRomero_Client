@@ -40,13 +40,7 @@ export const FooterDatos = () => {
     redesSociales: {},
   });
 
-  const [loading, setLoading] = useState(false);
-  useEffect(() => {
-    if (csrfToken) {
-      fetchEmpresaData();
-    }
-  }, [csrfToken]);
-
+  
   const fetchEmpresaData = async () => {
     setLoading(true);
     try {
@@ -64,6 +58,15 @@ export const FooterDatos = () => {
       setLoading(false);
     }
   };
+
+  const [loading, setLoading] = useState(false);
+  
+  useEffect(() => {
+    if (csrfToken) {
+      fetchEmpresaData();
+    }
+  }, [csrfToken]);
+
 
   const getSocialIcon = (url = '') => {
     if (!url || typeof url !== 'string') return faShareAlt;

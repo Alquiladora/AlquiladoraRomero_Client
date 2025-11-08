@@ -30,7 +30,7 @@ export const Login = () => {
   const [mfaToken, setMfaToken] = useState('');
   const [userId, setUserId] = useState('');
 
-  const { setUser, csrfToken, socket } = useAuth();
+  const { setUser, csrfToken} = useAuth();
   useEffect(() => {
     controls.start({ opacity: 1, y: 0 });
   }, [controls]);
@@ -64,25 +64,24 @@ export const Login = () => {
       'https://api64.ipify.org?format=json',
       'https://api.ipify.org?format=json',
       'https://ipinfo.io/json',
-      'https://ipapi.co/json/',
+      
     ];
 
     // Función para validar una dirección IP
-    const esIPValida = (ip) => {
+     const esIPValida = (ip) => {
       const regexIPv4 = /^(?:\d{1,3}\.){3}\d{1,3}$/;
-      const regexIPv6 = /^(?:[A-F0-9]{1,4}:){7}[A-F0-9]{1,4}$/i;
-      return regexIPv4.test(ip) || regexIPv6.test(ip);
+      return regexIPv4.test(ip); 
     };
-
     // Función para hacer la solicitud con timeout
-    const fetchConTimeout = (url, timeout = 5000) => {
+    const fetchConTimeout = (url, timeout = 3000) => { 
       return Promise.race([
-        axios.get(url),
+        axios.get(url, { timeout: timeout }), 
         new Promise((_, reject) =>
           setTimeout(() => reject(new Error('Timeout')), timeout)
         ),
       ]);
     };
+
 
     for (const servicio of serviciosIP) {
       try {

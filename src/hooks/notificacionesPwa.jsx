@@ -52,6 +52,7 @@ export const subscribeUserToPush = async (userId, csrfToken) => {
   let permission = Notification.permission;
 
   if (permission === 'default') {
+    console.log('⏳ Solicitando permiso de notificación al usuario...');
     permission = await Notification.requestPermission();
   }
 
@@ -68,15 +69,7 @@ export const subscribeUserToPush = async (userId, csrfToken) => {
     return;
   }
 
-  const SESSION_KEY = 'welcome_notified_' + userId;
-  if (sessionStorage.getItem(SESSION_KEY) === 'true') {
-    console.log(
-      'Notificación de bienvenida ya mostrada en esta sesión. Abortando.'
-    );
-    isSubscribing = false;
-    return;
-  }
-
+const SESSION_KEY = 'welcome_notified_' + userId;
   try {
     isSubscribing = true;
     const vapidKey = await getVapidKey(csrfToken);
@@ -95,9 +88,9 @@ export const subscribeUserToPush = async (userId, csrfToken) => {
       shouldShowWelcome = true;
     } else {
       console.log(
-        '🔔 Usuario ya suscrito. Actualizando estado en el servidor.'
+        '🔔 Usuario ya suscrito. Verificando/Actualizando estado en el servidor.'
       );
-      shouldShowWelcome = true;
+
     }
 
     await api.post(
@@ -116,19 +109,23 @@ export const subscribeUserToPush = async (userId, csrfToken) => {
     console.log(
       '🚀 Clave de suscripción enviada y guardada/actualizada en el servidor.'
     );
-    if (shouldShowWelcome) {
+    if (sessionStorage.getItem(SESSION_KEY) !== 'true') {
       showSimpleDesktopNotification(
-        '¡Dispositivo Vinculado!',
-        'Este navegador ya tenía permisos. Las notificaciones están ahora activas para tu cuenta.'
+        '¡Bienvenido!',
+        'Las notificaciones están ahora activas para tu cuenta.'
       );
       sessionStorage.setItem(SESSION_KEY, 'true');
+    } else {
+      console.log('Notificación de bienvenida ya mostrada para este usuario/sesión. No se muestra de nuevo.');
     }
+
   } catch (error) {
     console.error('⚠️ Error fatal en el proceso de suscripción Push:', error);
   } finally {
     isSubscribing = false;
   }
 };
+
 
 //Eliminar la suscripcion de notificaciones
 export const unsubscribeUserFromPush = async (csrfToken) => {

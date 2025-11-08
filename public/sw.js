@@ -3,7 +3,6 @@ const CACHE_STATIC_NAME = 'alquiladora-static-v1';
 const CACHE_DYNAMIC_NAME = 'alquiladora-dynamic-v1';
 const CACHE_DATA_NAME = 'alquiladora-data-v1';
 const MAX_DYNAMIC_ITEMS = 80;
-
 const API_ORIGIN_DEV = 'http://localhost:3001';
 const API_ORIGIN_PROD = 'https://alquiladora-romero-server.onrender.com';
 
@@ -25,7 +24,7 @@ const ASSETS = [
   '/icons/web-app-manifest-512x512.png',
   '/LogoOriginal.jpg',
   '/logo192.png',
-  '/logo512.png'
+  '/logo512.png',
 ];
 
 const limitCacheSize = (cacheName, maxItems) => {
@@ -50,21 +49,67 @@ self.addEventListener('install', e => {
 });
 
 
+// ... (todo tu código anterior se queda igual) ...
+
 self.addEventListener('activate', e => {
   const CACHE_WHITELIST = [
     CACHE_STATIC_NAME,
     CACHE_DYNAMIC_NAME,
     CACHE_DATA_NAME
   ];
+
   e.waitUntil(
     caches.keys().then(keys => Promise.all(
+
       keys.filter(k => !CACHE_WHITELIST.includes(k)).map(k => {
         console.log(`[SW] Deleting old cache: ${k}`);
         return caches.delete(k);
       })
-    ))
+    )).then(() => {
+
+      console.log('[SW] Calentando el caché de datos...');
+
+
+      const DATA_TO_PRECACHE = [
+        '/api/empresa/redesociales',
+        '/api/empresa',
+        '/api/productos/subcategorias',
+        '/api/usuarios/perfil',
+        '/api/carrito/carrito',
+        '/api/pedidos/productos/seleccion',
+        '/api/productos/categrias/disponibles',
+      ];
+
+      return caches.open(CACHE_DATA_NAME).then(cache => {
+        const cachePromises = DATA_TO_PRECACHE.map(relativePath => {
+         
+          const url = `${API_ORIGIN}${relativePath}`;
+         
+
+          return fetch(url) 
+            .then(response => {
+              if (response.ok) {
+                console.log(`[SW] Pre-caching de datos exitoso: ${url}`);
+               
+                return cache.put(url, response);
+              }
+              console.warn(`[SW] Respuesta no-ok para pre-cache: ${url}`);
+              return Promise.resolve();
+            })
+            .catch(err => {
+              console.warn(
+                `[SW] Falló el pre-caching de datos para: ${url}`,
+                err
+              );
+              return Promise.resolve();
+            });
+        });
+        return Promise.all(cachePromises);
+      });
+    })
   );
 });
+
 
 
 self.addEventListener('fetch', e => {
@@ -95,16 +140,16 @@ self.addEventListener('fetch', e => {
           return cache.match(e.request).then(response => {
             const fetchPromise = fetch(e.request).then(networkResponse => {
               if (networkResponse && networkResponse.ok) {
-                cache.put(e.request, networkResponse.clone()); 
+                cache.put(e.request, networkResponse.clone());
               }
               return networkResponse;
             });
-            return response || fetchPromise; 
+            return response || fetchPromise;
           });
         })
       );
     }
-    return; 
+    return;
   }
 
 
@@ -119,13 +164,13 @@ self.addEventListener('fetch', e => {
         return fetch(e.request).then(networkResponse => {
           return caches.open(CACHE_DYNAMIC_NAME).then(cache => {
             if (e.request.method === 'GET' && networkResponse.status === 200) {
-              
-              if(url.protocol.startsWith('http')){
-                 cache.put(e.request, networkResponse.clone());
-              limitCacheSize(CACHE_DYNAMIC_NAME, MAX_DYNAMIC_ITEMS);
+
+              if (url.protocol.startsWith('http')) {
+                cache.put(e.request, networkResponse.clone());
+                limitCacheSize(CACHE_DYNAMIC_NAME, MAX_DYNAMIC_ITEMS);
 
               }
-             
+
             }
             return networkResponse;
           });
@@ -143,8 +188,6 @@ self.addEventListener('fetch', e => {
 //EVENTO DE NOTIFICACIONES
 self.addEventListener('push', e => {
   console.log('[SW] Push Received');
-  
- 
   let data;
   try {
     data = e.data.json();
@@ -155,10 +198,10 @@ self.addEventListener('push', e => {
   const title = data.title || 'Alerta de Alquiladora Romero';
   const options = {
     body: data.body || 'Nuevo mensaje o actualización disponible.',
-    icon: '/icons/favicon-96x96.png', 
-    badge: '/icons/favicon.ico', 
+    icon: '/icons/favicon-96x96.png',
+    badge: '/icons/favicon.ico',
     data: {
-      url: data.url || '/' 
+      url: data.url || '/'
     }
   };
 
@@ -167,21 +210,19 @@ self.addEventListener('push', e => {
   );
 });
 
-
-
 self.addEventListener('notificationclick', e => {
   console.log('[SW] Notification Clicked');
-  e.notification.close(); 
+  e.notification.close();
   const targetUrl = e.notification.data.url || '/';
   e.waitUntil(
     clients.matchAll({ type: 'window' }).then(windowClients => {
-     
+
       for (const client of windowClients) {
         if (client.url.includes(self.location.origin) && 'focus' in client) {
           return client.focus().then(() => client.navigate(targetUrl));
         }
       }
-    
+
       if (clients.openWindow) {
         return clients.openWindow(targetUrl);
       }
