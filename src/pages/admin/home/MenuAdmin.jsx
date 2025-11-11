@@ -328,7 +328,7 @@ const MenuHomeAdmin = () => {
     {
       title: 'Gestión de Repartidores',
       items: [
-        { icon: faTruck, label: 'Repartidores' }, // Gestión de repartidores
+        { icon: faTruck, label: 'Repartidores' }, 
         { icon: faClipboardList, label: 'Asignación de Pedidos' },
       ],
     },

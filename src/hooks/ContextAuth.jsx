@@ -71,6 +71,13 @@ export const AuthProvider = ({ children }) => {
   const logout = async () => {
     const userId = user?.id || user?.idUsuarios;
     const SESSION_KEY = 'welcome_notified_' + userId;
+    const CACHES_TO_DELETE = [
+      'critical-user-cache',
+      'critical-cart-cache',
+      'cart-count-cache',
+      'dynamic-api-cache',
+    ];
+
     try {
       if (!csrfToken) await fetchCsrfToken();
       if (csrfToken) {
@@ -110,10 +117,14 @@ export const AuthProvider = ({ children }) => {
       console.log('✅ Sesión cerrada exitosamente.');
       if ('caches' in window) {
         try {
-          await caches.delete('alquiladora-data-v1');
-          console.log(
-            '🗑️ Caché de datos de la API (alquiladora-data-v1) limpiada.'
-          );
+
+          await Promise.all(CACHES_TO_DELETE.map(cacheName => {
+            return caches.delete(cacheName).then(deleted => {
+              if (deleted) {
+                console.log(`🗑️ Caché: ${cacheName} limpiada.`);
+              }
+            });
+          }));
         } catch (cacheError) {
           console.error(
             '⚠️ Error al limpiar el caché del Service Worker:',

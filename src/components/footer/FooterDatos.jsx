@@ -136,13 +136,7 @@ export const FooterDatos = () => {
               <FontAwesomeIcon icon={faFileContract} className="mr-2" />
               Términos y Condiciones
             </Link>
-            <Link
-              to="/sobre-nosotros"
-              className="flex items-center text-sm text-white transition-colors mb-1 hover:text-gray-400"
-            >
-              <FontAwesomeIcon icon={faQuestionCircle} className="mr-2" />
-              Sobre nosotros
-            </Link>
+          
           </div>
 
           <div className="flex flex-col items-center mb-6 md:mb-0">

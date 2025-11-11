@@ -30,7 +30,7 @@ export const Login = () => {
   const [mfaToken, setMfaToken] = useState('');
   const [userId, setUserId] = useState('');
 
-  const { setUser, csrfToken} = useAuth();
+  const { setUser, csrfToken } = useAuth();
   useEffect(() => {
     controls.start({ opacity: 1, y: 0 });
   }, [controls]);
@@ -64,36 +64,38 @@ export const Login = () => {
       'https://api64.ipify.org?format=json',
       'https://api.ipify.org?format=json',
       'https://ipinfo.io/json',
-      
+
     ];
 
     // Función para validar una dirección IP
-     const esIPValida = (ip) => {
+    const esIPValida = (ip) => {
       const regexIPv4 = /^(?:\d{1,3}\.){3}\d{1,3}$/;
-      return regexIPv4.test(ip); 
+      return regexIPv4.test(ip);
     };
     // Función para hacer la solicitud con timeout
-    const fetchConTimeout = (url, timeout = 3000) => { 
-      return Promise.race([
-        axios.get(url, { timeout: timeout }), 
-        new Promise((_, reject) =>
-          setTimeout(() => reject(new Error('Timeout')), timeout)
-        ),
-      ]);
+    const fetchIP = (url, timeout = 3000) => {
+      return axios.get(url, { timeout: timeout });
     };
 
 
     for (const servicio of serviciosIP) {
       try {
-        const response = await fetchConTimeout(servicio);
-        const ip =
-          response.data.ip || response.data.ipAddress || response.data.ipv4;
+       const response = await fetchIP(servicio, 4000);
+       let ip = response.data.ip || response.data.ipAddress || response.data.ipv4;
+       if (typeof ip === 'string') {
+            ip = ip.trim();
+        }
 
         if (ip && esIPValida(ip)) {
-          return ip;
+          return ip; 
         }
       } catch (error) {
-        console.warn(`Error al obtener IP desde ${servicio}:`, error.message);
+    
+        const errorMsg = error.message.includes('timeout')
+          ? 'Timeout'
+          : (error.code === 'ERR_BLOCKED_BY_CLIENT' ? 'Bloqueado por cliente' : 'Error de red');
+
+        console.warn(`Error al obtener IP desde ${servicio}: ${errorMsg}. Intentando con el siguiente...`);
       }
     }
 
@@ -534,11 +536,10 @@ export const Login = () => {
                     }
                     whileTap={!(isLoading || isBlocked) ? { scale: 0.95 } : {}}
                     className={`w-full px-4 py-3 rounded-lg font-semibold transition-all duration-300 flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-offset-2 dark:focus:ring-offset-gray-800 
-        ${
-          isLoading || isBlocked
-            ? 'bg-gray-400 dark:bg-gray-500 text-gray-200 cursor-not-allowed'
-            : 'bg-blue-600 hover:bg-blue-700 text-white focus:ring-blue-500'
-        }`}
+        ${isLoading || isBlocked
+                        ? 'bg-gray-400 dark:bg-gray-500 text-gray-200 cursor-not-allowed'
+                        : 'bg-blue-600 hover:bg-blue-700 text-white focus:ring-blue-500'
+                      }`}
                   >
                     {isLoading ? (
                       <>
@@ -671,11 +672,10 @@ export const Login = () => {
                 whileTap={!(isLoading || isBlocked) ? { scale: 0.95 } : {}}
                 type="submit"
                 className={`w-full py-3 rounded-md font-semibold shadow-md transition-all duration-300 flex items-center justify-center focus:outline-none focus:ring-2 
-        ${
-          isLoading || isBlocked
-            ? 'bg-gray-400 dark:bg-gray-500 text-gray-200 cursor-not-allowed'
-            : 'bg-yellow-500 hover:bg-yellow-600 dark:bg-yellow-500 text-white hover:bg-yellow-600 dark:hover:bg-yellow-600 focus:ring-yellow-500 dark:focus:ring-yellow-400'
-        }`}
+        ${isLoading || isBlocked
+                    ? 'bg-gray-400 dark:bg-gray-500 text-gray-200 cursor-not-allowed'
+                    : 'bg-yellow-500 hover:bg-yellow-600 dark:bg-yellow-500 text-white hover:bg-yellow-600 dark:hover:bg-yellow-600 focus:ring-yellow-500 dark:focus:ring-yellow-400'
+                  }`}
               >
                 {isLoading ? (
                   <>

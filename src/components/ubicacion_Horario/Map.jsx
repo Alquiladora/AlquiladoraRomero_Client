@@ -206,7 +206,6 @@ const MapComponent = () => {
 
       <div className="flex flex-col items-center mt-6 space-y-3">
         <p className="text-white text-center text-sm md:text-base">
-          📍{' '}
           <a
             href={googleMapsLink}
             target="_blank"

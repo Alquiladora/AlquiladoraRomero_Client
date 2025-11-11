@@ -27,7 +27,7 @@ const ComboProducts = ({ products = [] }) => {
     useEffect(() => {
       const interval = setInterval(() => {
         setIndex((prevIndex) => (prevIndex + 1) % subtitles.length);
-      }, 2500); // Intervalo de 2.5 segundos para mejor legibilidad
+      }, 2500);
 
       return () => clearInterval(interval);
     }, []);

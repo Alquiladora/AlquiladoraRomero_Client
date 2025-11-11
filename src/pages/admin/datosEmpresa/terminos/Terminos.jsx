@@ -1,21 +1,61 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { useFormik, FieldArray, FormikProvider } from 'formik';
 import * as yup from 'yup';
-import { Box, CircularProgress, Alert } from '@mui/material';
-import { useAuth } from '../../../../hooks/ContextAuth';
+import {
+  Box,
+  CircularProgress,
+  Alert,
+  Card,
+  CardContent,
+  Typography,
+  Button,
+  TextField,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Paper,
+  Chip,
+  IconButton,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Pagination,
+  Grid,
+  Tooltip,
+  Menu,
+  MenuItem,
+  ListItemIcon,
+  ListItemText,
+  Stack
+} from '@mui/material';
+import {
+  Add as AddIcon,
+  Edit as EditIcon,
+  Delete as DeleteIcon,
+  History as HistoryIcon,
+  MoreVert as MoreVertIcon,
+  Cancel as CancelIcon,
+  Save as SaveIcon,
+  Description as DescriptionIcon
+} from '@mui/icons-material';
 import api from '../../../../utils/AxiosConfig';
 import { toast } from 'react-toastify';
+import { useAuth } from '../../../../hooks/ContextAuth';
 
-//==============================fUNCION PAR AOBTENER EL TIRMPO ACTUAL
-const getMexico = () => {
+// Función para obtener la fecha actual en la zona horaria de México
+const getMexicoDate = () => {
   const options = {
     timeZone: 'America/Mexico_City',
     year: 'numeric',
     month: '2-digit',
     day: '2-digit',
   };
-  const formatear = new Intl.DateTimeFormat([], options);
-  const parts = formatear.formatToParts(new Date());
+  const formatter = new Intl.DateTimeFormat([], options);
+  const parts = formatter.formatToParts(new Date());
   const dateParts = {};
   parts.forEach(({ type, value }) => {
     dateParts[type] = value;
@@ -23,7 +63,7 @@ const getMexico = () => {
   return `${dateParts.year}-${dateParts.month}-${dateParts.day}`;
 };
 
-//====================================VALIDACIONES==============================================
+// Validaciones con Yup
 const validationSchema = yup.object().shape({
   titulo: yup
     .string()
@@ -33,7 +73,7 @@ const validationSchema = yup.object().shape({
   fechaVigencia: yup
     .date()
     .required('La fecha de vigencia es obligatoria')
-    .min(new Date(getMexico()), 'La fecha de vigencia no puede ser pasada'),
+    .min(new Date(getMexicoDate()), 'La fecha de vigencia no puede ser pasada'),
   secciones: yup
     .array()
     .of(
@@ -46,19 +86,22 @@ const validationSchema = yup.object().shape({
     )
     .min(1, 'Debe haber al menos una sección'),
 });
-//===============================================================================
 
 const Terminos = ({ onNavigate }) => {
   const [terminos, setTerminos] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [editMode, setEditMode] = useState(false);
   const [currentVersion, setCurrentVersion] = useState(null);
-
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [terminoToDelete, setTerminoToDelete] = useState(null);
+  const [menuAnchorEl, setMenuAnchorEl] = useState(null);
+  const [selectedTermino, setSelectedTermino] = useState(null);
   const { csrfToken } = useAuth();
-  const [error, setError] = useState(null);
-  //Pagination
+
+  // Estados para la paginación
   const [page, setPage] = useState(0);
   const [rowsPerPage] = useState(5);
-  const [loading, setLoading] = useState(true);
 
   const fetchTerminos = useCallback(async () => {
     try {
@@ -66,13 +109,14 @@ const Terminos = ({ onNavigate }) => {
         withCredentials: true,
       });
 
-      //EStructuramo slo datos a enviar
-      const parseDate = response.data.map((termino) => {
+      const parsedData = response.data.map((termino) => {
         const originalDate = termino.fechaVigencia
           ? new Date(termino.fechaVigencia)
-          : new Date(getMexico());
+          : new Date(getMexicoDate());
 
+        // Sumar un día a la fecha original
         originalDate.setDate(originalDate.getDate() + 1);
+
         return {
           ...termino,
           versio: extractValue(termino.versio),
@@ -84,11 +128,12 @@ const Terminos = ({ onNavigate }) => {
         };
       });
 
-      setTerminos(parseDate);
+      setTerminos(parsedData);
+      console.log('Términos obtenidos', parsedData);
       setLoading(false);
     } catch (error) {
       console.error('Error al obtener términos:', error);
-      setError('No se pudieron cargar los terminos');
+      setError('No se pudieron cargar los términos');
       setLoading(false);
     }
   }, []);
@@ -97,22 +142,18 @@ const Terminos = ({ onNavigate }) => {
     fetchTerminos();
   }, [fetchTerminos]);
 
-  //EXTRAEMOS EL VALOR
-  const extractValue = (versionField) => {
-    if (typeof versionField === 'object' && versionField !== null) {
-      return versionField || versionField.value || '';
+  const extractValue = (versioField) => {
+    if (typeof versioField === 'object' && versioField !== null) {
+      return versioField.data || versioField.value || '';
     }
-    return versionField;
+    return versioField;
   };
 
-  //===============================================================================
-
-  //vALIDACIONES
   const formik = useFormik({
     initialValues: {
       titulo: '',
       contenido: '',
-      fechaVigencia: '',
+      fechaVigencia: getMexicoDate(),
       secciones: [{ titulo: '', contenido: '' }],
     },
     validationSchema,
@@ -129,6 +170,7 @@ const Terminos = ({ onNavigate }) => {
       setPage(0);
     },
   });
+
   const {
     values,
     errors,
@@ -138,63 +180,56 @@ const Terminos = ({ onNavigate }) => {
     handleReset,
     setFieldValue,
     setFieldTouched,
+    isSubmitting,
   } = formik;
-  //=======================================================================
-  //Funcion par acontrolar ña paginacion
+
+  // Función para manejar el cambio de página
   const handleChangePage = (event, newPage) => {
     setPage(newPage);
   };
 
-  //Creamos un nuevo termino version 1.0
   const createTermino = async (data) => {
     try {
       await api.post('/api/terminos', data, {
         headers: { 'X-CSRF-Token': csrfToken },
         withCredentials: true,
       });
-      toast.success('Se creo el termino correctamente');
+      toast.success('Se creó el término correctamente');
     } catch (error) {
-      console.log('Error al crear el termino:', error);
-      toast.error('No se pudo crar el termino');
+      console.log('Error al crear el término:', error);
+      toast.error('No se pudo crear el término');
     }
   };
 
-  //=========================================================================
-  //Creamos una nueva versión de  termino existente osea actualizar pero como nueva version
   const createNewVersion = async (id, data) => {
     try {
       await api.post(`/api/terminos/${id}/nueva-version`, data, {
         headers: { 'X-CSRF-Token': csrfToken },
         withCredentials: true,
       });
-      toast.success('Se creó una nueva versión de termino');
+      toast.success('Se creó una nueva versión del término');
     } catch (error) {
       console.error('Error al crear nueva versión:', error);
       toast.error('No se pudo crear la nueva versión');
     }
   };
 
-  //Marcamos Termino como eliminado solo lógicamente
   const deleteTermino = async (id) => {
-    const confirmDeletion = window.confirm(
-      'Esta acción marcará la política como eliminada. ¿Desea continuar?'
-    );
-    if (confirmDeletion) {
-      try {
-        await api.delete(`/api/terminos/${id}`, {
-          headers: { 'X-CSRF-Token': csrfToken },
-          withCredentials: true,
-        });
-        toast.success('Política eliminada correctamente');
-        fetchTerminos();
-      } catch (error) {
-        console.error('Error al eliminar la política:', error);
-        toast.error('No se pudo eliminar la política');
-      }
+    try {
+      await api.delete(`/api/terminos/${id}`, {
+        headers: { 'X-CSRF-Token': csrfToken },
+        withCredentials: true,
+      });
+      toast.success('Término eliminado correctamente');
+      fetchTerminos();
+      setDeleteDialogOpen(false);
+      setTerminoToDelete(null);
+    } catch (error) {
+      console.error('Error al eliminar el término:', error);
+      toast.error('No se pudo eliminar el término');
     }
   };
 
-  //====Función para Editar término
   const editTermino = (termino) => {
     setCurrentVersion(termino);
     setFieldValue('titulo', termino.titulo);
@@ -208,12 +243,57 @@ const Terminos = ({ onNavigate }) => {
       termino.secciones || [{ titulo: '', contenido: '' }]
     );
     setEditMode(true);
+    setMenuAnchorEl(null);
   };
+
   const handleSubmitWrapper = (e) => {
     if (values.secciones.length === 0) {
       setFieldTouched('secciones', true);
     }
     handleSubmit(e);
+  };
+
+  // Funciones para el menú de acciones
+  const handleMenuOpen = (event, termino) => {
+    setMenuAnchorEl(event.currentTarget);
+    setSelectedTermino(termino);
+  };
+
+  const handleMenuClose = () => {
+    setMenuAnchorEl(null);
+    setSelectedTermino(null);
+  };
+
+  const handleDeleteClick = (termino) => {
+    setTerminoToDelete(termino);
+    setDeleteDialogOpen(true);
+    handleMenuClose();
+  };
+
+  const getStatusColor = (estado) => {
+    switch (estado) {
+      case 'vigente':
+        return 'success';
+      case 'no vigente':
+        return 'warning';
+      case 'eliminado':
+        return 'error';
+      default:
+        return 'default';
+    }
+  };
+
+  const getStatusText = (estado) => {
+    switch (estado) {
+      case 'vigente':
+        return 'Vigente';
+      case 'no vigente':
+        return 'No Vigente';
+      case 'eliminado':
+        return 'Eliminado';
+      default:
+        return estado;
+    }
   };
 
   if (loading)
@@ -230,345 +310,376 @@ const Terminos = ({ onNavigate }) => {
   );
 
   return (
-    <div className="max-w-3xl mx-auto p-8 mt-8 bg-white dark:bg-gray-900 transition-colors duration-300">
-      <h1 className="text-3xl font-extrabold text-center mb-8 text-gray-800 dark:text-gray-100">
-        Gestión de Términos y Condiciones
-      </h1>
-
-      <FormikProvider value={formik}>
-        <form onSubmit={handleSubmitWrapper} className="space-y-8">
-          {Object.keys(errors).length > 0 &&
-            Object.keys(touched).length > 0 && (
-              <div className="bg-red-100 dark:bg-red-200 border border-red-400 text-red-700 dark:text-red-900 px-5 py-3 rounded shadow-sm transition-colors duration-300">
-                <p className="font-semibold">
-                  Por favor corrige los siguientes errores:
-                </p>
-                <ul className="list-disc ml-6">
-                  {Object.entries(errors).map(([key, value]) => {
-                    if (typeof value === 'string') {
-                      return <li key={key}>{value}</li>;
-                    } else if (Array.isArray(value)) {
-                      return value
-                        .map((err, index) => {
-                          const erroresSeccion =
-                            Object.values(err).filter(Boolean);
-                          return erroresSeccion.map((mensajeError, idx) => (
-                            <li key={`${key}-${index}-${idx}`}>
-                              {`Sección ${index + 1}: ${mensajeError}`}
-                            </li>
-                          ));
-                        })
-                        .flat();
-                    }
-                    return null;
-                  })}
-                </ul>
-              </div>
-            )}
-
-          {/* Campo Título */}
-          <div>
-            <label
-              htmlFor="titulo"
-              className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300"
+    <Box sx={{ maxWidth: 1200, mx: 'auto', p: 3, mt: 2 }}>
+      {/* Header */}
+      <Card sx={{ mb: 4, bgcolor: 'background.paper' }}>
+        <CardContent>
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+            <Typography variant="h4" component="h1" fontWeight="bold" color="primary">
+              Gestión de Términos y Condiciones
+            </Typography>
+            <Button
+              variant="outlined"
+              startIcon={<HistoryIcon />}
+              onClick={() => onNavigate('historialTerminos')}
             >
-              Título
-            </label>
-            <input
-              type="text"
-              id="titulo"
-              name="titulo"
-              value={values.titulo}
-              onChange={handleChange}
-              className={`mt-1 w-full p-3 rounded-md border shadow-sm focus:outline-none focus:ring-2 focus:ring-yellow-500 transition-colors duration-300 bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 ${
-                touched.titulo && errors.titulo
-                  ? 'border-red-500'
-                  : 'border-gray-300 dark:border-gray-700'
-              }`}
-            />
-            {touched.titulo && errors.titulo && (
-              <p className="text-red-500 text-sm mt-1">{errors.titulo}</p>
-            )}
-          </div>
+              Ver Historial
+            </Button>
+          </Box>
+          <Typography variant="body1" color="text.secondary">
+            Administre los términos y condiciones y sus versiones
+          </Typography>
+        </CardContent>
+      </Card>
 
-          <div>
-            <label
-              htmlFor="contenido"
-              className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300"
-            >
-              Contenido
-            </label>
-            <textarea
-              id="contenido"
-              name="contenido"
-              value={values.contenido}
-              onChange={handleChange}
-              rows={4}
-              className={`mt-1 w-full p-3 rounded-md border shadow-sm focus:outline-none focus:ring-2 focus:ring-yellow-500 transition-colors duration-300 bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 ${
-                touched.contenido && errors.contenido
-                  ? 'border-red-500'
-                  : 'border-gray-300 dark:border-gray-700'
-              }`}
-            />
-            {touched.contenido && errors.contenido && (
-              <p className="text-red-500 text-sm mt-1">{errors.contenido}</p>
-            )}
-          </div>
+      <Grid container spacing={4}>
+        {/* Formulario */}
+        <Grid item xs={12} md={6}>
+          <Card>
+            <CardContent>
+              <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
+                <DescriptionIcon sx={{ mr: 1, color: 'primary.main' }} />
+                <Typography variant="h5" component="h2" fontWeight="bold">
+                  {editMode ? 'Editar Términos' : 'Nuevos Términos'}
+                </Typography>
+              </Box>
 
-          <div>
-            <label
-              htmlFor="fechaVigencia"
-              className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300"
-            >
-              Fecha de Vigencia
-            </label>
-            <input
-              type="date"
-              id="fechaVigencia"
-              name="fechaVigencia"
-              value={values.fechaVigencia}
-              onChange={handleChange}
-              min={getMexico()}
-              className={`mt-1 w-full p-3 rounded-md border shadow-sm focus:outline-none focus:ring-2 focus:ring-yellow-500 transition-colors duration-300 bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 ${
-                touched.fechaVigencia && errors.fechaVigencia
-                  ? 'border-red-500'
-                  : 'border-gray-300 dark:border-gray-700'
-              }`}
-            />
-            {touched.fechaVigencia && errors.fechaVigencia && (
-              <p className="text-red-500 text-sm mt-1">
-                {errors.fechaVigencia}
-              </p>
-            )}
-          </div>
+              <FormikProvider value={formik}>
+                <form onSubmit={handleSubmitWrapper}>
+                  <Stack spacing={3}>
+                    {/* Mensajes de error */}
+                    {Object.keys(errors).length > 0 &&
+                      Object.keys(touched).length > 0 && (
+                        <Alert severity="error" sx={{ mb: 2 }}>
+                          <Typography variant="subtitle2" gutterBottom>
+                            Por favor corrige los siguientes errores:
+                          </Typography>
+                          <Box component="ul" sx={{ pl: 2, mb: 0 }}>
+                            {Object.entries(errors).map(([key, value]) => {
+                              if (typeof value === 'string') {
+                                return (
+                                  <Typography component="li" variant="body2" key={key}>
+                                    {value}
+                                  </Typography>
+                                );
+                              } else if (Array.isArray(value)) {
+                                return value
+                                  .map((err, index) => {
+                                    const erroresSeccion = Object.values(err).filter(Boolean);
+                                    return erroresSeccion.map((mensajeError, idx) => (
+                                      <Typography component="li" variant="body2" key={`${key}-${index}-${idx}`}>
+                                        {`Sección ${index + 1}: ${mensajeError}`}
+                                      </Typography>
+                                    ));
+                                  })
+                                  .flat();
+                              }
+                              return null;
+                            })}
+                          </Box>
+                        </Alert>
+                      )}
 
-          {touched.secciones &&
-            errors.secciones &&
-            typeof errors.secciones === 'string' && (
-              <div className="bg-red-100 dark:bg-red-200 border border-red-400 text-red-700 dark:text-red-900 px-5 py-3 rounded shadow transition-colors duration-300">
-                {errors.secciones}
-              </div>
-            )}
+                    {/* Campo Título */}
+                    <TextField
+                      label="Título"
+                      name="titulo"
+                      value={values.titulo}
+                      onChange={handleChange}
+                      error={touched.titulo && Boolean(errors.titulo)}
+                      helperText={touched.titulo && errors.titulo}
+                      fullWidth
+                      variant="outlined"
+                    />
 
-          <FieldArray name="secciones">
-            {({ push, remove }) => (
-              <div>
-                <h2 className="text-xl font-semibold mb-4 text-gray-800 dark:text-gray-100">
-                  Secciones
-                </h2>
-                {Array.isArray(values.secciones) &&
-                  values.secciones.map((section, index) => (
-                    <div
-                      key={index}
-                      className="bg-gray-50 dark:bg-gray-800 p-5 rounded-md shadow-sm mb-4 transition-colors duration-300"
-                    >
-                      <div className="flex justify-between items-center mb-3">
-                        <span className="text-lg font-medium text-gray-800 dark:text-gray-100">
-                          Sección {index + 1}
-                        </span>
-                        <button
-                          type="button"
-                          onClick={() => remove(index)}
-                          className="text-red-500 hover:text-red-600 transition-colors duration-300"
-                          aria-label={`Eliminar sección ${index + 1}`}
+                    {/* Campo Contenido */}
+                    <TextField
+                      label="Contenido"
+                      name="contenido"
+                      value={values.contenido}
+                      onChange={handleChange}
+                      error={touched.contenido && Boolean(errors.contenido)}
+                      helperText={touched.contenido && errors.contenido}
+                      fullWidth
+                      multiline
+                      rows={4}
+                      variant="outlined"
+                    />
+
+                    {/* Fecha de Vigencia */}
+                    <TextField
+                      label="Fecha de Vigencia"
+                      name="fechaVigencia"
+                      type="date"
+                      value={values.fechaVigencia}
+                      onChange={handleChange}
+                      error={touched.fechaVigencia && Boolean(errors.fechaVigencia)}
+                      helperText={touched.fechaVigencia && errors.fechaVigencia}
+                      fullWidth
+                      variant="outlined"
+                      InputLabelProps={{ shrink: true }}
+                      inputProps={{ min: getMexicoDate() }}
+                    />
+
+                    {/* Secciones */}
+                    <Box>
+                      <Typography variant="h6" gutterBottom>
+                        Secciones
+                      </Typography>
+                      
+                      {touched.secciones &&
+                        errors.secciones &&
+                        typeof errors.secciones === 'string' && (
+                          <Alert severity="error" sx={{ mb: 2 }}>
+                            {errors.secciones}
+                          </Alert>
+                        )}
+
+                      <FieldArray name="secciones">
+                        {({ push, remove }) => (
+                          <Box>
+                            {Array.isArray(values.secciones) &&
+                              values.secciones.map((section, index) => (
+                                <Card key={index} variant="outlined" sx={{ mb: 2 }}>
+                                  <CardContent>
+                                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+                                      <Typography variant="subtitle1" fontWeight="bold">
+                                        Sección {index + 1}
+                                      </Typography>
+                                      <IconButton
+                                        onClick={() => remove(index)}
+                                        color="error"
+                                        size="small"
+                                      >
+                                        <DeleteIcon />
+                                      </IconButton>
+                                    </Box>
+
+                                    <TextField
+                                      label="Título de la Sección"
+                                      name={`secciones[${index}].titulo`}
+                                      value={section.titulo}
+                                      onChange={handleChange}
+                                      error={
+                                        touched.secciones?.[index]?.titulo &&
+                                        Boolean(errors.secciones?.[index]?.titulo)
+                                      }
+                                      helperText={
+                                        touched.secciones?.[index]?.titulo &&
+                                        errors.secciones?.[index]?.titulo
+                                      }
+                                      fullWidth
+                                      sx={{ mb: 2 }}
+                                      variant="outlined"
+                                    />
+
+                                    <TextField
+                                      label="Contenido de la Sección"
+                                      name={`secciones[${index}].contenido`}
+                                      value={section.contenido}
+                                      onChange={handleChange}
+                                      error={
+                                        touched.secciones?.[index]?.contenido &&
+                                        Boolean(errors.secciones?.[index]?.contenido)
+                                      }
+                                      helperText={
+                                        touched.secciones?.[index]?.contenido &&
+                                        errors.secciones?.[index]?.contenido
+                                      }
+                                      fullWidth
+                                      multiline
+                                      rows={3}
+                                      variant="outlined"
+                                    />
+                                  </CardContent>
+                                </Card>
+                              ))}
+
+                            <Button
+                              startIcon={<AddIcon />}
+                              onClick={() => push({ titulo: '', contenido: '' })}
+                              variant="outlined"
+                              fullWidth
+                            >
+                              Agregar Sección
+                            </Button>
+                          </Box>
+                        )}
+                      </FieldArray>
+                    </Box>
+
+                    {/* Botones de acción */}
+                    <Box sx={{ display: 'flex', gap: 2, justifyContent: 'flex-end', pt: 2 }}>
+                      {editMode && (
+                        <Button
+                          startIcon={<CancelIcon />}
+                          onClick={() => {
+                            handleReset();
+                            setEditMode(false);
+                            setCurrentVersion(null);
+                          }}
+                          variant="outlined"
+                          color="inherit"
                         >
-                          Eliminar
-                        </button>
-                      </div>
-                      <div className="mb-3">
-                        <label
-                          htmlFor={`secciones[${index}].titulo`}
-                          className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300"
-                        >
-                          Título de la Sección
-                        </label>
-                        <input
-                          type="text"
-                          id={`secciones[${index}].titulo`}
-                          name={`secciones[${index}].titulo`}
-                          value={section.titulo}
-                          onChange={handleChange}
-                          className={`mt-1 w-full p-3 rounded-md border shadow-sm focus:outline-none focus:ring-2 focus:ring-yellow-500 transition-colors duration-300 bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 ${
-                            touched.secciones?.[index]?.titulo &&
-                            errors.secciones?.[index]?.titulo
-                              ? 'border-red-500'
-                              : 'border-gray-300 dark:border-gray-700'
-                          }`}
-                        />
-                        {touched.secciones?.[index]?.titulo &&
-                          errors.secciones?.[index]?.titulo && (
-                            <p className="text-red-500 text-sm mt-1">
-                              {errors.secciones[index].titulo}
-                            </p>
-                          )}
-                      </div>
-                      <div>
-                        <label
-                          htmlFor={`secciones[${index}].contenido`}
-                          className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300"
-                        >
-                          Contenido de la Sección
-                        </label>
-                        <textarea
-                          id={`secciones[${index}].contenido`}
-                          name={`secciones[${index}].contenido`}
-                          value={section.contenido}
-                          onChange={handleChange}
-                          rows="3"
-                          className={`mt-1 w-full p-3 rounded-md border shadow-sm focus:outline-none focus:ring-2 focus:ring-yellow-500 transition-colors duration-300 bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 ${
-                            touched.secciones?.[index]?.contenido &&
-                            errors.secciones?.[index]?.contenido
-                              ? 'border-red-500'
-                              : 'border-gray-300 dark:border-gray-700'
-                          }`}
-                        />
-                        {touched.secciones?.[index]?.contenido &&
-                          errors.secciones?.[index]?.contenido && (
-                            <p className="text-red-500 text-sm mt-1">
-                              {errors.secciones[index].contenido}
-                            </p>
-                          )}
-                      </div>
-                    </div>
-                  ))}
-                <button
-                  type="button"
-                  onClick={() => push({ titulo: '', contenido: '' })}
-                  className="bg-yellow-500 hover:bg-yellow-600 text-white px-5 py-3 rounded-md transition-colors duration-300"
-                >
-                  Agregar Sección
-                </button>
-              </div>
-            )}
-          </FieldArray>
-
-          <div className="flex justify-end space-x-4">
-            {editMode && (
-              <button
-                type="button"
-                onClick={() => {
-                  handleReset();
-                  setEditMode(false);
-                  setCurrentVersion(null);
-                }}
-                className="bg-blue-500 hover:bg-blue-600 text-white px-5 py-3 rounded-md transition-colors duration-300"
-              >
-                Cancelar
-              </button>
-            )}
-            <button
-              type="submit"
-              disabled={formik.isSubmitting}
-              className="bg-yellow-500 hover:bg-yellow-600 text-white px-5 py-3 rounded-md transition-colors duration-300"
-            >
-              {formik.isSubmitting
-                ? 'Cargando...'
-                : editMode
-                  ? 'Crear Nueva Versión'
-                  : 'Agregar Término'}
-            </button>
-          </div>
-        </form>
-      </FormikProvider>
-
-      <h2 className="text-2xl font-bold mt-10 mb-6 text-gray-800 dark:text-gray-100">
-        Lista de Términos y Condiciones
-      </h2>
-      <div className="overflow-x-auto bg-white dark:bg-gray-800 shadow rounded-lg transition-colors duration-300">
-        <table className="min-w-full table-auto">
-          <thead className="bg-gray-200 dark:bg-gray-700">
-            <tr>
-              <th className="px-4 py-3 border">Título</th>
-              <th className="px-4 py-3 border">Versión</th>
-              <th className="px-4 py-3 border">Fecha de Vigencia</th>
-              <th className="px-4 py-3 border">Estado</th>
-              <th className="px-4 py-3 border">Acciones</th>
-            </tr>
-          </thead>
-          <tbody>
-            {paginatedTerminos.map((termino) => (
-              <tr
-                key={termino.id}
-                className="border-t transition-colors duration-300"
-              >
-                <td className="px-4 py-3">{termino.titulo}</td>
-                <td className="px-4 py-3">{termino.versio}</td>
-                <td className="px-4 py-3">
-                  {new Date(termino.fechaVigencia).toLocaleDateString('es-MX', {
-                    timeZone: 'America/Mexico_City',
-                  })}
-                </td>
-                <td className="px-4 py-3">
-                  <span
-                    className={`font-bold ${
-                      termino.estado === 'vigente'
-                        ? 'text-green-600'
-                        : termino.estado === 'no vigente'
-                          ? 'text-orange-600'
-                          : 'text-red-600'
-                    }`}
-                  >
-                    {termino.estado.charAt(0).toUpperCase() +
-                      termino.estado.slice(1)}
-                  </span>
-                </td>
-                <td className="px-4 py-3">
-                  {termino.estado !== 'eliminado' && (
-                    <div className="flex space-x-3">
-                      <button
-                        onClick={() => editTermino(termino)}
-                        className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md transition-colors duration-300"
-                        aria-label={`Editar término ${termino.titulo}`}
+                          Cancelar
+                        </Button>
+                      )}
+                      <Button
+                        type="submit"
+                        disabled={isSubmitting}
+                        startIcon={isSubmitting ? <CircularProgress size={20} /> : <SaveIcon />}
+                        variant="contained"
+                        color="primary"
                       >
-                        Editar
-                      </button>
-                      <button
-                        onClick={() => deleteTermino(termino.id)}
-                        className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-md transition-colors duration-300"
-                        aria-label={`Eliminar término ${termino.titulo}`}
-                      >
-                        Eliminar
-                      </button>
-                    </div>
-                  )}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-        <div className="flex justify-end items-center p-4">
-          <span className="mr-4 text-gray-800 dark:text-gray-100">
-            Página {page + 1} de {Math.ceil(terminos.length / rowsPerPage)}
-          </span>
-          <button
-            onClick={handleChangePage}
-            disabled={page === 0}
-            className="px-4 py-2 border rounded mr-3 disabled:opacity-50 transition-colors duration-300"
-          >
-            Anterior
-          </button>
-          <button
-            onClick={handleChangePage}
-            disabled={(page + 1) * rowsPerPage >= terminos.length}
-            className="px-4 py-2 border rounded disabled:opacity-50 transition-colors duration-300"
-          >
-            Siguiente
-          </button>
-        </div>
-      </div>
+                        {isSubmitting
+                          ? 'Guardando...'
+                          : editMode
+                            ? 'Crear Nueva Versión'
+                            : 'Crear Términos'}
+                      </Button>
+                    </Box>
+                  </Stack>
+                </form>
+              </FormikProvider>
+            </CardContent>
+          </Card>
+        </Grid>
 
-      <div className="flex justify-end mt-8">
-        <button
-          onClick={(e) => {
-            e.stopPropagation();
-            onNavigate('historialTerminos');
-          }}
-          className="flex items-center border border-yellow-500 text-yellow-500 hover:bg-yellow-500 hover:text-white px-5 py-3 rounded-md transition-colors duration-300"
-        >
-          <span className="mr-3">Ver Historial</span>
-        </button>
-      </div>
-    </div>
+        {/* Lista de Términos */}
+        <Grid item xs={12} md={6}>
+          <Card>
+            <CardContent>
+              <Typography variant="h5" component="h2" fontWeight="bold" gutterBottom>
+                Términos Existentes
+              </Typography>
+
+              <TableContainer component={Paper} variant="outlined">
+                <Table>
+                  <TableHead>
+                    <TableRow>
+                      <TableCell>Título</TableCell>
+                      <TableCell>Versión</TableCell>
+                      <TableCell>Estado</TableCell>
+                      <TableCell align="center">Acciones</TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {paginatedTerminos.map((termino) => (
+                      <TableRow
+                        key={termino.id}
+                        sx={{
+                          '&:last-child td, &:last-child th': { border: 0 },
+                          bgcolor: termino.estado === 'eliminado' ? 'action.hover' : 'background.paper'
+                        }}
+                      >
+                        <TableCell>
+                          <Typography variant="body2" fontWeight="medium">
+                            {termino.titulo}
+                          </Typography>
+                          <Typography variant="caption" color="text.secondary">
+                            Vigente hasta: {new Date(termino.fechaVigencia).toLocaleDateString('es-MX')}
+                          </Typography>
+                        </TableCell>
+                        <TableCell>
+                          <Chip label={`v${termino.versio}`} size="small" variant="outlined" />
+                        </TableCell>
+                        <TableCell>
+                          <Chip
+                            label={getStatusText(termino.estado)}
+                            color={getStatusColor(termino.estado)}
+                            size="small"
+                          />
+                        </TableCell>
+                        <TableCell align="center">
+                          {termino.estado !== 'eliminado' && (
+                            <Tooltip title="Acciones">
+                              <IconButton
+                                size="small"
+                                onClick={(e) => handleMenuOpen(e, termino)}
+                              >
+                                <MoreVertIcon />
+                              </IconButton>
+                            </Tooltip>
+                          )}
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </TableContainer>
+
+              {/* Paginación */}
+              {terminos.length > 0 && (
+                <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2 }}>
+                  <Pagination
+                    count={Math.ceil(terminos.length / rowsPerPage)}
+                    page={page + 1}
+                    onChange={(event, value) => setPage(value - 1)}
+                    color="primary"
+                  />
+                </Box>
+              )}
+
+              {terminos.length === 0 && (
+                <Box sx={{ textAlign: 'center', py: 4 }}>
+                  <Typography variant="body1" color="text.secondary">
+                    No hay términos y condiciones registrados
+                  </Typography>
+                </Box>
+              )}
+            </CardContent>
+          </Card>
+        </Grid>
+      </Grid>
+
+      {/* Menú de Acciones */}
+      <Menu
+        anchorEl={menuAnchorEl}
+        open={Boolean(menuAnchorEl)}
+        onClose={handleMenuClose}
+      >
+        <MenuItem onClick={() => editTermino(selectedTermino)}>
+          <ListItemIcon>
+            <EditIcon fontSize="small" />
+          </ListItemIcon>
+          <ListItemText>Editar</ListItemText>
+        </MenuItem>
+        <MenuItem onClick={() => handleDeleteClick(selectedTermino)}>
+          <ListItemIcon>
+            <DeleteIcon fontSize="small" />
+          </ListItemIcon>
+          <ListItemText>Eliminar</ListItemText>
+        </MenuItem>
+      </Menu>
+
+      {/* Diálogo de Confirmación de Eliminación */}
+      <Dialog
+        open={deleteDialogOpen}
+        onClose={() => setDeleteDialogOpen(false)}
+      >
+        <DialogTitle>
+          Confirmar Eliminación
+        </DialogTitle>
+        <DialogContent>
+          <Typography>
+            ¿Está seguro de que desea eliminar los términos "{terminoToDelete?.titulo}"?
+            Esta acción marcará los términos como eliminados.
+          </Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setDeleteDialogOpen(false)}>
+            Cancelar
+          </Button>
+          <Button
+            onClick={() => deleteTermino(terminoToDelete?.id)}
+            color="error"
+            variant="contained"
+          >
+            Eliminar
+          </Button>
+        </DialogActions>
+      </Dialog>
+    </Box>
   );
 };
 

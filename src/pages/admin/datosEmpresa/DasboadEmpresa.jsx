@@ -15,31 +15,26 @@ const modulesData = [
     route: '/empresa/sobre',
     description: 'Conoce nuestra historia, misión y visión.',
   },
-  {
-    key: 'Deslin',
-    title: 'Deslin',
-    route: '/empresa/disclaimer',
-    description: 'Aviso legal y limitaciones de responsabilidad.',
-  },
-  {
-    key: 'Politicas',
-    title: 'Politicas',
-    route: '/empresa/politicas',
-    description: 'Nuestras políticas y lineamientos internos y externos.',
-  },
-  {
-    key: 'Terminos',
-    title: 'Terminos',
-    route: '/empresa/terminos',
-    description: 'Términos y condiciones de uso de nuestros servicios.',
-  },
-  {
-    key: 'Aviso de privacidad',
-    title: 'privacidad',
-    route: '/empresa/privacidad',
-    description: 'Aviso de privacidad para lso consumidores.',
-  },
+    {
+        key: 'Deslin',
+        title: 'Deslin',
+        route: '/empresa/disclaimer',
+        description: 'Aviso legal que limita nuestra responsabilidad por el uso de los equipos alquilados y los riesgos asociados.',
+    },
+    {
+        key: 'Politicas',
+        title: 'Politicas',
+        route: '/empresa/politicas',
+        description: 'Marco de acción que rige el manejo de la privacidad, devoluciones y calidad del servicio.',
+    },
+    {
+        key: 'Terminos',
+        title: 'Terminos',
+        route: '/empresa/terminos',
+        description: 'El contrato que establece las reglas de uso de la plataforma y las condiciones de la renta.',
+    },
 ];
+
 
 const atomicKeyframes = `
   @keyframes atomicMovement {

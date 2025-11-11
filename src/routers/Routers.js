@@ -27,7 +27,8 @@ import ProductosCategoria from '../components/productosCategoria/ProductosCatgeo
 import PoliticasPrivacidad from '../components/footer/foter-empresa/Politicas';
 import RastrearPedido from '../components/rastreo-pedido/RastreoPedido';
 import MissionVision from '../pages/public/home/MisionVision';
-
+import DeslindeResponsabilidad from '../components/footer/foter-empresa/Deslin';
+import TerminosCondiciones from '../components/footer/foter-empresa/terminos';
 //-------------------CLIENT------------------------
 import PerfilUsuarioPrime from '../pages/client/perfil/PerfilClient';
 import TokenModal from '../pages/client/perfil/componetsPerfil/TokenModal';
@@ -135,7 +136,7 @@ const Routerss = () => {
                     <RoutePublic>
                       {' '}
                       <LayoutHeader>
-                        <PoliticasPrivacidad />
+                        <DeslindeResponsabilidad />
                       </LayoutHeader>
                     </RoutePublic>
                   }
@@ -146,7 +147,7 @@ const Routerss = () => {
                     <RoutePublic>
                       {' '}
                       <LayoutHeader>
-                        <PoliticasPrivacidad />
+                        <TerminosCondiciones />
                       </LayoutHeader>
                     </RoutePublic>
                   }
@@ -269,7 +270,7 @@ const Routerss = () => {
                     <RoutePrivate rolesPermitidos={['cliente']}>
                       {' '}
                       <LayoutHeader>
-                        <PoliticasPrivacidad />
+                        <DeslindeResponsabilidad />
                       </LayoutHeader>
                     </RoutePrivate>
                   }
@@ -280,7 +281,7 @@ const Routerss = () => {
                     <RoutePrivate rolesPermitidos={['cliente']}>
                       {' '}
                       <LayoutHeader>
-                        <PoliticasPrivacidad />
+                        <TerminosCondiciones />
                       </LayoutHeader>
                     </RoutePrivate>
                   }

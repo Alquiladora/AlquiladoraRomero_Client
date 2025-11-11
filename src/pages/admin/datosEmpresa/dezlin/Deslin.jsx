@@ -2,12 +2,54 @@ import React, { useEffect, useState } from 'react';
 import { useFormik, FieldArray, FormikProvider } from 'formik';
 import * as yup from 'yup';
 
-import { Box, CircularProgress, Alert } from '@mui/material';
+import {
+  Box,
+  CircularProgress,
+  Alert,
+  Card,
+  CardContent,
+  Typography,
+  Button,
+  TextField,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Paper,
+  Chip,
+  IconButton,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Pagination,
+  Grid,
+  Divider,
+  Tooltip,
+  Menu,
+  MenuItem,
+  ListItemIcon,
+  ListItemText,
+  Stack
+} from '@mui/material';
+import {
+  Add as AddIcon,
+  Edit as EditIcon,
+  Delete as DeleteIcon,
+  History as HistoryIcon,
+  MoreVert as MoreVertIcon,
+  Visibility as ViewIcon,
+  Cancel as CancelIcon,
+  Save as SaveIcon,
+  Article as DocumentIcon
+} from '@mui/icons-material';
 import api from '../../../../utils/AxiosConfig';
 import { useAuth } from '../../../../hooks/ContextAuth';
 import { toast } from 'react-toastify';
 
-// Función para obtener la fecha actual en México
+
 const getMexicoDate = () => {
   const options = {
     timeZone: 'America/Mexico_City',
@@ -24,7 +66,7 @@ const getMexicoDate = () => {
   return `${dateParts.year}-${dateParts.month}-${dateParts.day}`;
 };
 
-// Validaciones con Yup
+
 const validationSchema = yup.object().shape({
   titulo: yup
     .string()
@@ -56,6 +98,10 @@ const DeslindeLegal = ({ onNavigate }) => {
   const [currentVersion, setCurrentVersion] = useState(null);
   const [page, setPage] = useState(0);
   const [rowsPerPage] = useState(5);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [documentToDelete, setDocumentToDelete] = useState(null);
+  const [menuAnchorEl, setMenuAnchorEl] = useState(null);
+  const [selectedDocument, setSelectedDocument] = useState(null);
   const { csrfToken } = useAuth();
 
   useEffect(() => {
@@ -126,6 +172,7 @@ const DeslindeLegal = ({ onNavigate }) => {
     handleReset,
     setFieldValue,
     setFieldTouched,
+    isSubmitting,
   } = formik;
 
   // Función para crear un nuevo documento
@@ -135,9 +182,9 @@ const DeslindeLegal = ({ onNavigate }) => {
         headers: { 'X-CSRF-Token': csrfToken },
         withCredentials: true,
       });
-      toast.success('Éxito', 'Se creó el documento correctamente');
+      toast.success('Se creó el documento correctamente');
     } catch (error) {
-      toast.error('Error', 'No se pudo crear el documento');
+      toast.error('No se pudo crear el documento');
     }
   };
 
@@ -156,21 +203,18 @@ const DeslindeLegal = ({ onNavigate }) => {
 
   // Función para eliminar un documento
   const deleteDeslinde = async (id) => {
-    const confirmDeletion = window.confirm(
-      'Esta acción marcará el deslinde como eliminada. ¿Desea continuar?'
-    );
-    if (confirmDeletion) {
-      try {
-        await api.delete(`/api/deslin/${id}`, {
-          headers: { 'X-CSRF-Token': csrfToken },
-          withCredentials: true,
-        });
-        toast.success('Deslinde eliminada correctamente');
-        fetchDocumentos();
-      } catch (error) {
-        console.error('Error al eliminar el deslinde:', error);
-        toast.error('No se pudo eliminar el deslinde');
-      }
+    try {
+      await api.delete(`/api/deslin/${id}`, {
+        headers: { 'X-CSRF-Token': csrfToken },
+        withCredentials: true,
+      });
+      toast.success('Deslinde eliminado correctamente');
+      fetchDocumentos();
+      setDeleteDialogOpen(false);
+      setDocumentToDelete(null);
+    } catch (error) {
+      console.error('Error al eliminar el deslinde:', error);
+      toast.error('No se pudo eliminar el deslinde');
     }
   };
 
@@ -188,6 +232,7 @@ const DeslindeLegal = ({ onNavigate }) => {
       documento.secciones || [{ titulo: '', contenido: '' }]
     );
     setEditMode(true);
+    setMenuAnchorEl(null);
   };
 
   // Función para manejar el envío del formulario y marcar "secciones" como tocado si está vacío
@@ -201,6 +246,49 @@ const DeslindeLegal = ({ onNavigate }) => {
   // Funciones para manejar la paginación
   const handleChangePage = (event, newPage) => {
     setPage(newPage);
+  };
+
+  // Funciones para el menú de acciones
+  const handleMenuOpen = (event, documento) => {
+    setMenuAnchorEl(event.currentTarget);
+    setSelectedDocument(documento);
+  };
+
+  const handleMenuClose = () => {
+    setMenuAnchorEl(null);
+    setSelectedDocument(null);
+  };
+
+  const handleDeleteClick = (documento) => {
+    setDocumentToDelete(documento);
+    setDeleteDialogOpen(true);
+    handleMenuClose();
+  };
+
+  const getStatusColor = (estado) => {
+    switch (estado) {
+      case 'vigente':
+        return 'success';
+      case 'no vigente':
+        return 'warning';
+      case 'eliminado':
+        return 'error';
+      default:
+        return 'default';
+    }
+  };
+
+  const getStatusText = (estado) => {
+    switch (estado) {
+      case 'vigente':
+        return 'Vigente';
+      case 'no vigente':
+        return 'No Vigente';
+      case 'eliminado':
+        return 'Eliminado';
+      default:
+        return estado;
+    }
   };
 
   if (loading)
@@ -219,350 +307,376 @@ const DeslindeLegal = ({ onNavigate }) => {
   );
 
   return (
-    <div className="max-w-3xl mx-auto p-8 mt-8 bg-white dark:bg-gray-900 transition-colors duration-300">
-      <h1 className="text-3xl font-extrabold text-center mb-8 text-gray-800 dark:text-gray-100">
-        Gestión de Deslinde de Responsabilidad
-      </h1>
-
-      <FormikProvider value={formik}>
-        <form onSubmit={handleSubmitWrapper} className="space-y-8">
-          {Object.keys(errors).length > 0 &&
-            Object.keys(touched).length > 0 && (
-              <div className="bg-red-100 dark:bg-red-200 border border-red-400 text-red-700 dark:text-red-900 px-5 py-3 rounded shadow-sm transition-colors duration-300">
-                <p className="font-semibold">
-                  Por favor corrige los siguientes errores:
-                </p>
-                <ul className="list-disc ml-6">
-                  {Object.entries(errors).map(([key, value]) => {
-                    if (typeof value === 'string') {
-                      return <li key={key}>{value}</li>;
-                    } else if (Array.isArray(value)) {
-                      return value
-                        .map((err, index) => {
-                          const erroresSeccion =
-                            Object.values(err).filter(Boolean);
-                          return erroresSeccion.map((mensajeError, idx) => (
-                            <li key={`${key}-${index}-${idx}`}>
-                              {`Sección ${index + 1}: ${mensajeError}`}
-                            </li>
-                          ));
-                        })
-                        .flat();
-                    }
-                    return null;
-                  })}
-                </ul>
-              </div>
-            )}
-
-          {/* Campo Título */}
-          <div>
-            <label
-              htmlFor="titulo"
-              className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300"
+    <Box sx={{ maxWidth: 1200, mx: 'auto', p: 3, mt: 2 }}>
+      {/* Header */}
+      <Card sx={{ mb: 4, bgcolor: 'background.paper' }}>
+        <CardContent>
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+            <Typography variant="h4" component="h1" fontWeight="bold" color="primary">
+              Gestión de Deslinde Legal
+            </Typography>
+            <Button
+              variant="outlined"
+              startIcon={<HistoryIcon />}
+              onClick={() => onNavigate('historialDeslinde')}
             >
-              Título
-            </label>
-            <input
-              type="text"
-              id="titulo"
-              name="titulo"
-              value={values.titulo}
-              onChange={handleChange}
-              className={`mt-1 w-full p-3 rounded-md border shadow-sm focus:outline-none focus:ring-2 focus:ring-yellow-500 transition-colors duration-300 bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 ${
-                touched.titulo && errors.titulo
-                  ? 'border-red-500'
-                  : 'border-gray-300 dark:border-gray-700'
-              }`}
-            />
-            {touched.titulo && errors.titulo && (
-              <p className="text-red-500 text-sm mt-1">{errors.titulo}</p>
-            )}
-          </div>
+              Ver Historial
+            </Button>
+          </Box>
+          <Typography variant="body1" color="text.secondary">
+            Administre los documentos de deslinde de responsabilidad legal
+          </Typography>
+        </CardContent>
+      </Card>
 
-          <div>
-            <label
-              htmlFor="contenido"
-              className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300"
-            >
-              Contenido
-            </label>
-            <textarea
-              id="contenido"
-              name="contenido"
-              value={values.contenido}
-              onChange={handleChange}
-              rows={4}
-              className={`mt-1 w-full p-3 rounded-md border shadow-sm focus:outline-none focus:ring-2 focus:ring-yellow-500 transition-colors duration-300 bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 ${
-                touched.contenido && errors.contenido
-                  ? 'border-red-500'
-                  : 'border-gray-300 dark:border-gray-700'
-              }`}
-            />
-            {touched.contenido && errors.contenido && (
-              <p className="text-red-500 text-sm mt-1">{errors.contenido}</p>
-            )}
-          </div>
+      <Grid container spacing={4}>
+        {/* Formulario */}
+        <Grid item xs={12} md={6}>
+          <Card>
+            <CardContent>
+              <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
+                <DocumentIcon sx={{ mr: 1, color: 'primary.main' }} />
+                <Typography variant="h5" component="h2" fontWeight="bold">
+                  {editMode ? 'Editar Documento' : 'Nuevo Documento'}
+                </Typography>
+              </Box>
 
-          {/* Fecha de Vigencia */}
-          <div>
-            <label
-              htmlFor="fechaVigencia"
-              className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300"
-            >
-              Fecha de Vigencia
-            </label>
-            <input
-              type="date"
-              id="fechaVigencia"
-              name="fechaVigencia"
-              value={values.fechaVigencia}
-              onChange={handleChange}
-              min={getMexicoDate()}
-              className={`mt-1 w-full p-3 rounded-md border shadow-sm focus:outline-none focus:ring-2 focus:ring-yellow-500 transition-colors duration-300 bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 ${
-                touched.fechaVigencia && errors.fechaVigencia
-                  ? 'border-red-500'
-                  : 'border-gray-300 dark:border-gray-700'
-              }`}
-            />
-            {touched.fechaVigencia && errors.fechaVigencia && (
-              <p className="text-red-500 text-sm mt-1">
-                {errors.fechaVigencia}
-              </p>
-            )}
-          </div>
+              <FormikProvider value={formik}>
+                <form onSubmit={handleSubmitWrapper}>
+                  <Stack spacing={3}>
+                    {/* Mensajes de error */}
+                    {Object.keys(errors).length > 0 &&
+                      Object.keys(touched).length > 0 && (
+                        <Alert severity="error" sx={{ mb: 2 }}>
+                          <Typography variant="subtitle2" gutterBottom>
+                            Por favor corrige los siguientes errores:
+                          </Typography>
+                          <Box component="ul" sx={{ pl: 2, mb: 0 }}>
+                            {Object.entries(errors).map(([key, value]) => {
+                              if (typeof value === 'string') {
+                                return (
+                                  <Typography component="li" variant="body2" key={key}>
+                                    {value}
+                                  </Typography>
+                                );
+                              } else if (Array.isArray(value)) {
+                                return value
+                                  .map((err, index) => {
+                                    const erroresSeccion = Object.values(err).filter(Boolean);
+                                    return erroresSeccion.map((mensajeError, idx) => (
+                                      <Typography component="li" variant="body2" key={`${key}-${index}-${idx}`}>
+                                        {`Sección ${index + 1}: ${mensajeError}`}
+                                      </Typography>
+                                    ));
+                                  })
+                                  .flat();
+                              }
+                              return null;
+                            })}
+                          </Box>
+                        </Alert>
+                      )}
 
-          {touched.secciones &&
-            errors.secciones &&
-            typeof errors.secciones === 'string' && (
-              <div className="bg-red-100 dark:bg-red-200 border border-red-400 text-red-700 dark:text-red-900 px-5 py-3 rounded shadow transition-colors duration-300">
-                {errors.secciones}
-              </div>
-            )}
+                    {/* Campo Título */}
+                    <TextField
+                      label="Título"
+                      name="titulo"
+                      value={values.titulo}
+                      onChange={handleChange}
+                      error={touched.titulo && Boolean(errors.titulo)}
+                      helperText={touched.titulo && errors.titulo}
+                      fullWidth
+                      variant="outlined"
+                    />
 
-          {/* Secciones */}
-          <FieldArray name="secciones">
-            {({ push, remove }) => (
-              <div>
-                <h2 className="text-xl font-semibold mb-4 text-gray-800 dark:text-gray-100">
-                  Secciones
-                </h2>
-                {Array.isArray(values.secciones) &&
-                  values.secciones.map((section, index) => (
-                    <div
-                      key={index}
-                      className="bg-gray-50 dark:bg-gray-800 p-5 rounded-md shadow-sm mb-4 transition-colors duration-300"
-                    >
-                      <div className="flex justify-between items-center mb-3">
-                        <span className="text-lg font-medium text-gray-800 dark:text-gray-100">
-                          Sección {index + 1}
-                        </span>
-                        <button
-                          type="button"
-                          onClick={() => remove(index)}
-                          className="text-red-500 hover:text-red-600 transition-colors duration-300"
-                          aria-label={`Eliminar sección ${index + 1}`}
+                    {/* Campo Contenido */}
+                    <TextField
+                      label="Contenido"
+                      name="contenido"
+                      value={values.contenido}
+                      onChange={handleChange}
+                      error={touched.contenido && Boolean(errors.contenido)}
+                      helperText={touched.contenido && errors.contenido}
+                      fullWidth
+                      multiline
+                      rows={4}
+                      variant="outlined"
+                    />
+
+                    {/* Fecha de Vigencia */}
+                    <TextField
+                      label="Fecha de Vigencia"
+                      name="fechaVigencia"
+                      type="date"
+                      value={values.fechaVigencia}
+                      onChange={handleChange}
+                      error={touched.fechaVigencia && Boolean(errors.fechaVigencia)}
+                      helperText={touched.fechaVigencia && errors.fechaVigencia}
+                      fullWidth
+                      variant="outlined"
+                      InputLabelProps={{ shrink: true }}
+                      inputProps={{ min: getMexicoDate() }}
+                    />
+
+                    {/* Secciones */}
+                    <Box>
+                      <Typography variant="h6" gutterBottom>
+                        Secciones
+                      </Typography>
+                      
+                      {touched.secciones &&
+                        errors.secciones &&
+                        typeof errors.secciones === 'string' && (
+                          <Alert severity="error" sx={{ mb: 2 }}>
+                            {errors.secciones}
+                          </Alert>
+                        )}
+
+                      <FieldArray name="secciones">
+                        {({ push, remove }) => (
+                          <Box>
+                            {Array.isArray(values.secciones) &&
+                              values.secciones.map((section, index) => (
+                                <Card key={index} variant="outlined" sx={{ mb: 2 }}>
+                                  <CardContent>
+                                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+                                      <Typography variant="subtitle1" fontWeight="bold">
+                                        Sección {index + 1}
+                                      </Typography>
+                                      <IconButton
+                                        onClick={() => remove(index)}
+                                        color="error"
+                                        size="small"
+                                      >
+                                        <DeleteIcon />
+                                      </IconButton>
+                                    </Box>
+
+                                    <TextField
+                                      label="Título de la Sección"
+                                      name={`secciones[${index}].titulo`}
+                                      value={section.titulo}
+                                      onChange={handleChange}
+                                      error={
+                                        touched.secciones?.[index]?.titulo &&
+                                        Boolean(errors.secciones?.[index]?.titulo)
+                                      }
+                                      helperText={
+                                        touched.secciones?.[index]?.titulo &&
+                                        errors.secciones?.[index]?.titulo
+                                      }
+                                      fullWidth
+                                      sx={{ mb: 2 }}
+                                      variant="outlined"
+                                    />
+
+                                    <TextField
+                                      label="Contenido de la Sección"
+                                      name={`secciones[${index}].contenido`}
+                                      value={section.contenido}
+                                      onChange={handleChange}
+                                      error={
+                                        touched.secciones?.[index]?.contenido &&
+                                        Boolean(errors.secciones?.[index]?.contenido)
+                                      }
+                                      helperText={
+                                        touched.secciones?.[index]?.contenido &&
+                                        errors.secciones?.[index]?.contenido
+                                      }
+                                      fullWidth
+                                      multiline
+                                      rows={3}
+                                      variant="outlined"
+                                    />
+                                  </CardContent>
+                                </Card>
+                              ))}
+
+                            <Button
+                              startIcon={<AddIcon />}
+                              onClick={() => push({ titulo: '', contenido: '' })}
+                              variant="outlined"
+                              fullWidth
+                            >
+                              Agregar Sección
+                            </Button>
+                          </Box>
+                        )}
+                      </FieldArray>
+                    </Box>
+
+                    {/* Botones de acción */}
+                    <Box sx={{ display: 'flex', gap: 2, justifyContent: 'flex-end', pt: 2 }}>
+                      {editMode && (
+                        <Button
+                          startIcon={<CancelIcon />}
+                          onClick={() => {
+                            handleReset();
+                            setEditMode(false);
+                            setCurrentVersion(null);
+                          }}
+                          variant="outlined"
+                          color="inherit"
                         >
-                          Eliminar
-                        </button>
-                      </div>
-                      <div className="mb-3">
-                        <label
-                          htmlFor={`secciones[${index}].titulo`}
-                          className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300"
-                        >
-                          Título de la Sección
-                        </label>
-                        <input
-                          type="text"
-                          id={`secciones[${index}].titulo`}
-                          name={`secciones[${index}].titulo`}
-                          value={section.titulo}
-                          onChange={handleChange}
-                          className={`mt-1 w-full p-3 rounded-md border shadow-sm focus:outline-none focus:ring-2 focus:ring-yellow-500 transition-colors duration-300 bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 ${
-                            touched.secciones?.[index]?.titulo &&
-                            errors.secciones?.[index]?.titulo
-                              ? 'border-red-500'
-                              : 'border-gray-300 dark:border-gray-700'
-                          }`}
-                        />
-                        {touched.secciones?.[index]?.titulo &&
-                          errors.secciones?.[index]?.titulo && (
-                            <p className="text-red-500 text-sm mt-1">
-                              {errors.secciones[index].titulo}
-                            </p>
-                          )}
-                      </div>
-                      <div>
-                        <label
-                          htmlFor={`secciones[${index}].contenido`}
-                          className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300"
-                        >
-                          Contenido de la Sección
-                        </label>
-                        <textarea
-                          id={`secciones[${index}].contenido`}
-                          name={`secciones[${index}].contenido`}
-                          value={section.contenido}
-                          onChange={handleChange}
-                          rows="3"
-                          className={`mt-1 w-full p-3 rounded-md border shadow-sm focus:outline-none focus:ring-2 focus:ring-yellow-500 transition-colors duration-300 bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 ${
-                            touched.secciones?.[index]?.contenido &&
-                            errors.secciones?.[index]?.contenido
-                              ? 'border-red-500'
-                              : 'border-gray-300 dark:border-gray-700'
-                          }`}
-                        />
-                        {touched.secciones?.[index]?.contenido &&
-                          errors.secciones?.[index]?.contenido && (
-                            <p className="text-red-500 text-sm mt-1">
-                              {errors.secciones[index].contenido}
-                            </p>
-                          )}
-                      </div>
-                    </div>
-                  ))}
-                <button
-                  type="button"
-                  onClick={() => push({ titulo: '', contenido: '' })}
-                  className="bg-yellow-500 hover:bg-yellow-600 text-white px-5 py-3 rounded-md transition-colors duration-300"
-                >
-                  Agregar Sección
-                </button>
-              </div>
-            )}
-          </FieldArray>
-
-          <div className="flex justify-end space-x-4">
-            {editMode && (
-              <button
-                type="button"
-                onClick={() => {
-                  handleReset();
-                  setEditMode(false);
-                  setCurrentVersion(null);
-                }}
-                className="bg-blue-500 hover:bg-blue-600 text-white px-5 py-3 rounded-md transition-colors duration-300"
-              >
-                Cancelar
-              </button>
-            )}
-            <button
-              type="submit"
-              disabled={formik.isSubmitting}
-              className="bg-yellow-500 hover:bg-yellow-600 text-white px-5 py-3 rounded-md transition-colors duration-300"
-            >
-              {formik.isSubmitting
-                ? 'Cargando...'
-                : editMode
-                  ? 'Crear Nueva Versión'
-                  : 'Agregar Deslinde'}
-            </button>
-          </div>
-        </form>
-      </FormikProvider>
-
-      <h2 className="text-2xl font-bold mt-10 mb-6 text-gray-800 dark:text-gray-100">
-        Lista de Deslinde de Responsabilidad
-      </h2>
-      <div className="overflow-x-auto bg-white dark:bg-gray-800 shadow rounded-lg transition-colors duration-300">
-        <table className="min-w-full table-auto">
-          <thead className="bg-gray-200 dark:bg-gray-700">
-            <tr>
-              <th className="px-4 py-3 border">Título</th>
-              <th className="px-4 py-3 border">Versión</th>
-              <th className="px-4 py-3 border">Fecha de Vigencia</th>
-              <th className="px-4 py-3 border">Estado</th>
-              <th className="px-4 py-3 border">Acciones</th>
-            </tr>
-          </thead>
-          <tbody>
-            {paginatedDeslindes.map((deslinde) => (
-              <tr
-                key={deslinde.id}
-                className="border-t transition-colors duration-300"
-              >
-                <td className="px-4 py-3">{deslinde.titulo}</td>
-                <td className="px-4 py-3">{deslinde.versio}</td>
-                <td className="px-4 py-3">
-                  {new Date(deslinde.fechaVigencia).toLocaleDateString(
-                    'es-MX',
-                    {
-                      timeZone: 'America/Mexico_City',
-                    }
-                  )}
-                </td>
-                <td className="px-4 py-3">
-                  <span
-                    className={`font-bold ${
-                      deslinde.estado === 'vigente'
-                        ? 'text-green-600'
-                        : deslinde.estado === 'no vigente'
-                          ? 'text-orange-600'
-                          : 'text-red-600'
-                    }`}
-                  >
-                    {deslinde.estado.charAt(0).toUpperCase() +
-                      deslinde.estado.slice(1)}
-                  </span>
-                </td>
-                <td className="px-4 py-3">
-                  {deslinde.estado !== 'eliminado' && (
-                    <div className="flex space-x-3">
-                      <button
-                        onClick={() => editDeslinde(deslinde)}
-                        className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md transition-colors duration-300"
-                        aria-label={`Editar deslinde ${deslinde.titulo}`}
+                          Cancelar
+                        </Button>
+                      )}
+                      <Button
+                        type="submit"
+                        disabled={isSubmitting}
+                        startIcon={isSubmitting ? <CircularProgress size={20} /> : <SaveIcon />}
+                        variant="contained"
+                        color="primary"
                       >
-                        Editar
-                      </button>
-                      <button
-                        onClick={() => deleteDeslinde(deslinde.id)}
-                        className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-md transition-colors duration-300"
-                        aria-label={`Eliminar deslinde ${deslinde.titulo}`}
-                      >
-                        Eliminar
-                      </button>
-                    </div>
-                  )}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-        <div className="flex justify-end items-center p-4">
-          <span className="mr-4 text-gray-800 dark:text-gray-100">
-            Página {page + 1} de {Math.ceil(documentos.length / rowsPerPage)}
-          </span>
-          <button
-            onClick={handleChangePage}
-            disabled={page === 0}
-            className="px-4 py-2 border rounded mr-3 disabled:opacity-50 transition-colors duration-300"
-          >
-            Anterior
-          </button>
-          <button
-            onClick={handleChangePage}
-            disabled={(page + 1) * rowsPerPage >= documentos.length}
-            className="px-4 py-2 border rounded disabled:opacity-50 transition-colors duration-300"
-          >
-            Siguiente
-          </button>
-        </div>
-      </div>
+                        {isSubmitting
+                          ? 'Guardando...'
+                          : editMode
+                            ? 'Crear Nueva Versión'
+                            : 'Crear Documento'}
+                      </Button>
+                    </Box>
+                  </Stack>
+                </form>
+              </FormikProvider>
+            </CardContent>
+          </Card>
+        </Grid>
 
-      <div className="flex justify-end mt-8">
-        <button
-          onClick={(e) => {
-            e.stopPropagation();
-            onNavigate('historialDeslinde');
-          }}
-          className="flex items-center border border-yellow-500 text-yellow-500 hover:bg-yellow-500 hover:text-white px-5 py-3 rounded-md transition-colors duration-300"
-        >
-          <span className="mr-3">Ver Historial</span>
-        </button>
-      </div>
-    </div>
+        {/* Lista de Documentos */}
+        <Grid item xs={12} md={6}>
+          <Card>
+            <CardContent>
+              <Typography variant="h5" component="h2" fontWeight="bold" gutterBottom>
+                Documentos Existentes
+              </Typography>
+
+              <TableContainer component={Paper} variant="outlined">
+                <Table>
+                  <TableHead>
+                    <TableRow>
+                      <TableCell>Título</TableCell>
+                      <TableCell>Versión</TableCell>
+                      <TableCell>Estado</TableCell>
+                      <TableCell align="center">Acciones</TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {paginatedDeslindes.map((deslinde) => (
+                      <TableRow
+                        key={deslinde.id}
+                        sx={{
+                          '&:last-child td, &:last-child th': { border: 0 },
+                          bgcolor: deslinde.estado === 'eliminado' ? 'action.hover' : 'background.paper'
+                        }}
+                      >
+                        <TableCell>
+                          <Typography variant="body2" fontWeight="medium">
+                            {deslinde.titulo}
+                          </Typography>
+                          <Typography variant="caption" color="text.secondary">
+                            Vigente hasta: {new Date(deslinde.fechaVigencia).toLocaleDateString('es-MX')}
+                          </Typography>
+                        </TableCell>
+                        <TableCell>
+                          <Chip label={`v${deslinde.versio}`} size="small" variant="outlined" />
+                        </TableCell>
+                        <TableCell>
+                          <Chip
+                            label={getStatusText(deslinde.estado)}
+                            color={getStatusColor(deslinde.estado)}
+                            size="small"
+                          />
+                        </TableCell>
+                        <TableCell align="center">
+                          {deslinde.estado !== 'eliminado' && (
+                            <Tooltip title="Acciones">
+                              <IconButton
+                                size="small"
+                                onClick={(e) => handleMenuOpen(e, deslinde)}
+                              >
+                                <MoreVertIcon />
+                              </IconButton>
+                            </Tooltip>
+                          )}
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </TableContainer>
+
+              {/* Paginación */}
+              {documentos.length > 0 && (
+                <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2 }}>
+                  <Pagination
+                    count={Math.ceil(documentos.length / rowsPerPage)}
+                    page={page + 1}
+                    onChange={(event, value) => setPage(value - 1)}
+                    color="primary"
+                  />
+                </Box>
+              )}
+
+              {documentos.length === 0 && (
+                <Box sx={{ textAlign: 'center', py: 4 }}>
+                  <Typography variant="body1" color="text.secondary">
+                    No hay documentos de deslinde registrados
+                  </Typography>
+                </Box>
+              )}
+            </CardContent>
+          </Card>
+        </Grid>
+      </Grid>
+
+      {/* Menú de Acciones */}
+      <Menu
+        anchorEl={menuAnchorEl}
+        open={Boolean(menuAnchorEl)}
+        onClose={handleMenuClose}
+      >
+        <MenuItem onClick={() => editDeslinde(selectedDocument)}>
+          <ListItemIcon>
+            <EditIcon fontSize="small" />
+          </ListItemIcon>
+          <ListItemText>Editar</ListItemText>
+        </MenuItem>
+        <MenuItem onClick={() => handleDeleteClick(selectedDocument)}>
+          <ListItemIcon>
+            <DeleteIcon fontSize="small" />
+          </ListItemIcon>
+          <ListItemText>Eliminar</ListItemText>
+        </MenuItem>
+      </Menu>
+
+      {/* Diálogo de Confirmación de Eliminación */}
+      <Dialog
+        open={deleteDialogOpen}
+        onClose={() => setDeleteDialogOpen(false)}
+      >
+        <DialogTitle>
+          Confirmar Eliminación
+        </DialogTitle>
+        <DialogContent>
+          <Typography>
+            ¿Está seguro de que desea eliminar el documento "{documentToDelete?.titulo}"?
+            Esta acción marcará el deslinde como eliminado.
+          </Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setDeleteDialogOpen(false)}>
+            Cancelar
+          </Button>
+          <Button
+            onClick={() => deleteDeslinde(documentToDelete?.id)}
+            color="error"
+            variant="contained"
+          >
+            Eliminar
+          </Button>
+        </DialogActions>
+      </Dialog>
+    </Box>
   );
 };
 
