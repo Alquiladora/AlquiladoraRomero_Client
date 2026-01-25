@@ -35,7 +35,9 @@ const ProductosCategoria = () => {
           setSubcategorias([]);
         }
       } catch (error) {
-        toast.error('Falló la carga de subcategorías. 😔 Intenta recargar la página para reintentar la conexión.');
+        toast.error(
+          'Falló la carga de subcategorías. 😔 Intenta recargar la página para reintentar la conexión.'
+        );
       }
     };
 

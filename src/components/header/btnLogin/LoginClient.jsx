@@ -9,19 +9,17 @@ import {
   Divider,
   IconButton,
   CircularProgress,
-
 } from '@mui/material';
 import {
   faUser,
   faSignOutAlt,
   faHistory,
   faTrophy,
-
 } from '@fortawesome/free-solid-svg-icons';
 import Swal from 'sweetalert2';
 import { useAuth } from '../../../hooks/ContextAuth';
 import { UserIcon } from '@heroicons/react/outline';
-import "./CerrarSesion.css"
+import './CerrarSesion.css';
 
 const LoginLink = () => (
   <Link
@@ -69,59 +67,61 @@ const IconoPerfil = () => {
     };
   }, [user, controls, navigate]);
 
-const handleLogout = async () => {
+  const handleLogout = async () => {
     if (isLoggingOut) return;
 
     try {
-        await logout();
+      await logout();
 
-        Swal.fire({
-            title: '✅ Sesión cerrada',
-            text: 'Has cerrado sesión correctamente.',
-            icon: 'success',
-            confirmButtonText: 'Continuar',
-            width: '320px',
-            padding: '1rem',
-            background: '#f8fafc',
-            color: '#1f2937',
-            customClass: {
-                popup: 'rounded-xl shadow-2xl border border-gray-200',
-                title: 'text-base font-semibold text-gray-800 mb-2',
-                htmlContainer: 'text-sm text-gray-600 leading-relaxed',
-                confirmButton: 'bg-gradient-to-r from-blue-500 to-blue-600 text-white px-6 py-2 rounded-lg text-sm font-medium shadow-sm hover:from-blue-600 hover:to-blue-700 transition-all duration-200 transform hover:scale-105 active:scale-95',
-            },
-            showClass: {
-                popup: 'animate-scale-in'
-            },
-            hideClass: {
-                popup: 'animate-scale-out'
-            },
-            buttonsStyling: false,
-            timer: 2000,
-            timerProgressBar: true,
-        }).then(() => navigate('/login'));
+      Swal.fire({
+        title: '✅ Sesión cerrada',
+        text: 'Has cerrado sesión correctamente.',
+        icon: 'success',
+        confirmButtonText: 'Continuar',
+        width: '320px',
+        padding: '1rem',
+        background: '#f8fafc',
+        color: '#1f2937',
+        customClass: {
+          popup: 'rounded-xl shadow-2xl border border-gray-200',
+          title: 'text-base font-semibold text-gray-800 mb-2',
+          htmlContainer: 'text-sm text-gray-600 leading-relaxed',
+          confirmButton:
+            'bg-gradient-to-r from-blue-500 to-blue-600 text-white px-6 py-2 rounded-lg text-sm font-medium shadow-sm hover:from-blue-600 hover:to-blue-700 transition-all duration-200 transform hover:scale-105 active:scale-95',
+        },
+        showClass: {
+          popup: 'animate-scale-in',
+        },
+        hideClass: {
+          popup: 'animate-scale-out',
+        },
+        buttonsStyling: false,
+        timer: 2000,
+        timerProgressBar: true,
+      }).then(() => navigate('/login'));
     } catch (error) {
-        console.error('❌ Error al cerrar sesión:', error);
-        Swal.fire({
-            title: '⚠️ Error',
-            text: 'No se pudo cerrar sesión. Intenta de nuevo.',
-            icon: 'error',
-            confirmButtonText: 'Entendido',
-            width: '300px',
-            padding: '1rem',
-            background: '#fef2f2',
-            customClass: {
-                popup: 'rounded-xl shadow-2xl border border-red-100',
-                title: 'text-base font-semibold text-red-800 mb-2',
-                htmlContainer: 'text-sm text-red-600 leading-relaxed',
-                confirmButton: 'bg-gradient-to-r from-red-500 to-red-600 text-white px-6 py-2 rounded-lg text-sm font-medium shadow-sm hover:from-red-600 hover:to-red-700 transition-all duration-200',
-            },
-            buttonsStyling: false,
-        });
+      console.error('❌ Error al cerrar sesión:', error);
+      Swal.fire({
+        title: '⚠️ Error',
+        text: 'No se pudo cerrar sesión. Intenta de nuevo.',
+        icon: 'error',
+        confirmButtonText: 'Entendido',
+        width: '300px',
+        padding: '1rem',
+        background: '#fef2f2',
+        customClass: {
+          popup: 'rounded-xl shadow-2xl border border-red-100',
+          title: 'text-base font-semibold text-red-800 mb-2',
+          htmlContainer: 'text-sm text-red-600 leading-relaxed',
+          confirmButton:
+            'bg-gradient-to-r from-red-500 to-red-600 text-white px-6 py-2 rounded-lg text-sm font-medium shadow-sm hover:from-red-600 hover:to-red-700 transition-all duration-200',
+        },
+        buttonsStyling: false,
+      });
     } finally {
-        if (setIsLoggingOut) setIsLoggingOut(false);
+      if (setIsLoggingOut) setIsLoggingOut(false);
     }
-};
+  };
 
   const username = user?.nombre ? user.nombre.charAt(0).toUpperCase() : 'U';
   const fotoPerfil = foto || '';
@@ -254,10 +254,11 @@ const handleLogout = async () => {
         <motion.div whileHover={{ scale: 1.03 }} transition={{ duration: 0.2 }}>
           <MenuItem
             onClick={handleLogout}
-            className={`p-3 rounded-lg flex items-center transition-all duration-200 ${isLoggingOut
+            className={`p-3 rounded-lg flex items-center transition-all duration-200 ${
+              isLoggingOut
                 ? 'bg-gray-200 dark:bg-gray-700 cursor-not-allowed'
                 : 'hover:bg-red-50 dark:hover:bg-red-900/20'
-              }`}
+            }`}
             disabled={isLoggingOut}
           >
             {isLoggingOut ? (
@@ -268,14 +269,14 @@ const handleLogout = async () => {
                 className="mr-3 text-red-500"
               />
             )}
-            <span className={`font-medium text-sm ${isLoggingOut ? 'text-gray-500 dark:text-gray-400' : 'text-red-600 dark:text-red-400'}`}>
+            <span
+              className={`font-medium text-sm ${isLoggingOut ? 'text-gray-500 dark:text-gray-400' : 'text-red-600 dark:text-red-400'}`}
+            >
               {isLoggingOut ? 'Cerrando Sesión...' : 'Cerrar Sesión'}
             </span>
           </MenuItem>
         </motion.div>
       </Menu>
-
-      
     </div>
   );
 };

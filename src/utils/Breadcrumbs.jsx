@@ -47,9 +47,7 @@ const Breadcrumbs = () => {
     }
 
     if (relevantSegments.includes('compra-exitosa')) {
-        return [
-            { name: 'Alquiler Confirmado', to: location.pathname }
-        ];
+      return [{ name: 'Alquiler Confirmado', to: location.pathname }];
     }
 
     let pathAccumulator = basePath;

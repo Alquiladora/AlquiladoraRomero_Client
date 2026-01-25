@@ -44,8 +44,6 @@ const Paso3 = ({ guardarCorreo }) => {
   const { csrfToken } = useAuth();
   const [isCompromised, setIsCompromised] = useState(false);
 
- 
-
   useEffect(() => {
     const fetchUsuariosYCsrf = async () => {
       try {

@@ -1451,7 +1451,6 @@ const HistorialPedidos = () => {
                         </div>
                       </div>
                     </div>
-                    
 
                     {/* Información del pedido */}
                     <div className="p-6">
@@ -1587,7 +1586,6 @@ const HistorialPedidos = () => {
                               {order.idRastreo}
                             </strong>
                           </h4>
-                         
 
                           <a
                             href={

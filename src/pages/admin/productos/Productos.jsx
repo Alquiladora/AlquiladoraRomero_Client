@@ -60,8 +60,6 @@ function ProductTable() {
     fetchProductos(currentPage);
   }, [currentPage, search, filterCategory]);
 
-
-
   // ===================== OBTENER PRODUCTOS CON PAGINACIÓN Y FILTROS =====================
   const fetchProductos = async (page = 1) => {
     try {
@@ -98,12 +96,10 @@ function ProductTable() {
       setTotalPages(response.data.pagination.totalPages);
       setTotalRecords(response.data.pagination.totalRecords);
       setCurrentPage(response.data.pagination.currentPage);
-    
     } catch (error) {
-     
-      toast.error("Error al cargar productos");
-    }finally {
-      setLoading(false)
+      toast.error('Error al cargar productos');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -129,7 +125,7 @@ function ProductTable() {
         headers: { 'X-CSRF-Token': csrfToken },
       });
       setColoresObtenidos(response.data.colores);
-     // console.log('Colores ', response.data.colores);
+      // console.log('Colores ', response.data.colores);
     } catch (error) {
       // console.error('Error al obtener colores:', error);
       // toast.error("Error al cargar Colores");
@@ -211,20 +207,20 @@ function ProductTable() {
             );
             setUploadProgress(percent);
             setUploadStatus(`Subiendo: ${percent}%`);
-          //  console.log('Progreso de la subida de la imagen', percent);
+            //  console.log('Progreso de la subida de la imagen', percent);
           },
         }
       );
 
       setUploadProgress(100);
-     // console.log('Progreso de la subida de la imagen', 100);
+      // console.log('Progreso de la subida de la imagen', 100);
       setUploadStatus('Subiendo: 100% (procesando en servidor...)');
       const newUrls = response.data.urls;
       toast.success('Imágenes subidas correctamente');
       setNuevasImagenes((prev) => [...prev, ...newUrls]);
-     // console.log('Nuevas URLs obtenidas:', newUrls);
+      // console.log('Nuevas URLs obtenidas:', newUrls);
     } catch (error) {
-    //  console.error('Error subiendo imagen:', error);
+      //  console.error('Error subiendo imagen:', error);
 
       if (error.code === 'ECONNABORTED') {
         setUploadError(
@@ -454,11 +450,11 @@ function ProductTable() {
         handleCloseModal();
         fetchProductos(1); // Go to first page after add
       } else {
-       // console.error('Error al insertar producto:', response.data.message);
+        // console.error('Error al insertar producto:', response.data.message);
         toast.error(response.data.message || 'Error al insertar producto');
       }
     } catch (error) {
-     // console.error('Error al insertar producto:', error);
+      // console.error('Error al insertar producto:', error);
       if (
         error.response &&
         error.response.data &&
@@ -657,7 +653,7 @@ function ProductTable() {
             </div>
           ))}
         </div>
-    ) : (
+      ) : (
         /* ================= AQUÍ ESTÁ LA CORRECCIÓN ================= */
         <div className="flex flex-col items-center justify-center py-16 text-center">
           {search || filterCategory ? (
@@ -681,7 +677,7 @@ function ProductTable() {
                 No se encontraron resultados
               </h3>
               <p className="text-gray-500 dark:text-gray-400 mt-2 max-w-md">
-                No hay productos que coincidan con "{search}" 
+                No hay productos que coincidan con "{search}"
                 {filterCategory && ` en la categoría "${filterCategory}"`}.
                 Intenta con otros términos.
               </p>
@@ -709,7 +705,8 @@ function ProductTable() {
                 No existen productos agregados todavía
               </h3>
               <p className="text-gray-600 dark:text-gray-400 mt-2 mb-6 max-w-sm">
-                Tu inventario está vacío. Comienza agregando tu primer producto al sistema.
+                Tu inventario está vacío. Comienza agregando tu primer producto
+                al sistema.
               </p>
               <button
                 onClick={handleOpenAddModal}

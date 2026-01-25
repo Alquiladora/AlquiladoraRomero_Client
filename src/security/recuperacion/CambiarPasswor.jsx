@@ -1,7 +1,12 @@
 /* eslint-disable */
 import React, { useState, useEffect } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faCheckCircle, faSpinner, faEnvelope, faKey } from '@fortawesome/free-solid-svg-icons';
+import {
+  faCheckCircle,
+  faSpinner,
+  faEnvelope,
+  faKey,
+} from '@fortawesome/free-solid-svg-icons';
 import Swal from 'sweetalert2';
 import { useNavigate } from 'react-router-dom';
 
@@ -172,7 +177,6 @@ const CambiarPassword = () => {
       <div className="p-8 rounded-2xl w-full max-w-md transform transition-all duration-500 hover:scale-105 dark:bg-gray-900 dark:text-white">
         {step === 1 && (
           <>
-
             <div className="relative bg-white dark:bg-gray-800 shadow-lg rounded-2xl  mx-auto p-6 border-t-4 border-yellow-500">
               {/* Banner compacto */}
               <div className="absolute -top-2 left-1/2 transform -translate-x-1/2 z-10">
@@ -202,9 +206,14 @@ const CambiarPassword = () => {
 
                 {/* Mensaje de error compacto */}
                 {errorMessage && (
-                  <div className={`mb-3 p-2 rounded-lg text-xs ${getErrorColor(errorMessage)} bg-opacity-10`}>
+                  <div
+                    className={`mb-3 p-2 rounded-lg text-xs ${getErrorColor(errorMessage)} bg-opacity-10`}
+                  >
                     <div className="flex items-center">
-                      <FontAwesomeIcon icon={faExclamationTriangle} className="mr-2" />
+                      <FontAwesomeIcon
+                        icon={faExclamationTriangle}
+                        className="mr-2"
+                      />
                       <span>{errorMessage}</span>
                     </div>
                   </div>
@@ -221,14 +230,18 @@ const CambiarPassword = () => {
                         type="email"
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
-                        className={`w-full p-3 pl-10 text-sm border rounded-lg bg-gray-50 dark:bg-gray-700 dark:text-white dark:border-gray-600 focus:outline-none focus:ring-1 focus:ring-blue-500 ${loading ? 'opacity-50' : ''
-                          }`}
+                        className={`w-full p-3 pl-10 text-sm border rounded-lg bg-gray-50 dark:bg-gray-700 dark:text-white dark:border-gray-600 focus:outline-none focus:ring-1 focus:ring-blue-500 ${
+                          loading ? 'opacity-50' : ''
+                        }`}
                         placeholder="tu@correo.com"
                         required
                         disabled={loading}
                       />
                       <div className="absolute inset-y-0 left-0 pl-3 flex items-center">
-                        <FontAwesomeIcon icon={faEnvelope} className="text-gray-400" />
+                        <FontAwesomeIcon
+                          icon={faEnvelope}
+                          className="text-gray-400"
+                        />
                       </div>
                     </div>
                   </div>
@@ -236,8 +249,11 @@ const CambiarPassword = () => {
                   {/* Botón compacto */}
                   <button
                     type="submit"
-                    className={`w-full flex justify-center items-center gap-2 bg-blue-600 text-white py-3 px-4 rounded-lg text-sm font-medium transition-colors ${loading || bloqueado ? 'opacity-50 cursor-not-allowed' : 'hover:bg-blue-700'
-                      }`}
+                    className={`w-full flex justify-center items-center gap-2 bg-blue-600 text-white py-3 px-4 rounded-lg text-sm font-medium transition-colors ${
+                      loading || bloqueado
+                        ? 'opacity-50 cursor-not-allowed'
+                        : 'hover:bg-blue-700'
+                    }`}
                     disabled={loading || bloqueado}
                   >
                     {loading ? (
@@ -262,7 +278,6 @@ const CambiarPassword = () => {
                 </div>
               </div>
             </div>
-
           </>
         )}
 

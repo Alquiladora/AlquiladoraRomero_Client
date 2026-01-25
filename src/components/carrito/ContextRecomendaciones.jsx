@@ -1,14 +1,11 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
 import { useAuth } from '../../hooks/ContextAuth';
 
-
 const RecomendacionesContext = createContext();
-
 
 export const RecomendacionesProvider = ({ children }) => {
   const { user } = useAuth();
   const userId = user?.idUsuarios || user?.id;
-
 
   const storageKey = userId ? `recomendacionesApp_${userId}` : null;
 
@@ -61,7 +58,6 @@ export const RecomendacionesProvider = ({ children }) => {
     </RecomendacionesContext.Provider>
   );
 };
-
 
 export const useRecomendaciones = () => {
   return useContext(RecomendacionesContext);

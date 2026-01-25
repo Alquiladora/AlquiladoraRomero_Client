@@ -281,7 +281,7 @@ const PerfilUsuarioPrime = () => {
 
     setUploading(true);
     setIsBlocked(true);
-   
+
     toast.warning('Espera mientras se sube la imagen...');
 
     try {
@@ -318,10 +318,9 @@ const PerfilUsuarioPrime = () => {
 
       setLastUpdated(now);
       fetchProfileData();
-      
+
       toast.success('Foto de perfil actualizada correctamente.');
     } catch (error) {
-      
       toast.error('Error al actualizar la foto de perfil.');
     } finally {
       setUploading(false);
@@ -656,7 +655,7 @@ const PerfilUsuarioPrime = () => {
                   <h2 className="text-xl md:text-2xl font-bold text-gray-800 dark:text-white">
                     {`${usuariosC.nombre} ${usuariosC.apellidoP} ${usuariosC.apellidoM}`}
                   </h2>
-                </div>                
+                </div>
               </div>
             </div>
           </div>

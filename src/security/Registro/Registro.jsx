@@ -186,7 +186,7 @@ const Registro = () => {
       </div>
 
       {/* Estilos mejorados */}
-     <style jsx>{`
+      <style jsx>{`
         .meteor-shower {
           position: absolute;
           top: 0;
@@ -369,20 +369,20 @@ const Registro = () => {
             margin: 0 0.5rem;
             padding: 0.75rem;
           }
-          
+
           .steps-overview {
             padding: 0.75rem;
           }
-          
+
           .step-circle {
             width: 8px;
             height: 8px;
           }
-          
+
           h2 {
             font-size: 1.25rem;
           }
-          
+
           p {
             font-size: 0.8rem;
           }
@@ -395,7 +395,6 @@ const Registro = () => {
           }
         }
       `}</style>
-
     </div>
   );
 };

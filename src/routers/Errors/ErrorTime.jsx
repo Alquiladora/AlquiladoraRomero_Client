@@ -1,18 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  Alert, 
-  AlertTitle, 
-  IconButton, 
-  Box,
-  Typography
-} from '@mui/material';
+import { Alert, AlertTitle, IconButton, Box, Typography } from '@mui/material';
 import {
   Close as CloseIcon,
   Warning as WarningIcon,
   WifiOff as WifiOffIcon,
   Schedule as ScheduleIcon,
-  CloudOff as CloudOffIcon
+  CloudOff as CloudOffIcon,
 } from '@mui/icons-material';
 
 const ServerErrorModal = () => {
@@ -25,21 +19,22 @@ const ServerErrorModal = () => {
     const errorMap = {
       'offline-error': {
         title: 'Sin Conexión',
-        message: 'No hay conexión a Internet. Algunas funciones no están disponibles.',
+        message:
+          'No hay conexión a Internet. Algunas funciones no están disponibles.',
         type: 'warning',
-        icon: <WifiOffIcon />
+        icon: <WifiOffIcon />,
       },
       'timeout-error': {
         title: 'Conexión Lenta',
         message: 'La solicitud está tardando más de lo esperado.',
         type: 'warning',
-        icon: <ScheduleIcon />
+        icon: <ScheduleIcon />,
       },
       'server-unreachable': {
         title: 'Servidor No Disponible',
         message: 'No se puede conectar con el servidor en este momento.',
         type: 'error',
-        icon: <CloudOffIcon />
+        icon: <CloudOffIcon />,
       },
     };
 
@@ -50,7 +45,7 @@ const ServerErrorModal = () => {
         setModalMessage(errorConfig.message);
         setAlertType(errorConfig.type);
         setVisible(true);
-        
+
         // Auto-ocultar después de 6 segundos
         setTimeout(() => {
           setVisible(false);
@@ -78,14 +73,14 @@ const ServerErrorModal = () => {
           initial={{ opacity: 0, y: -50, scale: 0.8 }}
           animate={{ opacity: 1, y: 0, scale: 1 }}
           exit={{ opacity: 0, y: -50, scale: 0.8 }}
-          transition={{ duration: 0.3, type: "spring", stiffness: 300 }}
+          transition={{ duration: 0.3, type: 'spring', stiffness: 300 }}
           style={{
             position: 'fixed',
             top: 20,
             right: 20,
             zIndex: 9999,
             minWidth: 300,
-            maxWidth: 400
+            maxWidth: 400,
           }}
         >
           <Alert
@@ -106,8 +101,8 @@ const ServerErrorModal = () => {
               borderRadius: 2,
               boxShadow: 3,
               '& .MuiAlert-message': {
-                width: '100%'
-              }
+                width: '100%',
+              },
             }}
           >
             <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1 }}>

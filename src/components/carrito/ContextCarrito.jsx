@@ -27,7 +27,7 @@ export const CartProvider = ({ children }) => {
         headers: { 'X-CSRF-Token': csrfToken },
       });
       const count = response.data.count || 0;
-     // console.log('Conteo del carrito desde el backend:', count);
+      // console.log('Conteo del carrito desde el backend:', count);
       setCartCount(count);
     } catch (error) {
       console.error('Error al obtener el conteo del carrito:', error);

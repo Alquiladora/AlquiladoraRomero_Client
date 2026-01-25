@@ -47,13 +47,11 @@ const RelevantesProducts = () => {
 
   return (
     <>
-    
       <div className="w-full md:w-1/2">
         <h2 className="text-4xl  text-[#fcb900] font-bold mb-5 text-center">
           Lo más relevante
         </h2>
         <div className="relative overflow-hidden rounded-lg">
-        
           <motion.div
             className="relative w-full h-[300px] overflow-hidden rounded-lg"
             whileHover={{ scale: 1.1 }}
@@ -66,23 +64,21 @@ const RelevantesProducts = () => {
             />
           </motion.div>
 
-        
           <div className="absolute top-1/2 left-0 right-0 transform -translate-y-1/2 flex justify-between px-4">
             <button
               onClick={anteriorImagen}
               className="bg-white bg-opacity-75 p-2 rounded-full shadow-md hover:bg-opacity-100"
             >
-              &#10094; 
+              &#10094;
             </button>
             <button
               onClick={siguienteImagen}
               className="bg-white bg-opacity-75 p-2 rounded-full shadow-md hover:bg-opacity-100"
             >
-              &#10095; 
+              &#10095;
             </button>
           </div>
 
-        
           <div className="flex justify-center mt-3 space-x-2">
             {imagenes.map((_, index) => (
               <button

@@ -5,13 +5,13 @@ import api from '../../../utils/AxiosConfig';
 // Animaciones: Movimiento ascendente con un pequeño retraso
 const fadeIn = {
   hidden: { opacity: 0, y: 30 },
-  visible: { 
-    opacity: 1, 
-    y: 0, 
-    transition: { 
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: {
       duration: 0.6,
-      ease: "easeOut"
-    } 
+      ease: 'easeOut',
+    },
   },
 };
 
@@ -20,9 +20,9 @@ const staggerContainer = {
   visible: {
     opacity: 1,
     transition: {
-      staggerChildren: 0.1
-    }
-  }
+      staggerChildren: 0.1,
+    },
+  },
 };
 
 const PoliticaPrivacidad = () => {
@@ -36,15 +36,16 @@ const PoliticaPrivacidad = () => {
       try {
         const response = await api.get('/api/politicas/vigente');
         const data = response.data;
-        
+
         // Parsear las secciones si vienen como string
         const parsedData = {
           ...data,
-          secciones: typeof data.secciones === 'string' 
-            ? JSON.parse(data.secciones) 
-            : data.secciones
+          secciones:
+            typeof data.secciones === 'string'
+              ? JSON.parse(data.secciones)
+              : data.secciones,
         };
-        
+
         setPoliticaData(parsedData);
         setLoading(false);
       } catch (err) {
@@ -62,14 +63,24 @@ const PoliticaPrivacidad = () => {
     {
       icon: '🔍',
       title: 'Análisis de Impacto en la Privacidad',
-      description: 'Evaluamos riesgos mediante análisis de impacto antes de implementar nuevas funciones, definiendo medidas de control proactivas.',
-      features: ['Evaluación de riesgos', 'Medidas preventivas', 'Cumplimiento normativo']
+      description:
+        'Evaluamos riesgos mediante análisis de impacto antes de implementar nuevas funciones, definiendo medidas de control proactivas.',
+      features: [
+        'Evaluación de riesgos',
+        'Medidas preventivas',
+        'Cumplimiento normativo',
+      ],
     },
     {
       icon: '📊',
       title: 'Responsabilidad Proactiva',
-      description: 'Revisamos periódicamente políticas, capacitamos al personal y auditamos procesos para asegurar cumplimiento continuo.',
-      features: ['Auditorías regulares', 'Capacitación continua', 'Mejora constante']
+      description:
+        'Revisamos periódicamente políticas, capacitamos al personal y auditamos procesos para asegurar cumplimiento continuo.',
+      features: [
+        'Auditorías regulares',
+        'Capacitación continua',
+        'Mejora constante',
+      ],
     },
   ];
 
@@ -82,7 +93,7 @@ const PoliticaPrivacidad = () => {
     'from-gray-600 to-gray-800',
     'from-pink-500 to-rose-500',
     'from-yellow-500 to-amber-500',
-    'from-teal-500 to-cyan-500'
+    'from-teal-500 to-cyan-500',
   ];
 
   const formatDate = (dateString) => {
@@ -91,12 +102,12 @@ const PoliticaPrivacidad = () => {
     return date.toLocaleDateString('es-MX', {
       year: 'numeric',
       month: 'long',
-      day: 'numeric'
+      day: 'numeric',
     });
   };
 
   // --- Renderizado de Estados (Loading, Error, No Data) ---
-  
+
   if (loading) {
     return (
       <section className="min-h-screen bg-gray-50 dark:bg-gray-900 flex justify-center items-center">
@@ -109,14 +120,19 @@ const PoliticaPrivacidad = () => {
     return (
       <section className="bg-gray-50 dark:bg-gray-900 py-20 px-4">
         <div className="max-w-5xl mx-auto">
-          <div className={`${error ? 'bg-red-100 dark:bg-red-900/20 border-red-400 text-red-700' : 'bg-yellow-100 dark:bg-yellow-900/20 border-yellow-400 text-yellow-700'} border p-6 rounded-xl text-center`}>
-            <p className="font-semibold">{error || 'No hay política de privacidad disponible en este momento.'}</p>
+          <div
+            className={`${error ? 'bg-red-100 dark:bg-red-900/20 border-red-400 text-red-700' : 'bg-yellow-100 dark:bg-yellow-900/20 border-yellow-400 text-yellow-700'} border p-6 rounded-xl text-center`}
+          >
+            <p className="font-semibold">
+              {error ||
+                'No hay política de privacidad disponible en este momento.'}
+            </p>
           </div>
         </div>
       </section>
     );
   }
-  
+
   // --- Renderizado Principal ---
 
   return (
@@ -135,16 +151,23 @@ const PoliticaPrivacidad = () => {
         >
           <div className="flex flex-col md:flex-row items-start md:items-center gap-6 mb-8">
             <div className="bg-gradient-to-br from-[#FFC700] to-[#FFA000] p-4 rounded-xl shadow-xl flex-shrink-0">
-              <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+              <svg
+                className="w-8 h-8 text-white"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                viewBox="0 0 24 24"
+              >
                 <path d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
               </svg>
             </div>
             <div>
               <h1 className="text-4xl md:text-5xl font-extrabold text-gray-900 dark:text-white leading-tight">
-                {politicaData.titulo || "Política de Privacidad"}
+                {politicaData.titulo || 'Política de Privacidad'}
               </h1>
               <span className="text-sm font-medium text-gray-500 dark:text-gray-400 mt-1 block">
-                Vigente hasta: {formatDate(politicaData.fechaVigencia)} | Versión: {politicaData.versio || '1.0'}
+                Vigente hasta: {formatDate(politicaData.fechaVigencia)} |
+                Versión: {politicaData.versio || '1.0'}
               </span>
             </div>
           </div>
@@ -155,7 +178,11 @@ const PoliticaPrivacidad = () => {
             variants={fadeIn}
           >
             <p className="font-semibold text-gray-800 dark:text-gray-200">
-              En <span className="font-bold text-[#FFC700]">Alquiladora Romero</span>, estamos comprometidos con la transparencia.
+              En{' '}
+              <span className="font-bold text-[#FFC700]">
+                Alquiladora Romero
+              </span>
+              , estamos comprometidos con la transparencia.
             </p>
             <p>{politicaData.contenido}</p>
           </motion.div>
@@ -169,7 +196,7 @@ const PoliticaPrivacidad = () => {
           <div className="w-20 h-1 bg-gradient-to-r from-[#FFC700] to-[#FFA000] rounded-full mx-auto"></div>
         </div>
 
-        <motion.div 
+        <motion.div
           className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-16"
           variants={staggerContainer}
         >
@@ -180,7 +207,9 @@ const PoliticaPrivacidad = () => {
               variants={fadeIn}
             >
               <div className="flex items-start gap-4 mb-4">
-                <div className={`bg-gradient-to-br ${gradients[index % gradients.length]} p-3 rounded-lg text-white font-bold shadow-md flex-shrink-0`}>
+                <div
+                  className={`bg-gradient-to-br ${gradients[index % gradients.length]} p-3 rounded-lg text-white font-bold shadow-md flex-shrink-0`}
+                >
                   {index + 1}
                 </div>
                 <h3 className="text-xl font-bold text-gray-900 dark:text-white mt-1">
@@ -189,21 +218,29 @@ const PoliticaPrivacidad = () => {
               </div>
               <div className="space-y-3 pl-12">
                 {/* Asumimos que el contenido de la sección viene separado por " / " */}
-                {seccion.contenido && seccion.contenido.split(' / ').map((item, i) => (
-                  <div key={i} className="flex items-start gap-2 text-gray-700 dark:text-gray-400 text-base">
-                    <svg className="w-4 h-4 text-[#FFC700] mt-1.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                {seccion.contenido &&
+                  seccion.contenido.split(' / ').map((item, i) => (
+                    <div
+                      key={i}
+                      className="flex items-start gap-2 text-gray-700 dark:text-gray-400 text-base"
+                    >
+                      <svg
+                        className="w-4 h-4 text-[#FFC700] mt-1.5 flex-shrink-0"
+                        fill="currentColor"
+                        viewBox="0 0 20 20"
+                      >
                         <path d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586L7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" />
-                    </svg>
-                    <p className="leading-relaxed">{item.trim()}</p>
-                  </div>
-                ))}
+                      </svg>
+                      <p className="leading-relaxed">{item.trim()}</p>
+                    </div>
+                  ))}
               </div>
             </motion.div>
           ))}
         </motion.div>
 
         {/* COMPROMISOS ADICIONALES (Estático) */}
-        <motion.div 
+        <motion.div
           className="bg-gray-100 dark:bg-gray-800 rounded-2xl shadow-inner p-8 md:p-10 border border-gray-200 dark:border-gray-700"
           variants={fadeIn}
         >
@@ -221,8 +258,12 @@ const PoliticaPrivacidad = () => {
                 variants={fadeIn}
               >
                 <span className="text-3xl mb-3 block">{item.icon}</span>
-                <h4 className="text-xl font-bold text-gray-900 dark:text-white mb-2">{item.title}</h4>
-                <p className="text-gray-600 dark:text-gray-300 text-sm">{item.description}</p>
+                <h4 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
+                  {item.title}
+                </h4>
+                <p className="text-gray-600 dark:text-gray-300 text-sm">
+                  {item.description}
+                </p>
               </motion.div>
             ))}
           </div>
@@ -242,13 +283,22 @@ const PoliticaPrivacidad = () => {
             href="mailto:contacto@alquiladoraromero.com"
             className="bg-gradient-to-r from-[#FFC700] to-[#FFA000] text-gray-900 px-6 py-3 rounded-full font-semibold hover:shadow-lg transition-all duration-300 hover:scale-105 flex items-center gap-2 text-sm"
           >
-            <svg className="w-4 h-4 text-gray-900" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+            <svg
+              className="w-4 h-4 text-gray-900"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
+              />
             </svg>
             Contacto Legal
           </a>
         </motion.div>
-
       </motion.div>
     </section>
   );

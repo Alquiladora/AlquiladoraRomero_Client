@@ -2,7 +2,6 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { RefreshCw, ServerCrash } from 'lucide-react';
 
-
 const containerVariants = {
   hidden: { opacity: 0 },
   visible: {
