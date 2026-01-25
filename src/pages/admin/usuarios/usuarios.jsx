@@ -33,7 +33,7 @@ const Usuarios = () => {
     fetchUsuarios();
     const fetchCurrentAdmin = async () => {
       try {
-        const response = await api.get('/api/usuarios/current', {
+        const response = await api.get('/api/usuarios/totalUsuarios', {
           withCredentials: true,
         });
         setCurrentAdminId(response.data.idUsuarios);

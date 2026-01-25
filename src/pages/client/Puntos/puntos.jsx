@@ -1,535 +1,556 @@
 /* eslint-disable */
-import React, { useMemo } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faStar,
   faTrophy,
   faLock,
   faCheckCircle,
-  faShoppingCart,
   faCamera,
-  faCommentDots,
   faUserCircle,
-  faCoins,
-  faArrowDown,
+  faSync,
   faCrown,
   faMedal,
   faAward,
-  faCircleDot, // Icono para Nivel Actual
+  faCircleDot,
+  faFire,
+  faGem,
 } from '@fortawesome/free-solid-svg-icons';
+import PuntosYNivelStats from './nivel';
+import { useAuth } from '../../../hooks/ContextAuth';
+import api from '../../../utils/AxiosConfig';
 
-/*
-================================================================================
-  DATOS DEL PROGRAMA "FIESTA ROMERO"
-================================================================================
-*/
 
-// (Datos de allBadges y pointEarningMethods sin cambios, omitidos por brevedad)
-// ...
+
 const allBadges = {
   bronce: [
     {
       name: 'Anfitrión de Primera',
-      description:
-        'Al completar la primera renta exitosa (pedido "Finalizado").',
+      description: 'Completar primera renta exitosa',
       icon: faTrophy,
-      color: 'from-orange-400 to-orange-600',
-      bgColor: 'bg-orange-500',
+      bgColor: 'bg-amber-100',
+      borderColor: 'border-amber-300',
+      textColor: 'text-amber-100',
+      iconColor: 'text-amber-600',
     },
     {
       name: 'Crítico de Confianza',
-      description: 'Al publicar la primera reseña que incluya una fotografía.',
+      description: 'Primera reseña con fotografía',
       icon: faCamera,
-      color: 'from-orange-400 to-orange-600',
-      bgColor: 'bg-orange-500',
+      bgColor: 'bg-amber-100',
+      borderColor: 'border-amber-300',
+      textColor: 'text-amber-100',
+      iconColor: 'text-amber-600',
     },
   ],
   plata: [
     {
       name: 'Cliente Frecuente',
-      description: 'Al completar un total de 3 rentas.',
-      icon: faTrophy,
-      color: 'from-gray-400 to-gray-600',
-      bgColor: 'bg-gray-500',
+      description: 'Completar 3 rentas exitosas',
+      icon: faUserCircle,
+      bgColor: 'bg-gray-100',
+      borderColor: 'border-gray-300',
+      textColor: 'text-gray-800',
+      iconColor: 'text-gray-600',
     },
     {
       name: 'Fiestero Total',
-      description:
-        'Al realizar una sola renta que incluya productos de 3 categorías diferentes.',
-      icon: faShoppingCart,
-      color: 'from-gray-400 to-gray-600',
-      bgColor: 'bg-gray-500',
+      description: 'Renta con 3 categorías diferentes',
+      icon: faFire,
+      bgColor: 'bg-gray-100',
+      borderColor: 'border-gray-300',
+      textColor: 'text-gray-800',
+      iconColor: 'text-gray-600',
     },
   ],
   oro: [
     {
       name: 'Planificador Experto',
-      description: 'Al completar 5 rentas en un periodo de 365 días.',
+      description: '5 rentas en 365 días',
       icon: faCrown,
-      color: 'from-yellow-400 to-yellow-600',
-      bgColor: 'bg-yellow-500',
+      bgColor: 'bg-yellow-100',
+      borderColor: 'border-yellow-300',
+      textColor: 'text-yellow-100',
+      iconColor: 'text-yellow-600',
     },
     {
       name: 'Cliente VIP',
-      description: 'Al acumular un gasto total de $30,000 MXN.',
-      icon: faStar,
-      color: 'from-yellow-400 to-yellow-600',
-      bgColor: 'bg-yellow-500',
+      description: 'Acumular $30,000 MXN en compras',
+      icon: faGem,
+      bgColor: 'bg-yellow-100',
+      borderColor: 'border-yellow-300',
+      textColor: 'text-yellow-100',
+      iconColor: 'text-yellow-600',
     },
   ],
 };
 
-const pointEarningMethods = [
-  {
-    action: 'Completar una renta',
-    points: '1 punto por cada $10 MXN',
-    icon: faShoppingCart,
-    color: 'text-blue-500',
-  },
-  {
-    action: 'Dejar reseña (con foto)',
-    points: '50 puntos',
-    icon: faCamera,
-    color: 'text-green-500',
-  },
-  {
-    action: 'Dejar reseña (solo texto)',
-    points: '40 puntos',
-    icon: faCommentDots,
-    color: 'text-purple-500',
-  },
-  {
-    action: 'Completar perfil de usuario',
-    points: '50 puntos',
-    icon: faUserCircle,
-    color: 'text-indigo-500',
-  },
-];
-const levels = [
-  {
-    name: 'Invitado',
-    minPoints: 1,
-    color: 'text-gray-500',
-    bgColor: 'bg-gray-100 dark:bg-gray-700',
-    icon: faUserCircle,
-  },
-  {
-    name: 'Anfitrión',
-    minPoints: 500,
-    color: 'text-green-600 dark:text-green-400',
-    bgColor: 'bg-green-50 dark:bg-green-900/20',
-    icon: faMedal,
-  },
-  {
-    name: 'Organizador Pro',
-    minPoints: 2000,
-    color: 'text-blue-600 dark:text-blue-400',
-    bgColor: 'bg-blue-50 dark:bg-blue-900/20',
-    icon: faAward,
-  },
-  {
-    name: 'Embajador de Fiesta',
-    minPoints: 5000,
-    color: 'text-purple-600 dark:text-purple-400',
-    bgColor: 'bg-purple-50 dark:bg-purple-900/20',
-    icon: faCrown,
-  },
-];
-
-/*
-================================================================================
-  Sub-Componente: Tarjeta de Insignia (NUEVO DISEÑO COMPACTO)
-================================================================================
-*/
-const BadgeCard = ({ name, description, icon, isUnlocked, color }) => {
+const BadgeCard = ({ name, description, icon, isUnlocked, bgColor, borderColor, textColor, iconColor, iconBg }) => {
   return (
     <div
       className={`
-        relative p-4 rounded-xl flex items-center space-x-4
-        transition-all duration-300 transform 
-        ${
-          isUnlocked
-            ? `bg-gradient-to-r ${color} shadow-lg hover:shadow-xl hover:-translate-y-1`
-            : 'bg-gray-100 dark:bg-gray-800 opacity-70'
+        relative p-4 rounded-lg border flex flex-col items-center text-center
+        transition-all duration-200 hover:shadow-sm
+        ${isUnlocked
+          ? `${bgColor} ${borderColor} ${textColor}`
+          : 'bg-gray-5 border-gray-200 text-gray-400'
         }
-        border border-gray-200 dark:border-gray-700
       `}
     >
-      {/* Icono */}
+
       <div
         className={`
-          flex-shrink-0 w-12 h-12 rounded-lg flex items-center justify-center
-          ${
-            isUnlocked
-              ? 'bg-white/20 backdrop-blur-sm text-white'
-              : 'bg-gray-200 dark:bg-gray-700 text-gray-400'
+          w-14 h-14 rounded-full flex items-center justify-center mb-3
+          ${isUnlocked
+            ? `${iconColor} ${iconBg}`
+            : 'bg-gray-200 text-gray-400'
           }
-          shadow-md
         `}
       >
         <FontAwesomeIcon
-          icon={isUnlocked ? icon : faLock}
+          icon={icon}
           className="text-xl"
         />
       </div>
 
-      {/* Detalles */}
-      <div className="flex-1 min-w-0">
-        <p
-          className={`font-bold truncate ${isUnlocked ? 'text-white' : 'text-gray-600 dark:text-gray-300'}`}
+      <div className="flex-1">
+        <h3
+          className={`font-semibold text-sm mb-1 ${isUnlocked ? textColor : 'text-gray-500'
+            }`}
         >
           {name}
-        </p>
+        </h3>
         <p
-          className={`text-sm ${isUnlocked ? 'text-white/90' : 'text-gray-500 dark:text-gray-400'}`}
+          className={`text-xs leading-relaxed ${isUnlocked ? 'text-gray-600' : 'text-gray-400'
+            }`}
         >
           {description}
         </p>
       </div>
 
-      {/* Marca de desbloqueo */}
       {isUnlocked && (
-        <div className="absolute top-2 right-2 text-white" title="Desbloqueado">
-          <FontAwesomeIcon icon={faCheckCircle} className="text-xs" />
+        <div className={`absolute top-2 right-2 ${iconColor}`}>
+          <FontAwesomeIcon icon={faCheckCircle} className="text-sm" />
         </div>
       )}
     </div>
   );
 };
 
-/*
-================================================================================
-  Sub-Componente: Nivel y Progreso (CON HISTORIAL DE NIVELES)
-================================================================================
-*/
-const LevelProgress = ({ levelPoints }) => {
-  const { currentLevel, nextLevel, progressPercent } = useMemo(() => {
-    let currentLevel = levels[0];
-    let nextLevel = levels[1];
+const unlockedTemplates = {
+  Bronce: {
+    bgColor: 'bg-amber-100',
+    borderColor: 'border-amber-300',
+    textColor: 'text-amber-800',
+    iconColor: 'text-amber-600',
+    iconBg: 'bg-amber-50'
+  },
+  Plata: {
+    bgColor: 'bg-gray-100',
+    borderColor: 'border-gray-300',
+    textColor: 'text-gray-800',
+    iconColor: 'text-gray-600',
+    iconBg: 'bg-gray-50'
+  },
+  Oro: {
+    bgColor: 'bg-yellow-100',
+    borderColor: 'border-yellow-300',
+    textColor: 'text-yellow-800',
+    iconColor: 'text-yellow-600',
+    iconBg: 'bg-yellow-50'
+  }
+};
 
-    for (let i = levels.length - 1; i >= 0; i--) {
-      if (levelPoints >= levels[i].minPoints) {
-        currentLevel = levels[i];
-        nextLevel = levels[i + 1] || null;
-        break;
+
+const GamificacionPerfil = () => {
+  const [insigniasData, setInsigniasData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const { csrfToken } = useAuth();
+
+
+  const fetchInsigniasData = async () => {
+    if (!csrfToken) return;
+
+    setLoading(true);
+    setError(null);
+    try {
+      const response = await api.get('api/pedidos/insignias', {
+        headers: { 'X-CSRF-TOKEN': csrfToken },
+        withCredentials: true,
+      });
+
+      if (response.data.success) {
+        setInsigniasData(response.data.data);
+      } else {
+        throw new Error(response.data.message || "No se pudieron cargar las insignias.");
       }
+    } catch (err) {
+      console.error("Error al obtener datos de insignias:", err);
+      setError(err.message || "Error de conexión al cargar insignias.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  //Funcion de obtener datos de insignias
+  useEffect(() => {
+    fetchInsigniasData();
+  }, [csrfToken]);
+
+
+
+  const handleManualRefresh = () => {
+    fetchInsigniasData();
+  };
+
+
+  const getUnlockedBadges = () => {
+    if (!insigniasData) return [];
+
+    const unlocked = [];
+    Object.values(insigniasData.insignias).forEach(nivel => {
+      nivel.forEach(insignia => {
+        if (insignia.desbloqueada) {
+          unlocked.push(insignia.nombre);
+        }
+      });
+    });
+    return unlocked;
+  };
+
+  const getBadgeTemplate = (badgeName, nivel, isUnlocked) => {
+
+
+    const lockedTemplate = {
+      bgColor: 'bg-gray-50',
+      borderColor: 'border-gray-200',
+      textColor: 'text-gray-400',
+      iconColor: 'text-gray-400',
+      iconBg: 'bg-gray-200'
+    };
+
+    if (isUnlocked) {
+      const baseTemplate = unlockedTemplates[nivel] || unlockedTemplates.Bronce;
+
+
+      const badgeFromAll = allBadges[nivel.toLowerCase()]?.find(badge => badge.name === badgeName);
+
+      return {
+        ...baseTemplate,
+        icon: badgeFromAll?.icon || faTrophy
+      };
     }
 
-    let progressPercent = 0;
-    if (nextLevel) {
-      const pointsInThisLevel = nextLevel.minPoints - currentLevel.minPoints;
-      const pointsEarnedInThisLevel = levelPoints - currentLevel.minPoints;
-      progressPercent = Math.min(
-        100,
-        (pointsEarnedInThisLevel / pointsInThisLevel) * 100
-      );
-    } else {
-      progressPercent = 100;
-    }
 
-    return { currentLevel, nextLevel, progressPercent };
-  }, [levelPoints]);
+    return {
+      ...lockedTemplate,
+      icon: faLock
+    };
+  };
 
-  return (
-    <div className="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700">
-      {/* --- SECCIÓN NIVEL ACTUAL --- */}
-      <div className={`${currentLevel.bgColor} p-4 rounded-xl mb-6`}>
-        <div className="flex items-center justify-between mb-3">
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-            Nivel Actual
-          </h3>
-          <FontAwesomeIcon
-            icon={currentLevel.icon}
-            className={`text-xl ${currentLevel.color}`}
-          />
+
+
+  const renderBadgeSection = (nivel, title) => {
+    if (!insigniasData) return null;
+
+    const insigniasDelNivel = insigniasData.insignias[nivel] || [];
+    const desbloqueadasCount = insigniasDelNivel.filter(insignia => insignia.desbloqueada).length;
+    const totalCount = insigniasDelNivel.length;
+
+    return (
+      <div className="mb-6">
+        <div className="flex items-center space-x-3 mb-3">
+          <div className={`w-1 h-6 rounded-full ${unlockedTemplates[nivel]?.bgColor || 'bg-gray-300'}`}></div>
+          <div>
+            <h3 className="text-lg font-semibold text-gray-900">
+              {title}
+            </h3>
+            <p className="text-xs text-gray-600">
+              {desbloqueadasCount} de {totalCount} desbloqueadas
+            </p>
+          </div>
         </div>
 
-        <p className={`text-2xl font-bold ${currentLevel.color} mb-3`}>
-          {currentLevel.name}
-        </p>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+          {insigniasDelNivel.map((insignia) => {
 
-        {/* Barra de Progreso */}
-        {nextLevel ? (
-          <>
-            <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2.5 overflow-hidden shadow-inner">
-              <div
-                className="bg-gradient-to-r from-blue-500 to-indigo-600 h-2.5 rounded-full transition-all duration-1000 ease-out"
-                style={{ width: `${progressPercent}%` }}
-              ></div>
-            </div>
-            <p className="text-sm text-gray-600 dark:text-gray-400 mt-2">
-              <span className="font-bold text-gray-900 dark:text-white">
-                {nextLevel.minPoints - levelPoints}
-              </span>{' '}
-              puntos para <span className="font-bold">{nextLevel.name}</span>
-            </p>
-          </>
-        ) : (
-          <p className="text-sm font-bold text-indigo-600 dark:text-indigo-400">
-            ¡Nivel máximo alcanzado! 🎉
-          </p>
-        )}
-      </div>
-
-      {/* --- NUEVO: HISTORIAL DE NIVELES --- */}
-      <div>
-        <h4 className="text-md font-semibold text-gray-900 dark:text-white mb-4">
-          Historial de Niveles
-        </h4>
-        <div className="space-y-3">
-          {levels.map((level) => {
-            const isUnlocked = levelPoints >= level.minPoints;
-            const isCurrent = level.name === currentLevel.name;
+            const badgeTemplate = getBadgeTemplate(insignia.nombre, nivel, insignia.desbloqueada);
 
             return (
-              <div key={level.name} className="flex items-center space-x-3">
-                {/* Icono de Estado */}
-                <div className="flex-shrink-0">
-                  {isCurrent ? (
-                    <FontAwesomeIcon
-                      icon={faCircleDot}
-                      className={`text-blue-500 animate-pulse`}
-                    />
-                  ) : isUnlocked ? (
-                    <FontAwesomeIcon
-                      icon={faCheckCircle}
-                      className="text-green-500"
-                    />
-                  ) : (
-                    <FontAwesomeIcon icon={faLock} className="text-gray-400" />
-                  )}
-                </div>
-
-                {/* Nombre y Puntos */}
-                <div className={`flex-1 ${!isUnlocked && 'opacity-50'}`}>
-                  <p
-                    className={`font-medium ${isUnlocked ? 'text-gray-800 dark:text-gray-200' : 'text-gray-500 dark:text-gray-400'}`}
-                  >
-                    {level.name}
-                  </p>
-                  <p className="text-xs text-gray-500 dark:text-gray-400">
-                    {level.minPoints} Puntos de Nivel
-                  </p>
-                </div>
-
-                {/* Icono del Nivel */}
-                <FontAwesomeIcon
-                  icon={level.icon}
-                  className={`text-lg ${isUnlocked ? level.color : 'text-gray-400'}`}
-                />
-              </div>
+              <BadgeCard
+                key={insignia.id}
+                name={insignia.nombre}
+                description={insignia.descripcion}
+                icon={badgeTemplate.icon}
+                isUnlocked={insignia.desbloqueada}
+                bgColor={badgeTemplate.bgColor}
+                borderColor={badgeTemplate.borderColor}
+                textColor={badgeTemplate.textColor}
+                iconColor={badgeTemplate.iconColor}
+                iconBg={badgeTemplate.iconBg}
+              />
             );
           })}
         </div>
       </div>
-    </div>
-  );
-};
+    );
+  };
 
-/*
-================================================================================
-  Sub-Componente: Puntos (Sin cambios)
-================================================================================
-*/
-const PointsSection = ({ currentPoints, spentPoints }) => {
-  return (
-    <div className="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700">
-      <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-6">
-        Puntos Fiesta
-      </h3>
 
-      <div className="space-y-4 mb-6">
-        <div className="text-center p-4 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-xl text-white shadow-lg">
-          <div className="flex items-center justify-center space-x-3 mb-2">
-            <FontAwesomeIcon
-              icon={faCoins}
-              className="text-yellow-300 text-xl"
-            />
-            <span className="text-sm font-medium opacity-90">Disponibles</span>
+
+  if (loading) {
+    return (
+      <div className="min-h-screen p-2">
+        <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-4">
+          <div className="lg:col-span-1 space-y-4">
+
+            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-5 animate-pulse">
+              <div className="h-6 bg-gray-200 rounded w-3/4 mb-4"></div>
+              <div className="h-4 bg-gray-200 rounded w-full mb-2"></div>
+              <div className="h-4 bg-gray-200 rounded w-5/6"></div>
+            </div>
           </div>
-          <p className="text-4xl font-bold">{currentPoints}</p>
-          <p className="text-xs opacity-80 mt-1">Listos para gastar</p>
-        </div>
-
-        <div className="flex justify-between items-center p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
-          <div className="flex items-center space-x-2">
-            <FontAwesomeIcon icon={faArrowDown} className="text-gray-400" />
-            <span className="text-sm font-medium text-gray-600 dark:text-gray-400">
-              Gastados
-            </span>
+          <div className="lg:col-span-2">
+            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-5 animate-pulse">
+              <div className="h-6 bg-gray-200 rounded w-1/2 mb-4"></div>
+              <div className="h-4 bg-gray-200 rounded w-full mb-6"></div>
+              <div className="space-y-4">
+                {[1, 2, 3].map(item => (
+                  <div key={item} className="h-32 bg-gray-200 rounded"></div>
+                ))}
+              </div>
+            </div>
           </div>
-          <span className="text-lg font-bold text-gray-900 dark:text-white">
-            {spentPoints}
-          </span>
         </div>
       </div>
+    );
+  }
 
-      <div>
-        <h4 className="text-md font-semibold text-gray-900 dark:text-white mb-4">
-          Cómo ganar puntos
-        </h4>
-        <div className="space-y-3">
-          {pointEarningMethods.map((method) => (
-            <div
-              key={method.action}
-              className="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-200"
+  if (error) {
+    return (
+      <div className="min-h-screen p-2">
+        <div className="max-w-6xl mx-auto">
+          <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-center">
+            <p className="text-red-600 font-semibold">Error al cargar insignias</p>
+            <p className="text-sm text-red-500 mt-1">{error}</p>
+            <button
+              onClick={handleManualRefresh}
+              className="mt-3 bg-red-600 text-white px-4 py-2 rounded-md text-sm hover:bg-red-700 transition-colors"
             >
-              <div
-                className={`p-2 rounded-lg bg-gray-100 dark:bg-gray-600 ${method.color}`}
-              >
-                <FontAwesomeIcon icon={method.icon} className="text-sm" />
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="font-medium text-gray-700 dark:text-gray-300 text-sm">
-                  {method.action}
-                </p>
-                <p className="text-xs text-gray-500 dark:text-gray-400">
-                  {method.points}
-                </p>
-              </div>
-            </div>
-          ))}
+              Reintentar
+            </button>
+          </div>
         </div>
       </div>
-    </div>
-  );
-};
+    );
+  }
 
-/*
-================================================================================
-  COMPONENTE PRINCIPAL (Grid de Insignias Ajustado)
-================================================================================
-*/
-
-const GamificacionPerfil = ({
-  currentPoints,
-  spentPoints,
-  unlockedBadges = [],
-}) => {
-  const levelPoints = useMemo(
-    () => currentPoints + spentPoints,
-    [currentPoints, spentPoints]
-  );
-
-  const renderBadgeSection = (title, badges) => (
-    <div className="mb-8">
-      {/* Título de la Sección */}
-      <div className="flex items-center space-x-3 mb-6">
-        <div
-          className={`w-1.5 h-7 rounded-full ${badges[0].bgColor} shadow-lg`}
-        ></div>
-        <h3
-          className={`text-2xl font-bold ${badges[0].color.split(' ')[0]} dark:text-white`}
-        >
-          {title}
-        </h3>
+  if (!insigniasData) {
+    return (
+      <div className="min-h-screen p-2">
+        <div className="max-w-6xl mx-auto text-center">
+          <p className="text-gray-500">No se encontraron datos de insignias.</p>
+        </div>
       </div>
+    );
+  }
 
-      {/* --- NUEVO GRID DE INSIGNIAS --- */}
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-        {badges.map((badge) => (
-          <BadgeCard
-            key={badge.name}
-            name={badge.name}
-            description={badge.description}
-            icon={badge.icon}
-            isUnlocked={unlockedBadges.includes(badge.name)}
-            color={badge.color}
-          />
-        ))}
-      </div>
-    </div>
-  );
+  const { resumen } = insigniasData;
+  const unlockedBadges = getUnlockedBadges();
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 p-4 md:p-6">
-      {/* Header */}
-      <div className="max-w-7xl mx-auto mb-8">
-        <h1 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white text-center">
-          Programa de Lealtad
-        </h1>
-        <p className="text-gray-600 dark:text-gray-400 text-center mt-2">
-          Gana puntos, desbloquea insignias y disfruta de beneficios exclusivos
-        </p>
-      </div>
+    <div className="min-h-screen p-2">
 
-      {/* Contenido Principal */}
-      <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
-        {/* Sidebar - Stats y Nivel */}
-        <div className="lg:col-span-1 space-y-6 lg:space-y-8">
-          <LevelProgress levelPoints={levelPoints} />
-          <PointsSection
-            currentPoints={currentPoints}
-            spentPoints={spentPoints}
-          />
+      <div className="max-w-6xl mx-auto mb-6">
+        <div className="text-center">
+          <h1 className="text-xl md:text-2xl font-bold text-gray-900 mb-2">
+            Programa de Lealtad
+          </h1>
+          <button
+            onClick={handleManualRefresh}
+            disabled={loading}
+            className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400 transition-colors text-sm"
+          >
+            <FontAwesomeIcon
+              icon={loading ? faCircleDot : faSync}
+              className={loading ? "animate-spin" : ""}
+            />
+
+          </button>
+          <p className="text-sm text-gray-600 max-w-2xl mx-auto">
+            Gana puntos, desbloquea insignias y disfruta de beneficios exclusivos
+          </p>
         </div>
 
-        {/* Main Content - Insignias */}
+      </div>
+
+
+
+      <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-4">
+
+        <div className="lg:col-span-1 space-y-4">
+          <PuntosYNivelStats />
+        </div>
+
+
         <div className="lg:col-span-2">
-          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl border border-gray-200 dark:border-gray-700 p-6 md:p-8">
-            {/* Header de Insignias */}
-            <div className="flex items-center justify-between mb-8">
-              <div>
-                <h2 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white">
-                  Mis Insignias
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-5">
+
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-5">
+              <div className="mb-3 sm:mb-0">
+                <h2 className="text-lg font-semibold text-gray-900 mb-1">
+                  Tu Colección de Insignias
                 </h2>
-                <p className="text-gray-600 dark:text-gray-400 mt-1">
-                  {unlockedBadges.length} de{' '}
-                  {Object.values(allBadges).flat().length} desbloqueadas
-                </p>
+
+                <div className="flex items-center space-x-3 text-xs text-gray-600">
+                  <span>{resumen.totalDesbloqueadas} desbloqueadas</span>
+                  <span>•</span>
+                  <span>{resumen.totalPorConseguir} por conseguir</span>
+                </div>
               </div>
-              <div className="hidden md:block p-3 bg-indigo-100 dark:bg-indigo-900/30 rounded-lg">
-                <FontAwesomeIcon
-                  icon={faTrophy}
-                  className="text-indigo-600 dark:text-indigo-400 text-2xl"
-                />
+
+              <div className="bg-blue-50 px-3 py-1.5 rounded-md border border-blue-200">
+                <div className="flex items-center space-x-1.5">
+                  <FontAwesomeIcon
+                    icon={faTrophy}
+                    className="text-blue-600 text-base"
+                  />
+                  <span className="font-semibold text-blue-700 text-sm">
+                    {resumen.progresoTotal}%
+                  </span>
+                </div>
               </div>
             </div>
 
-            {/* Progreso de Insignias */}
-            <div className="mb-8 p-4 bg-gray-50 dark:bg-gray-700 rounded-xl">
-              <div className="flex items-center justify-between text-sm text-gray-600 dark:text-gray-400 mb-2">
-                <span>Progreso total</span>
-                <span>
-                  {Math.round(
-                    (unlockedBadges.length /
-                      Object.values(allBadges).flat().length) *
-                      100
-                  )}
-                  %
+
+            <div className="mb-6 p-4 bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl border border-green-200 shadow-sm">
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center space-x-2">
+                  <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                  <span className="text-sm font-semibold text-green-800">Progreso Total</span>
+                </div>
+                <div className="flex items-center space-x-1">
+                  <span className="text-lg font-bold text-green-700">{resumen.progresoTotal}%</span>
+                  <div className="w-1 h-1 bg-green-400 rounded-full animate-bounce"></div>
+                </div>
+              </div>
+
+              <div className="relative">
+
+                <div className="w-full bg-green-200 rounded-full h-3 overflow-hidden shadow-inner">
+
+                  <div
+                    className="bg-gradient-to-r from-green-500 via-emerald-500 to-green-600 h-3 rounded-full relative overflow-hidden transition-all duration-1000 ease-out"
+                    style={{ width: `${resumen.progresoTotal}%` }}
+                  >
+
+                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent animate-shine"></div>
+
+
+                    <div className="absolute top-0 right-0 w-1 h-3 bg-white/60 animate-pulse"></div>
+
+
+                    <div className="absolute top-1 left-1/4 w-1 h-1 bg-white/50 rounded-full animate-bubble-1"></div>
+                    <div className="absolute top-2 left-1/2 w-0.5 h-0.5 bg-white/40 rounded-full animate-bubble-2"></div>
+                    <div className="absolute top-1 left-3/4 w-0.5 h-0.5 bg-white/30 rounded-full animate-bubble-3"></div>
+                  </div>
+                </div>
+
+
+                <div
+                  className="absolute top-1/2 transform -translate-y-1/2 transition-all duration-1000 ease-out"
+                  style={{ left: `calc(${Math.min(resumen.progresoTotal, 97)}% - 8px)` }}
+                >
+                  <div className="relative">
+                    <div className="w-4 h-4 bg-white border-2 border-green-500 rounded-full shadow-lg animate-ping-slow"></div>
+                    <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-2 h-2 bg-green-500 rounded-full"></div>
+                  </div>
+                </div>
+              </div>
+
+
+              <div className="flex justify-between items-center mt-2 text-xs">
+                <span className="text-green-700 font-medium">
+                  {resumen.totalDesbloqueadas} de {resumen.totalDesbloqueadas + resumen.totalPorConseguir} insignias
+                </span>
+                <span className="text-green-600">
+                  {resumen.totalPorConseguir > 0 ? `${resumen.totalPorConseguir} restantes` : '¡Completado!'}
                 </span>
               </div>
-              <div className="w-full bg-gray-200 dark:bg-gray-600 rounded-full h-2">
-                <div
-                  className="bg-gradient-to-r from-green-400 to-blue-500 h-2 rounded-full transition-all duration-1000"
-                  style={{
-                    width: `${(unlockedBadges.length / Object.values(allBadges).flat().length) * 100}%`,
-                  }}
-                ></div>
-              </div>
             </div>
 
-            {/* Secciones de Insignias */}
-            <div className="space-y-8">
-              {renderBadgeSection('Bronce', allBadges.bronce)}
-              {renderBadgeSection('Plata', allBadges.plata)}
-              {renderBadgeSection('Oro', allBadges.oro)}
+            <style jsx>{`
+  @keyframes shine {
+    0% { transform: translateX(-100%) skewX(-15deg); }
+    100% { transform: translateX(200%) skewX(-15deg); }
+  }
+  
+  @keyframes ping-slow {
+    0%, 100% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.2); opacity: 0.8; }
+  }
+  
+  @keyframes bubble-1 {
+    0%, 100% { transform: translateY(0px); opacity: 0.7; }
+    50% { transform: translateY(-1px); opacity: 1; }
+  }
+  
+  @keyframes bubble-2 {
+    0%, 100% { transform: translateY(0px) translateX(0px); opacity: 0.5; }
+    33% { transform: translateY(-1px) translateX(1px); opacity: 0.8; }
+    66% { transform: translateY(1px) translateX(-1px); opacity: 0.6; }
+  }
+  
+  @keyframes bubble-3 {
+    0%, 100% { transform: translateY(0px); opacity: 0.4; }
+    50% { transform: translateY(1px); opacity: 0.7; }
+  }
+  
+  .animate-shine {
+    animation: shine 2s ease-in-out infinite;
+  }
+  
+  .animate-ping-slow {
+    animation: ping-slow 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  }
+  
+  .animate-bubble-1 {
+    animation: bubble-1 3s ease-in-out infinite;
+  }
+  
+  .animate-bubble-2 {
+    animation: bubble-2 4s ease-in-out infinite;
+  }
+  
+  .animate-bubble-3 {
+    animation: bubble-3 5s ease-in-out infinite;
+  }
+`}</style>
+
+
+            <div className="space-y-6">
+              {renderBadgeSection('Bronce', 'Insignias Bronce')}
+              {renderBadgeSection('Plata', 'Insignias Plata')}
+              {renderBadgeSection('Oro', 'Insignias Oro')}
             </div>
           </div>
         </div>
       </div>
 
-      {/* Footer Informativo */}
-      <div className="max-w-7xl mx-auto mt-8 text-center">
-        <p className="text-sm text-gray-500 dark:text-gray-400">
-          Los puntos expiran después de 12 meses de inactividad • Consulta los{' '}
-          <a
-            href="#"
-            className="text-indigo-600 dark:text-indigo-400 hover:underline"
-          >
-            términos y condiciones
-          </a>
-        </p>
+      {/* Footer */}
+      <div className="max-w-6xl mx-auto mt-6 text-center">
+        <div className="bg-white rounded-lg p-3 shadow-xs border border-gray-200">
+          <p className="text-xs text-gray-600">
+            Los puntos expiran después de 2 meses de inactividad •{' '}
+            <a
+              href="#"
+              className="text-blue-600 hover:underline font-medium"
+            >
+              Consulta términos y condiciones
+            </a>
+          </p>
+        </div>
       </div>
     </div>
   );

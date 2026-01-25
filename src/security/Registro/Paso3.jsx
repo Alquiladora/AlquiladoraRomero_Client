@@ -44,7 +44,7 @@ const Paso3 = ({ guardarCorreo }) => {
   const { csrfToken } = useAuth();
   const [isCompromised, setIsCompromised] = useState(false);
 
-  const BASE_URL = 'http://localhost:3001';
+ 
 
   useEffect(() => {
     const fetchUsuariosYCsrf = async () => {

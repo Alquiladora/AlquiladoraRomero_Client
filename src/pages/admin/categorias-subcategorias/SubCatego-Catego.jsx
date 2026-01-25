@@ -102,7 +102,7 @@ function CrudSubcategorias() {
     setEditItem(null);
   };
 
-  const handleAdd = async () => {
+const handleAdd = async () => {
     if (!inputValue.trim()) {
       toast.warning('Por favor, ingresa un nombre válido.');
       return;
@@ -118,13 +118,12 @@ function CrudSubcategorias() {
             withCredentials: true,
           }
         );
-        setCategorias([...categorias, response.data]);
-        fetchData();
+        setCategorias([...categorias, response.data]); 
         toast.success('Categoría agregada correctamente.');
       } else if (modalType === 'subcategoria') {
-        console.log('ID de categoría seleccionado:', selectedCategory);
-
-        const response = await api.post(
+        
+        // --- CORRECCIÓN AQUÍ ---
+        await api.post(
           '/api/productos/subcategoria',
           {
             nombre: inputValue,
@@ -135,39 +134,36 @@ function CrudSubcategorias() {
             withCredentials: true,
           }
         );
-        setSubcategorias([...subcategorias, response.data]);
-        fetchData();
+        
+    
         toast.success('Subcategoría agregada correctamente.');
       }
+      
+      fetchData();
       closeModal();
     } catch (error) {
-      if (
-        error.response &&
-        error.response.data &&
-        error.response.data.message
-      ) {
+     
+      if (error.response && error.response.data && error.response.data.message) {
         toast.error(error.response.data.message);
       } else {
-        toast.error('Error al agregar la categoría o subcategoría.');
+        toast.error('Error al agregar.');
       }
       console.error('Error al agregar:', error);
     }
   };
 
-  const handleUpdate = async () => {
+ const handleUpdate = async () => {
     if (!editItem || !inputValue.trim()) {
       toast.warning('Por favor, ingresa un valor.');
       return;
     }
     try {
       if (modalType === 'categoria') {
+       
         await api.put(
           `/api/productos/categoria/${editItem.id}`,
           { nombre: inputValue },
-          {
-            headers: { 'X-CSRF-Token': csrfToken },
-            withCredentials: true,
-          }
+          { headers: { 'X-CSRF-Token': csrfToken }, withCredentials: true }
         );
         setCategorias((prev) =>
           prev.map((cat) =>
@@ -175,8 +171,8 @@ function CrudSubcategorias() {
           )
         );
         toast.success('Categoría actualizada correctamente.');
-        fetchData();
       } else if (modalType === 'subcategoria') {
+       
         await api.put(
           `/api/productos/subcategoria/${editItem.id}`,
           { nombre: inputValue, idCategoria: selectedCategory },
@@ -185,26 +181,19 @@ function CrudSubcategorias() {
             withCredentials: true,
           }
         );
-        setSubcategorias((prev) =>
-          prev.map((sub) =>
-            sub.id === editItem.id
-              ? { ...sub, nombre: inputValue, idCategoria: selectedCategory }
-              : sub
-          )
-        );
-        fetchData();
+
+        
         toast.success('Subcategoría actualizada correctamente.');
       }
+      
+      fetchData(); 
       closeModal();
     } catch (error) {
-      if (
-        error.response &&
-        error.response.data &&
-        error.response.data.message
-      ) {
+      
+      if (error.response && error.response.data && error.response.data.message) {
         toast.error(error.response.data.message);
       } else {
-        toast.error('Error al actualizar la categoría o subcategoría.');
+        toast.error('Error al actualizar.');
       }
       console.error('Error al actualizar:', error);
     }

@@ -41,7 +41,7 @@ const Chatbox = ({ onClose }) => {
 
   const fetchEmpresaInfo = async () => {
     try {
-      const response = await fetch('https://localhost:4000/api/getEmpresa');
+      const response = await fetch('https://alquiladora-romero-server.onrender.com/api/getEmpresa');
       if (!response.ok) throw new Error('Error en la respuesta del servidor');
       const data = await response.json();
       console.log('Datos de la empresa:', data);

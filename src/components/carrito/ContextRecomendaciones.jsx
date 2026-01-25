@@ -1,19 +1,19 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
-import { useAuth } from '../../hooks/ContextAuth'; // <-- 1. Importa el hook de autenticación
+import { useAuth } from '../../hooks/ContextAuth';
 
-// Crear el contexto
+
 const RecomendacionesContext = createContext();
 
-// Crear el Proveedor (Provider) que manejará el estado
+
 export const RecomendacionesProvider = ({ children }) => {
-  const { user } = useAuth(); // <-- 2. Obtén la información del usuario actual
+  const { user } = useAuth();
   const userId = user?.idUsuarios || user?.id;
 
-  // --- MEJORA CLAVE: La clave de localStorage ahora es única para cada usuario ---
+
   const storageKey = userId ? `recomendacionesApp_${userId}` : null;
 
   const [recomendaciones, setRecomendaciones] = useState(() => {
-    if (!storageKey) return []; // Si no hay usuario, no hay recomendaciones guardadas
+    if (!storageKey) return [];
     try {
       const recomendacionesGuardadas = localStorage.getItem(storageKey);
       return recomendacionesGuardadas
@@ -25,9 +25,7 @@ export const RecomendacionesProvider = ({ children }) => {
     }
   });
 
-  // Cada vez que las recomendaciones o el usuario cambien, se actualiza localStorage
   useEffect(() => {
-    // Solo guarda si hay un usuario logueado
     if (storageKey) {
       try {
         localStorage.setItem(storageKey, JSON.stringify(recomendaciones));
@@ -46,7 +44,6 @@ export const RecomendacionesProvider = ({ children }) => {
 
   const limpiarRecomendaciones = () => {
     setRecomendaciones([]);
-    // También limpia el localStorage para el usuario actual
     if (storageKey) {
       localStorage.removeItem(storageKey);
     }
@@ -65,7 +62,7 @@ export const RecomendacionesProvider = ({ children }) => {
   );
 };
 
-// Crear un hook personalizado para usar el contexto fácilmente
+
 export const useRecomendaciones = () => {
   return useContext(RecomendacionesContext);
 };

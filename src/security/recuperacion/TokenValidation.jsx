@@ -69,7 +69,6 @@ export const TokenValidation = ({ correo, setStep }) => {
         headers: { 'X-CSRF-Token': csrfToken },
         withCredentials: true,
       });
-      console.log('Respuesta de vecesCambioPass:', response.data);
       setCambiosContrasena(response.data.cambiosRealizados);
       setBloqueado(response.data.cambiosRealizados >= 20);
     } catch (error) {
@@ -77,47 +76,41 @@ export const TokenValidation = ({ correo, setStep }) => {
     }
   };
 
-  const handleSubmit = async () => {
-    const tokenIngresado = tokens.join('');
-    console.log('Token enviado a correo:', correo);
+ const handleSubmit = async () => {
+  const tokenIngresado = tokens.join('');
 
-    try {
-      const response = await api.post(
-        '/api/usuarios/validarToken/contrasena',
-        { correo: correo, token: tokenIngresado },
-        {
-          headers: {
-            'X-CSRF-Token': csrfToken,
-          },
-          withCredentials: true,
-        }
-      );
+  try {
+    const response = await api.post(
+      '/api/usuarios/validarToken/contrasena',
+      { correo: correo, token: tokenIngresado },
+      { headers: { 'X-CSRF-Token': csrfToken }, withCredentials: true }
+    );
 
-      console.log(
-        'Este es lo que me contiene de response de validar correo',
-        response
-      );
-
-      if (
-        response.data.message ===
-        'Token válido. Puede proceder con el cambio de contraseña. El token ha sido eliminado.'
-      ) {
-        Swal.fire({
-          title: '¡Token Correcto!',
-          text: 'El token ha sido validado correctamente.',
-          icon: 'success',
-          timer: 2000,
-          showConfirmButton: false,
-        }).then(() => {
-          setStep(3);
-        });
-      } else {
-        setErrorMessage(response.data.message);
-      }
-    } catch (error) {
-      Swal.fire('Error', 'Hubo un problema al validar el token.', 'error');
+    if (response.data.redirect) {
+      
+      setStep(3);
+      return;
     }
-  };
+
+    if (response.data.message.includes('válido')) {
+      Swal.fire({
+        title: '¡Token Correcto!',
+        text: 'Redirigiendo...',
+        icon: 'success',
+        timer: 1500,
+        showConfirmButton: false,
+      }).then(() => {
+        setStep(3); 
+      });
+    } else {
+      setErrorMessage(response.data.message);
+    }
+  } catch (error) {
+    setErrorMessage('Error al validar token');
+  }
+};
+
+      
 
   const formatTime = (seconds) => {
     const minutes = Math.floor(seconds / 60);

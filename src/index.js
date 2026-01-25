@@ -8,6 +8,15 @@ import { AuthProvider } from './hooks/ContextAuth';
 import InactivityHandler from './hooks/ContexInactividad';
 import { useSocket } from './utils/Socket';
 
+//Bloqueamos console.log
+if (process.env.NODE_ENV === 'production') {
+  console.log = () => {};
+  console.info = () => {};
+  console.debug = () => {};
+  console.warn = () => {}; 
+  console.error = () => {}; 
+}
+
 function SocketController() {
   useSocket();
   return null;
@@ -29,11 +38,16 @@ root.render(
   </React.StrictMode>
 );
 
+
+
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
-    navigator.serviceWorker
-      .register('/sw.js')
-      .then((reg) => console.log('Service Worker registrado', reg))
-      .catch((err) => console.log('Service Worker no registrado', err));
+    navigator.serviceWorker.register('/service-worker.js')
+      .then(registration => {
+       // console.log('SW registrado con éxito:', registration);
+      })
+      .catch(error => {
+       // console.log('Fallo el registro del SW:', error);
+      });
   });
 }

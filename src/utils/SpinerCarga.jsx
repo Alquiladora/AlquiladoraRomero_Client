@@ -7,7 +7,7 @@ const SpinerCarga = () => {
 
   const getLogo = async () => {
     try {
-      const response = await api.get('/api/empresa/log', {
+      const response = await api.get('/api/empresa/logo', {
         withCredentials: true,
       });
       setLogoData(response.data);

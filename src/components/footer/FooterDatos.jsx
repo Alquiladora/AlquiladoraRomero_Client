@@ -40,13 +40,7 @@ export const FooterDatos = () => {
     redesSociales: {},
   });
 
-  const [loading, setLoading] = useState(false);
-  useEffect(() => {
-    if (csrfToken) {
-      fetchEmpresaData();
-    }
-  }, [csrfToken]);
-
+  
   const fetchEmpresaData = async () => {
     setLoading(true);
     try {
@@ -64,6 +58,15 @@ export const FooterDatos = () => {
       setLoading(false);
     }
   };
+
+  const [loading, setLoading] = useState(false);
+  
+  useEffect(() => {
+    if (csrfToken) {
+      fetchEmpresaData();
+    }
+  }, [csrfToken]);
+
 
   const getSocialIcon = (url = '') => {
     if (!url || typeof url !== 'string') return faShareAlt;
@@ -133,13 +136,7 @@ export const FooterDatos = () => {
               <FontAwesomeIcon icon={faFileContract} className="mr-2" />
               Términos y Condiciones
             </Link>
-            <Link
-              to="/sobre-nosotros"
-              className="flex items-center text-sm text-white transition-colors mb-1 hover:text-gray-400"
-            >
-              <FontAwesomeIcon icon={faQuestionCircle} className="mr-2" />
-              Sobre nosotros
-            </Link>
+          
           </div>
 
           <div className="flex flex-col items-center mb-6 md:mb-0">
@@ -177,23 +174,12 @@ export const FooterDatos = () => {
               className="flex items-center text-sm text-white transition-colors mb-1 hover:text-gray-400"
             >
               <FontAwesomeIcon icon={faIndustry} className="mr-2" />
-              Compañía 1
+              Ferreteria Romero
             </a>
-            <a
-              href="#"
-              className="flex items-center text-sm text-white transition-colors mb-1 hover:text-gray-400"
-            >
-              <FontAwesomeIcon icon={faIndustry} className="mr-2" />
-              Compañía 2
-            </a>
-            <a
-              href="#"
-              className="flex items-center text-sm text-white transition-colors mb-1 hover:text-gray-400"
-            >
-              <FontAwesomeIcon icon={faIndustry} className="mr-2" />
-              Compañía 3
-            </a>
+         
+           
           </div>
+
         </div>
       </div>
 
@@ -208,14 +194,16 @@ export const FooterDatos = () => {
       </div>
 
       <div className="flex justify-center mt-4">
-        <a
-          href="#"
-          className="inline-flex items-center text-sm text-white bg-blue-500 px-4 py-2 rounded-md hover:bg-blue-600 transition-colors shadow-md"
-        >
-          <FontAwesomeIcon icon={faDownload} className="mr-2" />
-          Descarga nuestra App
-        </a>
-      </div>
+  <a
+    href="https://apkpure.com/p/com.example.movil_alquiladora_romero_repartidor"
+    target="_blank"
+    rel="noopener noreferrer"
+    className="inline-flex items-center text-sm text-white bg-blue-500 px-4 py-2 rounded-md hover:bg-blue-600 transition-colors shadow-md"
+  >
+    <FontAwesomeIcon icon={faDownload} className="mr-2" />
+    Descarga nuestra App
+  </a>
+</div>
     </>
   );
 };

@@ -35,8 +35,6 @@ import {
 import { faWhatsapp } from '@fortawesome/free-brands-svg-icons';
 import { toast } from 'react-toastify';
 
-const numeroWhatsApp = '521234567890';
-
 const OrderCardSkeleton = () => (
   <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700 p-6 mb-4 animate-pulse">
     <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-4">
@@ -618,6 +616,28 @@ const HistorialPedidos = () => {
     orderId: null,
   });
   const [ratedOrders, setRatedOrders] = useState([]);
+  const [numeroWhatsApp, setNumeroWhatsApp] = useState('');
+
+  const fetchWhatsappNumber = useCallback(
+    async (signal) => {
+      if (!csrfToken) return;
+
+      try {
+        const response = await api.get('/api/empresa/telefonoEmpresa', {
+          withCredentials: true,
+          headers: { 'X-CSRF-Token': csrfToken },
+          signal,
+        });
+
+        if (response.data.telefono) {
+          setNumeroWhatsApp(response.data.telefono);
+        }
+      } catch (err) {
+        console.error('Error al obtener el número de WhatsApp:', err);
+      }
+    },
+    [csrfToken]
+  );
 
   const fetchOrders = useCallback(async (page, signal) => {
     setLoading(true);
@@ -740,11 +760,12 @@ const HistorialPedidos = () => {
 
   useEffect(() => {
     const controller = new AbortController();
-    if (!isLoadingAuth) {
+    if (!isLoadingAuth && csrfToken) {
       const timer = setTimeout(
         () => {
           fetchOrders(pagination.currentPage, controller.signal);
           fetchRatedOrders(controller.signal);
+          fetchWhatsappNumber(controller.signal);
         },
         isFirstLoad ? 150 : 0
       );
@@ -763,6 +784,8 @@ const HistorialPedidos = () => {
     fetchOrders,
     fetchRatedOrders,
     isLoadingAuth,
+    fetchWhatsappNumber,
+    csrfToken,
   ]);
 
   useEffect(() => {
@@ -1314,7 +1337,7 @@ const HistorialPedidos = () => {
                 {
                   id: 'incompletos',
                   label: 'Incompletos',
-                  count: orders.filter((o) => o.estado === 'Incompelto').length,
+                  count: orders.filter((o) => o.estado === 'Incompleto').length,
                 },
                 {
                   id: 'entregados',
@@ -1400,7 +1423,7 @@ const HistorialPedidos = () => {
                   <div
                     data-testid="order-card"
                     key={order.idPedido}
-                    className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700 overflow-hidden"
+                    className="bg-white dark:bg-gray-1000 rounded-2xl shadow-lg border border-gray-900 dark:border-gray-700 overflow-hidden"
                   >
                     {/* Header del pedido */}
                     <div className="bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-700 dark:to-gray-800 px-6 py-4 border-b border-gray-200 dark:border-gray-700">
@@ -1428,6 +1451,7 @@ const HistorialPedidos = () => {
                         </div>
                       </div>
                     </div>
+                    
 
                     {/* Información del pedido */}
                     <div className="p-6">
@@ -1556,31 +1580,42 @@ const HistorialPedidos = () => {
                       {/* Productos del pedido */}
                       <div className="border-t border-gray-200 dark:border-gray-700 pt-6">
                         {/* Información del pedido (idRastreo) fuera del bucle de fotos */}
-                        <div className="flex items-center justify-between p-4 bg-gray-100 dark:bg-gray-800 rounded-lg mb-4">
+                        <div className="flex items-center justify-between p-4  dark:bg-gray-800 rounded-lg mb-4">
                           <h4 className="font-medium text-gray-900 dark:text-white">
                             Pedido:{' '}
                             <strong className="text-gray-900 dark:text-white">
                               {order.idRastreo}
                             </strong>
                           </h4>
-                          {/* Aquí puedes mantener el botón de preguntar, si aplica al pedido en general */}
+                         
 
                           <a
-                            href={`https://wa.me/${numeroWhatsApp}?text=${mensaje}`}
+                            href={
+                              numeroWhatsApp
+                                ? `https://wa.me/${numeroWhatsApp}?text=${mensaje} #${order.idRastreo}`
+                                : '#'
+                            }
                             target="_blank"
-                            rel="noopener noreferrer" // Buena práctica de seguridad para enlaces externos
-                            className="flex items-center space-x-2 px-3 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors duration-200 text-sm no-underline"
+                            rel="noopener noreferrer"
+                            className={`flex items-center space-x-2 px-3 py-2 text-white rounded-lg transition-colors duration-200 text-sm no-underline ${
+                              numeroWhatsApp
+                                ? 'bg-green-500 hover:bg-green-600'
+                                : 'bg-gray-400 cursor-not-allowed'
+                            }`}
+                            onClick={(e) =>
+                              !numeroWhatsApp && e.preventDefault()
+                            }
                           >
                             <FontAwesomeIcon
                               icon={faWhatsapp}
                               className="w-4 h-4"
                             />
-                            <span>Preguntar por WhatsApp</span>
+                            <span>Contactar</span>
                           </a>
                         </div>
 
                         {/* Contenedor principal para las fotos */}
-                        <div className="p-4 bg-gray-50 dark:bg-gray-700 rounded-lg mb-4 last:mb-0">
+                        <div className="p-4  dark:bg-gray-700 rounded-lg mb-4 last:mb-0">
                           {order.fotosProductos &&
                           order.fotosProductos.length > 0 ? (
                             <div className="flex items-center space-x-2">

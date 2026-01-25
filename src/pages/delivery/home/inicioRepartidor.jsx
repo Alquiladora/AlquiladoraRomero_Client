@@ -24,16 +24,13 @@ const InicioRepartidor = ({ datosRepartidor }) => {
     promedioValoracion: 0,
   });
   // ✅ Corrección
-  const [setPedidosFinalizadosPorMes] = useState([]);
   const { user, csrfToken } = useAuth();
 
   console.log(
     'Datos recibidos desde el enpoit de datos de repartidor ',
     datosRepartidor
   );
-  // Datos para el gráfico radial de rendimiento mensual
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -63,8 +60,6 @@ const InicioRepartidor = ({ datosRepartidor }) => {
             totalFinalizado: data.totalFinalizado || 0,
             promedioValoracion: parseFloat(data.promedioValoracion) || 0,
           });
-
-          setPedidosFinalizadosPorMes(data.pedidosFinalizadosPorMes || []);
         } else {
           console.log('Error');
         }
@@ -84,7 +79,6 @@ const InicioRepartidor = ({ datosRepartidor }) => {
           totalFinalizado: 0,
           promedioValoracion: 0,
         });
-        setPedidosFinalizadosPorMes([]);
       } finally {
         setLoading(false);
       }

@@ -9,15 +9,19 @@ import {
   Divider,
   IconButton,
   CircularProgress,
+
 } from '@mui/material';
 import {
   faUser,
   faSignOutAlt,
   faHistory,
+  faTrophy,
+
 } from '@fortawesome/free-solid-svg-icons';
 import Swal from 'sweetalert2';
 import { useAuth } from '../../../hooks/ContextAuth';
 import { UserIcon } from '@heroicons/react/outline';
+import "./CerrarSesion.css"
 
 const LoginLink = () => (
   <Link
@@ -32,7 +36,7 @@ const LoginLink = () => (
 );
 
 const IconoPerfil = () => {
-  const { user, isLoading, logout } = useAuth();
+  const { user, isLoading, logout, isLoggingOut, setIsLoggingOut } = useAuth();
   const [anchorEl, setAnchorEl] = useState(null);
   const [foto, setFoto] = useState('');
   const navigate = useNavigate();
@@ -65,33 +69,59 @@ const IconoPerfil = () => {
     };
   }, [user, controls, navigate]);
 
-  const handleLogout = async () => {
+const handleLogout = async () => {
+    if (isLoggingOut) return;
+
     try {
-      await logout();
-      Swal.fire({
-        title: 'Sesión cerrada',
-        text: 'Has cerrado sesión correctamente.',
-        icon: 'success',
-        confirmButtonText: 'OK',
-        width: '350px',
-        customClass: {
-          popup: 'small-swal',
-          title: 'text-lg font-semibold',
-          content: 'text-sm',
-          confirm肆Button: 'bg-blue-500 text-white px-4 py-2 rounded-lg',
-        },
-        buttonsStyling: false,
-      }).then(() => navigate('/login'));
+        await logout();
+
+        Swal.fire({
+            title: '✅ Sesión cerrada',
+            text: 'Has cerrado sesión correctamente.',
+            icon: 'success',
+            confirmButtonText: 'Continuar',
+            width: '320px',
+            padding: '1rem',
+            background: '#f8fafc',
+            color: '#1f2937',
+            customClass: {
+                popup: 'rounded-xl shadow-2xl border border-gray-200',
+                title: 'text-base font-semibold text-gray-800 mb-2',
+                htmlContainer: 'text-sm text-gray-600 leading-relaxed',
+                confirmButton: 'bg-gradient-to-r from-blue-500 to-blue-600 text-white px-6 py-2 rounded-lg text-sm font-medium shadow-sm hover:from-blue-600 hover:to-blue-700 transition-all duration-200 transform hover:scale-105 active:scale-95',
+            },
+            showClass: {
+                popup: 'animate-scale-in'
+            },
+            hideClass: {
+                popup: 'animate-scale-out'
+            },
+            buttonsStyling: false,
+            timer: 2000,
+            timerProgressBar: true,
+        }).then(() => navigate('/login'));
     } catch (error) {
-      console.error('❌ Error al cerrar sesión:', error);
-      Swal.fire({
-        title: 'Error',
-        text: 'No se pudo cerrar sesión. Intenta de nuevo.',
-        icon: 'error',
-        confirmButtonText: 'OK',
-      });
+        console.error('❌ Error al cerrar sesión:', error);
+        Swal.fire({
+            title: '⚠️ Error',
+            text: 'No se pudo cerrar sesión. Intenta de nuevo.',
+            icon: 'error',
+            confirmButtonText: 'Entendido',
+            width: '300px',
+            padding: '1rem',
+            background: '#fef2f2',
+            customClass: {
+                popup: 'rounded-xl shadow-2xl border border-red-100',
+                title: 'text-base font-semibold text-red-800 mb-2',
+                htmlContainer: 'text-sm text-red-600 leading-relaxed',
+                confirmButton: 'bg-gradient-to-r from-red-500 to-red-600 text-white px-6 py-2 rounded-lg text-sm font-medium shadow-sm hover:from-red-600 hover:to-red-700 transition-all duration-200',
+            },
+            buttonsStyling: false,
+        });
+    } finally {
+        if (setIsLoggingOut) setIsLoggingOut(false);
     }
-  };
+};
 
   const username = user?.nombre ? user.nombre.charAt(0).toUpperCase() : 'U';
   const fotoPerfil = foto || '';
@@ -120,6 +150,7 @@ const IconoPerfil = () => {
           onClick={handleMenuOpen}
           className="p-1 focus:outline-none"
           aria-label="Perfil"
+          disabled={isLoggingOut}
         >
           <Avatar
             src={fotoPerfil}
@@ -134,7 +165,11 @@ const IconoPerfil = () => {
               fontWeight: 'bold',
             }}
           >
-            {!fotoPerfil && username}
+            {isLoggingOut ? (
+              <CircularProgress size={20} color="inherit" />
+            ) : (
+              !fotoPerfil && username
+            )}
           </Avatar>
         </IconButton>
       </motion.div>
@@ -155,6 +190,7 @@ const IconoPerfil = () => {
           onClick={handleMenuClose}
           component={Link}
           to="/cliente/perfil"
+          disabled={isLoggingOut}
           className="hover:bg-gray-100 dark:hover:bg-gray-800 p-3 rounded-lg flex items-center transition-all duration-200"
         >
           <FontAwesomeIcon icon={faUser} className="mr-3 text-blue-500" />
@@ -166,18 +202,20 @@ const IconoPerfil = () => {
         <MenuItem
           onClick={handleMenuClose}
           component={Link}
+          disabled={isLoggingOut}
           to="/cliente/nivel/logros"
           className="hover:bg-gray-100 dark:hover:bg-gray-800 p-3 rounded-lg flex items-center transition-all duration-200"
         >
-          <FontAwesomeIcon icon={faHistory} className="mr-3 text-green-500" />
+          <FontAwesomeIcon icon={faTrophy} className="mr-3 text-yellow-500" />
           <span className="text-gray-700 dark:text-gray-200 font-medium text-sm">
-            Nivel / Logoros
+            Nivel / Logros
           </span>
         </MenuItem>
 
         <MenuItem
           onClick={handleMenuClose}
           component={Link}
+          disabled={isLoggingOut}
           to="/cliente/historial-pedidos"
           className="hover:bg-gray-100 dark:hover:bg-gray-800 p-3 rounded-lg flex items-center transition-all duration-200"
         >
@@ -216,18 +254,28 @@ const IconoPerfil = () => {
         <motion.div whileHover={{ scale: 1.03 }} transition={{ duration: 0.2 }}>
           <MenuItem
             onClick={handleLogout}
-            className="hover:bg-red-50 dark:hover:bg-red-900/20 p-3 rounded-lg flex items-center transition-all duration-200"
+            className={`p-3 rounded-lg flex items-center transition-all duration-200 ${isLoggingOut
+                ? 'bg-gray-200 dark:bg-gray-700 cursor-not-allowed'
+                : 'hover:bg-red-50 dark:hover:bg-red-900/20'
+              }`}
+            disabled={isLoggingOut}
           >
-            <FontAwesomeIcon
-              icon={faSignOutAlt}
-              className="mr-3 text-red-500"
-            />
-            <span className="text-red-600 dark:text-red-400 font-medium text-sm">
-              Cerrar Sesión
+            {isLoggingOut ? (
+              <CircularProgress size={20} className="mr-3 text-red-500" />
+            ) : (
+              <FontAwesomeIcon
+                icon={faSignOutAlt}
+                className="mr-3 text-red-500"
+              />
+            )}
+            <span className={`font-medium text-sm ${isLoggingOut ? 'text-gray-500 dark:text-gray-400' : 'text-red-600 dark:text-red-400'}`}>
+              {isLoggingOut ? 'Cerrando Sesión...' : 'Cerrar Sesión'}
             </span>
           </MenuItem>
         </motion.div>
       </Menu>
+
+      
     </div>
   );
 };

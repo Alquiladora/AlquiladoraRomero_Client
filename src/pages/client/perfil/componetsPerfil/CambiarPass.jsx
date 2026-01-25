@@ -26,7 +26,7 @@ const ModalPassword = ({ open, onClose, usuario }) => {
     setIsProcessing(true);
     try {
       const response = await api.post(
-        `/api/email/cambiarpass`,
+        `/api/emails/cambiarpass`,
         {
           correo: usuario.correo,
           nombreU: usuario.nombre,

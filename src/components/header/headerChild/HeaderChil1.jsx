@@ -20,12 +20,13 @@ import api from '../../../utils/AxiosConfig';
 
 import { useCart } from '../../carrito/ContextCarrito';
 
-const HeaderChil1 = () => {
+const  HeaderChil1 = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isCategoriesOpen, setIsCategoriesOpen] = useState(false);
   const { user, csrfToken } = useAuth();
   const { cartCount, isLoading } = useCart();
   const [categorias, setCategorias] = useState([]);
+  const [logoData, setLogoData] = useState(null);
 
   const [showMessage, setShowMessage] = useState(false);
 
@@ -55,10 +56,28 @@ const HeaderChil1 = () => {
     }
   };
 
+
+   const getLogo = async () => {
+    try {
+      const response = await api.get('/api/empresa/logo', {
+        withCredentials: true,
+      });
+      setLogoData(response.data);
+    } catch (error) {
+      console.error('Error al obtener el logo de la empresa:', error);
+
+      setLogoData(null);
+    }
+  };
+
+  useEffect(() => {
+    getLogo();
+  }, []);
+
   const handleCategoryClick = () => {
     setIsCategoriesOpen(false);
   };
-
+ const logoUrl = logoData && logoData.logoUrl ? logoData.logoUrl : Logo;
   return (
     <header className="sticky top-0 z-50 bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm shadow-lg transition-all duration-300">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
@@ -72,7 +91,7 @@ const HeaderChil1 = () => {
             >
               <div className="relative">
                 <img
-                  src={Logo}
+                 src={logoUrl}
                   alt="Logo"
                   className="h-10 sm:h-12 w-auto object-contain border-2 border-transparent hover:border-blue-500 transition-all duration-300 transform hover:scale-110 z-10 relative"
                 />

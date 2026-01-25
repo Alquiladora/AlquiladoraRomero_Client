@@ -1843,7 +1843,6 @@ const AsignacionPedidosGeo = () => {
       dispatch({ type: 'ASIGNAR_PEDIDOS' });
       toast.success('Pedidos asignados con éxito');
 
-      // Actualizar el historial después de asignar
       setIsLoadingHistorial(true);
       const dateStr = selectedDate.toISOString().split('T')[0];
       const historialRes = await api.get(
@@ -1942,7 +1941,7 @@ const AsignacionPedidosGeo = () => {
   const assignedPedidos = state.totals.totalPedidosAsignados;
 
   if (state.isLoading) return <CustomLoading />;
-  console.log('State completo:', state);
+
 
   // Paginación del historial
   const itemsPerPageHistorial = 2;
@@ -2202,7 +2201,7 @@ const AsignacionPedidosGeo = () => {
                                   localidad,
                                   { entrega, recogida, atrasados },
                                 ]) => {
-                                  const itemsPerPage = 6;
+                                  const itemsPerPage = 20;
                                   const totalEntregaPages = Math.ceil(
                                     entrega.length / itemsPerPage
                                   );

@@ -1,32 +1,16 @@
 /* eslint-disable */
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, lazy, Suspense } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import HomeAdmin from './HomeAdmin';
-import Usuarios from '../usuarios/usuarios';
-import ProductTable from '../productos/Productos';
+
 import ToggleThemeButton from '../../../components/btnTheme/ToggleThemeButton';
 import { useAuth } from '../../../hooks/ContextAuth';
-import Inventory from '../inventario/Inventario';
-import DashboardModulosEmpresa from '../datosEmpresa/DasboadEmpresa';
 import api from '../../../utils/AxiosConfig';
 import SpinerCarga from '../../../utils/SpinerCarga';
-import PerfilAdmin from '../perfil/PerilAdmin';
 import Logo from '../../../img/Logos/LogoOriginal.png';
-import DasboardUsuarios from '../usuarios/usuariosSospechosos/DasboardUsuariso';
-import UsuariosSospechosos from '../usuarios/usuariosSospechosos/UsuariosSospechosos';
-import Auditoria from '../usuarios/usuariosSospechosos/AuditoriaLogin';
-import CrudEmpresa from '../datosEmpresa/gestiomEmpresa/GestiomEmpresa';
-import Politicas from '../datosEmpresa/politicas/Politicas';
-import HistorialPoliticas from '../datosEmpresa/politicas/HistorialPoliticas';
 import Terminos from '../datosEmpresa/terminos/Terminos';
 import HistorialTerminos from '../datosEmpresa/terminos/HistorialTerminos';
 import DeslindeLegal from '../datosEmpresa/dezlin/Deslin';
 import HistorialDeslindeLegal from '../datosEmpresa/dezlin/historialDeslin';
-import SobreNosotros from '../datosEmpresa/sobreNosotros/SobreNosotros';
-import CrudSubcategorias from '../categorias-subcategorias/SubCatego-Catego';
-import ActualizacionPrecios from '../actualizacionPrecios/ActualiacionPrecios';
-import Bodegas from '../bodegas/Bodegas';
-import PedidosManuales from '../pedidosamanuales/PedidosManuales';
 import { useSocket } from '../../../utils/Socket';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
@@ -57,25 +41,53 @@ import {
   faHeadset, // Para atención al cliente
   faClipboardCheck, // Para auditoría de datos
 } from '@fortawesome/free-solid-svg-icons';
-import PagosGeneral from '../pagos/Pagos';
 
-import GestionPedidosDevueltos from '../gestion-pedidos/PedidosDevueltos';
+// Seguridad
+const DasboardUsuarios = lazy(() => import('../usuarios/usuariosSospechosos/DasboardUsuariso'));
+const UsuariosSospechosos = lazy(() => import('../usuarios/usuariosSospechosos/UsuariosSospechosos'));
+const Auditoria = lazy(() => import('../usuarios/usuariosSospechosos/AuditoriaLogin'));
+const WearOsLogin = lazy(() => import('../../../components/wearOs/WearOsLogin'));
 
-import AgregarProductosSubbodegas from '../inventario/AgregarProductosSubbodegas';
-import DashboardPedidos from '../dashboard/DashboardPedidos';
-import GestionPedidos from '../gestion-pedidos/GestionPedidos';
-import PedidosCalendario from '../pedidosamanuales/PedidosCalentario';
-import CalendarioGeneralPedidos from '../gestion-pedidos/PedidosGeneralCalendario';
-import PedidosGeneralesDashboard from '../gestion-pedidos/DashboardGeneralPedidos';
-import ProductosDashboard from '../gestion-pedidos/DasboardProductos';
-import ColorManager from '../colores/Colores';
-import Horario from '../horario/Horario';
-import AsignacionPedidosV2 from '../repartidores/asignacionPedidos';
-import GestionRepartidores from '../repartidores/gestionRepartidor';
-import WearOsLogin from '../../../components/wearOs/WearOsLogin';
-import GestionPagos from '../pagos/GestionPagos';
-import GestionPedidosIncidentes from '../gestion-pedidos/PedidosIncidentes';
-import PedidosConPrediccion from '../gestion-pedidos/PedidosModeloPrevenir';
+// Empresa
+const DashboardModulosEmpresa = lazy(() => import('../datosEmpresa/DasboadEmpresa'));
+const CrudEmpresa = lazy(() => import('../datosEmpresa/gestiomEmpresa/GestiomEmpresa'));
+const SobreNosotros = lazy(() => import('../datosEmpresa/sobreNosotros/SobreNosotros'));
+const Politicas = lazy(() => import('../datosEmpresa/politicas/Politicas'));
+const HistorialPoliticas = lazy(() => import('../datosEmpresa/politicas/HistorialPoliticas'));
+
+const Horario = lazy(() => import('../horario/Horario'));
+const AsignacionPedidosV2 = lazy(() => import('../repartidores/asignacionPedidos'));
+const GestionRepartidores = lazy(() => import('../repartidores/gestionRepartidor'));
+// General
+const HomeAdmin = lazy(() => import('./HomeAdmin'));
+const PerfilAdmin = lazy(() => import('../perfil/PerilAdmin'));
+const Usuarios = lazy(() => import('../usuarios/usuarios'));
+
+// Productos y Stock
+const ProductTable = lazy(() => import('../productos/Productos'));
+const ColorManager = lazy(() => import('../colores/Colores'));
+const Bodegas = lazy(() => import('../bodegas/Bodegas'));
+const Inventory = lazy(() => import('../inventario/Inventario'));
+const CrudSubcategorias = lazy(() => import('../categorias-subcategorias/SubCatego-Catego'));
+const AgregarProductosSubbodegas = lazy(() => import('../inventario/AgregarProductosSubbodegas'));
+
+// Pagos y Precios
+const ActualizacionPrecios = lazy(() => import('../actualizacionPrecios/ActualiacionPrecios'));
+const PagosGeneral = lazy(() => import('../pagos/Pagos'));
+const GestionPagos = lazy(() => import('../pagos/GestionPagos'));
+
+// Pedidos y Gestión
+const PedidosManuales = lazy(() => import('../pedidosamanuales/PedidosManuales'));
+const DashboardPedidos = lazy(() => import('../dashboard/DashboardPedidos'));
+const PedidosCalendario = lazy(() => import('../pedidosamanuales/PedidosCalentario'));
+const GestionPedidos = lazy(() => import('../gestion-pedidos/GestionPedidos'));
+const CalendarioGeneralPedidos = lazy(() => import('../gestion-pedidos/PedidosGeneralCalendario'));
+const PedidosGeneralesDashboard = lazy(() => import('../gestion-pedidos/DashboardGeneralPedidos'));
+const ProductosDashboard = lazy(() => import('../gestion-pedidos/DasboardProductos'));
+const GestionPedidosIncidentes = lazy(() => import('../gestion-pedidos/PedidosIncidentes'));
+const GestionPedidosDevueltos = lazy(() => import('../gestion-pedidos/PedidosDevueltos'));
+const PedidosConPrediccion = lazy(() => import('../gestion-pedidos/PedidosModeloPrevenir'));
+
 
 const Breadcrumbs = ({ activeTab, onNavigate }) => {
   const pageHierarchy = {
@@ -328,7 +340,7 @@ const MenuHomeAdmin = () => {
     {
       title: 'Gestión de Repartidores',
       items: [
-        { icon: faTruck, label: 'Repartidores' }, // Gestión de repartidores
+        { icon: faTruck, label: 'Repartidores' }, 
         { icon: faClipboardList, label: 'Asignación de Pedidos' },
       ],
     },
@@ -665,7 +677,14 @@ const MenuHomeAdmin = () => {
         {/* Main content */}
         <main className="p-3 sm:p-4 lg:p-6 max-w-7xl w-full mx-auto flex-1">
           <Breadcrumbs activeTab={activeTab} onNavigate={handleNavigate} />
+         <Suspense fallback={
+                <div className="flex justify-center items-center h-full min-h-[50vh] text-xl text-amber-600 dark:text-amber-400">
+                    <SpinerCarga />
+                    Cargando Módulo...
+                </div>
+            }>
           {renderContent()}
+          </Suspense>
         </main>
 
         {/* Scroll to Top Button */}

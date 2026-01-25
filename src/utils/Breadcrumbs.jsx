@@ -46,6 +46,12 @@ const Breadcrumbs = () => {
       return [{ name: combinedCategoryName, to: location.pathname }];
     }
 
+    if (relevantSegments.includes('compra-exitosa')) {
+        return [
+            { name: 'Alquiler Confirmado', to: location.pathname }
+        ];
+    }
+
     let pathAccumulator = basePath;
     return relevantSegments.map((segment) => {
       pathAccumulator += `/${segment}`;
