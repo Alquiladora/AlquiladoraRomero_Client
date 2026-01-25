@@ -69,7 +69,7 @@ export const subscribeUserToPush = async (userId, csrfToken) => {
     return;
   }
 
-const SESSION_KEY = 'welcome_notified_' + userId;
+  const SESSION_KEY = 'welcome_notified_' + userId;
   try {
     isSubscribing = true;
     const vapidKey = await getVapidKey(csrfToken);
@@ -90,7 +90,6 @@ const SESSION_KEY = 'welcome_notified_' + userId;
       console.log(
         '🔔 Usuario ya suscrito. Verificando/Actualizando estado en el servidor.'
       );
-
     }
 
     await api.post(
@@ -116,16 +115,16 @@ const SESSION_KEY = 'welcome_notified_' + userId;
       );
       sessionStorage.setItem(SESSION_KEY, 'true');
     } else {
-      console.log('Notificación de bienvenida ya mostrada para este usuario/sesión. No se muestra de nuevo.');
+      console.log(
+        'Notificación de bienvenida ya mostrada para este usuario/sesión. No se muestra de nuevo.'
+      );
     }
-
   } catch (error) {
     console.error('⚠️ Error fatal en el proceso de suscripción Push:', error);
   } finally {
     isSubscribing = false;
   }
 };
-
 
 //Eliminar la suscripcion de notificaciones
 export const unsubscribeUserFromPush = async (csrfToken) => {

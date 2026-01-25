@@ -11,7 +11,14 @@ import { loadStripe } from '@stripe/stripe-js';
 
 const stripePromise = loadStripe(process.env.REACT_APP_STRIPE_PUBLISHABLE_KEY);
 
-const DetallesPago = ({ cartItems,puntos, total, rentalDate, returnDate, onBack }) => {
+const DetallesPago = ({
+  cartItems,
+  puntos,
+  total,
+  rentalDate,
+  returnDate,
+  onBack,
+}) => {
   const { user, csrfToken } = useAuth();
   const { cartCount, clearCart } = useCart();
   const navigate = useNavigate();
@@ -31,26 +38,20 @@ const DetallesPago = ({ cartItems,puntos, total, rentalDate, returnDate, onBack 
   const endIndex = startIndex + itemsPerPage;
   const paginatedItems = cartItems.slice(startIndex, endIndex);
 
-
   const [usarPuntos, setUsarPuntos] = useState(false);
 
-
   const puntosDisponibles = puntos?.currentPoints || 0;
-  
-  
+
   const valorMonetarioPuntos = puntosDisponibles / 10;
 
+  const limiteDescuento = total * 0.5;
 
-  const limiteDescuento = total * 0.50;
+  const descuentoPuntosAplicable = Math.min(
+    valorMonetarioPuntos,
+    limiteDescuento
+  );
 
-
-  const descuentoPuntosAplicable = Math.min(valorMonetarioPuntos, limiteDescuento);
-
- 
-  const totalFinal = usarPuntos ? (total - descuentoPuntosAplicable) : total;
-
-
-
+  const totalFinal = usarPuntos ? total - descuentoPuntosAplicable : total;
 
   useEffect(() => {
     const cargarDirecciones = async () => {
@@ -115,8 +116,8 @@ const DetallesPago = ({ cartItems,puntos, total, rentalDate, returnDate, onBack 
           fechaInicio: rentalDate,
           fechaEntrega: returnDate,
           cartItems: cartItems,
-          //Verifcar ahoprita 
-          puntosUsados: usarPuntos ? (descuentoPuntosAplicable * 10) : 0,
+          //Verifcar ahoprita
+          puntosUsados: usarPuntos ? descuentoPuntosAplicable * 10 : 0,
           descuentoPuntos: usarPuntos ? descuentoPuntosAplicable : 0,
         },
         {
@@ -124,7 +125,7 @@ const DetallesPago = ({ cartItems,puntos, total, rentalDate, returnDate, onBack 
           headers: { 'X-CSRF-Token': csrfToken },
         }
       );
-    // console.log('datos a aneviar', Math.round(total * 100));
+      // console.log('datos a aneviar', Math.round(total * 100));
 
       const stripe = await stripePromise;
       const { error } = await stripe.redirectToCheckout({
@@ -230,9 +231,9 @@ const DetallesPago = ({ cartItems,puntos, total, rentalDate, returnDate, onBack 
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
 
-   // console.log('Datoa en viados de stripe '.urlParams);
+    // console.log('Datoa en viados de stripe '.urlParams);
     const sessionId = urlParams.get('session_id');
-   // console.log('Datoa en viados de stripe sesion id '.sessionId);
+    // console.log('Datoa en viados de stripe sesion id '.sessionId);
     if (sessionId) {
       handlePaymentSuccess(sessionId, 'success');
     }
@@ -389,9 +390,7 @@ const DetallesPago = ({ cartItems,puntos, total, rentalDate, returnDate, onBack 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {!showPaymentModal && (
             <>
-
               <div className="lg:col-span-2 space-y-6">
-             
                 <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6 animate-fadeIn">
                   <div className="flex justify-between items-center mb-4">
                     <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-100">
@@ -626,59 +625,69 @@ const DetallesPago = ({ cartItems,puntos, total, rentalDate, returnDate, onBack 
                     </button>
                   </div>
                 )}
-               {/* Resumen de costos */}
+                {/* Resumen de costos */}
                 <div className="space-y-3 text-sm border-t pt-4 dark:border-gray-700">
-                  
                   {/* 1. Subtotal Normal */}
                   <div className="flex justify-between">
                     <span className="text-gray-600 dark:text-gray-300">
                       Subtotal ({cartItems.length} productos):
                     </span>
                     <span className="font-medium text-gray-800 dark:text-gray-100">
-                      ${total.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}
+                      $
+                      {total.toLocaleString('en-US', {
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2,
+                      })}
                     </span>
                   </div>
 
-             
                   {puntosDisponibles > 0 && (
                     <div className="bg-indigo-50 dark:bg-indigo-900/30 p-3 rounded-lg border border-indigo-100 dark:border-indigo-800 my-2 transition-all duration-300">
-                        <div className="flex items-center justify-between mb-2">
-                            <div className="flex flex-col">
-                                <span className="font-bold text-indigo-700 dark:text-indigo-300 flex items-center gap-1 text-sm">
-                                    💎 Usar mis puntos
-                                </span>
-                                <span className="text-xs text-gray-600 dark:text-gray-400">
-                                    Disponible: {puntosDisponibles} pts (${valorMonetarioPuntos.toFixed(2)})
-                                </span>
-                            </div>
-                            
-                            {/* Interruptor (Toggle Switch) */}
-                            <label className="relative inline-flex items-center cursor-pointer">
-                                <input 
-                                    type="checkbox" 
-                                    checked={usarPuntos}
-                                    onChange={() => setUsarPuntos(!usarPuntos)}
-                                    className="sr-only peer"
-                                />
-                                <div className="w-11 h-6 bg-gray-300 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-indigo-300 dark:peer-focus:ring-indigo-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-indigo-600"></div>
-                            </label>
+                      <div className="flex items-center justify-between mb-2">
+                        <div className="flex flex-col">
+                          <span className="font-bold text-indigo-700 dark:text-indigo-300 flex items-center gap-1 text-sm">
+                            💎 Usar mis puntos
+                          </span>
+                          <span className="text-xs text-gray-600 dark:text-gray-400">
+                            Disponible: {puntosDisponibles} pts ($
+                            {valorMonetarioPuntos.toFixed(2)})
+                          </span>
                         </div>
-                        {usarPuntos && (
-                            <div className="animate-fadeIn">
-                                <div className="text-xs text-indigo-600 dark:text-indigo-400 mt-1 pb-1 border-b border-indigo-200 dark:border-indigo-700 mb-2">
-                                    {valorMonetarioPuntos > limiteDescuento 
-                                        ? `*Límite del 50% aplicado (Máx: $${limiteDescuento.toFixed(2)})`
-                                        : `*Se usarán ${descuentoPuntosAplicable * 10} puntos`
-                                    }
-                                </div>
 
-                               
-                                <div className="flex justify-between text-green-600 dark:text-green-400 font-bold text-sm">
-                                    <span>Descuento por puntos:</span>
-                                    <span>-${descuentoPuntosAplicable.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span>
-                                </div>
-                            </div>
-                        )}
+                        {/* Interruptor (Toggle Switch) */}
+                        <label className="relative inline-flex items-center cursor-pointer">
+                          <input
+                            type="checkbox"
+                            checked={usarPuntos}
+                            onChange={() => setUsarPuntos(!usarPuntos)}
+                            className="sr-only peer"
+                          />
+                          <div className="w-11 h-6 bg-gray-300 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-indigo-300 dark:peer-focus:ring-indigo-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-indigo-600"></div>
+                        </label>
+                      </div>
+                      {usarPuntos && (
+                        <div className="animate-fadeIn">
+                          <div className="text-xs text-indigo-600 dark:text-indigo-400 mt-1 pb-1 border-b border-indigo-200 dark:border-indigo-700 mb-2">
+                            {valorMonetarioPuntos > limiteDescuento
+                              ? `*Límite del 50% aplicado (Máx: $${limiteDescuento.toFixed(2)})`
+                              : `*Se usarán ${descuentoPuntosAplicable * 10} puntos`}
+                          </div>
+
+                          <div className="flex justify-between text-green-600 dark:text-green-400 font-bold text-sm">
+                            <span>Descuento por puntos:</span>
+                            <span>
+                              -$
+                              {descuentoPuntosAplicable.toLocaleString(
+                                'en-US',
+                                {
+                                  minimumFractionDigits: 2,
+                                  maximumFractionDigits: 2,
+                                }
+                              )}
+                            </span>
+                          </div>
+                        </div>
+                      )}
                     </div>
                   )}
                   {/* ----------------------------------------------------------- */}
@@ -689,10 +698,14 @@ const DetallesPago = ({ cartItems,puntos, total, rentalDate, returnDate, onBack 
                         Total a pagar:
                       </span>
                       <span className="text-green-600 dark:text-green-400">
-                        ${totalFinal.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}
+                        $
+                        {totalFinal.toLocaleString('en-US', {
+                          minimumFractionDigits: 2,
+                          maximumFractionDigits: 2,
+                        })}
                       </span>
                     </div>
-                    
+
                     <p className="text-xs text-gray-500 dark:text-gray-400 text-right mt-1 italic">
                       El precio incluye descuentos, tarifa de servicio e IVA.
                     </p>
@@ -704,20 +717,28 @@ const DetallesPago = ({ cartItems,puntos, total, rentalDate, returnDate, onBack 
                       <span className="font-semibold">📅 Renta:</span>{' '}
                       {new Date(rentalDate + 'T00:00:00').toLocaleDateString(
                         'es-MX',
-                        { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }
+                        {
+                          weekday: 'long',
+                          year: 'numeric',
+                          month: 'long',
+                          day: 'numeric',
+                        }
                       )}
                     </p>
                     <p className="text-sm text-gray-700 dark:text-gray-300">
                       <span className="font-semibold">🔄 Devolución:</span>{' '}
                       {new Date(returnDate + 'T00:00:00').toLocaleDateString(
                         'es-MX',
-                        { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }
+                        {
+                          weekday: 'long',
+                          year: 'numeric',
+                          month: 'long',
+                          day: 'numeric',
+                        }
                       )}
                     </p>
                   </div>
                 </div>
-
-
 
                 {/* Botón Continuar */}
                 <button
@@ -732,7 +753,6 @@ const DetallesPago = ({ cartItems,puntos, total, rentalDate, returnDate, onBack 
                   )}
                 </button>
 
-               
                 <div className="security-section dark:bg-gray-800">
                   <div className="flex items-center space-x-2">
                     <FaLock className="text-indigo-600 dark:text-indigo-400" />

@@ -36,7 +36,6 @@ const ProductosRelacionados = ({
         );
         if (response.data.success) {
           setRawProductos(response.data.products);
-         
         } else {
           setRawProductos([]);
         }

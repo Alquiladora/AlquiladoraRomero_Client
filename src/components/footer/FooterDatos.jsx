@@ -40,7 +40,6 @@ export const FooterDatos = () => {
     redesSociales: {},
   });
 
-  
   const fetchEmpresaData = async () => {
     setLoading(true);
     try {
@@ -60,13 +59,12 @@ export const FooterDatos = () => {
   };
 
   const [loading, setLoading] = useState(false);
-  
+
   useEffect(() => {
     if (csrfToken) {
       fetchEmpresaData();
     }
   }, [csrfToken]);
-
 
   const getSocialIcon = (url = '') => {
     if (!url || typeof url !== 'string') return faShareAlt;
@@ -136,7 +134,6 @@ export const FooterDatos = () => {
               <FontAwesomeIcon icon={faFileContract} className="mr-2" />
               Términos y Condiciones
             </Link>
-          
           </div>
 
           <div className="flex flex-col items-center mb-6 md:mb-0">
@@ -176,10 +173,7 @@ export const FooterDatos = () => {
               <FontAwesomeIcon icon={faIndustry} className="mr-2" />
               Ferreteria Romero
             </a>
-         
-           
           </div>
-
         </div>
       </div>
 
@@ -194,16 +188,16 @@ export const FooterDatos = () => {
       </div>
 
       <div className="flex justify-center mt-4">
-  <a
-    href="https://apkpure.com/p/com.example.movil_alquiladora_romero_repartidor"
-    target="_blank"
-    rel="noopener noreferrer"
-    className="inline-flex items-center text-sm text-white bg-blue-500 px-4 py-2 rounded-md hover:bg-blue-600 transition-colors shadow-md"
-  >
-    <FontAwesomeIcon icon={faDownload} className="mr-2" />
-    Descarga nuestra App
-  </a>
-</div>
+        <a
+          href="https://apkpure.com/p/com.example.movil_alquiladora_romero_repartidor"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex items-center text-sm text-white bg-blue-500 px-4 py-2 rounded-md hover:bg-blue-600 transition-colors shadow-md"
+        >
+          <FontAwesomeIcon icon={faDownload} className="mr-2" />
+          Descarga nuestra App
+        </a>
+      </div>
     </>
   );
 };

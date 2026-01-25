@@ -32,7 +32,7 @@ import {
   MenuItem,
   ListItemIcon,
   ListItemText,
-  Stack
+  Stack,
 } from '@mui/material';
 import {
   Add as AddIcon,
@@ -43,12 +43,11 @@ import {
   Visibility as ViewIcon,
   Cancel as CancelIcon,
   Save as SaveIcon,
-  Article as DocumentIcon
+  Article as DocumentIcon,
 } from '@mui/icons-material';
 import api from '../../../../utils/AxiosConfig';
 import { useAuth } from '../../../../hooks/ContextAuth';
 import { toast } from 'react-toastify';
-
 
 const getMexicoDate = () => {
   const options = {
@@ -65,7 +64,6 @@ const getMexicoDate = () => {
   });
   return `${dateParts.year}-${dateParts.month}-${dateParts.day}`;
 };
-
 
 const validationSchema = yup.object().shape({
   titulo: yup
@@ -311,8 +309,20 @@ const DeslindeLegal = ({ onNavigate }) => {
       {/* Header */}
       <Card sx={{ mb: 4, bgcolor: 'background.paper' }}>
         <CardContent>
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-            <Typography variant="h4" component="h1" fontWeight="bold" color="primary">
+          <Box
+            sx={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              mb: 2,
+            }}
+          >
+            <Typography
+              variant="h4"
+              component="h1"
+              fontWeight="bold"
+              color="primary"
+            >
               Gestión de Deslinde Legal
             </Typography>
             <Button
@@ -355,19 +365,30 @@ const DeslindeLegal = ({ onNavigate }) => {
                             {Object.entries(errors).map(([key, value]) => {
                               if (typeof value === 'string') {
                                 return (
-                                  <Typography component="li" variant="body2" key={key}>
+                                  <Typography
+                                    component="li"
+                                    variant="body2"
+                                    key={key}
+                                  >
                                     {value}
                                   </Typography>
                                 );
                               } else if (Array.isArray(value)) {
                                 return value
                                   .map((err, index) => {
-                                    const erroresSeccion = Object.values(err).filter(Boolean);
-                                    return erroresSeccion.map((mensajeError, idx) => (
-                                      <Typography component="li" variant="body2" key={`${key}-${index}-${idx}`}>
-                                        {`Sección ${index + 1}: ${mensajeError}`}
-                                      </Typography>
-                                    ));
+                                    const erroresSeccion =
+                                      Object.values(err).filter(Boolean);
+                                    return erroresSeccion.map(
+                                      (mensajeError, idx) => (
+                                        <Typography
+                                          component="li"
+                                          variant="body2"
+                                          key={`${key}-${index}-${idx}`}
+                                        >
+                                          {`Sección ${index + 1}: ${mensajeError}`}
+                                        </Typography>
+                                      )
+                                    );
                                   })
                                   .flat();
                               }
@@ -410,7 +431,9 @@ const DeslindeLegal = ({ onNavigate }) => {
                       type="date"
                       value={values.fechaVigencia}
                       onChange={handleChange}
-                      error={touched.fechaVigencia && Boolean(errors.fechaVigencia)}
+                      error={
+                        touched.fechaVigencia && Boolean(errors.fechaVigencia)
+                      }
                       helperText={touched.fechaVigencia && errors.fechaVigencia}
                       fullWidth
                       variant="outlined"
@@ -423,7 +446,7 @@ const DeslindeLegal = ({ onNavigate }) => {
                       <Typography variant="h6" gutterBottom>
                         Secciones
                       </Typography>
-                      
+
                       {touched.secciones &&
                         errors.secciones &&
                         typeof errors.secciones === 'string' && (
@@ -437,10 +460,24 @@ const DeslindeLegal = ({ onNavigate }) => {
                           <Box>
                             {Array.isArray(values.secciones) &&
                               values.secciones.map((section, index) => (
-                                <Card key={index} variant="outlined" sx={{ mb: 2 }}>
+                                <Card
+                                  key={index}
+                                  variant="outlined"
+                                  sx={{ mb: 2 }}
+                                >
                                   <CardContent>
-                                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-                                      <Typography variant="subtitle1" fontWeight="bold">
+                                    <Box
+                                      sx={{
+                                        display: 'flex',
+                                        justifyContent: 'space-between',
+                                        alignItems: 'center',
+                                        mb: 2,
+                                      }}
+                                    >
+                                      <Typography
+                                        variant="subtitle1"
+                                        fontWeight="bold"
+                                      >
                                         Sección {index + 1}
                                       </Typography>
                                       <IconButton
@@ -459,7 +496,9 @@ const DeslindeLegal = ({ onNavigate }) => {
                                       onChange={handleChange}
                                       error={
                                         touched.secciones?.[index]?.titulo &&
-                                        Boolean(errors.secciones?.[index]?.titulo)
+                                        Boolean(
+                                          errors.secciones?.[index]?.titulo
+                                        )
                                       }
                                       helperText={
                                         touched.secciones?.[index]?.titulo &&
@@ -477,7 +516,9 @@ const DeslindeLegal = ({ onNavigate }) => {
                                       onChange={handleChange}
                                       error={
                                         touched.secciones?.[index]?.contenido &&
-                                        Boolean(errors.secciones?.[index]?.contenido)
+                                        Boolean(
+                                          errors.secciones?.[index]?.contenido
+                                        )
                                       }
                                       helperText={
                                         touched.secciones?.[index]?.contenido &&
@@ -494,7 +535,9 @@ const DeslindeLegal = ({ onNavigate }) => {
 
                             <Button
                               startIcon={<AddIcon />}
-                              onClick={() => push({ titulo: '', contenido: '' })}
+                              onClick={() =>
+                                push({ titulo: '', contenido: '' })
+                              }
                               variant="outlined"
                               fullWidth
                             >
@@ -506,7 +549,14 @@ const DeslindeLegal = ({ onNavigate }) => {
                     </Box>
 
                     {/* Botones de acción */}
-                    <Box sx={{ display: 'flex', gap: 2, justifyContent: 'flex-end', pt: 2 }}>
+                    <Box
+                      sx={{
+                        display: 'flex',
+                        gap: 2,
+                        justifyContent: 'flex-end',
+                        pt: 2,
+                      }}
+                    >
                       {editMode && (
                         <Button
                           startIcon={<CancelIcon />}
@@ -524,7 +574,13 @@ const DeslindeLegal = ({ onNavigate }) => {
                       <Button
                         type="submit"
                         disabled={isSubmitting}
-                        startIcon={isSubmitting ? <CircularProgress size={20} /> : <SaveIcon />}
+                        startIcon={
+                          isSubmitting ? (
+                            <CircularProgress size={20} />
+                          ) : (
+                            <SaveIcon />
+                          )
+                        }
                         variant="contained"
                         color="primary"
                       >
@@ -546,7 +602,12 @@ const DeslindeLegal = ({ onNavigate }) => {
         <Grid item xs={12} md={6}>
           <Card>
             <CardContent>
-              <Typography variant="h5" component="h2" fontWeight="bold" gutterBottom>
+              <Typography
+                variant="h5"
+                component="h2"
+                fontWeight="bold"
+                gutterBottom
+              >
                 Documentos Existentes
               </Typography>
 
@@ -566,7 +627,10 @@ const DeslindeLegal = ({ onNavigate }) => {
                         key={deslinde.id}
                         sx={{
                           '&:last-child td, &:last-child th': { border: 0 },
-                          bgcolor: deslinde.estado === 'eliminado' ? 'action.hover' : 'background.paper'
+                          bgcolor:
+                            deslinde.estado === 'eliminado'
+                              ? 'action.hover'
+                              : 'background.paper',
                         }}
                       >
                         <TableCell>
@@ -574,11 +638,18 @@ const DeslindeLegal = ({ onNavigate }) => {
                             {deslinde.titulo}
                           </Typography>
                           <Typography variant="caption" color="text.secondary">
-                            Vigente hasta: {new Date(deslinde.fechaVigencia).toLocaleDateString('es-MX')}
+                            Vigente hasta:{' '}
+                            {new Date(
+                              deslinde.fechaVigencia
+                            ).toLocaleDateString('es-MX')}
                           </Typography>
                         </TableCell>
                         <TableCell>
-                          <Chip label={`v${deslinde.versio}`} size="small" variant="outlined" />
+                          <Chip
+                            label={`v${deslinde.versio}`}
+                            size="small"
+                            variant="outlined"
+                          />
                         </TableCell>
                         <TableCell>
                           <Chip
@@ -654,19 +725,16 @@ const DeslindeLegal = ({ onNavigate }) => {
         open={deleteDialogOpen}
         onClose={() => setDeleteDialogOpen(false)}
       >
-        <DialogTitle>
-          Confirmar Eliminación
-        </DialogTitle>
+        <DialogTitle>Confirmar Eliminación</DialogTitle>
         <DialogContent>
           <Typography>
-            ¿Está seguro de que desea eliminar el documento "{documentToDelete?.titulo}"?
-            Esta acción marcará el deslinde como eliminado.
+            ¿Está seguro de que desea eliminar el documento "
+            {documentToDelete?.titulo}"? Esta acción marcará el deslinde como
+            eliminado.
           </Typography>
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setDeleteDialogOpen(false)}>
-            Cancelar
-          </Button>
+          <Button onClick={() => setDeleteDialogOpen(false)}>Cancelar</Button>
           <Button
             onClick={() => deleteDeslinde(documentToDelete?.id)}
             color="error"

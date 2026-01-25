@@ -4,30 +4,34 @@ import 'mapbox-gl/dist/mapbox-gl.css';
 import { motion } from 'framer-motion';
 import { MapPin, Loader2, Navigation } from 'lucide-react';
 
-
-mapboxgl.accessToken = 'pk.eyJ1IjoiZWRpbGJlcnRvMTIzIiwiYSI6ImNseTN3cWUxZzBkajUyanBvZHR0MjVsdXUifQ.U5EAmb6GXJOArRN9kAy0kg';
+mapboxgl.accessToken =
+  'pk.eyJ1IjoiZWRpbGJlcnRvMTIzIiwiYSI6ImNseTN3cWUxZzBkajUyanBvZHR0MjVsdXUifQ.U5EAmb6GXJOArRN9kAy0kg';
 
 const MapComponent = () => {
   const mapContainer = useRef(null);
   const map = useRef(null);
-  const [mapStyle, setMapStyle] = useState('mapbox://styles/mapbox/streets-v11');
+  const [mapStyle, setMapStyle] = useState(
+    'mapbox://styles/mapbox/streets-v11'
+  );
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   const longitude = -98.4251106;
   const latitude = 21.1456417;
 
-  const googleMapsLink = 'https://www.google.com/maps/place/Alquiladora+Romero/@21.1455757,-98.4249915,92m/data=!3m1!1e3!4m6!3m5!1s0x85d726e9e1ec5935:0x457af38d8c7157b7!8m2!3d21.1456417!4d-98.4251106!16s%2Fg%2F11gdz6y3yh?entry=ttu&g_ep=EgoyMDI1MDMwNC4wIKXMDSoASAFQAw%3D%3D';
+  const googleMapsLink =
+    'https://www.google.com/maps/place/Alquiladora+Romero/@21.1455757,-98.4249915,92m/data=!3m1!1e3!4m6!3m5!1s0x85d726e9e1ec5935:0x457af38d8c7157b7!8m2!3d21.1456417!4d-98.4251106!16s%2Fg%2F11gdz6y3yh?entry=ttu&g_ep=EgoyMDI1MDMwNC4wIKXMDSoASAFQAw%3D%3D';
 
   useEffect(() => {
     if (!mapContainer.current) return;
 
     let isCancelled = false;
 
-
     const checkToken = async () => {
       try {
-        const response = await fetch(`https://api.mapbox.com/styles/v1/mapbox/streets-v11?access_token=${mapboxgl.accessToken}`);
+        const response = await fetch(
+          `https://api.mapbox.com/styles/v1/mapbox/streets-v11?access_token=${mapboxgl.accessToken}`
+        );
         if (!response.ok) {
           throw new Error('Token de Mapbox inválido');
         }
@@ -55,7 +59,6 @@ const MapComponent = () => {
           failIfMajorPerformanceCaveat: false,
         });
 
-
         map.current.on('error', (e) => {
           if (isCancelled) return;
           setError('Error al cargar el mapa');
@@ -69,14 +72,14 @@ const MapComponent = () => {
 
           new mapboxgl.Marker({
             color: '#ff5733',
-            scale: 0.8
+            scale: 0.8,
           })
             .setLngLat([longitude, latitude])
             .setPopup(
               new mapboxgl.Popup({
                 offset: 25,
                 closeButton: false,
-                closeOnClick: false
+                closeOnClick: false,
               }).setHTML(`
                 <div style="max-width: 200px; padding: 12px;">
                   <div style="font-size: 14px; font-weight: bold; color: #333; margin-bottom: 8px; text-align: center;">
@@ -90,18 +93,15 @@ const MapComponent = () => {
             )
             .addTo(map.current);
 
-
           map.current.flyTo({
             center: [longitude, latitude],
             zoom: 16,
             duration: 3000,
-            essential: true
+            essential: true,
           });
         });
 
-
         map.current.addControl(new mapboxgl.NavigationControl(), 'top-right');
-
       } catch (err) {
         if (isCancelled) return;
         console.error('Error al inicializar el mapa:', err);
@@ -112,7 +112,6 @@ const MapComponent = () => {
 
     initializeMap();
 
-
     return () => {
       isCancelled = true;
       if (map.current) {
@@ -121,7 +120,6 @@ const MapComponent = () => {
       }
     };
   }, []);
-
 
   useEffect(() => {
     if (map.current && !loading && !error) {
@@ -159,7 +157,9 @@ const MapComponent = () => {
       {loading && (
         <div className="absolute inset-0 bg-gray-800 bg-opacity-90 flex flex-col items-center justify-center z-20 rounded-xl">
           <Loader2 className="w-12 h-12 text-[#fcb900] animate-spin mb-4" />
-          <div className="text-white font-semibold text-lg">Cargando mapa...</div>
+          <div className="text-white font-semibold text-lg">
+            Cargando mapa...
+          </div>
         </div>
       )}
 

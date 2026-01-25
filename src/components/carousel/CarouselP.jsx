@@ -1,4 +1,3 @@
-
 import Carousel from './Carousel';
 
 import imagen1 from '../../img/Logos/logo.jpg';
@@ -11,9 +10,18 @@ import imagen8 from '../../img/Logos/logo9.jpg';
 import imagen9 from '../../img/Logos/logo10.jpg';
 import imagen10 from '../../img/Logos/logo11.jpg';
 
-
 const CarouselP = () => {
-  const images = [imagen1, imagen5, imagen3, imagen4, imagen6, imagen7, imagen8, imagen9, imagen10];
+  const images = [
+    imagen1,
+    imagen5,
+    imagen3,
+    imagen4,
+    imagen6,
+    imagen7,
+    imagen8,
+    imagen9,
+    imagen10,
+  ];
 
   return (
     <>

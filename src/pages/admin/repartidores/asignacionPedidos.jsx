@@ -1942,7 +1942,6 @@ const AsignacionPedidosGeo = () => {
 
   if (state.isLoading) return <CustomLoading />;
 
-
   // Paginación del historial
   const itemsPerPageHistorial = 2;
   const totalHistorialPages = Math.ceil(

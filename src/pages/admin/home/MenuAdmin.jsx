@@ -43,21 +43,41 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 
 // Seguridad
-const DasboardUsuarios = lazy(() => import('../usuarios/usuariosSospechosos/DasboardUsuariso'));
-const UsuariosSospechosos = lazy(() => import('../usuarios/usuariosSospechosos/UsuariosSospechosos'));
-const Auditoria = lazy(() => import('../usuarios/usuariosSospechosos/AuditoriaLogin'));
-const WearOsLogin = lazy(() => import('../../../components/wearOs/WearOsLogin'));
+const DasboardUsuarios = lazy(
+  () => import('../usuarios/usuariosSospechosos/DasboardUsuariso')
+);
+const UsuariosSospechosos = lazy(
+  () => import('../usuarios/usuariosSospechosos/UsuariosSospechosos')
+);
+const Auditoria = lazy(
+  () => import('../usuarios/usuariosSospechosos/AuditoriaLogin')
+);
+const WearOsLogin = lazy(
+  () => import('../../../components/wearOs/WearOsLogin')
+);
 
 // Empresa
-const DashboardModulosEmpresa = lazy(() => import('../datosEmpresa/DasboadEmpresa'));
-const CrudEmpresa = lazy(() => import('../datosEmpresa/gestiomEmpresa/GestiomEmpresa'));
-const SobreNosotros = lazy(() => import('../datosEmpresa/sobreNosotros/SobreNosotros'));
+const DashboardModulosEmpresa = lazy(
+  () => import('../datosEmpresa/DasboadEmpresa')
+);
+const CrudEmpresa = lazy(
+  () => import('../datosEmpresa/gestiomEmpresa/GestiomEmpresa')
+);
+const SobreNosotros = lazy(
+  () => import('../datosEmpresa/sobreNosotros/SobreNosotros')
+);
 const Politicas = lazy(() => import('../datosEmpresa/politicas/Politicas'));
-const HistorialPoliticas = lazy(() => import('../datosEmpresa/politicas/HistorialPoliticas'));
+const HistorialPoliticas = lazy(
+  () => import('../datosEmpresa/politicas/HistorialPoliticas')
+);
 
 const Horario = lazy(() => import('../horario/Horario'));
-const AsignacionPedidosV2 = lazy(() => import('../repartidores/asignacionPedidos'));
-const GestionRepartidores = lazy(() => import('../repartidores/gestionRepartidor'));
+const AsignacionPedidosV2 = lazy(
+  () => import('../repartidores/asignacionPedidos')
+);
+const GestionRepartidores = lazy(
+  () => import('../repartidores/gestionRepartidor')
+);
 // General
 const HomeAdmin = lazy(() => import('./HomeAdmin'));
 const PerfilAdmin = lazy(() => import('../perfil/PerilAdmin'));
@@ -68,26 +88,47 @@ const ProductTable = lazy(() => import('../productos/Productos'));
 const ColorManager = lazy(() => import('../colores/Colores'));
 const Bodegas = lazy(() => import('../bodegas/Bodegas'));
 const Inventory = lazy(() => import('../inventario/Inventario'));
-const CrudSubcategorias = lazy(() => import('../categorias-subcategorias/SubCatego-Catego'));
-const AgregarProductosSubbodegas = lazy(() => import('../inventario/AgregarProductosSubbodegas'));
+const CrudSubcategorias = lazy(
+  () => import('../categorias-subcategorias/SubCatego-Catego')
+);
+const AgregarProductosSubbodegas = lazy(
+  () => import('../inventario/AgregarProductosSubbodegas')
+);
 
 // Pagos y Precios
-const ActualizacionPrecios = lazy(() => import('../actualizacionPrecios/ActualiacionPrecios'));
+const ActualizacionPrecios = lazy(
+  () => import('../actualizacionPrecios/ActualiacionPrecios')
+);
 const PagosGeneral = lazy(() => import('../pagos/Pagos'));
 const GestionPagos = lazy(() => import('../pagos/GestionPagos'));
 
 // Pedidos y Gestión
-const PedidosManuales = lazy(() => import('../pedidosamanuales/PedidosManuales'));
+const PedidosManuales = lazy(
+  () => import('../pedidosamanuales/PedidosManuales')
+);
 const DashboardPedidos = lazy(() => import('../dashboard/DashboardPedidos'));
-const PedidosCalendario = lazy(() => import('../pedidosamanuales/PedidosCalentario'));
+const PedidosCalendario = lazy(
+  () => import('../pedidosamanuales/PedidosCalentario')
+);
 const GestionPedidos = lazy(() => import('../gestion-pedidos/GestionPedidos'));
-const CalendarioGeneralPedidos = lazy(() => import('../gestion-pedidos/PedidosGeneralCalendario'));
-const PedidosGeneralesDashboard = lazy(() => import('../gestion-pedidos/DashboardGeneralPedidos'));
-const ProductosDashboard = lazy(() => import('../gestion-pedidos/DasboardProductos'));
-const GestionPedidosIncidentes = lazy(() => import('../gestion-pedidos/PedidosIncidentes'));
-const GestionPedidosDevueltos = lazy(() => import('../gestion-pedidos/PedidosDevueltos'));
-const PedidosConPrediccion = lazy(() => import('../gestion-pedidos/PedidosModeloPrevenir'));
-
+const CalendarioGeneralPedidos = lazy(
+  () => import('../gestion-pedidos/PedidosGeneralCalendario')
+);
+const PedidosGeneralesDashboard = lazy(
+  () => import('../gestion-pedidos/DashboardGeneralPedidos')
+);
+const ProductosDashboard = lazy(
+  () => import('../gestion-pedidos/DasboardProductos')
+);
+const GestionPedidosIncidentes = lazy(
+  () => import('../gestion-pedidos/PedidosIncidentes')
+);
+const GestionPedidosDevueltos = lazy(
+  () => import('../gestion-pedidos/PedidosDevueltos')
+);
+const PedidosConPrediccion = lazy(
+  () => import('../gestion-pedidos/PedidosModeloPrevenir')
+);
 
 const Breadcrumbs = ({ activeTab, onNavigate }) => {
   const pageHierarchy = {
@@ -340,7 +381,7 @@ const MenuHomeAdmin = () => {
     {
       title: 'Gestión de Repartidores',
       items: [
-        { icon: faTruck, label: 'Repartidores' }, 
+        { icon: faTruck, label: 'Repartidores' },
         { icon: faClipboardList, label: 'Asignación de Pedidos' },
       ],
     },
@@ -677,13 +718,15 @@ const MenuHomeAdmin = () => {
         {/* Main content */}
         <main className="p-3 sm:p-4 lg:p-6 max-w-7xl w-full mx-auto flex-1">
           <Breadcrumbs activeTab={activeTab} onNavigate={handleNavigate} />
-         <Suspense fallback={
-                <div className="flex justify-center items-center h-full min-h-[50vh] text-xl text-amber-600 dark:text-amber-400">
-                    <SpinerCarga />
-                    Cargando Módulo...
-                </div>
-            }>
-          {renderContent()}
+          <Suspense
+            fallback={
+              <div className="flex justify-center items-center h-full min-h-[50vh] text-xl text-amber-600 dark:text-amber-400">
+                <SpinerCarga />
+                Cargando Módulo...
+              </div>
+            }
+          >
+            {renderContent()}
           </Suspense>
         </main>
 

@@ -102,7 +102,7 @@ function CrudSubcategorias() {
     setEditItem(null);
   };
 
-const handleAdd = async () => {
+  const handleAdd = async () => {
     if (!inputValue.trim()) {
       toast.warning('Por favor, ingresa un nombre válido.');
       return;
@@ -118,10 +118,9 @@ const handleAdd = async () => {
             withCredentials: true,
           }
         );
-        setCategorias([...categorias, response.data]); 
+        setCategorias([...categorias, response.data]);
         toast.success('Categoría agregada correctamente.');
       } else if (modalType === 'subcategoria') {
-        
         // --- CORRECCIÓN AQUÍ ---
         await api.post(
           '/api/productos/subcategoria',
@@ -134,16 +133,18 @@ const handleAdd = async () => {
             withCredentials: true,
           }
         );
-        
-    
+
         toast.success('Subcategoría agregada correctamente.');
       }
-      
+
       fetchData();
       closeModal();
     } catch (error) {
-     
-      if (error.response && error.response.data && error.response.data.message) {
+      if (
+        error.response &&
+        error.response.data &&
+        error.response.data.message
+      ) {
         toast.error(error.response.data.message);
       } else {
         toast.error('Error al agregar.');
@@ -152,14 +153,13 @@ const handleAdd = async () => {
     }
   };
 
- const handleUpdate = async () => {
+  const handleUpdate = async () => {
     if (!editItem || !inputValue.trim()) {
       toast.warning('Por favor, ingresa un valor.');
       return;
     }
     try {
       if (modalType === 'categoria') {
-       
         await api.put(
           `/api/productos/categoria/${editItem.id}`,
           { nombre: inputValue },
@@ -172,7 +172,6 @@ const handleAdd = async () => {
         );
         toast.success('Categoría actualizada correctamente.');
       } else if (modalType === 'subcategoria') {
-       
         await api.put(
           `/api/productos/subcategoria/${editItem.id}`,
           { nombre: inputValue, idCategoria: selectedCategory },
@@ -182,15 +181,17 @@ const handleAdd = async () => {
           }
         );
 
-        
         toast.success('Subcategoría actualizada correctamente.');
       }
-      
-      fetchData(); 
+
+      fetchData();
       closeModal();
     } catch (error) {
-      
-      if (error.response && error.response.data && error.response.data.message) {
+      if (
+        error.response &&
+        error.response.data &&
+        error.response.data.message
+      ) {
         toast.error(error.response.data.message);
       } else {
         toast.error('Error al actualizar.');

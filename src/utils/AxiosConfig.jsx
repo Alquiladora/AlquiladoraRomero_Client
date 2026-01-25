@@ -2,7 +2,7 @@ import axios from 'axios';
 
 const api = axios.create({
   //baseURL: 'http://localhost:3001',
-  baseURL:"https://alquiladora-romero-server.onrender.com",
+  baseURL: 'https://alquiladora-romero-server.onrender.com',
   timeout: 20000,
 });
 
