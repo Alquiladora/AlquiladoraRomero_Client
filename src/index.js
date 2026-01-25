@@ -13,8 +13,8 @@ if (process.env.NODE_ENV === 'production') {
   console.log = () => {};
   console.info = () => {};
   console.debug = () => {};
-  console.warn = () => {}; 
-  console.error = () => {}; 
+  console.warn = () => {};
+  console.error = () => {};
 }
 
 function SocketController() {
@@ -38,16 +38,15 @@ root.render(
   </React.StrictMode>
 );
 
-
-
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/service-worker.js')
-      .then(registration => {
-       // console.log('SW registrado con éxito:', registration);
+    navigator.serviceWorker
+      .register('/service-worker.js')
+      .then((registration) => {
+        // console.log('SW registrado con éxito:', registration);
       })
-      .catch(error => {
-       // console.log('Fallo el registro del SW:', error);
+      .catch((error) => {
+        // console.log('Fallo el registro del SW:', error);
       });
   });
 }
