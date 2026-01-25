@@ -186,7 +186,7 @@ const Registro = () => {
       </div>
 
       {/* Estilos mejorados */}
-      <style jsx>{`
+     <style jsx>{`
         .meteor-shower {
           position: absolute;
           top: 0;
@@ -201,8 +201,8 @@ const Registro = () => {
         .meteor {
           position: absolute;
           top: -100px;
-          width: 2px;
-          height: 60px;
+          width: 1px;
+          height: 40px;
           background: linear-gradient(
             to bottom,
             rgba(252, 185, 0, 0),
@@ -224,8 +224,20 @@ const Registro = () => {
         }
 
         .step-circle {
-          box-shadow: 0 0 0 5px rgba(252, 185, 0, 0.15);
+          box-shadow: 0 0 0 3px rgba(252, 185, 0, 0.15);
           transition: all 0.4s ease;
+        }
+
+        @media (min-width: 640px) {
+          .step-circle {
+            box-shadow: 0 0 0 4px rgba(252, 185, 0, 0.15);
+          }
+        }
+
+        @media (min-width: 768px) {
+          .step-circle {
+            box-shadow: 0 0 0 5px rgba(252, 185, 0, 0.15);
+          }
         }
 
         .fade-out {
@@ -302,10 +314,24 @@ const Registro = () => {
             box-shadow: 0 0 0 0 rgba(252, 185, 0, 0.4);
           }
           70% {
-            box-shadow: 0 0 0 20px rgba(252, 185, 0, 0);
+            box-shadow: 0 0 0 15px rgba(252, 185, 0, 0);
           }
           100% {
             box-shadow: 0 0 0 0 rgba(252, 185, 0, 0);
+          }
+        }
+
+        @media (min-width: 640px) {
+          @keyframes pulse {
+            0% {
+              box-shadow: 0 0 0 0 rgba(252, 185, 0, 0.4);
+            }
+            70% {
+              box-shadow: 0 0 0 20px rgba(252, 185, 0, 0);
+            }
+            100% {
+              box-shadow: 0 0 0 0 rgba(252, 185, 0, 0);
+            }
           }
         }
 
@@ -337,42 +363,39 @@ const Registro = () => {
           }
         }
 
-        /* Ajustes responsivos adicionales */
-        @media (max-width: 640px) {
-          .step-circle {
-            width: 10px;
-            height: 10px;
-          }
-
-          .steps-overview {
-            padding: 1rem;
-          }
-
+        /* Ajustes específicos para móviles muy pequeños */
+        @media (max-width: 380px) {
           .login-box {
-            padding: 1rem;
+            margin: 0 0.5rem;
+            padding: 0.75rem;
           }
-
+          
+          .steps-overview {
+            padding: 0.75rem;
+          }
+          
+          .step-circle {
+            width: 8px;
+            height: 8px;
+          }
+          
           h2 {
-            font-size: 1.5rem;
+            font-size: 1.25rem;
           }
-
-          p,
-          li,
-          span {
-            font-size: 0.875rem;
+          
+          p {
+            font-size: 0.8rem;
           }
         }
 
-        @media (max-width: 480px) {
+        /* Ajustes para tablets */
+        @media (min-width: 768px) and (max-width: 1024px) {
           .login-box {
-            margin: 0 1rem;
-          }
-
-          .start-button {
-            padding: 0.75rem 1.25rem;
+            max-width: 90%;
           }
         }
       `}</style>
+
     </div>
   );
 };

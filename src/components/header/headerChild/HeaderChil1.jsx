@@ -20,7 +20,7 @@ import api from '../../../utils/AxiosConfig';
 
 import { useCart } from '../../carrito/ContextCarrito';
 
-const HeaderChil1 = () => {
+const  HeaderChil1 = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isCategoriesOpen, setIsCategoriesOpen] = useState(false);
   const { user, csrfToken } = useAuth();

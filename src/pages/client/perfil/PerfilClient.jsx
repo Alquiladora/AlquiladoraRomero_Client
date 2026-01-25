@@ -12,6 +12,7 @@ import {
 import ComputerIcon from '@mui/icons-material/Computer';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { toast } from 'react-toastify';
+
 import AddressBook from './componetsPerfil/ListaDirecciones';
 
 import 'primereact/resources/themes/saga-blue/theme.css';
@@ -653,31 +654,9 @@ const PerfilUsuarioPrime = () => {
 
                 <div className="text-center">
                   <h2 className="text-xl md:text-2xl font-bold text-gray-800 dark:text-white">
-                    {`${usuariosC.nombre} ${usuariosC.apellidoP}`}
+                    {`${usuariosC.nombre} ${usuariosC.apellidoP} ${usuariosC.apellidoM}`}
                   </h2>
-                </div>
-
-                {/* Resumen de Alquileres */}
-                <div className="w-full max-w-md mx-auto">
-                  <div className="grid grid-cols-2 gap-2 md:gap-4">
-                    <div className="bg-blue-50 p-3 md:p-4 rounded-xl shadow-sm text-center dark:bg-gray-700">
-                      <div className="text-xs md:text-sm text-gray-600 dark:text-gray-300">
-                        Alquileres Activos
-                      </div>
-                      <div className="text-xl md:text-2xl font-bold text-blue-600 dark:text-blue-300">
-                        2
-                      </div>
-                    </div>
-                    <div className="bg-green-50 p-3 md:p-4 rounded-xl shadow-sm text-center dark:bg-gray-700">
-                      <div className="text-xs md:text-sm text-gray-600 dark:text-gray-300">
-                        Completados
-                      </div>
-                      <div className="text-xl md:text-2xl font-bold text-green-600 dark:text-green-300">
-                        15
-                      </div>
-                    </div>
-                  </div>
-                </div>
+                </div>                
               </div>
             </div>
           </div>

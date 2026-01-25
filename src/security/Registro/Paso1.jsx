@@ -30,7 +30,7 @@ const Paso1 = ({ onValidationSuccess, setGuardarCorreo }) => {
   const isValidEmail = async (email) => {
     try {
       const response = await api.post(
-        `/api/email/validate-email`,
+        `/api/emails/validate-email`,
         { email },
         {
           headers: {
@@ -84,7 +84,7 @@ const Paso1 = ({ onValidationSuccess, setGuardarCorreo }) => {
       }
 
       await api.post(
-        `/api/email/send`,
+        `/api/emails/send`,
         {
           correo: email,
           captchaToken,
@@ -106,7 +106,7 @@ const Paso1 = ({ onValidationSuccess, setGuardarCorreo }) => {
   };
 
   return (
-    <div className="max-w-md mx-auto p-6 shadow-md rounded-lg dark:bg-gray-950 dark:text-white relative">
+    <div className="max-w-md mx-auto p-6 dark:bg-gray-950 dark:text-white relative">
       <h2 className="text-2xl font-bold mb-4 text-center">
         Paso 1: Ingresa tu correo
       </h2>

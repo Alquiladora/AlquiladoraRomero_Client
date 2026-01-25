@@ -100,12 +100,12 @@ const ProductosCategoria = () => {
     animation: 'slideUpFade 3s ease-in-out infinite',
   };
 
-  const isNewProduct = (fechaCreacion) => {
+  const isNewProduct = (fechaCreacion, diasConsiderados = 30) => {
     const creationDate = new Date(fechaCreacion);
     const currentDate = new Date();
-    const diffTime = Math.abs(currentDate - creationDate);
-    const diffDays = diffTime / (1000 * 60 * 60 * 24);
-    return diffDays < 30;
+    const diffTime = currentDate - creationDate;
+    const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+    return diffDays < diasConsiderados;
   };
 
   return (
@@ -273,7 +273,7 @@ const ProductosCategoria = () => {
 
                         {!isOutOfStock && isLowStock && (
                           <div
-                            className="mt-2 text-[10px] xs:text-sm text-yellow-600 font-semibold animate-pulse"
+                            className="mt-2 text-[14px] xs:text-sm text-yellow-600 font-semibold animate-pulse"
                             style={slideUpFadeStyle}
                           >
                             ¡Alquila este producto antes de que se agote!

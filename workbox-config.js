@@ -18,17 +18,23 @@ generateSW({
 
 
   additionalManifestEntries: [
-    { url: `${CRITICAL_API_ORIGIN}/api/productos/categrias/disponibles`, revision: null },
-    { url: `${CRITICAL_API_ORIGIN}/api/pedidos/productos/seleccion`, revision: null },
     { url: `${CRITICAL_API_ORIGIN}/api/politicas/vigente`, revision: null },
     { url: `${CRITICAL_API_ORIGIN}/api/terminos/vigente`, revision: null },
     { url: `${CRITICAL_API_ORIGIN}/api/deslin/vigente`, revision: null },
-    { url: `${CRITICAL_API_ORIGIN}/api/productos/subcategorias`, revision: null },
     { url: `${CRITICAL_API_ORIGIN}/api/empresa/logo`, revision: null },
     { url: `${CRITICAL_API_ORIGIN}/api/empresa/sobreNosotros`, revision: null },
+    { url: `${CRITICAL_API_ORIGIN}/api/empresa/redesociales`, revision: null },
+    { url: `${CRITICAL_API_ORIGIN}/api/sobrenosotros`, revision: null },
   ],
 
   runtimeCaching: [
+    {
+      urlPattern: new RegExp(`^${CRITICAL_API_ORIGIN}/api/get-csrf-token`), 
+      handler: 'NetworkOnly', 
+      options: {
+        cacheableResponse: { statuses: [0] },
+      },
+    },
 
     {
       urlPattern: new RegExp(`^${CRITICAL_API_ORIGIN}/api/empresa/(logo|sobreNosotros|redesociales)$`),
@@ -42,11 +48,11 @@ generateSW({
 
 
     {
-      urlPattern: new RegExp(`^${CRITICAL_API_ORIGIN}/api/(pedidos/historial-pedidos|pedidos/insignias|pedidos/Nivelesypuntos|empresa/telefonoEmpresa)`),
-      handler: 'NetworkFirst',
+      urlPattern: new RegExp(`^${CRITICAL_API_ORIGIN}/api/(pedidos/historial-pedidos|pedidos/calificados|pedidos/insignias|pedidos/Nivelesypuntos|empresa/telefonoEmpresa)`),
+      handler: 'StaleWhileRevalidate',
       options: {
         cacheName: 'critical-user-cache',
-        networkTimeoutSeconds: 10,
+        
         cacheableResponse: { statuses: [0, 200] },
         expiration: { maxEntries: 10, maxAgeSeconds: 6 * 60 * 60 },
         plugins: [
@@ -65,7 +71,7 @@ generateSW({
       handler: 'NetworkFirst',
       options: {
         cacheName: 'critical-cart-cache',
-        networkTimeoutSeconds: 5,
+        
         cacheableResponse: { statuses: [0, 200] },
         expiration: { maxEntries: 10, maxAgeSeconds: 6 * 60 * 60 },
       },
@@ -73,7 +79,7 @@ generateSW({
 
     {
       urlPattern: new RegExp(`^${CRITICAL_API_ORIGIN}/api/carrito/count/.*$`),
-      handler: 'StaleWhileRevalidate',
+      handler: 'NetworkFirst',
       options: {
         cacheName: 'cart-count-cache',
         cacheableResponse: { statuses: [0, 200] },
@@ -86,7 +92,7 @@ generateSW({
 
     {
       urlPattern: new RegExp(`^${CRITICAL_API_ORIGIN}/api/(productos/categrias/disponibles|pedidos/productos/seleccion)`),
-      handler: 'StaleWhileRevalidate',
+       handler: 'NetworkFirst',
       options: {
         cacheName: 'dynamic-data-cache',
         cacheableResponse: { statuses: [0, 200] },
@@ -114,7 +120,7 @@ generateSW({
       handler: 'NetworkFirst',
       options: {
         cacheName: 'dynamic-api-cache',
-        networkTimeoutSeconds: 10,
+        networkTimeoutSeconds: 5,
         cacheableResponse: { statuses: [0, 200] },
         expiration: {
           maxEntries: 80,

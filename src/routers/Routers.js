@@ -1,4 +1,6 @@
 import { Routes, Route } from 'react-router-dom';
+import React, { lazy, Suspense } from 'react';
+
 
 //----------------------LAYOUTS--------------------------------------------
 import LayoutHeader from '../components/layout/LayHeader';
@@ -9,7 +11,7 @@ import { CartProvider } from '../components/carrito/ContextCarrito';
 import ErrorBoundary from './Errors/ErrorBoundary';
 import ServerErrorModal from './Errors/ErrorTime';
 
-import CarritoCompras from '../components/carrito/CarritoCompras';
+
 import { RecomendacionesProvider } from '../components/carrito/ContextRecomendaciones';
 
 import Error404 from './Errors/Error404';
@@ -18,33 +20,37 @@ import Error500 from './Errors/Error500';
 import GlobalErrores from './Errors/GlobalErrores';
 
 //-------------------PUBLIC------------------------
-import Home from '../pages/public/home/Home';
-import { Login } from '../security/Login/Login';
-import Registro from '../security/Registro/Registro';
-
-import CambiarPassword from '../security/recuperacion/CambiarPasswor';
-import ProductosCategoria from '../components/productosCategoria/ProductosCatgeoria';
 import PoliticasPrivacidad from '../components/footer/foter-empresa/Politicas';
 import RastrearPedido from '../components/rastreo-pedido/RastreoPedido';
 import MissionVision from '../pages/public/home/MisionVision';
 import DeslindeResponsabilidad from '../components/footer/foter-empresa/Deslin';
 import TerminosCondiciones from '../components/footer/foter-empresa/terminos';
-//-------------------CLIENT------------------------
-import PerfilUsuarioPrime from '../pages/client/perfil/PerfilClient';
 import TokenModal from '../pages/client/perfil/componetsPerfil/TokenModal';
 import ChangePassword from '../pages/client/perfil/componetsPerfil/ChangePassword';
-import DetalleProducto from '../components/productosCategoria/productosDetalles';
-import HistorialPedidos from '../pages/client/pedidos/HistorailPedidos';
-import MensajeCompraExitosa from '../components/carrito/MensajeExitoso';
-import GamificacionPerfil from '../pages/client/Puntos/puntos';
 
+
+const lazyLoad = (importFunc, componentName) => 
+  lazy(() => 
+    importFunc().then(module => ({ default: module[componentName] || module.default }))
+  );
+
+const Home = lazyLoad(() => import('../pages/public/home/Home'), 'Home');
+const ProductosCategoria = lazyLoad(() => import('../components/productosCategoria/ProductosCatgeoria'), 'ProductosCategoria');
+const DetalleProducto = lazyLoad(() => import('../components/productosCategoria/productosDetalles'), 'DetalleProducto');
+const Login = lazyLoad(() => import('../security/Login/Login'), 'Login');
+const Registro = lazyLoad(() => import('../security/Registro/Registro'), 'Registro');
+const CambiarPassword = lazyLoad(() => import('../security/recuperacion/CambiarPasswor'), 'CambiarPassword');
+//-------------------CLIENT------------------------
+const CarritoCompras = lazyLoad(() => import('../components/carrito/CarritoCompras'), 'CarritoCompras');
+const PerfilUsuarioPrime = lazyLoad(() => import('../pages/client/perfil/PerfilClient'), 'PerfilUsuarioPrime');
+const HistorialPedidos = lazyLoad(() => import('../pages/client/pedidos/HistorailPedidos'), 'HistorialPedidos');
+const GamificacionPerfil = lazyLoad(() => import('../pages/client/Puntos/puntos'), 'GamificacionPerfil');
+const MensajeCompraExitosa = lazyLoad(() => import('../components/carrito/MensajeExitoso'), 'MensajeCompraExitosa');
 //-------------------ADMIN------------------------
-import MenuHomeAdmin from '../pages/admin/home/MenuAdmin';
-
+const MenuHomeAdmin = lazyLoad(() => import('../pages/admin/home/MenuAdmin'), 'MenuHomeAdmin');
 //================================
 //REPARTIDOR
-import MenuRepartidor from '../pages/delivery/home/homeRepartidor';
-
+const MenuRepartidor = lazyLoad(() => import('../pages/delivery/home/homeRepartidor'), 'MenuRepartidor');
 const Routerss = () => {
   return (
     <>
@@ -55,6 +61,12 @@ const Routerss = () => {
 
           <CartProvider>
             <RecomendacionesProvider>
+              <Suspense fallback={
+                    <div className="flex justify-center items-center h-screen text-xl">
+                        Cargando contenido...
+                    </div>
+                }>
+
               <Routes>
                 <Route
                   path="/"
@@ -441,6 +453,8 @@ const Routerss = () => {
                   }
                 />
               </Routes>
+              </Suspense>
+
             </RecomendacionesProvider>
           </CartProvider>
         </div>

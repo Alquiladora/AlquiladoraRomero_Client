@@ -49,25 +49,36 @@ const CuentasReceptoras = () => {
   const [formError, setFormError] = useState('');
   const { csrfToken } = useAuth();
 
-  const fetchCuentas = async () => {
+  const fetchCuentas = async (signal = null) => {
     setLoading(true);
     try {
       const response = await api.get('/api/tarjetas/cuentas', {
         withCredentials: true,
         headers: { 'X-CSRF-Token': csrfToken },
+        signal: signal,
       });
       console.log('Datos recibidos de cuentas', response.data);
       setCuentas(response.data || []);
     } catch (err) {
-      toast.error('Error al cargar las cuentas');
-    } finally {
-      setLoading(false);
+    if (err.name === 'CanceledError' || err.code === 'ERR_CANCELED') {
+       console.log('Petición cancelada automáticamente');
+       return; 
     }
-  };
+  } finally {
+    if (signal ? !signal.aborted : true) {
+        setLoading(false);
+    }
+  }
+};
 
-  useEffect(() => {
-    fetchCuentas();
-  }, [fetchCuentas]);
+
+ useEffect(() => {
+  const controller = new AbortController();
+  fetchCuentas(controller.signal);
+  return () => {
+    controller.abort(); 
+  };
+}, []);
 
   const syncConStripe = async () => {
     setLoading(true);

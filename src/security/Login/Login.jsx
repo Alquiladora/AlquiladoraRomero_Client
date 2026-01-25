@@ -1,5 +1,4 @@
 import React, { useState, useRef, useContext, useEffect } from 'react';
-import logoUrl from '../../img/Logos/logo.jpg';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion, useAnimation } from 'framer-motion';
 

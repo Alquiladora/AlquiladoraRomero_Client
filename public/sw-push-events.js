@@ -1,7 +1,7 @@
 
 //EVENTO DE NOTIFICACIONES
 self.addEventListener('push', e => {
-  console.log('[SW] Push Received');
+//  console.log('[SW] Push Received');
   let data;
   try {
     data = e.data.json();
@@ -25,7 +25,7 @@ self.addEventListener('push', e => {
 });
 
 self.addEventListener('notificationclick', e => {
-  console.log('[SW] Notification Clicked');
+ // console.log('[SW] Notification Clicked');
   e.notification.close();
   const targetUrl = e.notification.data.url || '/';
   e.waitUntil(

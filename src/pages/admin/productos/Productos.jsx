@@ -60,15 +60,12 @@ function ProductTable() {
     fetchProductos(currentPage);
   }, [currentPage, search, filterCategory]);
 
-  useEffect(() => {
-    if (products.length || subcategorias.length || bodegas.length) {
-      setLoading(false);
-    }
-  }, [products, subcategorias, bodegas]);
+
 
   // ===================== OBTENER PRODUCTOS CON PAGINACIÓN Y FILTROS =====================
   const fetchProductos = async (page = 1) => {
     try {
+      setLoading(true);
       const params = {
         page,
         limit,
@@ -101,10 +98,12 @@ function ProductTable() {
       setTotalPages(response.data.pagination.totalPages);
       setTotalRecords(response.data.pagination.totalRecords);
       setCurrentPage(response.data.pagination.currentPage);
-      console.log('Obtenemos productos', productosConImagenes);
+    
     } catch (error) {
-      console.error('Error al obtener productos:', error);
-      // toast.error("Error al cargar productos");
+     
+      toast.error("Error al cargar productos");
+    }finally {
+      setLoading(false)
     }
   };
 
@@ -117,7 +116,7 @@ function ProductTable() {
       });
       setSubcategorias(response.data.subcategories);
     } catch (error) {
-      console.error('Error al obtener subcategorías:', error);
+      //console.error('Error al obtener subcategorías:', error);
       // toast.error("Error al cargar subcategorías");
     }
   };
@@ -130,9 +129,9 @@ function ProductTable() {
         headers: { 'X-CSRF-Token': csrfToken },
       });
       setColoresObtenidos(response.data.colores);
-      console.log('Colores ', response.data.colores);
+     // console.log('Colores ', response.data.colores);
     } catch (error) {
-      console.error('Error al obtener colores:', error);
+      // console.error('Error al obtener colores:', error);
       // toast.error("Error al cargar Colores");
     }
   };
@@ -212,20 +211,20 @@ function ProductTable() {
             );
             setUploadProgress(percent);
             setUploadStatus(`Subiendo: ${percent}%`);
-            console.log('Progreso de la subida de la imagen', percent);
+          //  console.log('Progreso de la subida de la imagen', percent);
           },
         }
       );
 
       setUploadProgress(100);
-      console.log('Progreso de la subida de la imagen', 100);
+     // console.log('Progreso de la subida de la imagen', 100);
       setUploadStatus('Subiendo: 100% (procesando en servidor...)');
       const newUrls = response.data.urls;
       toast.success('Imágenes subidas correctamente');
       setNuevasImagenes((prev) => [...prev, ...newUrls]);
-      console.log('Nuevas URLs obtenidas:', newUrls);
+     // console.log('Nuevas URLs obtenidas:', newUrls);
     } catch (error) {
-      console.error('Error subiendo imagen:', error);
+    //  console.error('Error subiendo imagen:', error);
 
       if (error.code === 'ECONNABORTED') {
         setUploadError(
@@ -404,7 +403,7 @@ function ProductTable() {
         toast.error(response.data.message || 'Error al actualizar producto');
       }
     } catch (error) {
-      console.error('Error al actualizar producto:', error);
+      //console.error('Error al actualizar producto:', error);
       toast.error('Error interno al actualizar producto');
     }
   };
@@ -455,11 +454,11 @@ function ProductTable() {
         handleCloseModal();
         fetchProductos(1); // Go to first page after add
       } else {
-        console.error('Error al insertar producto:', response.data.message);
+       // console.error('Error al insertar producto:', response.data.message);
         toast.error(response.data.message || 'Error al insertar producto');
       }
     } catch (error) {
-      console.error('Error al insertar producto:', error);
+     // console.error('Error al insertar producto:', error);
       if (
         error.response &&
         error.response.data &&
@@ -658,33 +657,71 @@ function ProductTable() {
             </div>
           ))}
         </div>
-      ) : (
-        <div className="flex flex-col items-center justify-center py-16">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            className="w-16 h-16 text-yellow-500 dark:text-yellow-400"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M3 7l9-4 9 4v10a2 2 0 01-2 2H5a2 2 0 01-2-2V7z"
-            />
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M9 22V12h6v10"
-            />
-          </svg>
-          <p className="mt-4 text-xl text-yellow-600 dark:text-yellow-400 font-semibold">
-            {search
-              ? 'Lo sentimos, no existe ningún producto con ese nombre.'
-              : 'Lo sentimos, no se ha registrado ningún producto.'}
-          </p>
+    ) : (
+        /* ================= AQUÍ ESTÁ LA CORRECCIÓN ================= */
+        <div className="flex flex-col items-center justify-center py-16 text-center">
+          {search || filterCategory ? (
+            // CASO 1: Hay filtros aplicados (búsqueda o categoría), pero no hay resultados
+            <>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="w-16 h-16 text-gray-400 dark:text-gray-500 mb-4"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                />
+              </svg>
+              <h3 className="text-xl font-semibold text-gray-700 dark:text-gray-300">
+                No se encontraron resultados
+              </h3>
+              <p className="text-gray-500 dark:text-gray-400 mt-2 max-w-md">
+                No hay productos que coincidan con "{search}" 
+                {filterCategory && ` en la categoría "${filterCategory}"`}.
+                Intenta con otros términos.
+              </p>
+            </>
+          ) : (
+            // CASO 2: La base de datos está vacía (no hay filtros activos)
+            <>
+              <div className="bg-yellow-100 dark:bg-yellow-900/30 p-4 rounded-full mb-4">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="w-12 h-12 text-yellow-600 dark:text-yellow-500"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"
+                  />
+                </svg>
+              </div>
+              <h3 className="text-xl font-bold text-gray-800 dark:text-white">
+                No existen productos agregados todavía
+              </h3>
+              <p className="text-gray-600 dark:text-gray-400 mt-2 mb-6 max-w-sm">
+                Tu inventario está vacío. Comienza agregando tu primer producto al sistema.
+              </p>
+              <button
+                onClick={handleOpenAddModal}
+                className="bg-blue-600 dark:bg-blue-500 text-white px-6 py-2 rounded-lg 
+                shadow-md hover:bg-blue-700 dark:hover:bg-blue-600 transition-all duration-300
+                flex items-center gap-2 mx-auto"
+              >
+                <Plus className="w-5 h-5" />
+                Crear mi primer producto
+              </button>
+            </>
+          )}
         </div>
       )}
 

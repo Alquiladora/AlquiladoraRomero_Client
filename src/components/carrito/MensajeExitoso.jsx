@@ -1,71 +1,133 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { FaCheckCircle, FaHome } from 'react-icons/fa'; // Cambiado FaArrowLeft por FaHome para un sentido más claro
-import { motion } from 'framer-motion'; // Para añadir animaciones sutiles
+import { FaCheck, FaHome, FaShoppingBag } from 'react-icons/fa';
+import { motion } from 'framer-motion';
+import Confetti from 'react-confetti';
 
 const MensajeCompraExitosa = () => {
   const navigate = useNavigate();
+  
+
+  const [windowSize, setWindowSize] = useState({
+    width: window.innerWidth,
+    height: window.innerHeight,
+  });
+
+ 
+  const [showConfetti, setShowConfetti] = useState(true);
+
+  
+  useEffect(() => {
+    const handleResize = () => {
+      setWindowSize({
+        width: window.innerWidth,
+        height: window.innerHeight,
+      });
+    };
+    window.addEventListener('resize', handleResize);
+    
+    
+    const timer = setTimeout(() => {
+      setShowConfetti(false);
+    }, 6000);
+
+    return () => {
+      window.removeEventListener('resize', handleResize);
+      clearTimeout(timer);
+    };
+  }, []);
 
   const handleVolverInicio = () => {
-    navigate('/'); // Redirigir a la página principal
+    navigate('/cliente'); 
   };
 
-  const containerVariants = {
-    hidden: { opacity: 0, scale: 0.9 },
-    visible: {
-      opacity: 1,
-      scale: 1,
-      transition: { duration: 0.5, ease: 'easeOut' },
+
+  const cardVariants = {
+    hidden: { opacity: 0, y: 50 },
+    visible: { 
+      opacity: 1, 
+      y: 0,
+      transition: { type: "spring", stiffness: 100, damping: 20, duration: 0.6 }
     },
   };
 
-  const iconVariants = {
-    hidden: { scale: 0 },
-    visible: {
-      scale: 1,
-      transition: { duration: 0.6, type: 'spring', stiffness: 100 },
+  const checkVariants = {
+    hidden: { scale: 0, rotate: -180 },
+    visible: { 
+      scale: 1, 
+      rotate: 0,
+      transition: { delay: 0.3, type: "spring", stiffness: 200 }
     },
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-950 dark:to-gray-800 flex flex-col items-center justify-center py-10 px-4 sm:px-6 lg:px-8">
-      {/* Contenedor principal con animaciones */}
+    <div className="relative min-h-screen w-full bg-gray-50 dark:bg-gray-900 overflow-hidden flex items-center justify-center p-4">
+  
+      <Confetti
+        width={windowSize.width}
+        height={windowSize.height}
+        recycle={showConfetti} 
+        numberOfPieces={500}
+        gravity={0.15}
+        colors={['#EAB308', '#3B82F6', '#10B981', '#F43F5E']} 
+      />
+
+    
+      <div className="absolute top-0 left-0 w-full h-full overflow-hidden -z-10">
+        <div className="absolute top-[-10%] left-[-10%] w-96 h-96 bg-yellow-300/30 rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-blob"></div>
+        <div className="absolute top-[-10%] right-[-10%] w-96 h-96 bg-blue-300/30 rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-blob animation-delay-2000"></div>
+        <div className="absolute bottom-[-20%] left-[20%] w-96 h-96 bg-pink-300/30 rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-blob animation-delay-4000"></div>
+      </div>
+
+     
       <motion.div
-        className="w-full max-w-lg bg-white dark:bg-gray-800 rounded-2xl shadow-2xl p-8 sm:p-10 lg:p-12 text-center border-t-4 border-yellow-500 dark:border-yellow-400 transform transition-all duration-300"
-        variants={containerVariants}
+        variants={cardVariants}
         initial="hidden"
         animate="visible"
+        className="relative z-10 w-full max-w-md bg-white/90 dark:bg-gray-800/90 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/20 dark:border-gray-700 p-8 text-center"
       >
-        {/* Icono de éxito con animación */}
-        <motion.div variants={iconVariants}>
-          <FaCheckCircle
-            size={80}
-            className="text-yellow-500 dark:text-yellow-400 mx-auto mb-6 drop-shadow-lg"
-          />
-        </motion.div>
+        
+  
+        <div className="flex justify-center mb-6">
+          <motion.div 
+            className="relative flex items-center justify-center w-24 h-24 rounded-full bg-green-100 dark:bg-green-900/30 shadow-inner"
+            variants={checkVariants}
+          >
+         
+            <div className="absolute inset-0 rounded-full border-4 border-green-500/20 animate-ping"></div>
+            
+            <FaCheck className="text-5xl text-green-500 dark:text-green-400" />
+          </motion.div>
+        </div>
 
-        {/* Título */}
-        <h2 className="text-4xl sm:text-5xl font-extrabold text-gray-900 dark:text-gray-100 mb-3 leading-tight">
-          ¡Alquiler Confirmado!
-        </h2>
-
-        {/* Mensaje principal */}
-        <p className="text-lg sm:text-xl text-gray-700 dark:text-gray-300 mb-8 leading-relaxed">
-          Tu alquiler ha sido procesado con éxito.
+        {/* Textos */}
+        <h1 className="text-3xl sm:text-4xl font-black text-gray-800 dark:text-white mb-2 tracking-tight">
+          ¡Pedido Exitoso!
+        </h1>
+        
+        <p className="text-gray-600 dark:text-gray-300 text-base sm:text-lg mb-6 leading-relaxed">
+          Tu alquiler ha sido confirmado correctamente. <br className="hidden sm:block"/>
+          ¡Estamos listos para tu evento!
         </p>
 
-        <p className="text-base sm:text-lg text-gray-600 dark:text-gray-400 mb-8">
-          ¡Gracias por elegirnos para tus eventos! Esperamos verte pronto.
-        </p>
+        <div className="bg-gray-50 dark:bg-gray-700/50 rounded-xl p-4 mb-8 border border-gray-100 dark:border-gray-600">
+            <div className="flex items-center justify-center space-x-2 text-sm text-gray-500 dark:text-gray-400">
+                <FaShoppingBag />
+                <span>Gracias por tu confianza</span>
+            </div>
+        </div>
 
-        {/* Botón de acción mejorado */}
-        <button
+      
+        <motion.button
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
           onClick={handleVolverInicio}
-          className="inline-flex items-center justify-center mx-auto bg-yellow-500 hover:bg-yellow-600 text-gray-900 font-bold py-3 px-8 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-yellow-300 dark:focus:ring-yellow-600"
+          className="w-full py-4 px-6 bg-gradient-to-r from-yellow-500 to-yellow-600 hover:from-yellow-400 hover:to-yellow-500 text-white text-lg font-bold rounded-2xl shadow-lg shadow-yellow-500/30 flex items-center justify-center gap-2 transition-all duration-300"
         >
-          <FaHome className="mr-3 text-lg" /> {/* Icono de casa */}
+          <FaHome className="text-xl" />
           Volver al Inicio
-        </button>
+        </motion.button>
+
       </motion.div>
     </div>
   );

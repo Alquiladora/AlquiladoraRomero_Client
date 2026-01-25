@@ -5,7 +5,7 @@ import { toast } from 'react-toastify';
 import { useAuth } from '../../hooks/ContextAuth';
 import api from '../../utils/AxiosConfig';
 import { useCart } from '../carrito/ContextCarrito';
-import { FaMoneyBillWave, FaTimes } from 'react-icons/fa';
+import { FaMoneyBillWave, FaTimes,FaIndustry } from 'react-icons/fa';
 import { GiMaterialsScience } from 'react-icons/gi';
 import { useRecomendaciones } from '../carrito/ContextRecomendaciones';
 import CustomLoading from '../spiner/SpinerGlobal';
@@ -283,7 +283,7 @@ function DetalleProducto() {
             </div>
           </div>
 
-          <div className="bg-white dark:bg-gray-800 p-4 sm:p-6 rounded-md shadow-lg relative max-w-md w-full border-t-4 border-yellow-400 mx-auto fadeIn">
+              <div className="bg-white dark:bg-gray-800 p-4 sm:p-6 rounded-md shadow-lg relative max-w-md w-full border-t-4 border-yellow-400 mx-auto fadeIn">
             {esNuevo() && (
               <div className="absolute top-0 right-0 bg-blue-600 text-white text-xs px-2 py-1 rounded-bl-md uppercase">
                 Nuevo
@@ -306,7 +306,7 @@ function DetalleProducto() {
 
             {producto.material && (
               <p className="flex text-gray-600 dark:text-gray-300 mb-2 text-sm sm:text-base">
-                <GiMaterialsScience className="mr-2 text-lg sm:text-xl text-blue-500" />
+                <FaIndustry className="mr-2 text-lg sm:text-xl text-blue-500" />
                 <span className="font-medium">Material:</span>{' '}
                 <span className="ml-1">{producto.material}</span>
               </p>
@@ -462,6 +462,7 @@ function DetalleProducto() {
               </div>
             </div>
           </div>
+
         </div>
 
         <ProductosRelacionados
@@ -473,11 +474,11 @@ function DetalleProducto() {
 
       {showModal && (
         <div
-          // Contenedor principal: Fondo oscuro, centrado y con efecto de desenfoque.
+        
           className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-95 backdrop-blur-md"
-          onClick={() => setShowModal(false)} // Cierra al hacer clic fuera de la imagen
+          onClick={() => setShowModal(false)} 
         >
-          {/* Estilos de animación (Mantener aquí si no están globales) */}
+        
           <style>
             {`
         @keyframes fadeIn {
@@ -491,19 +492,19 @@ function DetalleProducto() {
           </style>
 
           <div
-            // Contenedor de la imagen: Transparente (sin bg-white/gray), ajusta el tamaño.
+          
             className="relative w-11/12 max-w-5xl mx-auto animate-fadeIn"
-            onClick={(e) => e.stopPropagation()} // Evita que el clic en la imagen cierre el modal
+            onClick={(e) => e.stopPropagation()} 
           >
-            {/* Botón de Cerrar (Posicionado sobre la imagen) */}
+            
             <button
               onClick={() => setShowModal(false)}
-              // Estilo limpio: Fondo negro semi-transparente, icono blanco con hover ámbar.
+           
               className="absolute top-6 right-6 text-white hover:text-amber-400 bg-gray-900/50 hover:bg-gray-900 rounded-full p-3 z-10 transition-all duration-300 shadow-xl"
               aria-label="Cerrar imagen ampliada"
             >
               <svg
-                className="w-7 h-7" // Ícono más grande para facilitar el cierre
+                className="w-7 h-7"
                 fill="none"
                 stroke="currentColor"
                 strokeWidth={2}
@@ -525,7 +526,7 @@ function DetalleProducto() {
                 e.target.onerror = null;
                 e.target.src = fallbackImage;
               }}
-              // Estilos de la imagen: Max-height alto, sin bordes internos ni fondo visible.
+           
               className="w-full h-auto max-h-[90vh] object-contain rounded-lg shadow-2xl"
             />
           </div>

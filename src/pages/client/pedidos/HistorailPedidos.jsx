@@ -1337,7 +1337,7 @@ const HistorialPedidos = () => {
                 {
                   id: 'incompletos',
                   label: 'Incompletos',
-                  count: orders.filter((o) => o.estado === 'Incompelto').length,
+                  count: orders.filter((o) => o.estado === 'Incompleto').length,
                 },
                 {
                   id: 'entregados',
@@ -1423,7 +1423,7 @@ const HistorialPedidos = () => {
                   <div
                     data-testid="order-card"
                     key={order.idPedido}
-                    className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700 overflow-hidden"
+                    className="bg-white dark:bg-gray-1000 rounded-2xl shadow-lg border border-gray-900 dark:border-gray-700 overflow-hidden"
                   >
                     {/* Header del pedido */}
                     <div className="bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-700 dark:to-gray-800 px-6 py-4 border-b border-gray-200 dark:border-gray-700">
@@ -1451,6 +1451,7 @@ const HistorialPedidos = () => {
                         </div>
                       </div>
                     </div>
+                    
 
                     {/* Información del pedido */}
                     <div className="p-6">
@@ -1579,14 +1580,14 @@ const HistorialPedidos = () => {
                       {/* Productos del pedido */}
                       <div className="border-t border-gray-200 dark:border-gray-700 pt-6">
                         {/* Información del pedido (idRastreo) fuera del bucle de fotos */}
-                        <div className="flex items-center justify-between p-4 bg-gray-100 dark:bg-gray-800 rounded-lg mb-4">
+                        <div className="flex items-center justify-between p-4  dark:bg-gray-800 rounded-lg mb-4">
                           <h4 className="font-medium text-gray-900 dark:text-white">
                             Pedido:{' '}
                             <strong className="text-gray-900 dark:text-white">
                               {order.idRastreo}
                             </strong>
                           </h4>
-                          {/* Aquí puedes mantener el botón de preguntar, si aplica al pedido en general */}
+                         
 
                           <a
                             href={
@@ -1609,12 +1610,12 @@ const HistorialPedidos = () => {
                               icon={faWhatsapp}
                               className="w-4 h-4"
                             />
-                            <span>Preguntar por WhatsApp</span>
+                            <span>Contactar</span>
                           </a>
                         </div>
 
                         {/* Contenedor principal para las fotos */}
-                        <div className="p-4 bg-gray-50 dark:bg-gray-700 rounded-lg mb-4 last:mb-0">
+                        <div className="p-4  dark:bg-gray-700 rounded-lg mb-4 last:mb-0">
                           {order.fotosProductos &&
                           order.fotosProductos.length > 0 ? (
                             <div className="flex items-center space-x-2">

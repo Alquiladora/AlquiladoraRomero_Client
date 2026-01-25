@@ -1,7 +1,7 @@
 /* eslint-disable */
 import React, { useState, useEffect } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faCheckCircle, faSpinner } from '@fortawesome/free-solid-svg-icons';
+import { faCheckCircle, faSpinner, faEnvelope, faKey } from '@fortawesome/free-solid-svg-icons';
 import Swal from 'sweetalert2';
 import { useNavigate } from 'react-router-dom';
 
@@ -60,7 +60,7 @@ const CambiarPassword = () => {
         headers: { 'X-CSRF-Token': csrfToken },
         withCredentials: true,
       });
-      console.log('Respuesta de vecesCambioPass:', response.data);
+
       setCambiosContrasena(response.data.cambiosRealizados);
       setBloqueado(response.data.cambiosRealizados >= 20);
     } catch (error) {
@@ -126,7 +126,7 @@ const CambiarPassword = () => {
 
     try {
       await api.post(
-        '/api/email/cambiarpass',
+        '/api/emails/cambiarpass',
         {
           correo: email,
           nombreU: usuarioEncontrado.nombre,
@@ -172,65 +172,97 @@ const CambiarPassword = () => {
       <div className="p-8 rounded-2xl w-full max-w-md transform transition-all duration-500 hover:scale-105 dark:bg-gray-900 dark:text-white">
         {step === 1 && (
           <>
-            <div className="relative  shadow-lg rounded-2xl w-full max-w-md p-8 transform transition-all duration-500 hover:scale-105 border-t-8 border-yellow-500">
-              {/* Banner animado extra debajo del moño */}
-              <div className="absolute -top-4 left-0 right-0 mx-auto flex justify-center z-10">
-                <div className="bg-yellow-200 text-yellow-800 px-4 py-1 rounded-full text-sm font-medium shadow-lg animate-bounce">
-                  Verifica tu correo para el token
+
+            <div className="relative bg-white dark:bg-gray-800 shadow-lg rounded-2xl  mx-auto p-6 border-t-4 border-yellow-500">
+              {/* Banner compacto */}
+              <div className="absolute -top-2 left-1/2 transform -translate-x-1/2 z-10">
+                <div className="bg-yellow-400 text-yellow-900 px-4 py-1 rounded-full text-xs font-semibold shadow-md">
+                  <FontAwesomeIcon icon={faEnvelope} className="mr-1" />
+                  Verifica tu correo
                 </div>
               </div>
-              <div className="max-w-md mx-auto p-6 dark:bg-gray-900 dark:text-white">
-                <h2 className="text-2xl font-bold mb-4 text-center">
-                  Cambiar Contraseña
-                </h2>
-                {errorMessage && (
-                  <div
-                    className={`mb-4 p-3 rounded-md text-sm ${getErrorColor(
-                      errorMessage
-                    )}`}
-                  >
-                    {errorMessage}
-                  </div>
-                )}
-                <form onSubmit={handleEmailSubmit} className="space-y-4">
-                  <div className="form-group">
-                    <label
-                      htmlFor="email"
-                      className="block text-sm font-medium text-gray-700 dark:text-gray-300"
-                    >
-                      Correo Electrónico
-                    </label>
-                    <input
-                      type="email"
-                      id="email"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      className={`block w-full p-2 border rounded-md bg-gray-50 text-gray-900 dark:bg-gray-800 dark:text-white dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                        loading ? 'opacity-50 cursor-not-allowed' : ''
-                      }`}
-                      required
-                      disabled={loading}
+
+              {/* Contenido compacto */}
+              <div className="w-full pt-3">
+                {/* Header mínimo */}
+                <div className="text-center mb-4">
+                  <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center mx-auto mb-2">
+                    <FontAwesomeIcon
+                      icon={faKey}
+                      className="text-blue-600 dark:text-blue-400 text-lg"
                     />
                   </div>
+                  <h2 className="text-xl font-bold text-gray-800 dark:text-white mb-1">
+                    Cambiar Contraseña
+                  </h2>
+                  <p className="text-gray-600 dark:text-gray-300 text-xs">
+                    Ingresa tu correo para el token
+                  </p>
+                </div>
+
+                {/* Mensaje de error compacto */}
+                {errorMessage && (
+                  <div className={`mb-3 p-2 rounded-lg text-xs ${getErrorColor(errorMessage)} bg-opacity-10`}>
+                    <div className="flex items-center">
+                      <FontAwesomeIcon icon={faExclamationTriangle} className="mr-2" />
+                      <span>{errorMessage}</span>
+                    </div>
+                  </div>
+                )}
+
+                {/* Formulario compacto */}
+                <form onSubmit={handleEmailSubmit} className="space-y-4">
+                  <div>
+                    <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+                      Correo Electrónico
+                    </label>
+                    <div className="relative">
+                      <input
+                        type="email"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        className={`w-full p-3 pl-10 text-sm border rounded-lg bg-gray-50 dark:bg-gray-700 dark:text-white dark:border-gray-600 focus:outline-none focus:ring-1 focus:ring-blue-500 ${loading ? 'opacity-50' : ''
+                          }`}
+                        placeholder="tu@correo.com"
+                        required
+                        disabled={loading}
+                      />
+                      <div className="absolute inset-y-0 left-0 pl-3 flex items-center">
+                        <FontAwesomeIcon icon={faEnvelope} className="text-gray-400" />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Botón compacto */}
                   <button
                     type="submit"
-                    className={`w-full flex justify-center items-center bg-blue-600 text-white py-2 px-4 rounded-md transition-colors ${
-                      loading || bloqueado
-                        ? 'opacity-50 cursor-not-allowed'
-                        : 'hover:bg-blue-700'
-                    }`}
+                    className={`w-full flex justify-center items-center gap-2 bg-blue-600 text-white py-3 px-4 rounded-lg text-sm font-medium transition-colors ${loading || bloqueado ? 'opacity-50 cursor-not-allowed' : 'hover:bg-blue-700'
+                      }`}
                     disabled={loading || bloqueado}
                   >
                     {loading ? (
-                      <FontAwesomeIcon icon={faSpinner} spin className="mr-2" />
+                      <>
+                        <FontAwesomeIcon icon={faSpinner} spin />
+                        <span>Validando...</span>
+                      </>
                     ) : (
-                      <FontAwesomeIcon icon={faCheckCircle} className="mr-2" />
+                      <>
+                        <FontAwesomeIcon icon={faCheckCircle} />
+                        <span>Validar Correo</span>
+                      </>
                     )}
-                    Validar
                   </button>
                 </form>
+
+                {/* Texto pequeño al final */}
+                <div className="text-center mt-4 pt-3 border-t border-gray-200 dark:border-gray-700">
+                  <p className="text-xs text-gray-500 dark:text-gray-400">
+                    Te enviaremos un token de verificación
+                  </p>
+                </div>
               </div>
             </div>
+
           </>
         )}
 
