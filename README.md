@@ -1,70 +1,76 @@
-# Getting Started with Create React App
+# Alquiladora Romero Client
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+Plataforma web desarrollada con **React** para el ecosistema digital de **Alquiladora Romero**, enfocada en la gestión de inventario, pedidos, operaciones internas y administración de procesos relacionados con la renta de mobiliario.
 
-## Available Scripts
+Este proyecto representa la interfaz principal del sistema, conectando al usuario con las funciones operativas del negocio mediante una experiencia web clara, responsiva y orientada a la productividad.
 
-In the project directory, you can run:
+---
 
-### `npm start`
+## Objetivo del proyecto
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+El objetivo principal de esta plataforma es digitalizar y facilitar la administración de procesos clave dentro de Alquiladora Romero, permitiendo gestionar información operativa desde una aplicación web.
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+El sistema está pensado para apoyar tareas como:
 
-### `npm test`
+- Administración de productos.
+- Gestión de pedidos.
+- Consulta de información operativa.
+- Organización de procesos internos.
+- Apoyo a logística y seguimiento.
+- Conexión con el backend del ecosistema.
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+---
 
-### `npm run build`
+## ¿Qué problema resuelve?
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+En un negocio de renta de mobiliario, manejar inventario, pedidos, clientes, fechas de entrega y disponibilidad puede volverse complejo si se hace de forma manual.
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+Esta plataforma ayuda a centralizar la información y mejorar la organización del negocio, permitiendo que el usuario pueda consultar, registrar y administrar datos desde una interfaz web.
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+---
 
-### `npm run eject`
+## Funcionalidades principales
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+- Interfaz web desarrollada con React.
+- Panel administrativo para gestión operativa.
+- Componentes reutilizables.
+- Consumo de API backend.
+- Gestión visual de información del negocio.
+- Diseño responsivo.
+- Configuración de estilos con Tailwind CSS.
+- Pruebas end-to-end con Cypress.
+- Configuración de flujos con GitHub Actions.
+- Base para experiencia PWA mediante Workbox.
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+---
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+## Tecnologías utilizadas
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+- React
+- JavaScript
+- Tailwind CSS
+- Cypress
+- Workbox
+- GitHub Actions
+- npm / yarn
+- PWA
+- API REST
+- HTML5
+- CSS3
 
-## Learn More
+---
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+## Arquitectura general
 
-To learn React, check out the [React documentation](https://reactjs.org/).
-
-### Code Splitting
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
-
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+```txt
+Usuario
+  ↓
+Interfaz React
+  ↓
+Componentes y vistas
+  ↓
+Consumo de API REST
+  ↓
+Backend Alquiladora Romero
+  ↓
+Base de datos
